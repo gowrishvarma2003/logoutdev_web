@@ -1,6 +1,15 @@
 "use client";
 
-  
+import { use, useState } from "react";
+import { useDiscussions, useContributors } from "@/lib/hooks/useSpaces";
+import { useAuth } from "@/lib/hooks/useAuth";
+import DiscussionThreadCard from "../../../../../components/spaces/DiscussionThreadCard";
+import { EmptyState } from "@/components/spaces/SpaceBadges";
+import Spinner from "@/components/ui/Spinner";
+import Avatar from "@/components/ui/Avatar";
+import { ChatBubbleIcon } from "@/components/ui/Icons";
+import * as api from "@/lib/services/spacesApi";
+import type { DiscussionCategory } from "@/lib/types";
 
 const CATEGORIES: DiscussionCategory[] = [
   "idea", "question", "decision", "blocked", "retrospective",
