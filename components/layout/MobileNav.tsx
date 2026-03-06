@@ -1,0 +1,50 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { HomeIcon, CompassIcon, UserIcon, RocketIcon } from "@/components/ui/Icons";
+
+interface MobileNavProps {
+  /** username or fallback user ID for the profile link */
+  userId: string;
+  username?: string;
+}
+
+export default function MobileNav({ userId, username }: MobileNavProps) {
+  const pathname = usePathname();
+  const profileSlug = username || userId;
+
+  const items = [
+    { href: "/feed", icon: <HomeIcon className="w-6 h-6" />, label: "Home" },
+    { href: "/explore", icon: <CompassIcon className="w-6 h-6" />, label: "Explore" },
+    { href: "/spaces", icon: <RocketIcon className="w-6 h-6" />, label: "Spaces" },
+    { href: `/profile/${profileSlug}`, icon: <UserIcon className="w-6 h-6" />, label: "Profile" },
+  ];
+
+  return (
+    <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-zinc-950 border-t border-zinc-800">
+      <ul className="flex items-center">
+        {items.map(({ href, icon, label }) => {
+          const active =
+            label === "Profile"
+              ? pathname.startsWith("/profile/")
+              : pathname === href;
+
+          return (
+            <li key={href} className="flex-1">
+              <Link
+                href={href}
+                className={`flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors ${
+                  active ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                {icon}
+                {label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}

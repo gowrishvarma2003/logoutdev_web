@@ -1,0 +1,219 @@
+import type {
+  AuthResponse,
+  FeedResponse,
+  Post,
+  PostResponse,
+  User,
+} from "./types";
+
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function getAuthHeaders(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const token = localStorage.getItem("authToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function handleResponse<T>(res: Response): Promise<T> {
+  // Auto-logout on 401
+  if (res.status === 401) {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("currentUser");
+      window.location.href = "/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Request failed");
+  return data as T;
+}
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
+export async function loginUser(
+  email: string,
+  password: string
+): Promise<AuthResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  return handleResponse<AuthResponse>(res);
+}
+
+export async function registerUser(
+  name: string,
+  email: string,
+  password: string
+): Promise<AuthResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password }),
+  });
+  return handleResponse<AuthResponse>(res);
+}
+
+export async function getCurrentUser(): Promise<{ user: User }> {
+  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse<{ user: User }>(res);
+}
+
+// ─── Posts ────────────────────────────────────────────────────────────────────
+
+export async function getFeed(cursor?: string): Promise<FeedResponse> {
+  const qs = cursor ? `?cursor=${encodeURIComponent(cursor)}` : "";
+  const res = await fetch(`${API_BASE_URL}/api/posts/feed${qs}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse<FeedResponse>(res);
+}
+
+export async function getExplore(cursor?: string): Promise<FeedResponse> {
+  const qs = cursor ? `?cursor=${encodeURIComponent(cursor)}` : "";
+  const res = await fetch(`${API_BASE_URL}/api/posts/explore${qs}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse<FeedResponse>(res);
+}
+
+export async function createPost(content: string): Promise<{ post: Post }> {
+  const res = await fetch(`${API_BASE_URL}/api/posts`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ content }),
+  });
+  return handleResponse<{ post: Post }>(res);
+}
+
+export async function getPost(id: string): Promise<PostResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse<PostResponse>(res);
+}
+
+export async function deletePost(id: string): Promise<{ message: string }> {
+  const res = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
+    method: "DELETE",
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse<{ message: string }>(res);
+}
+
+export async function createReply(
+  postId: string,
+  content: string
+): Promise<{ reply: Post }> {
+  const res = await fetch(`${API_BASE_URL}/api/posts/${postId}/replies`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ content }),
+  });
+  return handleResponse<{ reply: Post }>(res);
+}
+
+export async function getReplies(
+  postId: string
+): Promise<{ replies: Post[] }> {
+  const res = await fetch(`${API_BASE_URL}/api/posts/${postId}/replies`, {
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse<{ replies: Post[] }>(res);
+}
+
+// ─── Interactions ─────────────────────────────────────────────────────────────
+
+export async function likePost(
+  id: string
+): Promise<{ liked: boolean; likeCount: number }> {
+  const res = await fetch(`${API_BASE_URL}/api/posts/${id}/like`, {
+    method: "POST",
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse(res);
+}
+
+export async function unlikePost(
+  id: string
+): Promise<{ liked: boolean; likeCount: number }> {
+  const res = await fetch(`${API_BASE_URL}/api/posts/${id}/like`, {
+    method: "DELETE",
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse(res);
+}
+
+export async function repostPost(
+  id: string
+): Promise<{ reposted: boolean; repostCount: number }> {
+  const res = await fetch(`${API_BASE_URL}/api/posts/${id}/repost`, {
+    method: "POST",
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse(res);
+}
+
+export async function undoRepost(
+  id: string
+): Promise<{ reposted: boolean; repostCount: number }> {
+  const res = await fetch(`${API_BASE_URL}/api/posts/${id}/repost`, {
+    method: "DELETE",
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse(res);
+}
+
+// ─── Social ───────────────────────────────────────────────────────────────────
+
+export async function followUser(
+  userId: string
+): Promise<{ following: boolean }> {
+  const res = await fetch(`${API_BASE_URL}/api/users/${userId}/follow`, {
+    method: "POST",
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse(res);
+}
+
+export async function unfollowUser(
+  userId: string
+): Promise<{ following: boolean }> {
+  const res = await fetch(`${API_BASE_URL}/api/users/${userId}/follow`, {
+    method: "DELETE",
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse(res);
+}
+
+export async function getFollowers(
+  userId: string
+): Promise<{ followers: User[] }> {
+  const res = await fetch(`${API_BASE_URL}/api/users/${userId}/followers`, {
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse<{ followers: User[] }>(res);
+}
+
+export async function getFollowing(
+  userId: string
+): Promise<{ following: User[] }> {
+  const res = await fetch(`${API_BASE_URL}/api/users/${userId}/following`, {
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse<{ following: User[] }>(res);
+}

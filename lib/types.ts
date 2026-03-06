@@ -1,0 +1,248 @@
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  username?: string;
+  headline?: string;
+  bio?: string;
+  location?: string;
+  website_url?: string;
+  github_url?: string;
+  linkedin_url?: string;
+  createdAt?: string;
+  created_at?: string;
+}
+
+// ─── Developer Profiles ──────────────────────────────────────────────────────
+
+export type ProofOfWorkBand = "Strong" | "Growing" | "Early";
+
+export interface UserProfileSkill {
+  id: string;
+  user_id: string;
+  skill: string;
+  rank: number;
+  created_at: string;
+}
+
+export interface UserFeaturedProject {
+  id: string;
+  position: number;
+  space: {
+    id: string;
+    name: string;
+    slug: string;
+    summary: string;
+    status: string;
+    visibility: string;
+    owner_id?: string;
+    created_at?: string;
+    owner?: User;
+  };
+}
+
+export interface ProfileStats {
+  followers: number;
+  following: number;
+  posts_count: number;
+  projects_created_count: number;
+  projects_contributed_count: number;
+  discussions_started_count: number;
+  updates_posted_count: number;
+}
+
+export interface ProofOfWorkSignals {
+  score: number;
+  band: ProofOfWorkBand;
+  factors: {
+    project_participation: number;
+    update_consistency: number;
+    discussion_engagement: number;
+    feed_consistency: number;
+  };
+}
+
+export interface ProfileResponse {
+  profile: User;
+  is_me: boolean;
+  stats: ProfileStats;
+  skills: UserProfileSkill[];
+  featured_projects: UserFeaturedProject[];
+}
+
+export interface ActivityItem {
+  type: "post" | "discussion" | "update";
+  created_at: string;
+  item: {
+    id: string;
+    content?: string;        // post
+    title?: string;          // discussion | update
+    category?: string;       // discussion
+    status?: string;         // discussion
+    type?: string;           // update
+    space?: { id: string; name: string; visibility: string };
+  };
+}
+
+export interface Post {
+  id: string;
+  user_id: string;
+  content: string;
+  like_count: number;
+  repost_count: number;
+  reply_count: number;
+  is_repost: boolean;
+  original_post_id: string | null;
+  reply_to_id: string | null;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+  hashtags?: Array<{ tag: string }>;
+  is_liked_by_me?: boolean;
+  is_reposted_by_me?: boolean;
+}
+
+export interface FeedResponse {
+  posts: Post[];
+  nextCursor: string | null;
+}
+
+export interface PostResponse {
+  post: Post;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: User;
+  error?: string;
+}
+
+// ─── Project Spaces ──────────────────────────────────────────────────────────
+
+export type SpaceStatus = "idea" | "building" | "shipping" | "paused" | "archived";
+export type SpaceVisibility = "public" | "private";
+export type StackCategory = "frontend" | "backend" | "database" | "infra" | "tooling" | "other";
+export type StackMaturity = "planned" | "in-use" | "deprecated";
+export type MemberRole = "owner" | "maintainer" | "contributor";
+export type JoinRequestStatus = "pending" | "accepted" | "rejected" | "need-info" | "withdrawn";
+export type DiscussionCategory = "idea" | "decision" | "question" | "blocked" | "retrospective";
+export type DiscussionStatus = "open" | "in-progress" | "resolved" | "closed";
+export type UpdateType = "milestone" | "devlog" | "release" | "blocker" | "weekly-summary";
+export type HealthBand = "Excellent" | "Healthy" | "Needs Attention";
+
+export interface ProjectSpace {
+  id: string;
+  owner_id: string;
+  name: string;
+  slug: string;
+  summary: string;
+  description?: string;
+  status: SpaceStatus;
+  visibility: SpaceVisibility;
+  primary_repo_url?: string;
+  created_at: string;
+  updated_at: string;
+  owner?: User;
+  members?: SpaceMember[];
+  stack?: StackEntry[];
+  memberCount?: number;
+}
+
+export interface StackEntry {
+  id: string;
+  space_id: string;
+  category: StackCategory;
+  technology: string;
+  maturity: StackMaturity;
+}
+
+export interface SpaceMember {
+  id: string;
+  space_id: string;
+  user_id: string;
+  role: MemberRole;
+  joined_at: string;
+  user?: User;
+}
+
+export interface JoinRequest {
+  id: string;
+  space_id: string;
+  user_id: string;
+  message: string;
+  skills: string[];
+  availability_hours: number | null;
+  proof_links: string[];
+  status: JoinRequestStatus;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  created_at: string;
+  applicant?: User;
+}
+
+export interface Discussion {
+  id: string;
+  space_id: string;
+  author_id: string;
+  title: string;
+  body: string;
+  category: DiscussionCategory;
+  is_pinned: boolean;
+  status: DiscussionStatus;
+  decision_summary?: string;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+  replies?: DiscussionReply[];
+  replyCount?: number;
+}
+
+export interface DiscussionReply {
+  id: string;
+  thread_id: string;
+  author_id: string;
+  parent_reply_id?: string | null;
+  body: string;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+}
+
+export interface SpaceUpdate {
+  id: string;
+  space_id: string;
+  author_id: string;
+  type: UpdateType;
+  title: string;
+  content: string;
+  what_shipped?: string;
+  next_up?: string;
+  blockers?: string;
+  evidence_links: string[];
+  created_at: string;
+  updated_at: string;
+  author?: User;
+}
+
+export interface HealthScore {
+  score: number;
+  band: HealthBand;
+  factors: Record<string, number>;
+}
+
+export interface DecisionEntry {
+  id: string;
+  title: string;
+  decision_summary: string;
+  category: DiscussionCategory;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
