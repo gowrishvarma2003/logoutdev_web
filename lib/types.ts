@@ -102,6 +102,84 @@ export interface Post {
   is_reposted_by_me?: boolean;
 }
 
+export type QuestionType = "open" | "mcq";
+export type McqMode = "single" | "multi";
+export type QuestionStatus = "open" | "closed";
+export type QuestionTagType = "role" | "stack" | "topic";
+
+export interface QuestionTag {
+  id: string;
+  question_id?: string;
+  tag_type: QuestionTagType;
+  tag: string;
+  slug: string;
+}
+
+export interface QuestionOption {
+  id: string;
+  question_id: string;
+  position: number;
+  text: string;
+  vote_count?: number;
+  vote_percent?: number;
+  selected_by_me?: boolean;
+  is_correct?: boolean;
+}
+
+export interface QuestionViewerState {
+  is_author: boolean;
+  has_answered: boolean;
+  can_answer: boolean;
+  can_view_locked_content: boolean;
+  can_discuss: boolean;
+  can_accept_answer: boolean;
+}
+
+export interface Question {
+  id: string;
+  author_id: string;
+  type: QuestionType;
+  mcq_mode?: McqMode | null;
+  title: string;
+  body: string;
+  status: QuestionStatus;
+  answer_count: number;
+  discussion_count: number;
+  participant_count: number;
+  latest_activity_at: string;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+  tags: QuestionTag[];
+  options?: QuestionOption[];
+  viewer_state?: QuestionViewerState;
+  accepted_answer_id?: string | null;
+}
+
+export interface QuestionAnswer {
+  id: string;
+  question_id: string;
+  author_id: string;
+  body: string;
+  score: number;
+  is_accepted: boolean;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+  is_upvoted_by_me?: boolean;
+}
+
+export interface QuestionDiscussionComment {
+  id: string;
+  question_id: string;
+  author_id: string;
+  parent_comment_id?: string | null;
+  body: string;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+}
+
 export interface FeedResponse {
   posts: Post[];
   nextCursor: string | null;

@@ -8,6 +8,7 @@ import Avatar from "@/components/ui/Avatar";
 import {
   HomeIcon,
   CompassIcon,
+  QuestionMarkCircleIcon,
   UserIcon,
   LogOutIcon,
   PencilSquareIcon,
@@ -72,6 +73,12 @@ export default function Sidebar({ user, onLogout }: SidebarProps) {
           icon={<CompassIcon />}
           label="Explore"
           active={pathname === "/explore"}
+        />
+        <NavItem
+          href="/questions"
+          icon={<QuestionMarkCircleIcon />}
+          label="Questions"
+          active={pathname.startsWith("/questions")}
         />
         <NavItem
           href="/spaces"

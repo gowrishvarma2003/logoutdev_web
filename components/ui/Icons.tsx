@@ -4,6 +4,22 @@ interface IconProps {
   className?: string;
 }
 
+export function QuestionMarkCircleIcon({ className = "w-5 h-5" }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 17.25h.008v.008H12v-.008zM9.75 9a2.25 2.25 0 114.276 1.006c-.286.636-.84 1.03-1.36 1.436-.67.523-1.291 1.14-1.291 2.308m8.625.75a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+export function ArrowUpIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+    </svg>
+  );
+}
+
 export function HomeIcon({ className = "w-5 h-5" }: IconProps) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
