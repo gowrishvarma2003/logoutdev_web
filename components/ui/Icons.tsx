@@ -195,6 +195,22 @@ export function LinkIcon({ className = "w-4 h-4" }: IconProps) {
   );
 }
 
+export function KeyIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3.75 3.75 0 11-6.75 2.297L3.75 12.797V15h2.203v2.25h2.25v2.25h2.297l5.25-5.25a3.75 3.75 0 000-9z" />
+    </svg>
+  );
+}
+
+export function CodeBracketIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L21 12l-3.75 5.25M6.75 6.75L3 12l3.75 5.25M13.5 4.5L10.5 19.5" />
+    </svg>
+  );
+}
+
 export function CogIcon({ className = "w-5 h-5" }: IconProps) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>

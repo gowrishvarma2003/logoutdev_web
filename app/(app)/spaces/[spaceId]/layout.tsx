@@ -5,6 +5,7 @@ import { useSpace, useContributors } from "@/lib/hooks/useSpaces";
 import { useAuth } from "@/lib/hooks/useAuth";
 import SpaceHeader from "@/components/spaces/SpaceHeader";
 import Spinner from "@/components/ui/Spinner";
+import type { MemberRole } from "@/lib/types";
 
 interface SpaceLayoutProps {
   children: React.ReactNode;
@@ -38,12 +39,19 @@ export default function SpaceLayout({ children, params }: SpaceLayoutProps) {
     );
   }
 
-  const isMember = contributors.some((c) => c.user_id === user?.id);
   const isOwner = space.owner_id === user?.id;
+  const currentMembership = contributors.find((c) => c.user_id === user?.id) ?? null;
+  const memberRole: MemberRole | null = isOwner ? "owner" : currentMembership?.role ?? null;
+  const isMember = Boolean(memberRole);
 
   return (
     <div className="min-h-screen">
-      <SpaceHeader space={space} isMember={isMember || isOwner} isOwner={isOwner} />
+      <SpaceHeader
+        space={space}
+        isMember={isMember}
+        isOwner={isOwner}
+        memberRole={memberRole}
+      />
       {children}
     </div>
   );

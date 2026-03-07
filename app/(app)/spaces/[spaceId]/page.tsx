@@ -1,44 +1,46 @@
 "use client";
 
 import { use } from "react";
+import Link from "next/link";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { useSpace, useStack, useContributors, useHealth, useDecisions, useUpdates } from "@/lib/hooks/useSpaces";
+import { useRepos } from "@/lib/hooks/useRepos";
 import TechStackPanel from "@/components/spaces/TechStackPanel";
 import CollaborationHealthBadge from "@/components/spaces/CollaborationHealthBadge";
 import DecisionLedgerCard from "@/components/spaces/DecisionLedgerCard";
 import ProgressUpdateCard from "@/components/spaces/ProgressUpdateCard";
 import Avatar from "@/components/ui/Avatar";
-import { LinkIcon, UsersIcon, ClockIcon, CheckCircleIcon } from "@/components/ui/Icons";
+import { LinkIcon, UsersIcon, ClockIcon } from "@/components/ui/Icons";
 import { SectionHeader, EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import { formatRelativeTime } from "@/lib/utils";
-import Link from "next/link";
 
-/**
- * /spaces/[spaceId] — Overview tab.
- * Shows description, health, stack, recent updates, decisions, and contributors at a glance.
- */
 export default function SpaceOverviewPage({
   params,
 }: {
   params: Promise<{ spaceId: string }>;
 }) {
   const { spaceId } = use(params);
+  const { user } = useAuth();
   const { space } = useSpace(spaceId);
   const { stack, loading: stackLoading } = useStack(spaceId);
   const { contributors } = useContributors(spaceId);
   const { health } = useHealth(spaceId);
   const { decisions } = useDecisions(spaceId);
   const { updates } = useUpdates(spaceId);
+  const { repos } = useRepos(spaceId);
 
   if (!space) return null;
 
+  const currentMembership = contributors.find((member) => member.user_id === user?.id) ?? null;
+  const canSeeRepos = space.owner_id === user?.id || currentMembership?.role === "maintainer" || repos.length > 0;
+
   return (
     <div className="divide-y divide-zinc-800">
-      {/* ── Description + Repo ────────────────────────────────────────────── */}
       {(space.description || space.primary_repo_url) && (
         <section className="px-4 py-5">
           {space.description && (
-            <p className="text-sm text-zinc-300 whitespace-pre-line leading-relaxed mb-3">
+            <p className="mb-3 whitespace-pre-line text-sm leading-relaxed text-zinc-300">
               {space.description}
             </p>
           )}
@@ -49,19 +51,17 @@ export default function SpaceOverviewPage({
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-sm text-sky-400 hover:text-sky-300 transition-colors"
             >
-              <LinkIcon className="w-3.5 h-3.5" />
+              <LinkIcon className="h-3.5 w-3.5" />
               {space.primary_repo_url.replace(/^https?:\/\//, "")}
             </a>
           )}
         </section>
       )}
 
-      {/* ── Collaboration Health ──────────────────────────────────────────── */}
       <section className="p-4">
         <CollaborationHealthBadge health={health} />
       </section>
 
-      {/* ── Tech Stack ────────────────────────────────────────────────────── */}
       <section>
         <SectionHeader title="Tech Stack" count={stack.length} />
         {stackLoading ? (
@@ -73,7 +73,6 @@ export default function SpaceOverviewPage({
         )}
       </section>
 
-      {/* ── Recent Updates (last 3) ───────────────────────────────────────── */}
       <section>
         <SectionHeader
           title="Recent Updates"
@@ -97,26 +96,24 @@ export default function SpaceOverviewPage({
           />
         ) : (
           <div>
-            {updates.slice(0, 3).map((u) => (
-              <ProgressUpdateCard key={u.id} update={u} />
+            {updates.slice(0, 3).map((update) => (
+              <ProgressUpdateCard key={update.id} update={update} />
             ))}
           </div>
         )}
       </section>
 
-      {/* ── Decision Ledger (last 5) ──────────────────────────────────────── */}
       {decisions.length > 0 && (
         <section>
           <SectionHeader title="Recent Decisions" count={decisions.length} />
           <div>
-            {decisions.slice(0, 5).map((d) => (
-              <DecisionLedgerCard key={d.id} decision={d} />
+            {decisions.slice(0, 5).map((decision) => (
+              <DecisionLedgerCard key={decision.id} decision={decision} />
             ))}
           </div>
         </section>
       )}
 
-      {/* ── Contributors snapshot ─────────────────────────────────────────── */}
       <section>
         <SectionHeader
           title="Contributors"
@@ -131,30 +128,27 @@ export default function SpaceOverviewPage({
           }
         />
         {contributors.length === 0 ? (
-          <EmptyState
-            icon={<UsersIcon className="w-10 h-10" />}
-            title="No contributors"
-          />
+          <EmptyState icon={<UsersIcon className="w-10 h-10" />} title="No contributors" />
         ) : (
-          <div className="px-4 py-3 flex flex-wrap gap-3">
-            {contributors.slice(0, 8).map((c) => (
+          <div className="flex flex-wrap gap-3 px-4 py-3">
+            {contributors.slice(0, 8).map((contributor) => (
               <div
-                key={c.id}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800"
+                key={contributor.id}
+                className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2"
               >
-                <Avatar user={c.user} size="xs" />
+                <Avatar user={contributor.user} size="xs" />
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold text-white truncate">
-                    {c.user?.name ?? "Unknown"}
+                  <p className="truncate text-xs font-semibold text-white">
+                    {contributor.user?.name ?? "Unknown"}
                   </p>
-                  <p className="text-[11px] text-zinc-500 capitalize">{c.role}</p>
+                  <p className="text-[11px] capitalize text-zinc-500">{contributor.role}</p>
                 </div>
               </div>
             ))}
             {contributors.length > 8 && (
               <Link
                 href={`/spaces/${spaceId}/contributors`}
-                className="flex items-center px-3 py-2 rounded-xl bg-zinc-800 text-xs text-zinc-400 font-medium hover:bg-zinc-700 transition-colors"
+                className="flex items-center rounded-xl bg-zinc-800 px-3 py-2 text-xs font-medium text-zinc-400 hover:bg-zinc-700 transition-colors"
               >
                 +{contributors.length - 8} more
               </Link>
@@ -163,7 +157,50 @@ export default function SpaceOverviewPage({
         )}
       </section>
 
-      {/* ── Footer meta ───────────────────────────────────────────────────── */}
+      {canSeeRepos && (
+        <section>
+          <SectionHeader
+            title="Repositories"
+            count={repos.length}
+            action={
+              <Link
+                href={`/spaces/${spaceId}/repos`}
+                className="text-xs text-sky-400 hover:text-sky-300 transition-colors"
+              >
+                View all →
+              </Link>
+            }
+          />
+          {repos.length === 0 ? (
+            <EmptyState
+              icon={<LinkIcon className="w-10 h-10" />}
+              title="No repo access yet"
+              description="Private code repositories will appear here once you have access."
+            />
+          ) : (
+            <div className="divide-y divide-zinc-800/50">
+              {repos.slice(0, 3).map((repo) => (
+                <Link
+                  key={repo.id}
+                  href={`/spaces/${spaceId}/repos/${repo.id}`}
+                  className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-zinc-900/30 transition-colors"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-white">{repo.name}</p>
+                    {repo.description && (
+                      <p className="truncate text-xs text-zinc-500">{repo.description}</p>
+                    )}
+                  </div>
+                  <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] uppercase text-sky-400">
+                    {repo.my_role ?? "read"}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       <section className="px-4 py-4 text-xs text-zinc-600">
         Created {formatRelativeTime(space.created_at)}
         {space.updated_at && space.updated_at !== space.created_at && (

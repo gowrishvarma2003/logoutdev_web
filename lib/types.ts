@@ -124,6 +124,7 @@ export type SpaceVisibility = "public" | "private";
 export type StackCategory = "frontend" | "backend" | "database" | "infra" | "tooling" | "other";
 export type StackMaturity = "planned" | "in-use" | "deprecated";
 export type MemberRole = "owner" | "maintainer" | "contributor";
+export type RepoRole = "read" | "write" | "admin";
 export type JoinRequestStatus = "pending" | "accepted" | "rejected" | "need-info" | "withdrawn";
 export type DiscussionCategory = "idea" | "decision" | "question" | "blocked" | "retrospective";
 export type DiscussionStatus = "open" | "in-progress" | "resolved" | "closed";
@@ -145,7 +146,85 @@ export interface ProjectSpace {
   owner?: User;
   members?: SpaceMember[];
   stack?: StackEntry[];
+  repos?: SpaceRepo[];
   memberCount?: number;
+}
+
+export interface SpaceRepo {
+  id: string;
+  space_id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  default_branch: string;
+  created_by: string;
+  archived_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  my_role?: RepoRole;
+}
+
+export interface RepoMember {
+  id: string;
+  repo_id: string;
+  user_id: string;
+  role: Exclude<RepoRole, "admin">;
+  granted_by: string;
+  created_at: string;
+  user?: User;
+}
+
+export interface RepoTreeEntry {
+  path: string;
+  name: string;
+  type: "tree" | "blob";
+  mode: string;
+  oid: string;
+}
+
+export interface RepoTreeResponse {
+  ref: string;
+  path: string;
+  entries: RepoTreeEntry[];
+}
+
+export interface RepoBlobResponse {
+  ref: string;
+  path: string;
+  size: number;
+  is_binary: boolean;
+  content?: string;
+  encoding?: "utf-8";
+}
+
+export interface RepoReadmeResponse {
+  readme: (RepoBlobResponse & { path: string }) | null;
+}
+
+export interface RepoCommit {
+  oid: string;
+  short_oid: string;
+  message: string;
+  author_name: string;
+  author_email: string;
+  authored_at: string;
+}
+
+export interface RepoCommitResponse {
+  ref: string;
+  page: number;
+  limit: number;
+  commits: RepoCommit[];
+}
+
+export interface GitAccessToken {
+  id: string;
+  name: string;
+  token_prefix: string;
+  last_used_at?: string | null;
+  expires_at?: string | null;
+  revoked_at?: string | null;
+  created_at: string;
 }
 
 export interface StackEntry {

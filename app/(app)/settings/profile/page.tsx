@@ -6,11 +6,12 @@
  */
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useProfile } from "@/lib/hooks/useProfile";
 import ProfileEditForm from "@/components/profile/ProfileEditForm";
 import Spinner from "@/components/ui/Spinner";
-import { ArrowLeftIcon, UserIcon } from "@/components/ui/Icons";
+import { ArrowLeftIcon, UserIcon, KeyIcon } from "@/components/ui/Icons";
 import type { User } from "@/lib/types";
 
 export default function SettingsProfilePage() {
@@ -66,6 +67,24 @@ export default function SettingsProfilePage() {
 
       {/* ── Content ── */}
       <div className="px-5 py-6">
+        <div className="mb-5 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-white">Git Access Tokens</h2>
+              <p className="mt-1 text-sm text-zinc-500">
+                Create tokens for cloning and pushing private space repositories over HTTPS.
+              </p>
+            </div>
+            <Link
+              href="/settings/tokens"
+              className="inline-flex items-center gap-1 rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-700 transition-colors"
+            >
+              <KeyIcon className="w-3.5 h-3.5" />
+              Manage
+            </Link>
+          </div>
+        </div>
+
         {loading ? (
           <div className="flex justify-center py-16">
             <Spinner size="lg" />

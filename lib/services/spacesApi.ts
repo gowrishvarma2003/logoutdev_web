@@ -2,6 +2,12 @@ import type {
   ProjectSpace,
   StackEntry,
   SpaceMember,
+  SpaceRepo,
+  RepoMember,
+  RepoTreeResponse,
+  RepoBlobResponse,
+  RepoReadmeResponse,
+  RepoCommitResponse,
   JoinRequest,
   Discussion,
   DiscussionReply,
@@ -100,6 +106,159 @@ export async function deleteSpace(spaceId: string): Promise<{ archived: boolean 
     method: "DELETE",
     headers: { ...authHeaders() },
   });
+  return handleRes(res);
+}
+
+// Repo management
+
+export async function listRepos(spaceId: string): Promise<{ repos: SpaceRepo[] }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/repos`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function createRepo(
+  spaceId: string,
+  body: {
+    name: string;
+    description?: string;
+    default_branch?: string;
+  }
+): Promise<{ repo: SpaceRepo }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/repos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function getRepo(
+  spaceId: string,
+  repoId: string
+): Promise<{ repo: SpaceRepo }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/repos/${repoId}`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function updateRepo(
+  spaceId: string,
+  repoId: string,
+  body: Partial<{
+    name: string;
+    description: string;
+    slug: string;
+    default_branch: string;
+  }>
+): Promise<{ repo: SpaceRepo }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/repos/${repoId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function archiveRepo(
+  spaceId: string,
+  repoId: string
+): Promise<{ archived: boolean }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/repos/${repoId}`, {
+    method: "DELETE",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function listRepoMembers(
+  spaceId: string,
+  repoId: string
+): Promise<{ members: RepoMember[] }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/repos/${repoId}/members`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function upsertRepoMember(
+  spaceId: string,
+  repoId: string,
+  userId: string,
+  role: "read" | "write"
+): Promise<{ member: RepoMember }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/repos/${repoId}/members/${userId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ role }),
+  });
+  return handleRes(res);
+}
+
+export async function removeRepoMember(
+  spaceId: string,
+  repoId: string,
+  userId: string
+): Promise<{ removed: boolean }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/repos/${repoId}/members/${userId}`, {
+    method: "DELETE",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function getRepoTree(
+  spaceId: string,
+  repoId: string,
+  params?: { ref?: string; path?: string }
+): Promise<RepoTreeResponse> {
+  const res = await fetch(
+    `${API}/api/spaces/${spaceId}/repos/${repoId}/tree${qs({ ref: params?.ref, path: params?.path })}`,
+    { headers: { ...authHeaders() } }
+  );
+  return handleRes(res);
+}
+
+export async function getRepoBlob(
+  spaceId: string,
+  repoId: string,
+  params: { ref?: string; path: string }
+): Promise<RepoBlobResponse> {
+  const res = await fetch(
+    `${API}/api/spaces/${spaceId}/repos/${repoId}/blob${qs({ ref: params?.ref, path: params.path })}`,
+    { headers: { ...authHeaders() } }
+  );
+  return handleRes(res);
+}
+
+export async function getRepoReadme(
+  spaceId: string,
+  repoId: string,
+  params?: { ref?: string }
+): Promise<RepoReadmeResponse> {
+  const res = await fetch(
+    `${API}/api/spaces/${spaceId}/repos/${repoId}/readme${qs({ ref: params?.ref })}`,
+    { headers: { ...authHeaders() } }
+  );
+  return handleRes(res);
+}
+
+export async function getRepoCommits(
+  spaceId: string,
+  repoId: string,
+  params?: { ref?: string; path?: string; page?: number; limit?: number }
+): Promise<RepoCommitResponse> {
+  const res = await fetch(
+    `${API}/api/spaces/${spaceId}/repos/${repoId}/commits${qs({
+      ref: params?.ref,
+      path: params?.path,
+      page: params?.page,
+      limit: params?.limit,
+    })}`,
+    { headers: { ...authHeaders() } }
+  );
   return handleRes(res);
 }
 

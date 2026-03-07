@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ProjectSpace } from "@/lib/types";
+import type { MemberRole, ProjectSpace } from "@/lib/types";
 import { StatusBadge, VisibilityBadge } from "./SpaceBadges";
 import {
   ArrowLeftIcon,
@@ -11,31 +11,45 @@ import {
   UsersIcon,
   CogIcon,
   DocumentTextIcon,
+  FolderIcon,
 } from "@/components/ui/Icons";
 import CollaborationHealthBadge from "./CollaborationHealthBadge";
 import { useHealth } from "@/lib/hooks/useSpaces";
+import { useRepos } from "@/lib/hooks/useRepos";
 
 interface SpaceHeaderProps {
   space: ProjectSpace;
   isMember: boolean;
   isOwner: boolean;
+  memberRole: MemberRole | null;
 }
 
 /**
  * Full-width header displayed on all space sub-pages.
  * Includes project info, health badge, and tab navigation.
  */
-export default function SpaceHeader({ space, isMember, isOwner }: SpaceHeaderProps) {
+export default function SpaceHeader({ space, isMember, isOwner, memberRole }: SpaceHeaderProps) {
   const pathname = usePathname();
   const { health } = useHealth(space.id);
+  const { repos } = useRepos(space.id);
 
   const base = `/spaces/${space.id}`;
+  const canManageRepos = isOwner || memberRole === "maintainer";
+  const canSeeRepos = canManageRepos || repos.length > 0;
   const tabs = [
     { href: base, label: "Overview", icon: <DocumentTextIcon className="w-4 h-4" /> },
     { href: `${base}/discussions`, label: "Discussions", icon: <ChatBubbleIcon className="w-4 h-4" /> },
     { href: `${base}/updates`, label: "Updates", icon: <ClockIcon className="w-4 h-4" /> },
     { href: `${base}/contributors`, label: "Contributors", icon: <UsersIcon className="w-4 h-4" /> },
   ];
+
+  if (canSeeRepos) {
+    tabs.push({
+      href: `${base}/repos`,
+      label: "Repos",
+      icon: <FolderIcon className="w-4 h-4" />,
+    });
+  }
 
   if (isOwner) {
     tabs.push({

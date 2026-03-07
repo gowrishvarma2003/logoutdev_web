@@ -1,9 +1,11 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
-import { useSpace, useJoinRequests, useStack } from "@/lib/hooks/useSpaces";
-import { useAuth } from "@/lib/hooks/useAuth";
+import { use, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSpace, useJoinRequests, useStack } from "@/lib/hooks/useSpaces";
+import { useRepos } from "@/lib/hooks/useRepos";
+import { useAuth } from "@/lib/hooks/useAuth";
 import Avatar from "@/components/ui/Avatar";
 import { SectionHeader, EmptyState } from "@/components/spaces/SpaceBadges";
 import TechStackPanel from "@/components/spaces/TechStackPanel";
@@ -19,10 +21,6 @@ import * as api from "@/lib/services/spacesApi";
 import { formatRelativeTime } from "@/lib/utils";
 import type { SpaceStatus, SpaceVisibility, StackCategory, StackMaturity } from "@/lib/types";
 
-/**
- * /spaces/[spaceId]/manage — Owner management dashboard.
- * Sections: Project Settings, Join Requests, Stack Management.
- */
 export default function ManagePage({
   params,
 }: {
@@ -32,18 +30,14 @@ export default function ManagePage({
   const router = useRouter();
   const { user } = useAuth();
   const { space, refetch: refetchSpace } = useSpace(spaceId);
-  const {
-    requests,
-    loading: reqLoading,
-    refetch: refetchReqs,
-  } = useJoinRequests(spaceId, "pending");
+  const { requests, loading: reqLoading, refetch: refetchReqs } = useJoinRequests(spaceId, "pending");
   const { stack, refetch: refetchStack } = useStack(spaceId);
+  const { repos } = useRepos(spaceId);
 
-  // Protect: only owner can see this page
   if (space && space.owner_id !== user?.id) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <h2 className="text-lg font-semibold text-white mb-2">Access Denied</h2>
+        <h2 className="mb-2 text-lg font-semibold text-white">Access Denied</h2>
         <p className="text-sm text-zinc-500">Only the project owner can manage this space.</p>
       </div>
     );
@@ -51,24 +45,13 @@ export default function ManagePage({
 
   return (
     <div className="divide-y divide-zinc-800">
-      {/* ── Section 1: Project Settings ───────────────────────────────────── */}
       <ProjectSettingsSection space={space} refetch={refetchSpace} onDelete={() => router.push("/spaces")} />
-
-      {/* ── Section 2: Pending Join Requests ──────────────────────────────── */}
-      <JoinRequestsSection
-        spaceId={spaceId}
-        requests={requests}
-        loading={reqLoading}
-        refetch={refetchReqs}
-      />
-
-      {/* ── Section 3: Stack Management ───────────────────────────────────── */}
+      <JoinRequestsSection spaceId={spaceId} requests={requests} loading={reqLoading} refetch={refetchReqs} />
       <StackManagementSection spaceId={spaceId} stack={stack} refetch={refetchStack} />
+      <RepoManagementSection spaceId={spaceId} repos={repos} />
     </div>
   );
 }
-
-// ─── Project Settings ────────────────────────────────────────────────────────
 
 function ProjectSettingsSection({
   space,
@@ -89,16 +72,14 @@ function ProjectSettingsSection({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Re-sync state when space data loads asynchronously
   useEffect(() => {
-    if (space) {
-      setName(space.name);
-      setSummary(space.summary);
-      setDescription(space.description ?? "");
-      setStatus(space.status);
-      setVisibility(space.visibility);
-      setRepoUrl(space.primary_repo_url ?? "");
-    }
+    if (!space) return;
+    setName(space.name);
+    setSummary(space.summary);
+    setDescription(space.description ?? "");
+    setStatus(space.status);
+    setVisibility(space.visibility);
+    setRepoUrl(space.primary_repo_url ?? "");
   }, [space]);
 
   async function handleSave() {
@@ -115,8 +96,6 @@ function ProjectSettingsSection({
       });
       refetch();
       setEditing(false);
-    } catch {
-      // silently fail
     } finally {
       setSaving(false);
     }
@@ -138,15 +117,15 @@ function ProjectSettingsSection({
 
   return (
     <section className="p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
           <CogIcon className="w-4 h-4" />
           Project Settings
         </h3>
         {!editing && (
           <button
             onClick={() => setEditing(true)}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
+            className="rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
           >
             Edit
           </button>
@@ -159,60 +138,62 @@ function ProjectSettingsSection({
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-zinc-600 transition-colors"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none transition-colors"
           />
           <input
             type="text"
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             maxLength={300}
-            className="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-zinc-600 transition-colors"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none transition-colors"
           />
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white focus:outline-none focus:border-zinc-600 resize-none transition-colors"
+            className="w-full resize-none rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none transition-colors"
           />
           <input
             type="url"
             value={repoUrl}
             onChange={(e) => setRepoUrl(e.target.value)}
-            placeholder="Repository URL"
-            className="w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
+            placeholder="External repository URL"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none transition-colors"
           />
           <div className="flex gap-2">
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as SpaceStatus)}
-              className="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-zinc-600"
+              className="rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-xs text-white focus:border-zinc-600 focus:outline-none"
             >
-              {["idea", "building", "shipping", "paused", "archived"].map((s) => (
-                <option key={s} value={s}>{s}</option>
+              {["idea", "building", "shipping", "paused", "archived"].map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
               ))}
             </select>
             <select
               value={visibility}
               onChange={(e) => setVisibility(e.target.value as SpaceVisibility)}
-              className="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-zinc-600"
+              className="rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-xs text-white focus:border-zinc-600 focus:outline-none"
             >
               <option value="public">Public</option>
               <option value="private">Private</option>
             </select>
           </div>
-          <div className="flex gap-2 justify-end">
+          <div className="flex justify-end gap-2">
             <button
               onClick={() => setEditing(false)}
-              className="px-3 py-1.5 rounded-lg text-xs text-zinc-400 hover:text-white transition-colors"
+              className="rounded-lg px-3 py-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-4 py-1.5 rounded-lg bg-white text-zinc-950 text-xs font-semibold hover:bg-zinc-100 disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-white px-4 py-1.5 text-xs font-semibold text-zinc-950 hover:bg-zinc-100 disabled:opacity-50 transition-colors"
             >
-              {saving ? "Saving…" : "Save Changes"}
+              {saving ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </div>
@@ -222,25 +203,22 @@ function ProjectSettingsSection({
           <p><span className="text-zinc-500">Summary:</span> {space.summary}</p>
           <p><span className="text-zinc-500">Status:</span> {space.status}</p>
           <p><span className="text-zinc-500">Visibility:</span> {space.visibility}</p>
-          {space.primary_repo_url && <p><span className="text-zinc-500">Repo:</span> {space.primary_repo_url}</p>}
+          {space.primary_repo_url && <p><span className="text-zinc-500">External Repo:</span> {space.primary_repo_url}</p>}
         </div>
       )}
 
-      {/* Danger zone */}
-      <div className="mt-6 pt-4 border-t border-zinc-800">
+      <div className="mt-6 border-t border-zinc-800 pt-4">
         <button
           onClick={handleDelete}
           disabled={deleting}
-          className="px-3 py-1.5 rounded-lg text-xs text-rose-400 border border-rose-500/20 hover:bg-rose-500/10 disabled:opacity-50 transition-colors"
+          className="rounded-lg border border-rose-500/20 px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 transition-colors"
         >
-          {deleting ? "Archiving…" : "Archive Space"}
+          {deleting ? "Archiving..." : "Archive Space"}
         </button>
       </div>
     </section>
   );
 }
-
-// ─── Join Requests ───────────────────────────────────────────────────────────
 
 function JoinRequestsSection({
   spaceId,
@@ -255,16 +233,11 @@ function JoinRequestsSection({
 }) {
   const [acting, setActing] = useState<string | null>(null);
 
-  async function handleAction(
-    requestId: string,
-    action: "accept" | "reject" | "need-info"
-  ) {
+  async function handleAction(requestId: string, action: "accept" | "reject" | "need-info") {
     setActing(requestId);
     try {
       await api.reviewJoinRequest(spaceId, requestId, action);
       refetch();
-    } catch {
-      // silently fail
     } finally {
       setActing(null);
     }
@@ -272,10 +245,7 @@ function JoinRequestsSection({
 
   return (
     <section>
-      <SectionHeader
-        title="Pending Join Requests"
-        count={requests.length}
-      />
+      <SectionHeader title="Pending Join Requests" count={requests.length} />
 
       {loading && (
         <div className="flex justify-center py-8">
@@ -293,29 +263,24 @@ function JoinRequestsSection({
 
       {!loading && requests.length > 0 && (
         <div className="divide-y divide-zinc-800/50">
-          {requests.map((req) => (
-            <div key={req.id} className="px-4 py-4">
+          {requests.map((request) => (
+            <div key={request.id} className="px-4 py-4">
               <div className="flex items-start gap-3">
-                <Avatar user={req.applicant} size="md" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm font-semibold text-white">
-                      {req.applicant?.name ?? "Unknown"}
-                    </p>
-                    <span className="text-[11px] text-zinc-500">
-                      {formatRelativeTime(req.created_at)}
-                    </span>
+                <Avatar user={request.applicant} size="md" />
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center gap-2">
+                    <p className="text-sm font-semibold text-white">{request.applicant?.name ?? "Unknown"}</p>
+                    <span className="text-[11px] text-zinc-500">{formatRelativeTime(request.created_at)}</span>
                   </div>
 
-                  <p className="text-sm text-zinc-300 mb-2">{req.message}</p>
+                  <p className="mb-2 text-sm text-zinc-300">{request.message}</p>
 
-                  {/* Skills */}
-                  {req.skills && req.skills.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {req.skills.map((skill) => (
+                  {request.skills && request.skills.length > 0 && (
+                    <div className="mb-2 flex flex-wrap gap-1">
+                      {request.skills.map((skill) => (
                         <span
                           key={skill}
-                          className="px-2 py-0.5 rounded-md bg-sky-500/10 text-[11px] text-sky-400 font-medium"
+                          className="rounded-md bg-sky-500/10 px-2 py-0.5 text-[11px] font-medium text-sky-400"
                         >
                           {skill}
                         </span>
@@ -323,23 +288,21 @@ function JoinRequestsSection({
                     </div>
                   )}
 
-                  {/* Availability */}
-                  {req.availability_hours && (
-                    <p className="text-[11px] text-zinc-500 mb-2">
-                      Available {req.availability_hours} hrs/week
+                  {request.availability_hours && (
+                    <p className="mb-2 text-[11px] text-zinc-500">
+                      Available {request.availability_hours} hrs/week
                     </p>
                   )}
 
-                  {/* Proof links */}
-                  {req.proof_links && req.proof_links.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      {req.proof_links.map((link, i) => (
+                  {request.proof_links && request.proof_links.length > 0 && (
+                    <div className="mb-3 flex flex-wrap gap-1.5">
+                      {request.proof_links.map((link, index) => (
                         <a
-                          key={i}
+                          key={index}
                           href={link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[11px] text-sky-400 hover:text-sky-300 underline"
+                          className="text-[11px] text-sky-400 underline hover:text-sky-300"
                         >
                           {link}
                         </a>
@@ -347,30 +310,29 @@ function JoinRequestsSection({
                     </div>
                   )}
 
-                  {/* Actions */}
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleAction(req.id, "accept")}
-                      disabled={acting === req.id}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50 transition-colors"
+                      onClick={() => handleAction(request.id, "accept")}
+                      disabled={acting === request.id}
+                      className="flex items-center gap-1 rounded-lg bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50 transition-colors"
                     >
-                      <CheckCircleIcon className="w-3.5 h-3.5" />
+                      <CheckCircleIcon className="h-3.5 w-3.5" />
                       Accept
                     </button>
                     <button
-                      onClick={() => handleAction(req.id, "need-info")}
-                      disabled={acting === req.id}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-500/10 text-xs font-semibold text-amber-400 hover:bg-amber-500/20 disabled:opacity-50 transition-colors"
+                      onClick={() => handleAction(request.id, "need-info")}
+                      disabled={acting === request.id}
+                      className="flex items-center gap-1 rounded-lg bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-400 hover:bg-amber-500/20 disabled:opacity-50 transition-colors"
                     >
-                      <ChatBubbleIcon className="w-3.5 h-3.5" />
+                      <ChatBubbleIcon className="h-3.5 w-3.5" />
                       Need Info
                     </button>
                     <button
-                      onClick={() => handleAction(req.id, "reject")}
-                      disabled={acting === req.id}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-500/10 text-xs font-semibold text-rose-400 hover:bg-rose-500/20 disabled:opacity-50 transition-colors"
+                      onClick={() => handleAction(request.id, "reject")}
+                      disabled={acting === request.id}
+                      className="flex items-center gap-1 rounded-lg bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/20 disabled:opacity-50 transition-colors"
                     >
-                      <XCircleIcon className="w-3.5 h-3.5" />
+                      <XCircleIcon className="h-3.5 w-3.5" />
                       Reject
                     </button>
                   </div>
@@ -384,8 +346,6 @@ function JoinRequestsSection({
   );
 }
 
-// ─── Stack Management ────────────────────────────────────────────────────────
-
 function StackManagementSection({
   spaceId,
   stack,
@@ -397,7 +357,7 @@ function StackManagementSection({
 }) {
   const [editing, setEditing] = useState(false);
   const [items, setItems] = useState(
-    stack.map((s) => ({ category: s.category, technology: s.technology, maturity: s.maturity }))
+    stack.map((entry) => ({ category: entry.category, technology: entry.technology, maturity: entry.maturity }))
   );
   const [newTech, setNewTech] = useState("");
   const [newCat, setNewCat] = useState<StackCategory>("backend");
@@ -416,8 +376,6 @@ function StackManagementSection({
       await api.replaceStack(spaceId, items);
       refetch();
       setEditing(false);
-    } catch {
-      // silently fail
     } finally {
       setSaving(false);
     }
@@ -425,15 +383,15 @@ function StackManagementSection({
 
   return (
     <section>
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+      <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
         <h3 className="text-sm font-semibold text-white">Tech Stack</h3>
         {!editing && (
           <button
             onClick={() => {
-              setItems(stack.map((s) => ({ category: s.category, technology: s.technology, maturity: s.maturity })));
+              setItems(stack.map((entry) => ({ category: entry.category, technology: entry.technology, maturity: entry.maturity })));
               setEditing(true);
             }}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
+            className="rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
           >
             Edit Stack
           </button>
@@ -441,19 +399,18 @@ function StackManagementSection({
       </div>
 
       {editing ? (
-        <div className="p-4 space-y-3">
-          {items.map((item, i) => (
+        <div className="space-y-3 p-4">
+          {items.map((item, index) => (
             <div
-              key={i}
-              className="flex items-center justify-between px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800"
+              key={`${item.category}-${item.technology}-${index}`}
+              className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2"
             >
               <span className="text-xs text-zinc-400">
-                <span className="text-zinc-500 uppercase">{item.category}</span>{" "}
-                · {item.technology}{" "}
+                <span className="uppercase text-zinc-500">{item.category}</span> · {item.technology}{" "}
                 <span className="text-zinc-600">({item.maturity})</span>
               </span>
               <button
-                onClick={() => setItems((prev) => prev.filter((_, j) => j !== i))}
+                onClick={() => setItems((prev) => prev.filter((_, idx) => idx !== index))}
                 className="text-xs text-zinc-600 hover:text-rose-400 transition-colors"
               >
                 Remove
@@ -461,14 +418,16 @@ function StackManagementSection({
             </div>
           ))}
 
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex flex-wrap gap-2">
             <select
               value={newCat}
               onChange={(e) => setNewCat(e.target.value as StackCategory)}
-              className="px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-zinc-600"
+              className="rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-white focus:border-zinc-600 focus:outline-none"
             >
-              {(["frontend", "backend", "database", "infra", "tooling", "other"] as StackCategory[]).map((c) => (
-                <option key={c} value={c}>{c}</option>
+              {(["frontend", "backend", "database", "infra", "tooling", "other"] as StackCategory[]).map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
               ))}
             </select>
             <input
@@ -476,13 +435,18 @@ function StackManagementSection({
               value={newTech}
               onChange={(e) => setNewTech(e.target.value)}
               placeholder="Technology"
-              className="flex-1 min-w-[100px] px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addItem(); } }}
+              className="min-w-[100px] flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addItem();
+                }
+              }}
             />
             <select
               value={newMat}
               onChange={(e) => setNewMat(e.target.value as StackMaturity)}
-              className="px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-zinc-600"
+              className="rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-white focus:border-zinc-600 focus:outline-none"
             >
               <option value="in-use">In Use</option>
               <option value="planned">Planned</option>
@@ -491,30 +455,81 @@ function StackManagementSection({
             <button
               type="button"
               onClick={addItem}
-              className="px-2 py-1.5 rounded-lg bg-zinc-800 text-xs text-white hover:bg-zinc-700 transition-colors"
+              className="rounded-lg bg-zinc-800 px-2 py-1.5 text-xs text-white hover:bg-zinc-700 transition-colors"
             >
               Add
             </button>
           </div>
 
-          <div className="flex gap-2 justify-end pt-2">
+          <div className="flex justify-end gap-2 pt-2">
             <button
               onClick={() => setEditing(false)}
-              className="px-3 py-1.5 rounded-lg text-xs text-zinc-400 hover:text-white transition-colors"
+              className="rounded-lg px-3 py-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-4 py-1.5 rounded-lg bg-white text-zinc-950 text-xs font-semibold hover:bg-zinc-100 disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-white px-4 py-1.5 text-xs font-semibold text-zinc-950 hover:bg-zinc-100 disabled:opacity-50 transition-colors"
             >
-              {saving ? "Saving…" : "Save Stack"}
+              {saving ? "Saving..." : "Save Stack"}
             </button>
           </div>
         </div>
       ) : (
         <TechStackPanel stack={stack} />
+      )}
+    </section>
+  );
+}
+
+function RepoManagementSection({
+  spaceId,
+  repos,
+}: {
+  spaceId: string;
+  repos: ReturnType<typeof useRepos>["repos"];
+}) {
+  return (
+    <section>
+      <SectionHeader
+        title="Repositories"
+        count={repos.length}
+        action={
+          <Link
+            href={`/spaces/${spaceId}/repos`}
+            className="text-xs text-sky-400 hover:text-sky-300 transition-colors"
+          >
+            Open repos →
+          </Link>
+        }
+      />
+
+      {repos.length === 0 ? (
+        <EmptyState
+          icon={<CogIcon className="w-10 h-10" />}
+          title="No repositories yet"
+          description="Create and manage private code repos from the space repos page."
+        />
+      ) : (
+        <div className="divide-y divide-zinc-800/50">
+          {repos.map((repo) => (
+            <Link
+              key={repo.id}
+              href={`/spaces/${spaceId}/repos/${repo.id}/settings`}
+              className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-zinc-900/30 transition-colors"
+            >
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-white">{repo.name}</p>
+                <p className="truncate text-xs text-zinc-500">
+                  {repo.description || "No description"} · {repo.default_branch}
+                </p>
+              </div>
+              <span className="text-xs text-zinc-400">Settings</span>
+            </Link>
+          ))}
+        </div>
       )}
     </section>
   );
