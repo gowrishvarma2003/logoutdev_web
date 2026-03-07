@@ -10,7 +10,7 @@ type FeedType = "feed" | "explore";
  * Fetches and manages a paginated list of posts.
  * Exposes helpers to add, update, or remove a single post (for optimistic updates).
  */
-export function useFeed(type: FeedType) {
+export function useFeed(type: FeedType, enabled = true) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -41,11 +41,21 @@ export function useFeed(type: FeedType) {
   );
 
   useEffect(() => {
+    if (!enabled) {
+      setPosts([]);
+      setNextCursor(null);
+      setIsLoading(false);
+      setIsLoadingMore(false);
+      setError(null);
+      hasFetched.current = false;
+      return;
+    }
+
     if (!hasFetched.current) {
       hasFetched.current = true;
       fetchPage();
     }
-  }, [fetchPage]);
+  }, [enabled, fetchPage]);
 
   const loadMore = useCallback(() => {
     if (nextCursor && !isLoadingMore) fetchPage(nextCursor);

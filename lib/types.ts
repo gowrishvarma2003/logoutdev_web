@@ -208,6 +208,12 @@ export type DiscussionCategory = "idea" | "decision" | "question" | "blocked" | 
 export type DiscussionStatus = "open" | "in-progress" | "resolved" | "closed";
 export type UpdateType = "milestone" | "devlog" | "release" | "blocker" | "weekly-summary";
 export type HealthBand = "Excellent" | "Healthy" | "Needs Attention";
+export type FreelancePricingModel = "fixed" | "hourly";
+export type FreelanceExperienceLevel = "any" | "junior" | "mid" | "senior";
+export type FreelanceEngagementType = "one_time" | "ongoing";
+export type FreelanceLocationMode = "remote" | "hybrid" | "onsite";
+export type FreelanceProjectStatus = "open" | "in_review" | "awarded" | "completed" | "cancelled";
+export type FreelanceProposalStatus = "submitted" | "shortlisted" | "accepted" | "rejected" | "withdrawn";
 
 export interface ProjectSpace {
   id: string;
@@ -395,6 +401,89 @@ export interface DecisionEntry {
   created_at: string;
   updated_at: string;
   author?: User;
+}
+
+export interface FreelanceProjectSkill {
+  id: string;
+  project_id: string;
+  skill: string;
+  rank: number;
+}
+
+export interface FreelanceProjectViewerState {
+  is_owner: boolean;
+  can_edit: boolean;
+  can_submit_proposal: boolean;
+  can_view_proposals: boolean;
+  has_submitted_proposal: boolean;
+  my_proposal_id?: string | null;
+  my_proposal_status?: FreelanceProposalStatus | null;
+  can_open_workspace: boolean;
+}
+
+export interface FreelanceProject {
+  id: string;
+  client_id: string;
+  linked_space_id?: string | null;
+  accepted_proposal_id?: string | null;
+  title: string;
+  slug: string;
+  summary: string;
+  description: string;
+  pricing_model: FreelancePricingModel;
+  currency_code: string;
+  budget_min_cents: number;
+  budget_max_cents: number;
+  experience_level: FreelanceExperienceLevel;
+  engagement_type: FreelanceEngagementType;
+  duration_weeks?: number | null;
+  location_mode: FreelanceLocationMode;
+  timezone_note?: string | null;
+  status: FreelanceProjectStatus;
+  closed_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  client?: User;
+  skills?: FreelanceProjectSkill[];
+  linked_space?: {
+    id: string;
+    slug: string;
+    name: string;
+    status: SpaceStatus;
+    visibility: SpaceVisibility;
+  } | null;
+  accepted_proposal?: Partial<FreelanceProposal> | null;
+  viewer_state?: FreelanceProjectViewerState;
+}
+
+export interface FreelanceProposal {
+  id: string;
+  project_id: string;
+  freelancer_id: string;
+  cover_note: string;
+  pricing_model: FreelancePricingModel;
+  currency_code: string;
+  bid_amount_cents: number;
+  estimated_duration_weeks?: number | null;
+  availability_hours?: number | null;
+  proof_links: string[];
+  status: FreelanceProposalStatus;
+  reviewed_at?: string | null;
+  withdrawn_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  project?: FreelanceProject;
+  freelancer?: User & {
+    profile_skills?: UserProfileSkill[];
+    featured_projects?: UserFeaturedProject[];
+  };
+}
+
+export interface FreelanceProjectListResponse {
+  projects: FreelanceProject[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 export interface PaginatedResponse<T> {

@@ -22,7 +22,17 @@ export default function AppShell({ children }: AppShellProps) {
   const { user, isLoaded, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const allowsGuest = pathname === "/questions" || pathname.startsWith("/questions/");
+  const allowsGuest = pathname === "/questions"
+    || pathname.startsWith("/questions/")
+    || pathname === "/explore"
+    || pathname === "/freelance"
+    || (
+      pathname.startsWith("/freelance/")
+      && pathname !== "/freelance/create"
+      && !pathname.startsWith("/freelance/my-")
+      && !pathname.endsWith("/edit")
+      && !pathname.endsWith("/proposals")
+    );
 
   useEffect(() => {
     if (isLoaded && !user && !allowsGuest) {

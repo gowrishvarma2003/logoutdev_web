@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HomeIcon, CompassIcon, UserIcon, RocketIcon, QuestionMarkCircleIcon } from "@/components/ui/Icons";
+import { HomeIcon, CompassIcon, UserIcon, RocketIcon, QuestionMarkCircleIcon, BoltIcon } from "@/components/ui/Icons";
 
 interface MobileNavProps {
   /** username or fallback user ID for the profile link */
@@ -17,6 +17,7 @@ export default function MobileNav({ userId, username }: MobileNavProps) {
   const items = [
     { href: "/feed", icon: <HomeIcon className="w-6 h-6" />, label: "Home" },
     { href: "/explore", icon: <CompassIcon className="w-6 h-6" />, label: "Explore" },
+    { href: "/freelance", icon: <BoltIcon className="w-6 h-6" />, label: "Freelance" },
     { href: "/questions", icon: <QuestionMarkCircleIcon className="w-6 h-6" />, label: "Questions" },
     { href: "/spaces", icon: <RocketIcon className="w-6 h-6" />, label: "Spaces" },
     { href: `/profile/${profileSlug}`, icon: <UserIcon className="w-6 h-6" />, label: "Profile" },
@@ -29,7 +30,9 @@ export default function MobileNav({ userId, username }: MobileNavProps) {
           const active =
             label === "Profile"
               ? pathname.startsWith("/profile/")
-              : pathname === href;
+              : label === "Freelance"
+                ? pathname.startsWith("/freelance")
+                : pathname === href;
 
           return (
             <li key={href} className="flex-1">

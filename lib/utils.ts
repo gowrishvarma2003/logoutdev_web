@@ -68,3 +68,15 @@ export function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
+
+export function formatCurrencyFromCents(
+  amountCents: number | null | undefined,
+  currencyCode = "USD"
+): string {
+  if (!Number.isFinite(amountCents ?? NaN)) return "TBD";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currencyCode,
+    maximumFractionDigits: 0,
+  }).format((amountCents ?? 0) / 100);
+}
