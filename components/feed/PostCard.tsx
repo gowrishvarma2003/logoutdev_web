@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { type ReactNode, useState } from "react";
 import { useRouter } from "next/navigation";
-import { deletePost } from "@/lib/api";
-import type { Post, User } from "@/lib/types";
+import { createReply, deletePost } from "@/lib/api";
+import type { Post, PostHashtagEntity, PostMentionEntity, User } from "@/lib/types";
 import { formatRelativeTime, emailToHandle } from "@/lib/utils";
 import Avatar from "@/components/ui/Avatar";
 import PostActions from "./PostActions";
 import ComposeBox from "./ComposeBox";
-import { createReply } from "@/lib/api";
 import { DotsIcon, TrashIcon, RepeatIcon } from "@/components/ui/Icons";
 
 interface PostCardProps {
@@ -16,28 +16,91 @@ interface PostCardProps {
   currentUser: User;
   onUpdate: (updated: Post) => void;
   onDelete: (id: string) => void;
-  /** When true, clicking the card navigates to the post detail page */
   clickable?: boolean;
-  /** When true, expands reply box inline */
   showReplies?: boolean;
 }
 
-/**
- * Splits content into plain text and #hashtag spans.
- */
-function PostContent({ text }: { text: string }) {
-  const parts = text.split(/(#[a-zA-Z0-9_]+)/g);
+type ContentToken =
+  | ({ type: "hashtag" } & PostHashtagEntity)
+  | ({ type: "mention" } & PostMentionEntity);
+
+function getAuthorHandle(user?: User) {
+  return user?.username || emailToHandle(user?.email);
+}
+
+function buildContentTokens(
+  hashtags: PostHashtagEntity[] = [],
+  mentions: PostMentionEntity[] = []
+): ContentToken[] {
+  return [
+    ...hashtags.map((tag) => ({ ...tag, type: "hashtag" as const })),
+    ...mentions.map((mention) => ({ ...mention, type: "mention" as const })),
+  ].sort((a, b) => a.start_index - b.start_index);
+}
+
+function PostContent({
+  text,
+  hashtags,
+  mentions,
+  clickable,
+}: {
+  text: string;
+  hashtags?: PostHashtagEntity[];
+  mentions?: PostMentionEntity[];
+  clickable: boolean;
+}) {
+  const tokens = buildContentTokens(hashtags, mentions);
+  let cursor = 0;
+  const fragments: ReactNode[] = [];
+
+  for (const token of tokens) {
+    if (token.start_index < cursor || token.end_index > text.length || token.start_index >= token.end_index) {
+      continue;
+    }
+
+    if (token.start_index > cursor) {
+      fragments.push(<span key={`text:${cursor}`}>{text.slice(cursor, token.start_index)}</span>);
+    }
+
+    const rawValue = text.slice(token.start_index, token.end_index);
+    if (token.type === "hashtag") {
+      fragments.push(
+        <Link
+          key={`hashtag:${token.start_index}`}
+          href={`/hashtags/${token.normalized_tag}`}
+          onClick={(event) => {
+            if (clickable) event.stopPropagation();
+          }}
+          className="text-sky-400 hover:underline"
+        >
+          {rawValue}
+        </Link>
+      );
+    } else {
+      fragments.push(
+        <Link
+          key={`mention:${token.start_index}`}
+          href={`/profile/${token.username}`}
+          onClick={(event) => {
+            if (clickable) event.stopPropagation();
+          }}
+          className="text-emerald-400 hover:underline"
+        >
+          {rawValue}
+        </Link>
+      );
+    }
+
+    cursor = token.end_index;
+  }
+
+  if (cursor < text.length) {
+    fragments.push(<span key={`tail:${cursor}`}>{text.slice(cursor)}</span>);
+  }
+
   return (
     <p className="mt-1.5 text-[15px] text-zinc-100 leading-relaxed whitespace-pre-wrap break-words">
-      {parts.map((part, i) =>
-        part.startsWith("#") ? (
-          <span key={i} className="text-sky-400 hover:underline cursor-pointer">
-            {part}
-          </span>
-        ) : (
-          <span key={i}>{part}</span>
-        )
-      )}
+      {fragments}
     </p>
   );
 }
@@ -69,8 +132,6 @@ export default function PostCard({
     try {
       await deletePost(post.id);
       onDelete(post.id);
-    } catch {
-      // silent fail — UI stays intact
     } finally {
       setIsDeleting(false);
       setMenuOpen(false);
@@ -80,56 +141,56 @@ export default function PostCard({
   return (
     <article
       onClick={clickable ? handleCardClick : undefined}
-      className={`relative border-b border-zinc-800 px-4 py-4 transition-colors
-        ${clickable ? "hover:bg-zinc-900/70 cursor-pointer" : ""}`}
+      className={`relative border-b border-zinc-800 px-4 py-4 transition-colors ${
+        clickable ? "hover:bg-zinc-900/70 cursor-pointer" : ""
+      }`}
     >
-      {/* Repost banner */}
       {post.is_repost && (
-        <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-medium mb-2 ml-[52px]">
-          <RepeatIcon className="w-3.5 h-3.5" />
+        <div className="mb-2 ml-[52px] flex items-center gap-1.5 text-xs font-medium text-emerald-400">
+          <RepeatIcon className="h-3.5 w-3.5" />
           <span>{post.author?.name ?? "Someone"} reposted</span>
         </div>
       )}
 
       <div className="flex gap-3">
-        {/* Author avatar */}
         <Avatar user={post.author ?? null} size="md" className="mt-0.5 shrink-0" />
 
-        <div className="flex-1 min-w-0">
-          {/* Header row */}
-          <div className="flex items-baseline gap-1.5 flex-wrap">
-            <span className="text-sm font-semibold text-white leading-snug">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-1.5">
+            <span className="text-sm font-semibold leading-snug text-white">
               {post.author?.name ?? "Unknown"}
             </span>
-            <span className="text-sm text-zinc-500 leading-snug truncate">
-              @{emailToHandle(post.author?.email)}
+            <span className="truncate text-sm leading-snug text-zinc-500">
+              @{getAuthorHandle(post.author)}
             </span>
-            <span className="text-zinc-700 text-sm">·</span>
-            <span className="text-xs text-zinc-500 shrink-0">
+            <span className="text-sm text-zinc-700">·</span>
+            <span className="shrink-0 text-xs text-zinc-500">
               {formatRelativeTime(post.created_at)}
             </span>
           </div>
 
-          {/* Content */}
-          <PostContent text={post.content} />
+          <PostContent
+            text={post.content}
+            hashtags={post.hashtags}
+            mentions={post.mentions}
+            clickable={clickable}
+          />
 
-          {/* Actions */}
           <PostActions
             post={post}
             onUpdate={onUpdate}
-            onReplyClick={() => setReplyOpen((o) => !o)}
+            onReplyClick={() => setReplyOpen((open) => !open)}
           />
         </div>
 
-        {/* Options menu (own posts only) */}
         {isOwn && (
           <div className="relative shrink-0">
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setMenuOpen((o) => !o);
+                setMenuOpen((open) => !open);
               }}
-              className="p-1.5 rounded-full text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+              className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
               aria-label="Post options"
             >
               <DotsIcon />
@@ -137,7 +198,6 @@ export default function PostCard({
 
             {menuOpen && (
               <>
-                {/* Backdrop */}
                 <div
                   className="fixed inset-0 z-10"
                   onClick={(e) => {
@@ -145,14 +205,14 @@ export default function PostCard({
                     setMenuOpen(false);
                   }}
                 />
-                <div className="absolute right-0 top-8 z-20 w-44 bg-zinc-900 rounded-xl border border-zinc-700 shadow-2xl overflow-hidden">
+                <div className="absolute right-0 top-8 z-20 w-44 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
                   <button
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-rose-400 hover:bg-rose-500/10 transition-colors disabled:opacity-50"
+                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-rose-400 transition-colors hover:bg-rose-500/10 disabled:opacity-50"
                   >
                     <TrashIcon />
-                    {isDeleting ? "Deleting…" : "Delete post"}
+                    {isDeleting ? "Deleting..." : "Delete post"}
                   </button>
                 </div>
               </>
@@ -161,19 +221,17 @@ export default function PostCard({
         )}
       </div>
 
-      {/* Inline reply box */}
       {replyOpen && (
         <div
-          className="mt-3 ml-[52px] border-t border-zinc-800 pt-3"
+          className="ml-[52px] mt-3 border-t border-zinc-800 pt-3"
           onClick={(e) => e.stopPropagation()}
         >
           <ComposeBox
             currentUser={currentUser}
-            placeholder="Write a reply…"
+            placeholder="Write a reply..."
             compact
             onSubmit={async (content) => {
               const res = await createReply(post.id, content);
-              // Bump reply count optimistically
               onUpdate({ ...post, reply_count: (post.reply_count ?? 0) + 1 });
               return res.reply;
             }}

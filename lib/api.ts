@@ -1,9 +1,13 @@
 import type {
   AuthResponse,
   FeedResponse,
+  HashtagFeedResponse,
+  HashtagSuggestion,
   Post,
   PostResponse,
+  RelatedHashtag,
   User,
+  UserSuggestion,
 } from "./types";
 
 export const API_BASE_URL =
@@ -136,6 +140,39 @@ export async function getReplies(
   return handleResponse<{ replies: Post[] }>(res);
 }
 
+export async function getPostsByHashtag(
+  tag: string,
+  cursor?: string
+): Promise<HashtagFeedResponse> {
+  const params = new URLSearchParams({ tag });
+  if (cursor) params.set("cursor", cursor);
+  const res = await fetch(`${API_BASE_URL}/api/posts/by-hashtag?${params.toString()}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse<HashtagFeedResponse>(res);
+}
+
+export async function suggestHashtags(
+  query: string,
+  context?: string
+): Promise<{ hashtags: HashtagSuggestion[]; related_tags: RelatedHashtag[] }> {
+  const params = new URLSearchParams({ q: query });
+  if (context) params.set("context", context);
+  const res = await fetch(`${API_BASE_URL}/api/hashtags/suggest?${params.toString()}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse<{ hashtags: HashtagSuggestion[]; related_tags: RelatedHashtag[] }>(res);
+}
+
+export async function getTrendingHashtags(
+  limit = 6
+): Promise<{ hashtags: HashtagSuggestion[] }> {
+  const res = await fetch(`${API_BASE_URL}/api/hashtags/trending?limit=${limit}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse<{ hashtags: HashtagSuggestion[] }>(res);
+}
+
 // ─── Interactions ─────────────────────────────────────────────────────────────
 
 export async function likePost(
@@ -216,4 +253,13 @@ export async function getFollowing(
     headers: { ...getAuthHeaders() },
   });
   return handleResponse<{ following: User[] }>(res);
+}
+
+export async function suggestUsers(
+  query: string
+): Promise<{ users: UserSuggestion[] }> {
+  const res = await fetch(`${API_BASE_URL}/api/users/suggest?q=${encodeURIComponent(query)}`, {
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse<{ users: UserSuggestion[] }>(res);
 }

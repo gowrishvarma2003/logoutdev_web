@@ -13,6 +13,45 @@ export interface User {
   created_at?: string;
 }
 
+export interface PostHashtagEntity {
+  id?: string;
+  tag: string;
+  normalized_tag: string;
+  start_index: number;
+  end_index: number;
+  usage_count?: number;
+}
+
+export interface PostMentionEntity {
+  id?: string;
+  user_id: string;
+  username: string;
+  display_name?: string | null;
+  start_index: number;
+  end_index: number;
+}
+
+export interface HashtagSuggestion {
+  tag: string;
+  normalized_tag: string;
+  usage_count: number;
+  recent_post_count?: number;
+  unique_author_count?: number;
+}
+
+export interface RelatedHashtag {
+  tag: string;
+  normalized_tag: string;
+  cooccurrence_count: number;
+}
+
+export interface UserSuggestion {
+  id: string;
+  name: string;
+  username: string;
+  headline?: string | null;
+}
+
 // ─── Developer Profiles ──────────────────────────────────────────────────────
 
 export type ProofOfWorkBand = "Strong" | "Growing" | "Early";
@@ -97,7 +136,8 @@ export interface Post {
   created_at: string;
   updated_at: string;
   author?: User;
-  hashtags?: Array<{ tag: string }>;
+  hashtags?: PostHashtagEntity[];
+  mentions?: PostMentionEntity[];
   is_liked_by_me?: boolean;
   is_reposted_by_me?: boolean;
 }
@@ -187,6 +227,13 @@ export interface FeedResponse {
 
 export interface PostResponse {
   post: Post;
+}
+
+export interface HashtagFeedResponse {
+  tag: string;
+  posts: Post[];
+  nextCursor: string | null;
+  related_tags: RelatedHashtag[];
 }
 
 export interface AuthResponse {
