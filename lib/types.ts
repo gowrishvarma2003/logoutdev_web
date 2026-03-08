@@ -207,6 +207,8 @@ export type JoinRequestStatus = "pending" | "accepted" | "rejected" | "need-info
 export type DiscussionCategory = "idea" | "decision" | "question" | "blocked" | "retrospective";
 export type DiscussionStatus = "open" | "in-progress" | "resolved" | "closed";
 export type UpdateType = "milestone" | "devlog" | "release" | "blocker" | "weekly-summary";
+export type SpaceIssueStatus = "open" | "triaged" | "in-progress" | "resolved" | "closed";
+export type SpaceIssuePriority = "low" | "medium" | "high" | "critical";
 export type HealthBand = "Excellent" | "Healthy" | "Needs Attention";
 export type FreelancePricingModel = "fixed" | "hourly";
 export type FreelanceExperienceLevel = "any" | "junior" | "mid" | "senior";
@@ -214,6 +216,13 @@ export type FreelanceEngagementType = "one_time" | "ongoing";
 export type FreelanceLocationMode = "remote" | "hybrid" | "onsite";
 export type FreelanceProjectStatus = "open" | "in_review" | "awarded" | "completed" | "cancelled";
 export type FreelanceProposalStatus = "submitted" | "shortlisted" | "accepted" | "rejected" | "withdrawn";
+export type LaunchProductType = "web-app" | "mobile-app" | "developer-tool" | "api" | "ai-tool" | "open-source" | "experimental" | "other";
+export type LaunchDevelopmentStage = "prototype" | "mvp" | "beta" | "live" | "maintained" | "paused";
+export type LaunchCollaborationMode = "off" | "looking";
+export type LaunchStatus = "draft" | "published" | "archived";
+export type LaunchReviewRecommendation = "recommend" | "mixed" | "not_recommend";
+export type LaunchFeedbackType = "suggestion" | "bug" | "idea";
+export type LaunchFeedbackStatus = "open" | "acknowledged" | "planned" | "resolved" | "closed";
 
 export interface ProjectSpace {
   id: string;
@@ -232,6 +241,15 @@ export interface ProjectSpace {
   stack?: StackEntry[];
   repos?: SpaceRepo[];
   memberCount?: number;
+  linked_launch?: {
+    id: string;
+    name: string;
+    slug: string;
+    tagline: string;
+    status: LaunchStatus;
+    upvote_count: number;
+    review_count: number;
+  } | null;
 }
 
 export interface SpaceRepo {
@@ -387,6 +405,21 @@ export interface SpaceUpdate {
   author?: User;
 }
 
+export interface SpaceIssue {
+  id: string;
+  space_id: string;
+  author_id: string;
+  assignee_user_id?: string | null;
+  title: string;
+  body: string;
+  status: SpaceIssueStatus;
+  priority: SpaceIssuePriority;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+  assignee?: User | null;
+}
+
 export interface HealthScore {
   score: number;
   band: HealthBand;
@@ -484,6 +517,119 @@ export interface FreelanceProjectListResponse {
   total: number;
   page: number;
   limit: number;
+}
+
+export interface LaunchScreenshot {
+  id: string;
+  image_url: string;
+  caption?: string | null;
+  rank: number;
+  created_at: string;
+}
+
+export interface LaunchTechStackItem {
+  id: string;
+  technology: string;
+  rank: number;
+  created_at: string;
+}
+
+export interface LaunchViewerState {
+  is_owner: boolean;
+  is_upvoted_by_me: boolean;
+  my_review_id?: string | null;
+  can_request_collaboration: boolean;
+  can_edit: boolean;
+  can_publish: boolean;
+}
+
+export interface LaunchReview {
+  id: string;
+  launch_id: string;
+  author_id: string;
+  headline: string;
+  body: string;
+  recommendation: LaunchReviewRecommendation;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+}
+
+export interface LaunchFeedbackComment {
+  id: string;
+  feedback_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+}
+
+export interface LaunchFeedbackItem {
+  id: string;
+  launch_id: string;
+  author_id: string;
+  type: LaunchFeedbackType;
+  title: string;
+  body: string;
+  status: LaunchFeedbackStatus;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+  comments?: LaunchFeedbackComment[];
+}
+
+export interface Launch {
+  id: string;
+  builder_id: string;
+  linked_space_id?: string | null;
+  name: string;
+  slug: string;
+  tagline: string;
+  description: string;
+  product_type: LaunchProductType;
+  development_stage: LaunchDevelopmentStage;
+  demo_url?: string | null;
+  website_url?: string | null;
+  github_url?: string | null;
+  docs_url?: string | null;
+  collaboration_mode: LaunchCollaborationMode;
+  collaboration_note?: string | null;
+  collaboration_roles: string[];
+  status: LaunchStatus;
+  upvote_count: number;
+  review_count: number;
+  feedback_count: number;
+  published_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  builder?: User;
+  screenshots?: LaunchScreenshot[];
+  tech_stack?: LaunchTechStackItem[];
+  linked_space?: {
+    id: string;
+    name?: string | null;
+    slug?: string | null;
+    visibility: SpaceVisibility;
+    status: SpaceStatus;
+  } | null;
+  viewer_state?: LaunchViewerState;
+}
+
+export type LaunchListItem = Launch;
+
+export interface LaunchListResponse {
+  launches: LaunchListItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface LaunchCollaborationRequestPayload {
+  message: string;
+  skills: string[];
+  availability_hours?: number | null;
+  proof_links: string[];
 }
 
 export interface PaginatedResponse<T> {

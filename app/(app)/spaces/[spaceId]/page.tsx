@@ -3,14 +3,15 @@
 import { use } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { useSpace, useStack, useContributors, useHealth, useDecisions, useUpdates } from "@/lib/hooks/useSpaces";
+import { useSpace, useStack, useContributors, useHealth, useDecisions, useUpdates, useIssues } from "@/lib/hooks/useSpaces";
 import { useRepos } from "@/lib/hooks/useRepos";
 import TechStackPanel from "@/components/spaces/TechStackPanel";
 import CollaborationHealthBadge from "@/components/spaces/CollaborationHealthBadge";
 import DecisionLedgerCard from "@/components/spaces/DecisionLedgerCard";
 import ProgressUpdateCard from "@/components/spaces/ProgressUpdateCard";
+import SpaceIssueCard from "@/components/spaces/SpaceIssueCard";
 import Avatar from "@/components/ui/Avatar";
-import { LinkIcon, UsersIcon, ClockIcon } from "@/components/ui/Icons";
+import { LinkIcon, UsersIcon, ClockIcon, QuestionMarkCircleIcon } from "@/components/ui/Icons";
 import { SectionHeader, EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import { formatRelativeTime } from "@/lib/utils";
@@ -28,12 +29,14 @@ export default function SpaceOverviewPage({
   const { health } = useHealth(spaceId);
   const { decisions } = useDecisions(spaceId);
   const { updates } = useUpdates(spaceId);
+  const { issues } = useIssues(spaceId, { page: 1, limit: 10 });
   const { repos } = useRepos(spaceId);
 
   if (!space) return null;
 
   const currentMembership = contributors.find((member) => member.user_id === user?.id) ?? null;
   const canSeeRepos = space.owner_id === user?.id || currentMembership?.role === "maintainer" || repos.length > 0;
+  const openIssues = issues.filter((issue) => issue.status !== "resolved" && issue.status !== "closed").slice(0, 3);
 
   return (
     <div className="divide-y divide-zinc-800">
@@ -49,7 +52,7 @@ export default function SpaceOverviewPage({
               href={space.primary_repo_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm text-sky-400 hover:text-sky-300 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-sky-400 transition-colors hover:text-sky-300"
             >
               <LinkIcon className="h-3.5 w-3.5" />
               {space.primary_repo_url.replace(/^https?:\/\//, "")}
@@ -81,9 +84,9 @@ export default function SpaceOverviewPage({
             updates.length > 0 ? (
               <Link
                 href={`/spaces/${spaceId}/updates`}
-                className="text-xs text-sky-400 hover:text-sky-300 transition-colors"
+                className="text-xs text-sky-400 transition-colors hover:text-sky-300"
               >
-                View all →
+                View all â†’
               </Link>
             ) : undefined
           }
@@ -116,14 +119,42 @@ export default function SpaceOverviewPage({
 
       <section>
         <SectionHeader
+          title="Open Issues"
+          count={openIssues.length}
+          action={
+            <Link
+              href={`/spaces/${spaceId}/issues`}
+              className="text-xs text-sky-400 transition-colors hover:text-sky-300"
+            >
+              View all â†’
+            </Link>
+          }
+        />
+        {openIssues.length === 0 ? (
+          <EmptyState
+            icon={<QuestionMarkCircleIcon className="w-10 h-10" />}
+            title="No open issues"
+            description="Problems, blockers, and bugs raised for this space will appear here."
+          />
+        ) : (
+          <div>
+            {openIssues.map((issue) => (
+              <SpaceIssueCard key={issue.id} issue={issue} spaceId={spaceId} compact />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <SectionHeader
           title="Contributors"
           count={contributors.length}
           action={
             <Link
               href={`/spaces/${spaceId}/contributors`}
-              className="text-xs text-sky-400 hover:text-sky-300 transition-colors"
+              className="text-xs text-sky-400 transition-colors hover:text-sky-300"
             >
-              View all →
+              View all â†’
             </Link>
           }
         />
@@ -148,7 +179,7 @@ export default function SpaceOverviewPage({
             {contributors.length > 8 && (
               <Link
                 href={`/spaces/${spaceId}/contributors`}
-                className="flex items-center rounded-xl bg-zinc-800 px-3 py-2 text-xs font-medium text-zinc-400 hover:bg-zinc-700 transition-colors"
+                className="flex items-center rounded-xl bg-zinc-800 px-3 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-700"
               >
                 +{contributors.length - 8} more
               </Link>
@@ -165,9 +196,9 @@ export default function SpaceOverviewPage({
             action={
               <Link
                 href={`/spaces/${spaceId}/repos`}
-                className="text-xs text-sky-400 hover:text-sky-300 transition-colors"
+                className="text-xs text-sky-400 transition-colors hover:text-sky-300"
               >
-                View all →
+                View all â†’
               </Link>
             }
           />
@@ -183,7 +214,7 @@ export default function SpaceOverviewPage({
                 <Link
                   key={repo.id}
                   href={`/spaces/${spaceId}/repos/${repo.id}`}
-                  className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-zinc-900/30 transition-colors"
+                  className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-zinc-900/30"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-white">{repo.name}</p>
@@ -204,7 +235,7 @@ export default function SpaceOverviewPage({
       <section className="px-4 py-4 text-xs text-zinc-600">
         Created {formatRelativeTime(space.created_at)}
         {space.updated_at && space.updated_at !== space.created_at && (
-          <> · Updated {formatRelativeTime(space.updated_at)}</>
+          <> Â· Updated {formatRelativeTime(space.updated_at)}</>
         )}
       </section>
     </div>

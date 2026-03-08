@@ -15,6 +15,7 @@ import {
   RocketIcon,
   CogIcon,
   BoltIcon,
+  SparklesIcon,
 } from "@/components/ui/Icons";
 
 interface SidebarProps {
@@ -74,6 +75,12 @@ export default function Sidebar({ user, onLogout }: SidebarProps) {
           icon={<CompassIcon />}
           label="Explore"
           active={pathname === "/explore"}
+        />
+        <NavItem
+          href="/launches"
+          icon={<SparklesIcon />}
+          label="Launches"
+          active={pathname.startsWith("/launches")}
         />
         <NavItem
           href="/freelance"

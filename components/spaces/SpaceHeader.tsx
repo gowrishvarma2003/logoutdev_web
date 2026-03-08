@@ -12,6 +12,7 @@ import {
   CogIcon,
   DocumentTextIcon,
   FolderIcon,
+  QuestionMarkCircleIcon,
 } from "@/components/ui/Icons";
 import CollaborationHealthBadge from "./CollaborationHealthBadge";
 import { useHealth } from "@/lib/hooks/useSpaces";
@@ -24,10 +25,6 @@ interface SpaceHeaderProps {
   memberRole: MemberRole | null;
 }
 
-/**
- * Full-width header displayed on all space sub-pages.
- * Includes project info, health badge, and tab navigation.
- */
 export default function SpaceHeader({ space, isMember, isOwner, memberRole }: SpaceHeaderProps) {
   const pathname = usePathname();
   const { health } = useHealth(space.id);
@@ -39,6 +36,7 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
   const tabs = [
     { href: base, label: "Overview", icon: <DocumentTextIcon className="w-4 h-4" /> },
     { href: `${base}/discussions`, label: "Discussions", icon: <ChatBubbleIcon className="w-4 h-4" /> },
+    { href: `${base}/issues`, label: "Issues", icon: <QuestionMarkCircleIcon className="w-4 h-4" /> },
     { href: `${base}/updates`, label: "Updates", icon: <ClockIcon className="w-4 h-4" /> },
     { href: `${base}/contributors`, label: "Contributors", icon: <UsersIcon className="w-4 h-4" /> },
   ];
@@ -61,36 +59,28 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
 
   return (
     <div className="border-b border-zinc-800">
-      {/* Back link + project hero */}
-      <div className="px-4 pt-4 pb-5">
+      <div className="px-4 pb-5 pt-4">
         <Link
           href="/spaces"
-          className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors mb-4"
+          className="mb-4 inline-flex items-center gap-1.5 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
         >
-          <ArrowLeftIcon className="w-3.5 h-3.5" />
+          <ArrowLeftIcon className="h-3.5 w-3.5" />
           All Spaces
         </Link>
 
-        {/* Project info row */}
         <div className="flex items-start gap-4">
-          {/* Project avatar */}
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500/20 to-sky-500/20 border border-zinc-700 flex items-center justify-center text-lg font-bold text-white shrink-0">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-gradient-to-br from-violet-500/20 to-sky-500/20 text-lg font-bold text-white">
             {space.name.charAt(0).toUpperCase()}
           </div>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-xl font-bold text-white truncate">
-                {space.name}
-              </h1>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="truncate text-xl font-bold text-white">{space.name}</h1>
               <StatusBadge status={space.status} />
               <VisibilityBadge visibility={space.visibility} />
             </div>
-            <p className="text-sm text-zinc-400 mt-1 line-clamp-2">
-              {space.summary}
-            </p>
+            <p className="mt-1 line-clamp-2 text-sm text-zinc-400">{space.summary}</p>
 
-            {/* Health badge (compact) */}
             {health && (
               <div className="mt-2">
                 <CollaborationHealthBadge health={health} compact />
@@ -98,11 +88,10 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
             )}
           </div>
 
-          {/* Join button for non-members */}
           {!isMember && (
             <Link
               href={`${base}/join`}
-              className="shrink-0 px-4 py-2 rounded-xl bg-white text-zinc-950 text-sm font-semibold hover:bg-zinc-100 transition-colors"
+              className="shrink-0 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
             >
               Request to Join
             </Link>
@@ -110,24 +99,19 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
         </div>
       </div>
 
-      {/* Tab navigation */}
-      <nav className="flex px-4 gap-1 overflow-x-auto" role="tablist">
+      <nav className="flex gap-1 overflow-x-auto px-4" role="tablist">
         {tabs.map((tab) => {
-          const isActive =
-            tab.href === base
-              ? pathname === base
-              : pathname.startsWith(tab.href);
-
+          const isActive = tab.href === base ? pathname === base : pathname.startsWith(tab.href);
           return (
             <Link
               key={tab.href}
               href={tab.href}
               role="tab"
               aria-selected={isActive}
-              className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+              className={`flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
                 isActive
                   ? "border-white text-white"
-                  : "border-transparent text-zinc-500 hover:text-zinc-300 hover:border-zinc-700"
+                  : "border-transparent text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
               }`}
             >
               {tab.icon}

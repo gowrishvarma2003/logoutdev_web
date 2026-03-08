@@ -25,7 +25,15 @@ export default function AppShell({ children }: AppShellProps) {
   const allowsGuest = pathname === "/questions"
     || pathname.startsWith("/questions/")
     || pathname === "/explore"
+    || pathname === "/launches"
     || pathname === "/freelance"
+    || (
+      pathname.startsWith("/launches/")
+      && pathname !== "/launches/new"
+      && pathname !== "/launches/me"
+      && !pathname.endsWith("/edit")
+      && !pathname.endsWith("/collaborate")
+    )
     || (
       pathname.startsWith("/freelance/")
       && pathname !== "/freelance/create"

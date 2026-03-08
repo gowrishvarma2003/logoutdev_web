@@ -1,0 +1,48 @@
+"use client";
+
+import Link from "next/link";
+import Avatar from "@/components/ui/Avatar";
+import { IssuePriorityBadge, IssueStatusBadge } from "@/components/spaces/SpaceIssueBadges";
+import type { SpaceIssue } from "@/lib/types";
+import { formatRelativeTime } from "@/lib/utils";
+
+export default function SpaceIssueCard({
+  issue,
+  spaceId,
+  compact = false,
+}: {
+  issue: SpaceIssue;
+  spaceId: string;
+  compact?: boolean;
+}) {
+  return (
+    <Link
+      href={`/spaces/${spaceId}/issues/${issue.id}`}
+      className="block border-b border-zinc-800/60 px-4 py-4 transition-colors hover:bg-zinc-900/30"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <IssueStatusBadge status={issue.status} />
+            <IssuePriorityBadge priority={issue.priority} />
+          </div>
+
+          <h3 className="truncate text-sm font-semibold text-white">{issue.title}</h3>
+          {!compact && (
+            <p className="mt-1 line-clamp-2 whitespace-pre-line text-sm text-zinc-400">{issue.body}</p>
+          )}
+
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-zinc-500">
+            <span>Reported {formatRelativeTime(issue.created_at)}</span>
+            <span>By {issue.author?.name ?? "Unknown"}</span>
+            <span>{issue.assignee ? `Assigned to ${issue.assignee.name}` : "Unassigned"}</span>
+          </div>
+        </div>
+
+        <div className="shrink-0">
+          <Avatar user={issue.assignee ?? issue.author} size="sm" />
+        </div>
+      </div>
+    </Link>
+  );
+}

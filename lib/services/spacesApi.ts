@@ -12,13 +12,12 @@ import type {
   Discussion,
   DiscussionReply,
   SpaceUpdate,
+  SpaceIssue,
   HealthScore,
   DecisionEntry,
 } from "../types";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function authHeaders(): Record<string, string> {
   if (typeof window === "undefined") return {};
@@ -38,22 +37,29 @@ async function handleRes<T>(res: Response): Promise<T> {
   return data as T;
 }
 
-function qs(params: Record<string, string | number | undefined>): string {
-  const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== "");
+function qs(params: Record<string, string | number | undefined | boolean>): string {
+  const entries = Object.entries(params).filter(([, value]) => value !== undefined && value !== "");
   if (!entries.length) return "";
-  return "?" + entries.map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`).join("&");
+  return `?${entries.map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`).join("&")}`;
 }
-
-// ─── Spaces CRUD ─────────────────────────────────────────────────────────────
 
 export async function listSpaces(filters?: {
   status?: string;
+  visibility?: string;
   tag?: string;
+  mine?: boolean;
   page?: number;
   limit?: number;
 }): Promise<{ spaces: ProjectSpace[]; page: number; limit: number; total?: number }> {
   const res = await fetch(
-    `${API}/api/spaces${qs({ status: filters?.status, tag: filters?.tag, page: filters?.page, limit: filters?.limit })}`,
+    `${API}/api/spaces${qs({
+      status: filters?.status,
+      visibility: filters?.visibility,
+      tag: filters?.tag,
+      mine: filters?.mine,
+      page: filters?.page,
+      limit: filters?.limit,
+    })}`,
     { headers: { ...authHeaders() } }
   );
   return handleRes(res);
@@ -109,8 +115,6 @@ export async function deleteSpace(spaceId: string): Promise<{ archived: boolean 
   return handleRes(res);
 }
 
-// Repo management
-
 export async function listRepos(spaceId: string): Promise<{ repos: SpaceRepo[] }> {
   const res = await fetch(`${API}/api/spaces/${spaceId}/repos`, {
     headers: { ...authHeaders() },
@@ -134,10 +138,7 @@ export async function createRepo(
   return handleRes(res);
 }
 
-export async function getRepo(
-  spaceId: string,
-  repoId: string
-): Promise<{ repo: SpaceRepo }> {
+export async function getRepo(spaceId: string, repoId: string): Promise<{ repo: SpaceRepo }> {
   const res = await fetch(`${API}/api/spaces/${spaceId}/repos/${repoId}`, {
     headers: { ...authHeaders() },
   });
@@ -162,10 +163,7 @@ export async function updateRepo(
   return handleRes(res);
 }
 
-export async function archiveRepo(
-  spaceId: string,
-  repoId: string
-): Promise<{ archived: boolean }> {
+export async function archiveRepo(spaceId: string, repoId: string): Promise<{ archived: boolean }> {
   const res = await fetch(`${API}/api/spaces/${spaceId}/repos/${repoId}`, {
     method: "DELETE",
     headers: { ...authHeaders() },
@@ -262,8 +260,6 @@ export async function getRepoCommits(
   return handleRes(res);
 }
 
-// ─── Stack ───────────────────────────────────────────────────────────────────
-
 export async function getStack(spaceId: string): Promise<{ stack: StackEntry[] }> {
   const res = await fetch(`${API}/api/spaces/${spaceId}/stack`, {
     headers: { ...authHeaders() },
@@ -283,11 +279,7 @@ export async function replaceStack(
   return handleRes(res);
 }
 
-// ─── Contributors ────────────────────────────────────────────────────────────
-
-export async function getContributors(
-  spaceId: string
-): Promise<{ contributors: SpaceMember[] }> {
+export async function getContributors(spaceId: string): Promise<{ contributors: SpaceMember[] }> {
   const res = await fetch(`${API}/api/spaces/${spaceId}/contributors`, {
     headers: { ...authHeaders() },
   });
@@ -317,8 +309,6 @@ export async function removeContributor(
   });
   return handleRes(res);
 }
-
-// ─── Join Requests ───────────────────────────────────────────────────────────
 
 export async function createJoinRequest(
   spaceId: string,
@@ -361,8 +351,6 @@ export async function reviewJoinRequest(
   return handleRes(res);
 }
 
-// ─── Discussions ─────────────────────────────────────────────────────────────
-
 export async function createDiscussion(
   spaceId: string,
   body: { title: string; body: string; category?: string }
@@ -386,10 +374,7 @@ export async function listDiscussions(
   return handleRes(res);
 }
 
-export async function getDiscussion(
-  spaceId: string,
-  threadId: string
-): Promise<{ thread: Discussion }> {
+export async function getDiscussion(spaceId: string, threadId: string): Promise<{ thread: Discussion }> {
   const res = await fetch(`${API}/api/spaces/${spaceId}/discussions/${threadId}`, {
     headers: { ...authHeaders() },
   });
@@ -430,8 +415,6 @@ export async function updateDiscussion(
   });
   return handleRes(res);
 }
-
-// ─── Progress Updates ────────────────────────────────────────────────────────
 
 export async function createUpdate(
   spaceId: string,
@@ -495,20 +478,69 @@ export async function deleteUpdate(
   return handleRes(res);
 }
 
-// ─── Signals ─────────────────────────────────────────────────────────────────
+export async function listIssues(
+  spaceId: string,
+  params?: { status?: string; priority?: string; assignee?: string; page?: number; limit?: number }
+): Promise<{ issues: SpaceIssue[]; page: number; limit: number; total?: number }> {
+  const res = await fetch(
+    `${API}/api/spaces/${spaceId}/issues${qs({
+      status: params?.status,
+      priority: params?.priority,
+      assignee: params?.assignee,
+      page: params?.page,
+      limit: params?.limit,
+    })}`,
+    { headers: { ...authHeaders() } }
+  );
+  return handleRes(res);
+}
 
-export async function getHealth(
-  spaceId: string
-): Promise<{ health: HealthScore }> {
+export async function getIssue(spaceId: string, issueId: string): Promise<{ issue: SpaceIssue }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/issues/${issueId}`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function createIssue(
+  spaceId: string,
+  body: { title: string; body: string }
+): Promise<{ issue: SpaceIssue }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/issues`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function updateIssue(
+  spaceId: string,
+  issueId: string,
+  body: Partial<{
+    title: string;
+    body: string;
+    status: string;
+    priority: string;
+    assignee_user_id: string | null;
+  }>
+): Promise<{ issue: SpaceIssue }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/issues/${issueId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function getHealth(spaceId: string): Promise<{ health: HealthScore }> {
   const res = await fetch(`${API}/api/spaces/${spaceId}/health`, {
     headers: { ...authHeaders() },
   });
   return handleRes(res);
 }
 
-export async function getDecisions(
-  spaceId: string
-): Promise<{ decisions: DecisionEntry[] }> {
+export async function getDecisions(spaceId: string): Promise<{ decisions: DecisionEntry[] }> {
   const res = await fetch(`${API}/api/spaces/${spaceId}/decisions`, {
     headers: { ...authHeaders() },
   });

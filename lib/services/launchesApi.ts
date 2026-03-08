@@ -1,0 +1,265 @@
+import type {
+  Launch,
+  LaunchCollaborationRequestPayload,
+  LaunchFeedbackItem,
+  LaunchListResponse,
+  LaunchReview,
+} from "../types";
+
+const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+
+function authHeaders(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const token = localStorage.getItem("authToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function handleRes<T>(res: Response): Promise<T> {
+  if (res.status === 401 && typeof window !== "undefined") {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("currentUser");
+    window.location.href = "/login";
+    throw new Error("Unauthorized");
+  }
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Request failed");
+  return data as T;
+}
+
+function qs(params: Record<string, string | number | boolean | undefined>): string {
+  const entries = Object.entries(params).filter(([, value]) => value !== undefined && value !== "");
+  if (!entries.length) return "";
+  return `?${entries.map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`).join("&")}`;
+}
+
+export async function listLaunches(filters?: {
+  q?: string;
+  product_type?: string;
+  development_stage?: string;
+  stack?: string;
+  seeking_collaborators?: boolean;
+  sort?: string;
+  page?: number;
+  limit?: number;
+}): Promise<LaunchListResponse> {
+  const res = await fetch(
+    `${API}/api/launches${qs({
+      q: filters?.q,
+      product_type: filters?.product_type,
+      development_stage: filters?.development_stage,
+      stack: filters?.stack,
+      seeking_collaborators: filters?.seeking_collaborators,
+      sort: filters?.sort,
+      page: filters?.page,
+      limit: filters?.limit,
+    })}`,
+    { headers: { ...authHeaders() } }
+  );
+  return handleRes(res);
+}
+
+export async function getMyLaunches(): Promise<LaunchListResponse> {
+  const res = await fetch(`${API}/api/launches/me`, { headers: { ...authHeaders() } });
+  return handleRes(res);
+}
+
+export async function getLaunch(launchId: string): Promise<{ launch: Launch }> {
+  const res = await fetch(`${API}/api/launches/${launchId}`, { headers: { ...authHeaders() } });
+  return handleRes(res);
+}
+
+export async function createLaunch(body: {
+  name: string;
+  tagline: string;
+  description: string;
+  product_type: string;
+  development_stage: string;
+  demo_url?: string;
+  website_url?: string;
+  github_url?: string;
+  docs_url?: string;
+  collaboration_mode: string;
+  collaboration_note?: string;
+  collaboration_roles: string[];
+  linked_space_id?: string | null;
+  screenshots: string[];
+  tech_stack: string[];
+  status?: "draft" | "published";
+  publish_now?: boolean;
+}): Promise<{ launch: Launch }> {
+  const res = await fetch(`${API}/api/launches`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function updateLaunch(
+  launchId: string,
+  body: Partial<{
+    name: string;
+    tagline: string;
+    description: string;
+    product_type: string;
+    development_stage: string;
+    demo_url: string;
+    website_url: string;
+    github_url: string;
+    docs_url: string;
+    collaboration_mode: string;
+    collaboration_note: string;
+    collaboration_roles: string[];
+    linked_space_id: string | null;
+    screenshots: string[];
+    tech_stack: string[];
+  }>
+): Promise<{ launch: Launch }> {
+  const res = await fetch(`${API}/api/launches/${launchId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function publishLaunch(launchId: string): Promise<{ launch: Launch }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/publish`, {
+    method: "POST",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function archiveLaunch(launchId: string): Promise<{ launch: Launch }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/archive`, {
+    method: "POST",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function upvoteLaunch(launchId: string): Promise<{ upvoted: boolean; upvote_count: number }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/upvote`, {
+    method: "POST",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function removeLaunchUpvote(launchId: string): Promise<{ upvoted: boolean; upvote_count: number }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/upvote`, {
+    method: "DELETE",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function listLaunchReviews(
+  launchId: string,
+  page = 1,
+  limit = 20
+): Promise<{ reviews: LaunchReview[]; total: number; page: number; limit: number }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/reviews${qs({ page, limit })}`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function upsertMyLaunchReview(
+  launchId: string,
+  body: { headline: string; body: string; recommendation: string }
+): Promise<{ review: LaunchReview }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/my-review`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function deleteMyLaunchReview(launchId: string): Promise<{ deleted: boolean }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/my-review`, {
+    method: "DELETE",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function listLaunchFeedback(
+  launchId: string,
+  filters?: { type?: string; status?: string; page?: number; limit?: number }
+): Promise<{ feedback: LaunchFeedbackItem[]; total: number; page: number; limit: number }> {
+  const res = await fetch(
+    `${API}/api/launches/${launchId}/feedback${qs({
+      type: filters?.type,
+      status: filters?.status,
+      page: filters?.page,
+      limit: filters?.limit,
+    })}`,
+    { headers: { ...authHeaders() } }
+  );
+  return handleRes(res);
+}
+
+export async function createLaunchFeedback(
+  launchId: string,
+  body: { type: string; title: string; body: string }
+): Promise<{ feedback: LaunchFeedbackItem }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/feedback`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function updateLaunchFeedback(
+  launchId: string,
+  feedbackId: string,
+  body: Partial<{ type: string; title: string; body: string; status: string }>
+): Promise<{ feedback: LaunchFeedbackItem }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/feedback/${feedbackId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function deleteLaunchFeedback(
+  launchId: string,
+  feedbackId: string
+): Promise<{ deleted: boolean }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/feedback/${feedbackId}`, {
+    method: "DELETE",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function createLaunchFeedbackComment(
+  launchId: string,
+  feedbackId: string,
+  body: { body: string }
+): Promise<{ comment: NonNullable<LaunchFeedbackItem["comments"]>[number] }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/feedback/${feedbackId}/comments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function createLaunchCollaborationRequest(
+  launchId: string,
+  body: LaunchCollaborationRequestPayload
+): Promise<{ joinRequest: { id: string; status: string } }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/collaboration-request`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}

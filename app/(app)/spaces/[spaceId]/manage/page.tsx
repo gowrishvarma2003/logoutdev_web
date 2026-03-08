@@ -46,10 +46,41 @@ export default function ManagePage({
   return (
     <div className="divide-y divide-zinc-800">
       <ProjectSettingsSection space={space} refetch={refetchSpace} onDelete={() => router.push("/spaces")} />
+      <LinkedLaunchSection space={space} />
       <JoinRequestsSection spaceId={spaceId} requests={requests} loading={reqLoading} refetch={refetchReqs} />
       <StackManagementSection spaceId={spaceId} stack={stack} refetch={refetchStack} />
       <RepoManagementSection spaceId={spaceId} repos={repos} />
     </div>
+  );
+}
+
+function LinkedLaunchSection({
+  space,
+}: {
+  space: ReturnType<typeof useSpace>["space"];
+}) {
+  if (!space?.linked_launch) return null;
+
+  return (
+    <section className="p-4">
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-white">Linked launch</h3>
+            <p className="mt-1 text-xs text-zinc-500">This space is attached to a marketplace launch page.</p>
+          </div>
+          <Link href={`/launches/${space.linked_launch.id}`} className="text-xs text-sky-400 hover:text-sky-300 transition-colors">
+            Open launch →
+          </Link>
+        </div>
+
+        <p className="text-sm font-medium text-white">{space.linked_launch.name}</p>
+        <p className="mt-1 text-sm text-zinc-400">{space.linked_launch.tagline}</p>
+        <p className="mt-2 text-xs text-zinc-500">
+          {space.linked_launch.status} · {space.linked_launch.upvote_count} upvotes · {space.linked_launch.review_count} reviews
+        </p>
+      </div>
+    </section>
   );
 }
 
