@@ -4,6 +4,7 @@ import Link from "next/link";
 import Avatar from "@/components/ui/Avatar";
 import type { Question, User } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils";
+import RichText from "@/components/ui/RichText";
 
 function TagPill({ label }: { label: string }) {
   return (
@@ -65,9 +66,7 @@ export default function QuestionCard({
           <h2 className="line-clamp-2 text-[17px] font-semibold text-white">
             {question.title}
           </h2>
-          <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-zinc-400">
-            {question.body}
-          </p>
+          <RichText text={question.body} className="mt-2 line-clamp-3 text-sm leading-relaxed text-zinc-400" />
 
           <div className="mt-3 flex flex-wrap gap-2">
             {question.tags.slice(0, 6).map((tag) => (

@@ -8,6 +8,9 @@ import LaunchHero from "@/components/launches/LaunchHero";
 import LaunchLinkBar from "@/components/launches/LaunchLinkBar";
 import LaunchReviewPanel from "@/components/launches/LaunchReviewPanel";
 import LaunchScreenshotGallery from "@/components/launches/LaunchScreenshotGallery";
+import NextStepsPanel from "@/components/connected/NextStepsPanel";
+import RelatedEntitiesPanel from "@/components/connected/RelatedEntitiesPanel";
+import TrustContextCard from "@/components/connected/TrustContextCard";
 import Spinner from "@/components/ui/Spinner";
 import {
   ArrowLeftIcon,
@@ -262,8 +265,16 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                         Publish
                       </button>
                     )}
+
                   </>
                 )}
+
+                <Link
+                  href={`/feed?shareType=launch&shareId=${launch.id}&shareTitle=${encodeURIComponent(launch.name)}&shareSubtitle=${encodeURIComponent(launch.tagline || "")}&shareHref=${encodeURIComponent(`/launches/${launch.id}`)}`}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-zinc-950 px-4 py-2.5 text-sm font-medium text-zinc-300 ring-1 ring-zinc-700 transition-colors hover:bg-zinc-900 hover:text-white"
+                >
+                  Share update
+                </Link>
               </div>
             </div>
 
@@ -428,6 +439,8 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
             description="See the builder, collaboration context, and linked workspace details in one place."
           >
             <div className="grid gap-4 sm:grid-cols-2">
+              {launch.trust_context ? <TrustContextCard trust={launch.trust_context} /> : null}
+
               {launch.builder && (
                 <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/60 p-5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Built by</p>
@@ -498,6 +511,68 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
             </div>
           </SectionShell>
         )}
+
+        {launch.next_steps?.length || launch.related_entities?.length || launch.builder_posts?.length || launch.recent_updates?.length ? (
+          <SectionShell
+            id="next-steps"
+            eyebrow="Connected flow"
+            title="What to do after this page"
+            description="Use the strongest next steps, then follow the surrounding product graph."
+          >
+            <div className="grid gap-4 lg:grid-cols-2">
+              {launch.next_steps ? <NextStepsPanel items={launch.next_steps} /> : null}
+              {launch.related_entities ? <RelatedEntitiesPanel items={launch.related_entities} /> : null}
+            </div>
+
+            {launch.linked_space_health || (launch.recent_updates && launch.recent_updates.length > 0) ? (
+              <div className="grid gap-4 pt-2 lg:grid-cols-2">
+                <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/60 p-5">
+                  <h3 className="text-base font-semibold text-white">Linked space health</h3>
+                  {launch.linked_space_health ? (
+                    <div className="mt-3 space-y-2 text-sm text-zinc-400">
+                      <p>{launch.linked_space_health.recent_updates} recent updates</p>
+                      <p>{launch.linked_space_health.active_contributors} active contributors</p>
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-zinc-500">No linked workspace health available.</p>
+                  )}
+                </div>
+
+                <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/60 p-5">
+                  <h3 className="text-base font-semibold text-white">Recent workspace updates</h3>
+                  <div className="mt-3 space-y-3">
+                    {(launch.recent_updates || []).slice(0, 3).map((update) => (
+                      <div key={update.id} className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-3">
+                        <p className="text-sm font-semibold text-white">{update.title}</p>
+                        <p className="mt-1 text-xs text-zinc-500">{update.type}</p>
+                      </div>
+                    ))}
+                    {(!launch.recent_updates || launch.recent_updates.length === 0) ? (
+                      <p className="text-sm text-zinc-500">No public workspace updates yet.</p>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {launch.builder_posts && launch.builder_posts.length > 0 ? (
+              <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/60 p-5">
+                <h3 className="text-base font-semibold text-white">Builder posts about the product</h3>
+                <div className="mt-3 space-y-3">
+                  {launch.builder_posts.slice(0, 3).map((post) => (
+                    <Link
+                      key={post.id}
+                      href={`/post/${post.id}`}
+                      className="block rounded-2xl border border-zinc-800 bg-zinc-900/70 p-3 transition-colors hover:bg-zinc-900"
+                    >
+                      <p className="line-clamp-3 text-sm leading-6 text-zinc-300">{post.content}</p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </SectionShell>
+        ) : null}
 
         {screenshotCount > 0 && (
           <SectionShell

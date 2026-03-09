@@ -11,6 +11,8 @@ import { ArrowLeftIcon } from "@/components/ui/Icons";
 import { formatRelativeTime } from "@/lib/utils";
 import * as api from "@/lib/services/spacesApi";
 import type { SpaceIssuePriority, SpaceIssueStatus } from "@/lib/types";
+import RichComposer from "@/components/ui/RichComposer";
+import RichText from "@/components/ui/RichText";
 
 const STATUS_OPTIONS: SpaceIssueStatus[] = ["open", "triaged", "in-progress", "resolved", "closed"];
 const PRIORITY_OPTIONS: SpaceIssuePriority[] = ["low", "medium", "high", "critical"];
@@ -150,11 +152,12 @@ export default function IssueDetailPage({
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
               />
-              <textarea
+              <RichComposer
                 value={body}
-                onChange={(e) => setBody(e.target.value)}
+                onChange={(value) => setBody(value)}
                 rows={6}
-                className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+                previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm leading-relaxed text-white"
+                className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:border-zinc-600 focus:outline-none selection:bg-[#1d9bf0]/30"
               />
             </div>
 
@@ -228,7 +231,7 @@ export default function IssueDetailPage({
           <div className="space-y-6 px-6 py-5">
             <section>
               <h2 className="text-sm font-semibold text-white">Issue description</h2>
-              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-zinc-300">{issue.body}</p>
+              <RichText text={issue.body} className="mt-3 whitespace-pre-line text-sm leading-relaxed text-zinc-300" />
             </section>
 
             <section className="grid gap-4 border-t border-zinc-800 pt-5 sm:grid-cols-3">

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import type { Launch, LaunchFeedbackItem, User } from "@/lib/types";
+import RichComposer from "@/components/ui/RichComposer";
+import RichText from "@/components/ui/RichText";
 
 interface LaunchFeedbackBoardProps {
   launch: Launch;
@@ -107,12 +109,13 @@ export default function LaunchFeedbackBoard({
                 className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
               />
 
-              <textarea
+              <RichComposer
                 value={body}
-                onChange={(e) => setBody(e.target.value)}
+                onChange={(value) => setBody(value)}
                 rows={3}
                 placeholder="Give enough detail for the builder to act on this"
-                className="w-full resize-y rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-7 text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+                previewClassName="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-7 text-white"
+                className="w-full resize-y rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-7 text-transparent caret-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none selection:bg-[#1d9bf0]/30"
               />
             </div>
 
@@ -187,14 +190,14 @@ export default function LaunchFeedbackBoard({
                   </div>
                 </div>
 
-                <p className="mt-4 text-sm leading-7 text-zinc-300 [overflow-wrap:anywhere]">{item.body}</p>
+                <RichText text={item.body} className="mt-4 text-sm leading-7 text-zinc-300 [overflow-wrap:anywhere]" />
 
                 {(item.comments ?? []).length > 0 && (
                   <div className="mt-4 space-y-3 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4">
                     {item.comments?.map((comment) => (
                       <div key={comment.id} className="text-sm leading-6 text-zinc-300 [overflow-wrap:anywhere]">
                         <span className="font-medium text-white">{comment.author?.name ?? "Member"}: </span>
-                        {comment.body}
+                        <RichText text={comment.body} as="span" className="inline" />
                       </div>
                     ))}
                   </div>

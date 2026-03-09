@@ -20,6 +20,7 @@ import {
 import * as api from "@/lib/services/spacesApi";
 import { formatRelativeTime } from "@/lib/utils";
 import type { SpaceStatus, SpaceVisibility, StackCategory, StackMaturity } from "@/lib/types";
+import RichText from "@/components/ui/RichText";
 
 export default function ManagePage({
   params,
@@ -304,7 +305,7 @@ function JoinRequestsSection({
                     <span className="text-[11px] text-zinc-500">{formatRelativeTime(request.created_at)}</span>
                   </div>
 
-                  <p className="mb-2 text-sm text-zinc-300">{request.message}</p>
+                  <RichText text={request.message} className="mb-2 text-sm text-zinc-300" />
 
                   {request.skills && request.skills.length > 0 && (
                     <div className="mb-2 flex flex-wrap gap-1">

@@ -117,6 +117,8 @@ export default function ProfileLayout({ params, children }: ProfileLayoutProps) 
         aria-label="Profile tabs"
       >
         <Tab href={base} label="Overview" active={pathname === base} />
+        <Tab href={`${base}/launches`} label="Launches" active={pathname === `${base}/launches`} />
+        <Tab href={`${base}/freelance`} label="Freelance" active={pathname === `${base}/freelance`} />
         <Tab href={`${base}/projects`} label="Projects" active={pathname === `${base}/projects`} />
         <Tab href={`${base}/posts`} label="Posts" active={pathname === `${base}/posts`} />
         <Tab href={`${base}/activity`} label="Activity" active={pathname === `${base}/activity`} />

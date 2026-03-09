@@ -5,6 +5,7 @@ import Avatar from "@/components/ui/Avatar";
 import { IssuePriorityBadge, IssueStatusBadge } from "@/components/spaces/SpaceIssueBadges";
 import type { SpaceIssue } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils";
+import RichText from "@/components/ui/RichText";
 
 export default function SpaceIssueCard({
   issue,
@@ -29,7 +30,7 @@ export default function SpaceIssueCard({
 
           <h3 className="truncate text-sm font-semibold text-white">{issue.title}</h3>
           {!compact && (
-            <p className="mt-1 line-clamp-2 whitespace-pre-line text-sm text-zinc-400">{issue.body}</p>
+            <RichText text={issue.body} className="mt-1 line-clamp-2 whitespace-pre-line text-sm text-zinc-400" />
           )}
 
           <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-zinc-500">

@@ -7,6 +7,7 @@ import Spinner from "@/components/ui/Spinner";
 import { ArrowLeftIcon } from "@/components/ui/Icons";
 import { useLaunch } from "@/lib/hooks/useLaunches";
 import * as launchesApi from "@/lib/services/launchesApi";
+import RichComposer from "@/components/ui/RichComposer";
 
 export default function LaunchCollaboratePage({ params }: { params: Promise<{ launchId: string }> }) {
   const { launchId } = use(params);
@@ -61,7 +62,7 @@ export default function LaunchCollaboratePage({ params }: { params: Promise<{ la
         >
           <div>
             <label className="mb-1.5 block text-sm font-medium text-zinc-300">Why do you want to help?</label>
-            <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={6} className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none" />
+            <RichComposer value={message} onChange={(value) => setMessage(value)} rows={6} previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-white" className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:border-zinc-600 focus:outline-none selection:bg-[#1d9bf0]/30" />
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-zinc-300">Relevant skills</label>

@@ -12,7 +12,10 @@ import {
   ChatIcon,
   DocumentTextIcon,
   RocketIcon,
+  SparklesIcon,
+  BoltIcon,
 } from "@/components/ui/Icons";
+import LinkedEntityCard from "@/components/connected/LinkedEntityCard";
 
 interface ActivityTimelineProps {
   activity: ActivityItem[];
@@ -38,6 +41,30 @@ const TYPE_CONFIG = {
     color: "bg-emerald-500/15 text-emerald-400",
     border: "border-emerald-500/20",
   },
+  launch: {
+    icon: <SparklesIcon className="w-4 h-4" />,
+    label: "Published a launch",
+    color: "bg-amber-500/15 text-amber-300",
+    border: "border-amber-500/20",
+  },
+  launch_review: {
+    icon: <SparklesIcon className="w-4 h-4" />,
+    label: "Received launch feedback",
+    color: "bg-sky-500/15 text-sky-300",
+    border: "border-sky-500/20",
+  },
+  freelance_project: {
+    icon: <BoltIcon className="w-4 h-4" />,
+    label: "Freelance milestone",
+    color: "bg-fuchsia-500/15 text-fuchsia-300",
+    border: "border-fuchsia-500/20",
+  },
+  freelance_win: {
+    icon: <BoltIcon className="w-4 h-4" />,
+    label: "Won freelance work",
+    color: "bg-emerald-500/15 text-emerald-300",
+    border: "border-emerald-500/20",
+  },
 } as const;
 
 function ActivityCard({ entry }: { entry: ActivityItem }) {
@@ -50,9 +77,11 @@ function ActivityCard({ entry }: { entry: ActivityItem }) {
 
   const href =
     entry.type === "post"
-      ? "#"
+      ? item.linked_entity?.href || "#"
       : entry.type === "discussion" && item.space
       ? `/spaces/${item.space.id}`
+      : item.href
+      ? item.href
       : item.space
       ? `/spaces/${item.space.id}`
       : "#";
@@ -90,7 +119,13 @@ function ActivityCard({ entry }: { entry: ActivityItem }) {
           {subLabel && (
             <p className="text-xs text-zinc-600 mt-0.5">in {subLabel}</p>
           )}
+          {item.stats ? <p className="mt-1 text-xs text-zinc-500">{item.stats}</p> : null}
         </Link>
+        {item.linked_entity ? (
+          <div className="mt-3">
+            <LinkedEntityCard entity={item.linked_entity} compact />
+          </div>
+        ) : null}
       </div>
     </div>
   );

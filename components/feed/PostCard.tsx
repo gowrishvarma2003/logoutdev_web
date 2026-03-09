@@ -10,6 +10,7 @@ import Avatar from "@/components/ui/Avatar";
 import PostActions from "./PostActions";
 import ComposeBox from "./ComposeBox";
 import { DotsIcon, TrashIcon, RepeatIcon } from "@/components/ui/Icons";
+import LinkedEntityCard from "@/components/connected/LinkedEntityCard";
 
 interface PostCardProps {
   post: Post;
@@ -38,17 +39,7 @@ function buildContentTokens(
   ].sort((a, b) => a.start_index - b.start_index);
 }
 
-function PostContent({
-  text,
-  hashtags,
-  mentions,
-  clickable,
-}: {
-  text: string;
-  hashtags?: PostHashtagEntity[];
-  mentions?: PostMentionEntity[];
-  clickable: boolean;
-}) {
+function PostContent({ text, hashtags, mentions, clickable }: { text: string; hashtags?: PostHashtagEntity[]; mentions?: PostMentionEntity[]; clickable: boolean; }) {
   const tokens = buildContentTokens(hashtags, mentions);
   let cursor = 0;
   const fragments: ReactNode[] = [];
@@ -71,7 +62,8 @@ function PostContent({
           onClick={(event) => {
             if (clickable) event.stopPropagation();
           }}
-          className="text-sky-400 hover:underline"
+          style={{ color: "#1d9bf0" }}
+          className="hover:underline"
         >
           {rawValue}
         </Link>
@@ -84,7 +76,8 @@ function PostContent({
           onClick={(event) => {
             if (clickable) event.stopPropagation();
           }}
-          className="text-emerald-400 hover:underline"
+          style={{ color: "#1d9bf0" }}
+          className="hover:underline"
         >
           {rawValue}
         </Link>
@@ -175,6 +168,12 @@ export default function PostCard({
             mentions={post.mentions}
             clickable={clickable}
           />
+
+          {post.linked_entity ? (
+            <div className="mt-3">
+              <LinkedEntityCard entity={post.linked_entity} compact />
+            </div>
+          ) : null}
 
           <PostActions
             post={post}

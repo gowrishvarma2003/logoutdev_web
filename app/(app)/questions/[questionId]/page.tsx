@@ -14,6 +14,9 @@ import Avatar from "@/components/ui/Avatar";
 import Spinner from "@/components/ui/Spinner";
 import { ArrowLeftIcon } from "@/components/ui/Icons";
 import { formatRelativeTime } from "@/lib/utils";
+import NextStepsPanel from "@/components/connected/NextStepsPanel";
+import RelatedEntitiesPanel from "@/components/connected/RelatedEntitiesPanel";
+import TrustContextCard from "@/components/connected/TrustContextCard";
 
 export default function QuestionDetailPage({
   params,
@@ -173,6 +176,18 @@ export default function QuestionDetailPage({
       </article>
 
       <div className="space-y-5 px-4 py-5">
+        {(resolvedQuestion.trust_context || resolvedQuestion.next_steps?.length || resolvedQuestion.related_entities?.length) ? (
+          <div className="grid gap-4 lg:grid-cols-2">
+            {resolvedQuestion.trust_context ? <TrustContextCard trust={resolvedQuestion.trust_context} /> : null}
+            {resolvedQuestion.next_steps ? <NextStepsPanel items={resolvedQuestion.next_steps} /> : null}
+            {resolvedQuestion.related_entities ? (
+              <div className="lg:col-span-2">
+                <RelatedEntitiesPanel items={resolvedQuestion.related_entities} />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
         {resolvedQuestion.type === "mcq" ? (
           <>
             {!user ? (
@@ -293,6 +308,15 @@ export default function QuestionDetailPage({
         )}
 
         {actionError && <p className="text-sm text-rose-400">{actionError}</p>}
+
+        <div>
+          <Link
+            href={`/feed?shareType=question&shareId=${resolvedQuestion.id}&shareTitle=${encodeURIComponent(resolvedQuestion.title)}&shareSubtitle=${encodeURIComponent(resolvedQuestion.body || "")}&shareHref=${encodeURIComponent(`/questions/${resolvedQuestion.id}`)}`}
+            className="inline-flex rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-800"
+          >
+            Share update
+          </Link>
+        </div>
 
         {!resolvedQuestion.viewer_state?.can_view_locked_content ? (
           <div className="rounded-2xl border border-dashed border-zinc-800 px-4 py-10 text-center text-sm text-zinc-500">

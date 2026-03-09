@@ -52,6 +52,88 @@ export interface UserSuggestion {
   headline?: string | null;
 }
 
+export interface EntityRef {
+  type: string;
+  id: string;
+  title: string;
+  href?: string | null;
+  subtitle?: string | null;
+  visibility?: string | null;
+  tags?: string[];
+}
+
+export interface RelatedEntityRef extends EntityRef {
+  reason?: string | null;
+}
+
+export interface NextStepItem {
+  title: string;
+  description: string;
+  href: string;
+  auth_required: boolean;
+  priority: number;
+}
+
+export interface TrustContext {
+  label: string;
+  user: {
+    id: string;
+    name: string;
+    username?: string | null;
+    headline?: string | null;
+    href: string;
+  };
+  proof_score: number;
+  proof_band: ProofOfWorkBand;
+  open_to_collaborate: boolean;
+  strongest_stacks: string[];
+  primary_stats: string[];
+  secondary_stats: string[];
+}
+
+export interface NotificationCta {
+  label: string;
+  href: string;
+}
+
+export interface SuggestedAction {
+  type: string;
+  title: string;
+  description: string;
+  primary_cta: NotificationCta;
+  secondary_cta?: NotificationCta | null;
+  entity_ref?: EntityRef | null;
+}
+
+export interface NotificationItem {
+  id: string;
+  actor?: User | null;
+  verb?: string | null;
+  preview_text?: string | null;
+  event_type: string;
+  category: string;
+  priority: "action" | "important" | "activity";
+  entity_ref: EntityRef;
+  secondary_entity_ref?: EntityRef | null;
+  action_url?: string | null;
+  can_open: boolean;
+  group_count: number;
+  created_at: string;
+  read_at?: string | null;
+}
+
+export interface NotificationSummary {
+  unread_count: number;
+  needs_action_count: number;
+  recent: NotificationItem[];
+}
+
+export interface NotificationListResponse {
+  notifications: NotificationItem[];
+  next_cursor: string | null;
+  suggested_actions: SuggestedAction[];
+}
+
 // ─── Developer Profiles ──────────────────────────────────────────────────────
 
 export type ProofOfWorkBand = "Strong" | "Growing" | "Early";
@@ -88,17 +170,38 @@ export interface ProfileStats {
   projects_contributed_count: number;
   discussions_started_count: number;
   updates_posted_count: number;
+  launches_published_count: number;
+  launch_reviews_received_count: number;
+  freelance_projects_posted_count: number;
+  freelance_wins_count: number;
+  workspaces_from_freelance_count: number;
+  accepted_collaborations_count: number;
 }
 
 export interface ProofOfWorkSignals {
   score: number;
   band: ProofOfWorkBand;
   factors: {
-    project_participation: number;
-    update_consistency: number;
-    discussion_engagement: number;
-    feed_consistency: number;
+    shipping_behavior: number;
+    review_quality: number;
+    collaboration_conversion: number;
+    freelance_outcomes: number;
+    platform_consistency: number;
   };
+}
+
+export interface CareerTimelineItem {
+  type: string;
+  title: string;
+  href?: string | null;
+  created_at: string;
+}
+
+export interface CareerSummary {
+  timeline: CareerTimelineItem[];
+  strongest_stacks: string[];
+  fit_clusters: string[];
+  open_to_collaborate: boolean;
 }
 
 export interface ProfileResponse {
@@ -107,19 +210,28 @@ export interface ProfileResponse {
   stats: ProfileStats;
   skills: UserProfileSkill[];
   featured_projects: UserFeaturedProject[];
+  career_summary: CareerSummary;
+  fit_clusters: string[];
+  open_to_collaborate: boolean;
+  related_entities: RelatedEntityRef[];
 }
 
 export interface ActivityItem {
-  type: "post" | "discussion" | "update";
+  type: "post" | "discussion" | "update" | "launch" | "launch_review" | "freelance_project" | "freelance_win";
   created_at: string;
   item: {
     id: string;
     content?: string;        // post
     title?: string;          // discussion | update
+    subtitle?: string;
     category?: string;       // discussion
     status?: string;         // discussion
     type?: string;           // update
     space?: { id: string; name: string; visibility: string };
+    href?: string | null;
+    stats?: string | null;
+    linked_space_id?: string | null;
+    linked_entity?: EntityRef | null;
   };
 }
 
@@ -140,6 +252,9 @@ export interface Post {
   mentions?: PostMentionEntity[];
   is_liked_by_me?: boolean;
   is_reposted_by_me?: boolean;
+  linked_entity_type?: string | null;
+  linked_entity_id?: string | null;
+  linked_entity?: EntityRef | null;
 }
 
 export type QuestionType = "open" | "mcq";
@@ -194,6 +309,9 @@ export interface Question {
   options?: QuestionOption[];
   viewer_state?: QuestionViewerState;
   accepted_answer_id?: string | null;
+  next_steps?: NextStepItem[];
+  related_entities?: RelatedEntityRef[];
+  trust_context?: TrustContext | null;
 }
 
 export interface QuestionAnswer {
@@ -297,6 +415,10 @@ export interface ProjectSpace {
     upvote_count: number;
     review_count: number;
   } | null;
+  next_steps?: NextStepItem[];
+  related_entities?: RelatedEntityRef[];
+  trust_context?: TrustContext | null;
+  recent_posts?: Post[];
 }
 
 export interface SpaceRepo {
@@ -534,6 +656,9 @@ export interface FreelanceProject {
   } | null;
   accepted_proposal?: Partial<FreelanceProposal> | null;
   viewer_state?: FreelanceProjectViewerState;
+  next_steps?: NextStepItem[];
+  related_entities?: RelatedEntityRef[];
+  trust_context?: TrustContext | null;
 }
 
 export interface FreelanceProposal {
@@ -661,6 +786,15 @@ export interface Launch {
     status: SpaceStatus;
   } | null;
   viewer_state?: LaunchViewerState;
+  next_steps?: NextStepItem[];
+  related_entities?: RelatedEntityRef[];
+  trust_context?: TrustContext | null;
+  builder_posts?: Post[];
+  linked_space_health?: {
+    recent_updates: number;
+    active_contributors: number;
+  } | null;
+  recent_updates?: SpaceUpdate[];
 }
 
 export type LaunchListItem = Launch;
@@ -677,6 +811,84 @@ export interface LaunchCollaborationRequestPayload {
   skills: string[];
   availability_hours?: number | null;
   proof_links: string[];
+}
+
+export type DiscoveryEntityType =
+  | "builder"
+  | "launch"
+  | "space"
+  | "question"
+  | "freelance_project";
+
+export interface DiscoveryRankExplanation {
+  score: number;
+  reasons: string[];
+  matched_stacks: string[];
+  freshness_bucket: string;
+  proof_of_work_band: string;
+}
+
+export interface DiscoveryEntityMeta {
+  eyebrow: string;
+  byline?: string | null;
+  stats?: string | null;
+  updated_at?: string | null;
+  collaboration_label?: string | null;
+  status_label?: string | null;
+  proof_of_work_band?: string | null;
+}
+
+export interface DiscoveryEntity {
+  id: string;
+  type: DiscoveryEntityType;
+  title: string;
+  subtitle: string;
+  href: string;
+  visibility: string;
+  tags: string[];
+  rank_explanation: DiscoveryRankExplanation;
+  meta: DiscoveryEntityMeta;
+}
+
+export interface DiscoverySection {
+  key: string;
+  title: string;
+  total: number;
+  items: DiscoveryEntity[];
+  see_all_href: string;
+  empty_copy: string;
+}
+
+export interface DiscoveryRailModuleItem {
+  label: string;
+  href: string;
+  meta?: string | null;
+}
+
+export interface DiscoveryRailModule {
+  key: string;
+  title: string;
+  reason: string;
+  items: DiscoveryRailModuleItem[];
+}
+
+export interface DiscoveryResult {
+  query: string;
+  applied_filters: {
+    q?: string;
+    type: string[];
+    stack?: string;
+    tag?: string;
+    status?: string;
+    collab: boolean;
+    sort: string;
+    viewer_context: string;
+  };
+  sections: DiscoverySection[];
+  rail_modules: DiscoveryRailModule[];
+  featured_entities: DiscoveryEntity[];
+  suggested_next_filters: string[];
+  guest_safe: boolean;
 }
 
 export interface PaginatedResponse<T> {

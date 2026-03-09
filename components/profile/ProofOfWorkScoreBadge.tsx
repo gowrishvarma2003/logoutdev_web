@@ -41,18 +41,20 @@ const BAND_CONFIG: Record<
 };
 
 const FACTOR_LABELS: Record<string, string> = {
-  project_participation: "Project Participation",
-  update_consistency: "Update Consistency",
-  discussion_engagement: "Discussion Engagement",
-  feed_consistency: "Feed Activity",
+  shipping_behavior: "Shipping Behavior",
+  review_quality: "Review Quality",
+  collaboration_conversion: "Collaboration Conversion",
+  freelance_outcomes: "Freelance Outcomes",
+  platform_consistency: "Platform Consistency",
 };
 
 // Maximum score per factor for the progress bar
 const FACTOR_MAX: Record<string, number> = {
-  project_participation: 30,
-  update_consistency: 25,
-  discussion_engagement: 25,
-  feed_consistency: 20,
+  shipping_behavior: 25,
+  review_quality: 20,
+  collaboration_conversion: 20,
+  freelance_outcomes: 20,
+  platform_consistency: 15,
 };
 
 export default function ProofOfWorkScoreBadge({ signals }: ProofOfWorkScoreBadgeProps) {

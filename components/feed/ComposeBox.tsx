@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { createPost, suggestHashtags, suggestUsers } from "@/lib/api";
 import type {
+  EntityRef,
   HashtagSuggestion,
   Post,
   RelatedHashtag,
@@ -10,6 +11,9 @@ import type {
   UserSuggestion,
 } from "@/lib/types";
 import Avatar from "@/components/ui/Avatar";
+import RichComposer, { type RichComposerHandle } from "@/components/ui/RichComposer";
+import { findActiveRichToken } from "@/lib/richText";
+import LinkedEntityCard from "@/components/connected/LinkedEntityCard";
 
 interface ComposeBoxProps {
   currentUser: User;
@@ -17,6 +21,10 @@ interface ComposeBoxProps {
   placeholder?: string;
   onSubmit?: (content: string) => Promise<Post>;
   compact?: boolean;
+  initialLinkedEntity?: EntityRef | null;
+  linkedEntityType?: string | null;
+  linkedEntityId?: string | null;
+  onClearLinkedEntity?: () => void;
 }
 
 interface ActiveToken {
@@ -44,22 +52,8 @@ type SuggestionItem =
 
 const MAX_LENGTH = 500;
 const MIN_QUERY_LENGTH = 2;
-
 function findActiveToken(value: string, caret: number): ActiveToken | null {
-  const beforeCaret = value.slice(0, caret);
-  const match = beforeCaret.match(/(?:^|\s)([#@])([A-Za-z0-9_]*)$/);
-  if (!match) return null;
-  if (match[2].length < MIN_QUERY_LENGTH) return null;
-
-  const fullMatch = match[0];
-  const tokenStart = beforeCaret.length - fullMatch.length + fullMatch.lastIndexOf(match[1]);
-
-  return {
-    type: match[1] === "#" ? "hashtag" : "mention",
-    query: match[2].toLowerCase(),
-    start: tokenStart,
-    end: caret,
-  };
+  return findActiveRichToken(value, caret, MIN_QUERY_LENGTH);
 }
 
 function mapHashtagSuggestions(items: HashtagSuggestion[]): SuggestionItem[] {
@@ -88,6 +82,10 @@ export default function ComposeBox({
   placeholder = "What are you building today?",
   onSubmit,
   compact = false,
+  initialLinkedEntity = null,
+  linkedEntityType = null,
+  linkedEntityId = null,
+  onClearLinkedEntity,
 }: ComposeBoxProps) {
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -96,7 +94,7 @@ export default function ComposeBox({
   const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
   const [relatedTags, setRelatedTags] = useState<RelatedHashtag[]>([]);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const composerRef = useRef<RichComposerHandle>(null);
 
   const remaining = MAX_LENGTH - content.length;
   const isOverLimit = remaining < 0;
@@ -141,10 +139,7 @@ export default function ComposeBox({
   }, [activeToken]);
 
   function updateTextareaHeight() {
-    const ta = textareaRef.current;
-    if (!ta) return;
-    ta.style.height = "auto";
-    ta.style.height = `${ta.scrollHeight}px`;
+    composerRef.current?.adjustHeight?.();
   }
 
   function updateActiveToken(value: string, caret: number) {
@@ -166,25 +161,23 @@ export default function ComposeBox({
     setError("");
 
     window.requestAnimationFrame(() => {
-      const textarea = textareaRef.current;
+      const textarea = composerRef.current;
       if (!textarea) return;
       textarea.focus();
-      textarea.selectionStart = nextCaret;
-      textarea.selectionEnd = nextCaret;
+      textarea.setSelectionRange(nextCaret, nextCaret);
       updateTextareaHeight();
     });
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const nextValue = e.target.value;
+  const handleChange = (nextValue: string, caret: number) => {
     setContent(nextValue);
     setError("");
-    updateActiveToken(nextValue, e.target.selectionStart ?? nextValue.length);
+    updateActiveToken(nextValue, caret);
     updateTextareaHeight();
   };
 
   const handleCursorActivity = () => {
-    const textarea = textareaRef.current;
+    const textarea = composerRef.current?.getElement();
     if (!textarea) return;
     updateActiveToken(textarea.value, textarea.selectionStart ?? textarea.value.length);
   };
@@ -229,14 +222,19 @@ export default function ComposeBox({
       if (onSubmit) {
         post = await onSubmit(content.trim());
       } else {
-        const res = await createPost(content.trim());
+        const res = await createPost(
+          content.trim(),
+          linkedEntityType && linkedEntityId
+            ? { type: linkedEntityType, id: linkedEntityId }
+            : null
+        );
         post = res.post;
       }
       setContent("");
       setActiveToken(null);
       setSuggestions([]);
       setRelatedTags([]);
-      if (textareaRef.current) textareaRef.current.style.height = "auto";
+      composerRef.current?.resetHeight?.();
       onPostCreated(post);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to post.");
@@ -254,8 +252,23 @@ export default function ComposeBox({
 
       <div className="flex-1 min-w-0">
         <div className="relative">
-          <textarea
-            ref={textareaRef}
+          {initialLinkedEntity ? (
+            <div className="mb-3">
+              <LinkedEntityCard entity={initialLinkedEntity} compact />
+              {onClearLinkedEntity ? (
+                <button
+                  type="button"
+                  onClick={onClearLinkedEntity}
+                  className="mt-2 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
+                >
+                  Remove attachment
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+
+          <RichComposer
+            ref={composerRef}
             value={content}
             onChange={handleChange}
             onClick={handleCursorActivity}
@@ -264,7 +277,9 @@ export default function ComposeBox({
             placeholder={placeholder}
             maxLength={MAX_LENGTH + 10}
             rows={compact ? 1 : 3}
-            className="w-full resize-none text-white placeholder:text-zinc-500 text-[15px] leading-relaxed outline-none bg-transparent overflow-hidden"
+            clickablePreview
+            previewClassName="text-[15px] leading-relaxed text-white"
+            className="relative w-full resize-none overflow-hidden bg-transparent text-[15px] leading-relaxed text-transparent caret-white outline-none selection:bg-[#1d9bf0]/30"
           />
 
           {isSuggestionOpen && (

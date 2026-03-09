@@ -10,6 +10,7 @@ import Avatar from "@/components/ui/Avatar";
 import { ChatBubbleIcon } from "@/components/ui/Icons";
 import * as api from "@/lib/services/spacesApi";
 import type { DiscussionCategory } from "@/lib/types";
+import RichComposer from "@/components/ui/RichComposer";
 
 const CATEGORIES: DiscussionCategory[] = [
   "idea", "question", "decision", "blocked", "retrospective",
@@ -91,12 +92,13 @@ export default function DiscussionsPage({
                 maxLength={180}
                 className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
               />
-              <textarea
+              <RichComposer
                 value={body}
-                onChange={(e) => setBody(e.target.value)}
+                onChange={(value) => setBody(value)}
                 placeholder="Share your idea..."
                 rows={3}
-                className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 resize-none transition-colors"
+                previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm leading-relaxed text-white"
+                className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm leading-relaxed text-transparent caret-white focus:outline-none focus:border-zinc-600 transition-colors selection:bg-[#1d9bf0]/30"
               />
               <div className="flex items-center gap-2">
                 <select

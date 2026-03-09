@@ -3,6 +3,8 @@ import type {
   FeedResponse,
   HashtagFeedResponse,
   HashtagSuggestion,
+  NotificationListResponse,
+  NotificationSummary,
   Post,
   PostResponse,
   RelatedHashtag,
@@ -89,14 +91,21 @@ export async function getExplore(cursor?: string): Promise<FeedResponse> {
   return handleResponse<FeedResponse>(res);
 }
 
-export async function createPost(content: string): Promise<{ post: Post }> {
+export async function createPost(
+  content: string,
+  linkedEntity?: { type: string; id: string } | null
+): Promise<{ post: Post }> {
   const res = await fetch(`${API_BASE_URL}/api/posts`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...getAuthHeaders(),
     },
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({
+      content,
+      linked_entity_type: linkedEntity?.type,
+      linked_entity_id: linkedEntity?.id,
+    }),
   });
   return handleResponse<{ post: Post }>(res);
 }
@@ -262,4 +271,58 @@ export async function suggestUsers(
     headers: { ...getAuthHeaders() },
   });
   return handleResponse<{ users: UserSuggestion[] }>(res);
+}
+
+// ─── Notifications ───────────────────────────────────────────────────────────
+
+export async function getNotificationSummary(): Promise<NotificationSummary> {
+  const res = await fetch(`${API_BASE_URL}/api/users/me/notifications/summary`, {
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse<NotificationSummary>(res);
+}
+
+export async function listNotifications(params?: {
+  tab?: "needs-action" | "unread" | "all";
+  cursor?: string | null;
+  limit?: number;
+}): Promise<NotificationListResponse> {
+  const search = new URLSearchParams();
+  if (params?.tab) search.set("tab", params.tab);
+  if (params?.cursor) search.set("cursor", params.cursor);
+  if (params?.limit) search.set("limit", String(params.limit));
+
+  const qs = search.toString();
+  const res = await fetch(
+    `${API_BASE_URL}/api/users/me/notifications${qs ? `?${qs}` : ""}`,
+    {
+      headers: { ...getAuthHeaders() },
+    }
+  );
+  return handleResponse<NotificationListResponse>(res);
+}
+
+export async function readNotification(notificationId: string): Promise<{ read: boolean }> {
+  const res = await fetch(`${API_BASE_URL}/api/users/me/notifications/${notificationId}/read`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+  });
+  return handleResponse<{ read: boolean }>(res);
+}
+
+export async function readAllNotifications(
+  tab: "needs-action" | "unread" | "all" = "all"
+): Promise<{ read: boolean; updated: number }> {
+  const res = await fetch(`${API_BASE_URL}/api/users/me/notifications/read-all`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ tab }),
+  });
+  return handleResponse<{ read: boolean; updated: number }>(res);
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { McqMode, QuestionType } from "@/lib/types";
 import * as api from "@/lib/services/questionsApi";
+import RichComposer from "@/components/ui/RichComposer";
 
 const ROLE_OPTIONS = [
   "frontend",
@@ -118,12 +119,13 @@ export default function AskQuestionForm({
         <label className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
           Details
         </label>
-        <textarea
+        <RichComposer
           value={body}
-          onChange={(e) => setBody(e.target.value)}
+          onChange={(value) => setBody(value)}
           rows={7}
           placeholder="Add context, what you tried, constraints, and what kind of answer would help."
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-600"
+          previewClassName="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm leading-relaxed text-white"
+          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm leading-relaxed text-transparent caret-white outline-none focus:border-zinc-600 selection:bg-[#1d9bf0]/30"
         />
       </div>
 

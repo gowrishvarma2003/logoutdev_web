@@ -6,6 +6,8 @@ import { ChatIcon } from "@/components/ui/Icons";
 import type { QuestionDiscussionComment, User } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils";
 import * as api from "@/lib/services/questionsApi";
+import RichComposer from "@/components/ui/RichComposer";
+import RichText from "@/components/ui/RichText";
 
 function buildChildrenMap(comments: QuestionDiscussionComment[]) {
   return comments.reduce<Record<string, QuestionDiscussionComment[]>>((acc, comment) => {
@@ -53,12 +55,13 @@ function Composer({
     <form onSubmit={handleSubmit} className="space-y-2">
       <div className="flex gap-2.5">
         <Avatar user={currentUser} size="xs" className="mt-1 shrink-0" />
-        <textarea
+        <RichComposer
           value={body}
-          onChange={(e) => setBody(e.target.value)}
+          onChange={(value) => setBody(value)}
           rows={2}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-600"
+          previewClassName="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm leading-relaxed text-white"
+          className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm leading-relaxed text-transparent caret-white outline-none focus:border-zinc-600 selection:bg-[#1d9bf0]/30"
         />
       </div>
       <div className="flex items-center justify-end gap-2">
@@ -103,9 +106,7 @@ function CommentNode({
             <span className="text-zinc-700">·</span>
             <span className="text-zinc-500">{formatRelativeTime(comment.created_at)}</span>
           </div>
-          <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-300">
-            {comment.body}
-          </p>
+          <RichText text={comment.body} className="whitespace-pre-line text-sm leading-relaxed text-zinc-300" />
 
           {currentUser && (
             <button

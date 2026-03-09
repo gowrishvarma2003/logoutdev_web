@@ -14,6 +14,9 @@ import type {
   Post,
   ProjectSpace,
   ActivityItem,
+  Launch,
+  FreelanceProject,
+  FreelanceProposal,
 } from "../types";
 import * as api from "../services/profilesApi";
 
@@ -68,6 +71,10 @@ export function useProfile(username: string) {
     stats: result.data?.stats ?? null,
     skills: result.data?.skills ?? [],
     featured_projects: result.data?.featured_projects ?? [],
+    career_summary: result.data?.career_summary ?? null,
+    fit_clusters: result.data?.fit_clusters ?? [],
+    open_to_collaborate: result.data?.open_to_collaborate ?? false,
+    related_entities: result.data?.related_entities ?? [],
     loading: result.loading,
     error: result.error,
     refetch: result.refetch,
@@ -132,6 +139,33 @@ export function useProfileActivity(username: string, page = 1) {
   return {
     activity: result.data?.activity ?? [],
     total: result.data?.total ?? 0,
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+export function useProfileLaunches(username: string) {
+  const result = useAsync<{ launches: Launch[] }>(
+    () => api.getProfileLaunches(username),
+    [username]
+  );
+  return {
+    launches: result.data?.launches ?? [],
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+export function useProfileFreelance(username: string) {
+  const result = useAsync<{ client_projects: FreelanceProject[]; wins: FreelanceProposal[] }>(
+    () => api.getProfileFreelance(username),
+    [username]
+  );
+  return {
+    client_projects: result.data?.client_projects ?? [],
+    wins: result.data?.wins ?? [],
     loading: result.loading,
     error: result.error,
     refetch: result.refetch,

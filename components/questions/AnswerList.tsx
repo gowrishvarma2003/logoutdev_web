@@ -4,6 +4,7 @@ import Avatar from "@/components/ui/Avatar";
 import { ArrowUpIcon, CheckCircleIcon } from "@/components/ui/Icons";
 import type { QuestionAnswer, User } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils";
+import RichText from "@/components/ui/RichText";
 
 export default function AnswerList({
   answers,
@@ -52,9 +53,7 @@ export default function AnswerList({
                   )}
                 </div>
 
-                <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-300">
-                  {answer.body}
-                </p>
+                <RichText text={answer.body} className="whitespace-pre-line text-sm leading-relaxed text-zinc-300" />
 
                 <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
                   {!isOwn && currentUser && (

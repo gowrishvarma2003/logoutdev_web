@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import type { User } from "@/lib/types";
 import { emailToHandle } from "@/lib/utils";
 import Avatar from "@/components/ui/Avatar";
 import {
   HomeIcon,
+  BellIcon,
   CompassIcon,
   QuestionMarkCircleIcon,
   UserIcon,
@@ -21,6 +23,7 @@ import {
 interface SidebarProps {
   user: User;
   onLogout: () => void;
+  unreadCount?: number;
 }
 
 interface NavItemProps {
@@ -28,9 +31,10 @@ interface NavItemProps {
   icon: React.ReactNode;
   label: string;
   active?: boolean;
+  badge?: number;
 }
 
-function NavItem({ href, icon, label, active }: NavItemProps) {
+function NavItem({ href, icon, label, active, badge }: NavItemProps) {
   return (
     <Link
       href={href}
@@ -41,14 +45,46 @@ function NavItem({ href, icon, label, active }: NavItemProps) {
             : "text-zinc-400 hover:bg-zinc-800/60 hover:text-white"
         }`}
     >
-      {icon}
-      {label}
+      <span className="relative inline-flex items-center">
+        {icon}
+        {badge ? (
+          <span className="absolute -right-2 -top-2 inline-flex min-w-[18px] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-semibold text-white">
+            {badge > 99 ? "99+" : badge}
+          </span>
+        ) : null}
+      </span>
+      <span className="flex-1">{label}</span>
     </Link>
   );
 }
 
-export default function Sidebar({ user, onLogout }: SidebarProps) {
+export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("q") || "");
+
+  useEffect(() => {
+    setQuery(searchParams.get("q") || "");
+  }, [searchParams]);
+
+  function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const params = new URLSearchParams();
+    const trimmed = query.trim();
+    if (trimmed) {
+      params.set("q", trimmed);
+    }
+
+    if (pathname === "/explore") {
+      ["type", "stack", "tag", "status", "collab", "sort"].forEach((key) => {
+        const value = searchParams.get(key);
+        if (value) params.set(key, value);
+      });
+    }
+
+    router.push(params.toString() ? `/explore?${params.toString()}` : "/explore");
+  }
 
   return (
     <nav className="flex flex-col h-full px-4 py-6">
@@ -61,6 +97,15 @@ export default function Sidebar({ user, onLogout }: SidebarProps) {
           LogoutDev
         </span>
       </Link>
+
+      <form onSubmit={handleSearchSubmit} className="mb-6 px-1">
+        <input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search builders, launches, spaces..."
+          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-zinc-700"
+        />
+      </form>
 
       {/* Navigation items */}
       <div className="flex flex-col gap-1">
@@ -75,6 +120,13 @@ export default function Sidebar({ user, onLogout }: SidebarProps) {
           icon={<CompassIcon />}
           label="Explore"
           active={pathname === "/explore"}
+        />
+        <NavItem
+          href="/notifications"
+          icon={<BellIcon />}
+          label="Inbox"
+          active={pathname.startsWith("/notifications")}
+          badge={unreadCount}
         />
         <NavItem
           href="/launches"

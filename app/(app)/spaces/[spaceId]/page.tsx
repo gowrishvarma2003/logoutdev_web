@@ -15,6 +15,9 @@ import { LinkIcon, UsersIcon, ClockIcon, QuestionMarkCircleIcon } from "@/compon
 import { SectionHeader, EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import { formatRelativeTime } from "@/lib/utils";
+import NextStepsPanel from "@/components/connected/NextStepsPanel";
+import RelatedEntitiesPanel from "@/components/connected/RelatedEntitiesPanel";
+import TrustContextCard from "@/components/connected/TrustContextCard";
 
 export default function SpaceOverviewPage({
   params,
@@ -64,6 +67,28 @@ export default function SpaceOverviewPage({
       <section className="p-4">
         <CollaborationHealthBadge health={health} />
       </section>
+
+      {(space.trust_context || space.next_steps?.length || space.related_entities?.length) ? (
+        <section className="p-4">
+          <div className="grid gap-4 lg:grid-cols-2">
+            {space.trust_context ? <TrustContextCard trust={space.trust_context} /> : null}
+            {space.next_steps ? <NextStepsPanel items={space.next_steps} /> : null}
+          </div>
+          {space.related_entities ? (
+            <div className="mt-4">
+              <RelatedEntitiesPanel items={space.related_entities} />
+            </div>
+          ) : null}
+          <div className="mt-4">
+            <Link
+              href={`/feed?shareType=space&shareId=${space.id}&shareTitle=${encodeURIComponent(space.name)}&shareSubtitle=${encodeURIComponent(space.summary || "")}&shareHref=${encodeURIComponent(`/spaces/${space.id}`)}`}
+              className="inline-flex items-center rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-800"
+            >
+              Share update
+            </Link>
+          </div>
+        </section>
+      ) : null}
 
       <section>
         <SectionHeader title="Tech Stack" count={stack.length} />
@@ -187,6 +212,23 @@ export default function SpaceOverviewPage({
           </div>
         )}
       </section>
+
+      {space.recent_posts && space.recent_posts.length > 0 ? (
+        <section>
+          <SectionHeader title="Member posts" count={space.recent_posts.length} />
+          <div className="space-y-3 px-4 py-3">
+            {space.recent_posts.slice(0, 3).map((post) => (
+              <Link
+                key={post.id}
+                href={`/post/${post.id}`}
+                className="block rounded-2xl border border-zinc-800 bg-zinc-900 px-4 py-3 transition-colors hover:bg-zinc-800/60"
+              >
+                <p className="line-clamp-3 text-sm leading-6 text-zinc-300">{post.content}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {canSeeRepos && (
         <section>

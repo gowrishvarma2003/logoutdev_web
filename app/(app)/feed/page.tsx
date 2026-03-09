@@ -1,24 +1,42 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useFeed } from "@/lib/hooks/useFeed";
 import ComposeBox from "@/components/feed/ComposeBox";
 import PostList from "@/components/feed/PostList";
-import type { Post } from "@/lib/types";
+import type { EntityRef, Post } from "@/lib/types";
 
 type Tab = "foryou" | "following";
 
 export default function FeedPage() {
   const { user } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>("foryou");
 
   const feed = useFeed("feed");
 
   if (!user) return null;
 
+  const linkedEntityType = searchParams.get("shareType");
+  const linkedEntityId = searchParams.get("shareId");
+  const linkedEntity: EntityRef | null = linkedEntityType && linkedEntityId
+    ? {
+        type: linkedEntityType,
+        id: linkedEntityId,
+        title: searchParams.get("shareTitle") || "Attached item",
+        subtitle: searchParams.get("shareSubtitle") || null,
+        href: searchParams.get("shareHref") || null,
+      }
+    : null;
+
   const handlePostCreated = (post: Post) => {
     feed.addPost(post);
+    if (linkedEntity) {
+      router.replace("/feed");
+    }
   };
 
   return (
@@ -45,7 +63,14 @@ export default function FeedPage() {
       </header>
 
       {/* ── Compose box ── */}
-      <ComposeBox currentUser={user} onPostCreated={handlePostCreated} />
+      <ComposeBox
+        currentUser={user}
+        onPostCreated={handlePostCreated}
+        initialLinkedEntity={linkedEntity}
+        linkedEntityType={linkedEntityType}
+        linkedEntityId={linkedEntityId}
+        onClearLinkedEntity={() => router.replace("/feed")}
+      />
 
       {/* ── Post list ── */}
       <PostList

@@ -6,6 +6,7 @@ import { useSpace } from "@/lib/hooks/useSpaces";
 import { ArrowLeftIcon, RocketIcon } from "@/components/ui/Icons";
 import * as api from "@/lib/services/spacesApi";
 import Link from "next/link";
+import RichComposer from "@/components/ui/RichComposer";
 
 /**
  * /spaces/[spaceId]/join — Guided join request form.
@@ -105,12 +106,13 @@ export default function JoinRequestPage({
           <label className="block text-sm font-medium text-zinc-400 mb-1.5">
             Why do you want to join? <span className="text-rose-400">*</span>
           </label>
-          <textarea
+          <RichComposer
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={(value) => setMessage(value)}
             placeholder="Share your motivation, what you can contribute…"
             rows={4}
-            className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 resize-none transition-colors"
+            previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-white"
+            className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors selection:bg-[#1d9bf0]/30"
           />
         </div>
 

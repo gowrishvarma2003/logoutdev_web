@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useNotificationSummary } from "@/lib/hooks/useNotifications";
 import Sidebar from "./Sidebar";
 import RightPanel from "./RightPanel";
 import MobileNav from "./MobileNav";
@@ -22,6 +23,7 @@ export default function AppShell({ children }: AppShellProps) {
   const { user, isLoaded, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const { summary } = useNotificationSummary(Boolean(user));
   const allowsGuest = pathname === "/questions"
     || pathname.startsWith("/questions/")
     || pathname === "/explore"
@@ -107,7 +109,7 @@ export default function AppShell({ children }: AppShellProps) {
       <div className="mx-auto flex min-h-screen w-full max-w-[1120px]">
         {/* ── Left sidebar (sticky, desktop only) ── */}
         <aside className="hidden lg:flex flex-col w-[240px] shrink-0 border-r border-zinc-800 bg-zinc-950 sticky top-0 h-screen overflow-y-auto">
-          <Sidebar user={user} onLogout={logout} />
+          <Sidebar user={user} onLogout={logout} unreadCount={summary.unread_count} />
         </aside>
 
         {/* ── Center feed column ── */}
@@ -124,7 +126,7 @@ export default function AppShell({ children }: AppShellProps) {
       </div>
 
       {/* ── Mobile bottom navigation bar ── */}
-      <MobileNav userId={user.id} username={user.username} />
+      <MobileNav userId={user.id} username={user.username} unreadCount={summary.unread_count} />
     </div>
   );
 }

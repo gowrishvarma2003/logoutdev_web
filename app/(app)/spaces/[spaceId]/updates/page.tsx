@@ -9,6 +9,7 @@ import Spinner from "@/components/ui/Spinner";
 import { ClockIcon, PlusIcon } from "@/components/ui/Icons";
 import * as api from "@/lib/services/spacesApi";
 import type { UpdateType } from "@/lib/types";
+import RichComposer from "@/components/ui/RichComposer";
 
 const UPDATE_TYPES: Array<{ value: UpdateType; label: string }> = [
   { value: "devlog",          label: "📝 Devlog" },
@@ -127,12 +128,13 @@ export default function UpdatesPage({
             className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
           />
 
-          <textarea
+          <RichComposer
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(value) => setContent(value)}
             placeholder="What happened?"
             rows={3}
-            className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 resize-none transition-colors"
+            previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-white"
+            className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors selection:bg-[#1d9bf0]/30"
           />
 
           {/* Structured fields */}

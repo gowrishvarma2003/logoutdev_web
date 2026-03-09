@@ -4,6 +4,7 @@ import type { SpaceUpdate } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils";
 import Avatar from "@/components/ui/Avatar";
 import { LinkIcon } from "@/components/ui/Icons";
+import RichText from "@/components/ui/RichText";
 
 const TYPE_STYLES: Record<string, { label: string; icon: string; color: string }> = {
   milestone:       { label: "Milestone",      icon: "🏁", color: "text-emerald-400 bg-emerald-500/10" },
@@ -46,28 +47,26 @@ export default function ProgressUpdateCard({ update }: { update: SpaceUpdate }) 
           </div>
 
           {/* Content */}
-          <p className="text-sm text-zinc-300 whitespace-pre-line mb-3">
-            {update.content}
-          </p>
+          <RichText text={update.content} className="mb-3 text-sm text-zinc-300 whitespace-pre-line" />
 
           {/* What shipped / Next up / Blockers */}
           <div className="space-y-2">
             {update.what_shipped && (
               <div className="flex gap-2 text-xs">
                 <span className="text-emerald-400 font-semibold shrink-0">Shipped:</span>
-                <span className="text-zinc-400">{update.what_shipped}</span>
+                <RichText text={update.what_shipped} as="span" className="text-zinc-400" />
               </div>
             )}
             {update.next_up && (
               <div className="flex gap-2 text-xs">
                 <span className="text-sky-400 font-semibold shrink-0">Next:</span>
-                <span className="text-zinc-400">{update.next_up}</span>
+                <RichText text={update.next_up} as="span" className="text-zinc-400" />
               </div>
             )}
             {update.blockers && (
               <div className="flex gap-2 text-xs">
                 <span className="text-rose-400 font-semibold shrink-0">Blocked:</span>
-                <span className="text-zinc-400">{update.blockers}</span>
+                <RichText text={update.blockers} as="span" className="text-zinc-400" />
               </div>
             )}
           </div>

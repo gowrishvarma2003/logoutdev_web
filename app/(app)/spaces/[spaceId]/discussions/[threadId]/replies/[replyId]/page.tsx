@@ -10,6 +10,8 @@ import { formatRelativeTime } from "@/lib/utils";
 import * as api from "@/lib/services/spacesApi";
 import type { DiscussionReply } from "@/lib/types";
 import Link from "next/link";
+import RichComposer, { type RichComposerHandle } from "@/components/ui/RichComposer";
+import RichText from "@/components/ui/RichText";
 
 const REPLY_LIMIT = 1000;
 
@@ -45,16 +47,13 @@ export default function DiscussionReplyThreadPage({
   const [replying, setReplying] = useState(false);
   const [replyError, setReplyError] = useState("");
   const [composerFocused, setComposerFocused] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const composerRef = useRef<RichComposerHandle>(null);
 
   const charCount = replyBody.length;
   const isOverLimit = charCount > REPLY_LIMIT;
 
   useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+    composerRef.current?.adjustHeight?.(160);
   }, [replyBody]);
 
   const replies = discussion?.replies ?? [];
@@ -148,9 +147,7 @@ export default function DiscussionReplyThreadPage({
                 {formatRelativeTime(targetReply.created_at)}
               </span>
             </div>
-            <p className="text-sm text-zinc-300 whitespace-pre-line leading-relaxed">
-              {targetReply.body}
-            </p>
+            <RichText text={targetReply.body} className="text-sm text-zinc-300 whitespace-pre-line leading-relaxed" />
           </div>
         </div>
       </div>
@@ -196,9 +193,7 @@ export default function DiscussionReplyThreadPage({
                       {formatRelativeTime(child.created_at)}
                     </span>
                   </div>
-                  <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
-                    {child.body}
-                  </p>
+                  <RichText text={child.body} className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line" />
                   <div className="mt-2 flex items-center justify-between text-xs">
                     <span className="inline-flex items-center gap-1.5 text-zinc-500">
                       <ChatIcon className="w-3.5 h-3.5" />
@@ -223,14 +218,20 @@ export default function DiscussionReplyThreadPage({
             <div className="flex gap-3 items-end">
               <Avatar user={user} size="sm" className="shrink-0 mb-0.5" />
               <div className="flex-1 relative">
-                <textarea
-                  ref={textareaRef}
+                <RichComposer
+                  ref={composerRef}
                   value={replyBody}
-                  onChange={(e) => setReplyBody(e.target.value)}
+                  onChange={(value) => setReplyBody(value)}
                   onFocus={() => setComposerFocused(true)}
                   placeholder="Reply to this post…"
                   rows={1}
-                  className={`w-full px-3.5 py-2.5 rounded-xl text-sm text-white placeholder:text-zinc-600
+                  previewClassName={`w-full px-3.5 py-2.5 rounded-xl text-sm leading-relaxed text-white
+                    bg-zinc-900 border transition-all duration-200
+                    ${composerFocused
+                      ? "border-zinc-600 ring-1 ring-zinc-700 pb-7"
+                      : "border-zinc-800 hover:border-zinc-700"}
+                    ${isOverLimit ? "border-rose-500/60 ring-rose-500/20" : ""}`}
+                  className={`w-full px-3.5 py-2.5 rounded-xl text-sm leading-relaxed text-transparent caret-white
                     bg-zinc-900 border transition-all duration-200 resize-none focus:outline-none
                     ${composerFocused
                       ? "border-zinc-600 ring-1 ring-zinc-700 pb-7"

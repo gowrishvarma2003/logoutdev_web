@@ -5,6 +5,7 @@ import { formatRelativeTime } from "@/lib/utils";
 import Avatar from "@/components/ui/Avatar";
 import { PinIcon, ChatIcon } from "@/components/ui/Icons";
 import Link from "next/link";
+import RichText from "@/components/ui/RichText";
 
 const CATEGORY_STYLES: Record<string, string> = {
   idea: "bg-violet-500/10 text-violet-400",
@@ -61,9 +62,7 @@ export default function DiscussionThreadCard({
             </h3>
 
             {discussion.body && (
-              <p className="text-sm text-zinc-400 leading-relaxed line-clamp-3 whitespace-pre-line">
-                {discussion.body}
-              </p>
+              <RichText text={discussion.body} className="text-sm text-zinc-400 leading-relaxed line-clamp-3 whitespace-pre-line" />
             )}
 
             <div className="mt-3 flex items-center gap-4 text-xs text-zinc-500">

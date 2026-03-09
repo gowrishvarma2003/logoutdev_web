@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import type { LaunchReview, User } from "@/lib/types";
+import RichComposer from "@/components/ui/RichComposer";
+import RichText from "@/components/ui/RichText";
 
 interface LaunchReviewPanelProps {
   reviews: LaunchReview[];
@@ -70,12 +72,13 @@ export default function LaunchReviewPanel({
                 className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
               />
 
-              <textarea
+              <RichComposer
                 value={body}
-                onChange={(e) => setBody(e.target.value)}
+                onChange={(value) => setBody(value)}
                 rows={4}
                 placeholder="Share what worked, what didn't, and your overall verdict"
-                className="w-full resize-y rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-7 text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+                previewClassName="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-7 text-white"
+                className="w-full resize-y rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-7 text-transparent caret-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none selection:bg-[#1d9bf0]/30"
               />
             </div>
 
@@ -153,7 +156,7 @@ export default function LaunchReviewPanel({
                   </span>
                 </div>
 
-                <p className="mt-4 text-sm leading-7 text-zinc-300 [overflow-wrap:anywhere]">{review.body}</p>
+                <RichText text={review.body} className="mt-4 text-sm leading-7 text-zinc-300 [overflow-wrap:anywhere]" />
               </article>
             );
           })}

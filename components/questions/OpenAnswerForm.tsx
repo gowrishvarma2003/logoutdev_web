@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import RichComposer from "@/components/ui/RichComposer";
 
 const MAX_LENGTH = 3000;
 
@@ -42,12 +43,13 @@ export default function OpenAnswerForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
-      <textarea
+      <RichComposer
         value={body}
-        onChange={(e) => setBody(e.target.value)}
+        onChange={(value) => setBody(value)}
         rows={5}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-600"
+        previewClassName="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm leading-relaxed text-white"
+        className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm leading-relaxed text-transparent caret-white outline-none focus:border-zinc-600 selection:bg-[#1d9bf0]/30"
       />
 
       <div className="flex items-center justify-between">

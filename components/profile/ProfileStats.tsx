@@ -32,14 +32,13 @@ function StatItem({ value, label }: StatItemProps) {
 export default function ProfileStats({ stats }: ProfileStatsProps) {
   return (
     <div className="px-5 py-4 border-y border-zinc-800">
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
         <StatItem value={stats.followers} label="Followers" />
         <StatItem value={stats.posts_count} label="Posts" />
-        <StatItem
-          value={stats.projects_created_count + stats.projects_contributed_count}
-          label="Projects"
-        />
-        <StatItem value={stats.discussions_started_count + stats.updates_posted_count} label="Updates" />
+        <StatItem value={stats.launches_published_count} label="Launches" />
+        <StatItem value={stats.freelance_wins_count} label="Wins" />
+        <StatItem value={stats.projects_created_count + stats.projects_contributed_count} label="Spaces" />
+        <StatItem value={stats.launch_reviews_received_count + stats.updates_posted_count} label="Signals" />
       </div>
     </div>
   );

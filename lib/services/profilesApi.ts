@@ -12,6 +12,9 @@ import type {
   ProjectSpace,
   ActivityItem,
   User,
+  Launch,
+  FreelanceProject,
+  FreelanceProposal,
 } from "../types";
 
 const API_BASE_URL =
@@ -97,6 +100,26 @@ export async function getProfileSignals(
 ): Promise<{ signals: ProofOfWorkSignals }> {
   const res = await fetch(
     `${API_BASE_URL}/api/profiles/${encodeURIComponent(username)}/signals`,
+    { headers: { ...getAuthHeaders() } }
+  );
+  return handleResponse(res);
+}
+
+export async function getProfileLaunches(
+  username: string
+): Promise<{ launches: Launch[] }> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/profiles/${encodeURIComponent(username)}/launches`,
+    { headers: { ...getAuthHeaders() } }
+  );
+  return handleResponse(res);
+}
+
+export async function getProfileFreelance(
+  username: string
+): Promise<{ client_projects: FreelanceProject[]; wins: FreelanceProposal[] }> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/profiles/${encodeURIComponent(username)}/freelance`,
     { headers: { ...getAuthHeaders() } }
   );
   return handleResponse(res);

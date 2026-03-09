@@ -10,6 +10,9 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import * as freelanceApi from "@/lib/services/freelanceApi";
 import { formatCurrencyFromCents } from "@/lib/utils";
 import { ArrowLeftIcon, CalendarIcon, MapPinIcon, BoltIcon } from "@/components/ui/Icons";
+import NextStepsPanel from "@/components/connected/NextStepsPanel";
+import RelatedEntitiesPanel from "@/components/connected/RelatedEntitiesPanel";
+import TrustContextCard from "@/components/connected/TrustContextCard";
 
 type ProposalPayload = {
   cover_note: string;
@@ -142,7 +145,19 @@ export default function FreelanceProjectDetailPage({
         </div>
       </div>
 
-      <div className="mt-6 rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6">
+      {(project.trust_context || project.next_steps?.length || project.related_entities?.length) ? (
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          {project.trust_context ? <TrustContextCard trust={project.trust_context} /> : null}
+          {project.next_steps ? <NextStepsPanel items={project.next_steps} /> : null}
+          {project.related_entities ? (
+            <div className="lg:col-span-2">
+              <RelatedEntitiesPanel items={project.related_entities} />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      <div id="apply" className="mt-6 rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6">
         <h2 className="text-lg font-bold text-white">Apply to this project</h2>
 
         {!user && (
@@ -201,6 +216,15 @@ export default function FreelanceProjectDetailPage({
         {user && !project.viewer_state?.is_owner && !project.viewer_state?.can_submit_proposal && !project.viewer_state?.has_submitted_proposal && (
           <p className="mt-3 text-sm text-zinc-400">This project is not accepting new proposals right now.</p>
         )}
+
+        <div className="mt-4">
+          <Link
+            href={`/feed?shareType=freelance_project&shareId=${project.id}&shareTitle=${encodeURIComponent(project.title)}&shareSubtitle=${encodeURIComponent(project.summary || "")}&shareHref=${encodeURIComponent(`/freelance/${project.id}`)}`}
+            className="inline-flex rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-800"
+          >
+            Share update
+          </Link>
+        </div>
       </div>
     </div>
   );

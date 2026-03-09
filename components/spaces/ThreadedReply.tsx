@@ -6,6 +6,7 @@ import { ChatIcon } from "@/components/ui/Icons";
 import { formatRelativeTime } from "@/lib/utils";
 import * as api from "@/lib/services/spacesApi";
 import type { DiscussionReply, User } from "@/lib/types";
+import RichText from "@/components/ui/RichText";
 
 const REPLY_LIMIT = 1000;
 const MAX_THREAD_DEPTH = 4;
@@ -158,9 +159,7 @@ export default function ThreadedReply({
         </div>
 
         {/* Reply body */}
-        <p className="text-sm text-zinc-300 whitespace-pre-line leading-relaxed">
-          {reply.body}
-        </p>
+        <RichText text={reply.body} className="text-sm text-zinc-300 whitespace-pre-line leading-relaxed" />
 
         {/* Action bar */}
         <div className="flex items-center gap-4 mt-2 text-xs">

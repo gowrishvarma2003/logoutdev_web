@@ -9,6 +9,7 @@ import Spinner from "@/components/ui/Spinner";
 import { PlusIcon, QuestionMarkCircleIcon } from "@/components/ui/Icons";
 import * as api from "@/lib/services/spacesApi";
 import type { SpaceIssuePriority, SpaceIssueStatus } from "@/lib/types";
+import RichComposer from "@/components/ui/RichComposer";
 
 const STATUS_OPTIONS: Array<{ value: "" | SpaceIssueStatus; label: string }> = [
   { value: "", label: "All statuses" },
@@ -154,12 +155,13 @@ export default function IssuesPage({
             maxLength={180}
             className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
           />
-          <textarea
+          <RichComposer
             value={body}
-            onChange={(e) => setBody(e.target.value)}
+            onChange={(value) => setBody(value)}
             placeholder="Describe what needs to be fixed or resolved"
             rows={4}
-            className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+            previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-white"
+            className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:border-zinc-600 focus:outline-none selection:bg-[#1d9bf0]/30"
           />
           <div className="flex items-center justify-end gap-2">
             {postError && <span className="mr-auto text-xs text-rose-400">{postError}</span>}
