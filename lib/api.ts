@@ -13,6 +13,8 @@ import type {
 } from "./types";
 import { API_BASE_URL } from "./apiBaseUrl";
 
+export { API_BASE_URL };
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function getAuthHeaders(): Record<string, string> {
