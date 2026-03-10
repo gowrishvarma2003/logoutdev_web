@@ -1,11 +1,9 @@
+import { API_BASE_URL } from "../apiBaseUrl";
 import type {
   FreelanceProject,
   FreelanceProjectListResponse,
   FreelanceProposal,
 } from "../types";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
 
 function getAuthHeaders(): Record<string, string> {
   if (typeof window === "undefined") return {};

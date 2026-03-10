@@ -16,8 +16,9 @@ import type {
   HealthScore,
   DecisionEntry,
 } from "../types";
+import { API_BASE_URL } from "../apiBaseUrl";
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+const API = API_BASE_URL;
 
 function authHeaders(): Record<string, string> {
   if (typeof window === "undefined") return {};

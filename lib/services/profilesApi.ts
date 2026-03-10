@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../apiBaseUrl";
 /**
  * profilesApi — all Developer Profile API calls.
  * Mirrors src/routes/profiles/profileRoutes.js endpoint contract.
@@ -16,9 +17,6 @@ import type {
   FreelanceProject,
   FreelanceProposal,
 } from "../types";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
