@@ -16,7 +16,9 @@ export default function FeedPage() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>("foryou");
 
-  const feed = useFeed("feed");
+  const forYouFeed = useFeed("explore", activeTab === "foryou");
+  const followingFeed = useFeed("feed", activeTab === "following");
+  const activeFeed = activeTab === "foryou" ? forYouFeed : followingFeed;
 
   if (!user) return null;
 
@@ -33,11 +35,26 @@ export default function FeedPage() {
     : null;
 
   const handlePostCreated = (post: Post) => {
-    feed.addPost(post);
+    forYouFeed.addPost(post);
+    followingFeed.addPost(post);
     if (linkedEntity) {
       router.replace("/feed");
     }
   };
+
+  const handlePostUpdated = (post: Post) => {
+    forYouFeed.updatePost(post);
+    followingFeed.updatePost(post);
+  };
+
+  const handlePostDeleted = (postId: string) => {
+    forYouFeed.removePost(postId);
+    followingFeed.removePost(postId);
+  };
+
+  const emptyMessage = activeTab === "foryou"
+    ? "No posts yet. Check back later for updates from across the community."
+    : "Follow some developers to see their posts here, or check For You.";
 
   return (
     <div>
@@ -74,16 +91,16 @@ export default function FeedPage() {
 
       {/* ── Post list ── */}
       <PostList
-        posts={feed.posts}
+        posts={activeFeed.posts}
         currentUser={user}
-        isLoading={feed.isLoading}
-        isLoadingMore={feed.isLoadingMore}
-        nextCursor={feed.nextCursor}
-        error={feed.error}
-        onUpdate={feed.updatePost}
-        onDelete={feed.removePost}
-        onLoadMore={feed.loadMore}
-        emptyMessage="Follow some developers to see their posts here, or check Explore."
+        isLoading={activeFeed.isLoading}
+        isLoadingMore={activeFeed.isLoadingMore}
+        nextCursor={activeFeed.nextCursor}
+        error={activeFeed.error}
+        onUpdate={handlePostUpdated}
+        onDelete={handlePostDeleted}
+        onLoadMore={activeFeed.loadMore}
+        emptyMessage={emptyMessage}
       />
     </div>
   );

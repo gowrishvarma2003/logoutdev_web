@@ -18,6 +18,7 @@ export function useFeed(type: FeedType, enabled = true) {
   const [error, setError] = useState<string | null>(null);
   // Prevent double-fetch in React strict mode
   const hasFetched = useRef(false);
+  const previousType = useRef<FeedType>(type);
 
   const fetchPage = useCallback(
     async (cursor?: string) => {
@@ -41,6 +42,14 @@ export function useFeed(type: FeedType, enabled = true) {
   );
 
   useEffect(() => {
+    if (previousType.current !== type) {
+      previousType.current = type;
+      hasFetched.current = false;
+      setPosts([]);
+      setNextCursor(null);
+      setError(null);
+    }
+
     if (!enabled) {
       setPosts([]);
       setNextCursor(null);
