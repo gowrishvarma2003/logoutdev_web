@@ -12,7 +12,13 @@ import { formatFileSize, formatRelativeTime } from "@/lib/utils";
 
 function getOrigin() {
   const configured = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (configured) return configured.replace(/\/api\/?$/, "");
+  if (configured) {
+    const sanitized = configured.replace(/\/api\/?$/, "");
+    if (typeof window !== "undefined" && window.location.protocol === "https:" && sanitized.startsWith("http://")) {
+      return window.location.origin;
+    }
+    return sanitized;
+  }
   if (typeof window !== "undefined") return window.location.origin;
   return "http://localhost:3000";
 }
