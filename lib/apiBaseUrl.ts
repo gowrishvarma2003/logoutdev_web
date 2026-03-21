@@ -9,7 +9,7 @@ function resolveApiBaseUrl() {
     typeof window !== "undefined" && window.location.protocol === "https:";
 
   if (isBrowserHttps && configuredApiBaseUrl.startsWith("http://")) {
-    return "/api";
+    return "";
   }
 
   return configuredApiBaseUrl;
