@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import { useRepoContext } from "../../layout";
 import { useRepoDiscussion } from "@/lib/hooks/useRepos";
@@ -13,10 +13,11 @@ import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/solid";
 export default function DiscussionDetailPage({
   params,
 }: {
-  params: { repoId: string; id: string };
+  params: Promise<{ repoId: string; id: string }>;
 }) {
+  const { repoId, id } = use(params);
   const { repo } = useRepoContext();
-  const { discussion, loading, error, refetch } = useRepoDiscussion(params.repoId, params.id);
+  const { discussion, loading, error, refetch } = useRepoDiscussion(repoId, id);
 
   const [replyBody, setReplyBody] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,7 +27,7 @@ export default function DiscussionDetailPage({
     if (!replyBody.trim()) return;
     setIsSubmitting(true);
     try {
-      await addRepoDiscussionComment(repo.id, params.id, {
+      await addRepoDiscussionComment(repo.id, id, {
         body: replyBody,
         parent_comment_id: parentId,
       });
@@ -42,7 +43,7 @@ export default function DiscussionDetailPage({
 
   const handleMarkAnswer = async (commentId: string) => {
     try {
-      await markRepoDiscussionAnswer(repo.id, params.id, commentId);
+      await markRepoDiscussionAnswer(repo.id, id, commentId);
       refetch();
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Failed to mark as answer");

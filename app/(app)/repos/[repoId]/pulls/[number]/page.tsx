@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { useRepoContext } from "../../layout";
 import {
   usePullRequest,
@@ -24,13 +24,14 @@ type TimelineItem =
 export default function PRConversationPage({
   params,
 }: {
-  params: { repoId: string; number: string }; // number as string from URL
+  params: Promise<{ repoId: string; number: string }>;
 }) {
+  const { number } = use(params);
   const { repo } = useRepoContext();
 
-  const { pullRequest, refetch: refetchPR } = usePullRequest(repo.id, params.number);
-  const { comments, loading: commentsLoading, refetch: refetchComments } = usePullRequestComments(repo.id, params.number);
-  const { reviews, loading: reviewsLoading } = usePullRequestReviews(repo.id, params.number);
+  const { pullRequest, refetch: refetchPR } = usePullRequest(repo.id, number);
+  const { comments, loading: commentsLoading, refetch: refetchComments } = usePullRequestComments(repo.id, number);
+  const { reviews, loading: reviewsLoading } = usePullRequestReviews(repo.id, number);
 
   const [commentBody, setCommentBody] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,7 +59,7 @@ export default function PRConversationPage({
     setIsSubmitting(true);
     setError(null);
     try {
-      await addPullRequestComment(repo.id, params.number, { body: commentBody });
+      await addPullRequestComment(repo.id, number, { body: commentBody });
       setCommentBody("");
       refetchComments();
     } catch (err: unknown) {
@@ -72,7 +73,7 @@ export default function PRConversationPage({
     setIsMerging(true);
     setError(null);
     try {
-      await mergePullRequest(repo.id, params.number);
+      await mergePullRequest(repo.id, number);
       refetchPR();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to merge pull request");
@@ -86,9 +87,9 @@ export default function PRConversationPage({
     setError(null);
     try {
       if (action === "close") {
-        await closePullRequest(repo.id, params.number);
+        await closePullRequest(repo.id, number);
       } else {
-        await reopenPullRequest(repo.id, params.number);
+        await reopenPullRequest(repo.id, number);
       }
       refetchPR();
     } catch (err: unknown) {

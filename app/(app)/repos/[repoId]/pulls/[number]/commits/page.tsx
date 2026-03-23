@@ -1,5 +1,6 @@
 "use client";
 
+import { use } from "react";
 import { useRepoContext } from "../../../layout";
 import { usePullRequestCommits } from "@/lib/hooks/useRepos";
 import Spinner from "@/components/ui/Spinner";
@@ -10,10 +11,11 @@ import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 export default function PRCommitsPage({
   params,
 }: {
-  params: { repoId: string; number: string }; // number as string from URL
+  params: Promise<{ repoId: string; number: string }>;
 }) {
+  const { number } = use(params);
   const { repo } = useRepoContext();
-  const { commits, loading, error } = usePullRequestCommits(repo.id, params.number);
+  const { commits, loading, error } = usePullRequestCommits(repo.id, number);
 
   if (loading) {
     return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { use, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRepoContext } from "../../layout";
@@ -20,11 +20,12 @@ export default function PullRequestLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { repoId: string; number: string }; // number is string from URL
+  params: Promise<{ repoId: string; number: string }>;
 }) {
+  const { number } = use(params);
   const { repo } = useRepoContext();
   const pathname = usePathname();
-  const { pullRequest: pr, loading, error } = usePullRequest(repo.id, params.number);
+  const { pullRequest: pr, loading, error } = usePullRequest(repo.id, number);
 
   const tabs = useMemo(() => {
     if (!pr) return [];

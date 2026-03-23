@@ -1,5 +1,6 @@
 "use client";
 
+import { use } from "react";
 import { useRepoContext } from "../../../layout";
 import { usePullRequestDiff } from "@/lib/hooks/useRepos";
 import Spinner from "@/components/ui/Spinner";
@@ -8,10 +9,11 @@ import { DocumentIcon } from "@heroicons/react/24/outline";
 export default function PRFilesPage({
   params,
 }: {
-  params: { repoId: string; number: string }; // number as string from URL
+  params: Promise<{ repoId: string; number: string }>;
 }) {
+  const { number } = use(params);
   const { repo } = useRepoContext();
-  const { diff, loading, error } = usePullRequestDiff(repo.id, params.number);
+  const { diff, loading, error } = usePullRequestDiff(repo.id, number);
 
   if (loading) {
     return (
