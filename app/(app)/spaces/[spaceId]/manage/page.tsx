@@ -100,7 +100,12 @@ function ProjectSettingsSection({
   const [description, setDescription] = useState(space?.description ?? "");
   const [status, setStatus] = useState<SpaceStatus>(space?.status ?? "idea");
   const [visibility, setVisibility] = useState<SpaceVisibility>(space?.visibility ?? "public");
-  const [repoUrl, setRepoUrl] = useState(space?.primary_repo_url ?? "");
+  const [workingInPublic, setWorkingInPublic] = useState(Boolean(space?.working_in_public));
+  const [currentFocus, setCurrentFocus] = useState(space?.current_focus ?? "");
+  const [openRoles, setOpenRoles] = useState((space?.open_roles ?? []).join(", "));
+  const [neededSkills, setNeededSkills] = useState((space?.needed_skills ?? []).join(", "));
+  const [contributionGuide, setContributionGuide] = useState(space?.contribution_guide ?? "");
+  const [responseSla, setResponseSla] = useState(space?.response_sla ?? "");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -111,7 +116,12 @@ function ProjectSettingsSection({
     setDescription(space.description ?? "");
     setStatus(space.status);
     setVisibility(space.visibility);
-    setRepoUrl(space.primary_repo_url ?? "");
+    setWorkingInPublic(Boolean(space.working_in_public));
+    setCurrentFocus(space.current_focus ?? "");
+    setOpenRoles((space.open_roles ?? []).join(", "));
+    setNeededSkills((space.needed_skills ?? []).join(", "));
+    setContributionGuide(space.contribution_guide ?? "");
+    setResponseSla(space.response_sla ?? "");
   }, [space]);
 
   async function handleSave() {
@@ -124,7 +134,12 @@ function ProjectSettingsSection({
         description: description.trim(),
         status,
         visibility,
-        primary_repo_url: repoUrl.trim() || undefined,
+        working_in_public: workingInPublic,
+        current_focus: currentFocus.trim() || undefined,
+        open_roles: openRoles.split(",").map((item) => item.trim()).filter(Boolean),
+        needed_skills: neededSkills.split(",").map((item) => item.trim()).filter(Boolean),
+        contribution_guide: contributionGuide.trim() || undefined,
+        response_sla: responseSla.trim() || undefined,
       });
       refetch();
       setEditing(false);
@@ -185,11 +200,48 @@ function ProjectSettingsSection({
             rows={3}
             className="w-full resize-none rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none transition-colors"
           />
+          <label className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-300">
+            <input
+              type="checkbox"
+              checked={workingInPublic}
+              onChange={(e) => setWorkingInPublic(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-700 bg-zinc-950"
+            />
+            Working in public
+          </label>
           <input
-            type="url"
-            value={repoUrl}
-            onChange={(e) => setRepoUrl(e.target.value)}
-            placeholder="External repository URL"
+            type="text"
+            value={currentFocus}
+            onChange={(e) => setCurrentFocus(e.target.value)}
+            placeholder="Current focus"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none transition-colors"
+          />
+          <input
+            type="text"
+            value={openRoles}
+            onChange={(e) => setOpenRoles(e.target.value)}
+            placeholder="Open roles, comma separated"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none transition-colors"
+          />
+          <input
+            type="text"
+            value={neededSkills}
+            onChange={(e) => setNeededSkills(e.target.value)}
+            placeholder="Needed skills, comma separated"
+            className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none transition-colors"
+          />
+          <textarea
+            value={contributionGuide}
+            onChange={(e) => setContributionGuide(e.target.value)}
+            rows={4}
+            placeholder="How people should contribute"
+            className="w-full resize-none rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none transition-colors"
+          />
+          <input
+            type="text"
+            value={responseSla}
+            onChange={(e) => setResponseSla(e.target.value)}
+            placeholder="Expected response time"
             className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none transition-colors"
           />
           <div className="flex gap-2">
@@ -235,7 +287,11 @@ function ProjectSettingsSection({
           <p><span className="text-zinc-500">Summary:</span> {space.summary}</p>
           <p><span className="text-zinc-500">Status:</span> {space.status}</p>
           <p><span className="text-zinc-500">Visibility:</span> {space.visibility}</p>
-          {space.primary_repo_url && <p><span className="text-zinc-500">External Repo:</span> {space.primary_repo_url}</p>}
+          <p><span className="text-zinc-500">Working in public:</span> {space.working_in_public ? "Yes" : "No"}</p>
+          {space.current_focus ? <p><span className="text-zinc-500">Current focus:</span> {space.current_focus}</p> : null}
+          {(space.open_roles?.length ?? 0) > 0 ? <p><span className="text-zinc-500">Open roles:</span> {space.open_roles?.join(", ")}</p> : null}
+          {(space.needed_skills?.length ?? 0) > 0 ? <p><span className="text-zinc-500">Needed skills:</span> {space.needed_skills?.join(", ")}</p> : null}
+          {space.response_sla ? <p><span className="text-zinc-500">Response SLA:</span> {space.response_sla}</p> : null}
         </div>
       )}
 

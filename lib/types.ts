@@ -364,16 +364,23 @@ export interface AuthResponse {
 
 export type SpaceStatus = "idea" | "building" | "shipping" | "paused" | "archived";
 export type SpaceVisibility = "public" | "private";
+export type RepositoryVisibility = "public" | "private";
 export type StackCategory = "frontend" | "backend" | "database" | "infra" | "tooling" | "other";
 export type StackMaturity = "planned" | "in-use" | "deprecated";
 export type MemberRole = "owner" | "maintainer" | "contributor";
 export type RepoRole = "read" | "write" | "admin";
 export type JoinRequestStatus = "pending" | "accepted" | "rejected" | "need-info" | "withdrawn";
-export type DiscussionCategory = "idea" | "decision" | "question" | "blocked" | "retrospective";
+export type DiscussionCategory = "idea" | "decision" | "question" | "blocked" | "retrospective" | "announcement";
 export type DiscussionStatus = "open" | "in-progress" | "resolved" | "closed";
 export type UpdateType = "milestone" | "devlog" | "release" | "blocker" | "weekly-summary";
 export type SpaceIssueStatus = "open" | "triaged" | "in-progress" | "resolved" | "closed";
 export type SpaceIssuePriority = "low" | "medium" | "high" | "critical";
+export type WorkItemType = "task" | "bug" | "feature" | "docs" | "research";
+export type WorkSort = "updated" | "created" | "priority" | "due_date";
+export type WorkDueState = "overdue" | "due_soon" | "scheduled" | "none";
+export type WorkReadiness = "ready" | "needs_triage";
+export type WorkView = "list" | "board" | "calendar" | "workload";
+export type MilestoneStatus = "planned" | "active" | "completed" | "archived";
 export type HealthBand = "Excellent" | "Healthy" | "Needs Attention";
 export type FreelancePricingModel = "fixed" | "hourly";
 export type FreelanceExperienceLevel = "any" | "junior" | "mid" | "senior";
@@ -399,13 +406,22 @@ export interface ProjectSpace {
   status: SpaceStatus;
   visibility: SpaceVisibility;
   primary_repo_url?: string;
+  working_in_public?: boolean;
+  current_focus?: string | null;
+  open_roles?: string[];
+  needed_skills?: string[];
+  contribution_guide?: string | null;
+  response_sla?: string | null;
   created_at: string;
   updated_at: string;
   owner?: User;
   members?: SpaceMember[];
   stack?: StackEntry[];
   repos?: SpaceRepo[];
+  attached_repos?: SpaceRepoAttachment[];
   memberCount?: number;
+  follower_count?: number;
+  is_following?: boolean;
   linked_launch?: {
     id: string;
     name: string;
@@ -421,11 +437,13 @@ export interface ProjectSpace {
   recent_posts?: Post[];
 }
 
-export interface SpaceRepo {
+export interface Repository {
   id: string;
-  space_id: string;
+  owner_id: string;
+  space_id?: string | null;
   name: string;
   slug: string;
+  visibility: RepositoryVisibility;
   description?: string | null;
   default_branch: string;
   created_by: string;
@@ -433,6 +451,44 @@ export interface SpaceRepo {
   created_at: string;
   updated_at: string;
   my_role?: RepoRole;
+  is_attached?: boolean;
+  owner?: User;
+  attached_space?: {
+    id: string;
+    name: string;
+    slug: string;
+    visibility: SpaceVisibility;
+  } | null;
+  community_files?: Array<{
+    key: string;
+    path: string;
+    name: string;
+  }>;
+  star_count?: number;
+  watcher_count?: number;
+  fork_count?: number;
+  is_starred?: boolean;
+  is_watching?: boolean;
+  watch_level?: "all" | "releases" | "ignore" | null;
+  forked_from?: {
+    id: string;
+    name: string;
+    slug: string;
+    owner?: { id: string; name: string; username: string };
+  } | null;
+}
+
+export type SpaceRepo = Repository;
+
+export interface SpaceRepoAttachment {
+  id: string;
+  kind: "managed" | "external";
+  label?: string | null;
+  position: number;
+  is_primary: boolean;
+  repo_id?: string | null;
+  external_url?: string | null;
+  repo?: Repository | null;
 }
 
 export interface RepoMember {
@@ -488,6 +544,183 @@ export interface RepoCommitResponse {
   commits: RepoCommit[];
 }
 
+export interface RepoBranch {
+  name: string;
+  oid: string;
+  is_default: boolean;
+  is_head: boolean;
+}
+
+export interface RepoTag {
+  name: string;
+  oid: string;
+  tag_oid?: string;
+  type: "annotated" | "lightweight";
+  message?: string;
+  tagger?: string;
+  tagged_at?: string;
+}
+
+export interface CommitDiffFile {
+  path: string;
+  status: "added" | "modified" | "deleted" | "renamed";
+  additions: number;
+  deletions: number;
+  patch?: string;
+}
+
+export interface CommitDetail {
+  oid: string;
+  short_oid: string;
+  parent_oids: string[];
+  message: string;
+  body: string;
+  author_name: string;
+  author_email: string;
+  authored_at: string;
+  stats: {
+    additions: number;
+    deletions: number;
+    files_changed: number;
+  };
+  files: CommitDiffFile[];
+}
+
+export interface RepoRelease {
+  id: string;
+  repo_id: string;
+  tag_name: string;
+  title: string;
+  body: string;
+  is_draft: boolean;
+  is_prerelease: boolean;
+  created_by: string;
+  published_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  author?: {
+    id: string;
+    name: string;
+    username: string;
+  };
+}
+
+export interface RepoForkEntry {
+  id: string;
+  repo: {
+    id: string;
+    name: string;
+    slug: string;
+    visibility: RepositoryVisibility;
+    owner?: { id: string; name: string; username: string };
+  } | null;
+  forker: { id: string; name: string; username: string } | null;
+  created_at: string;
+}
+
+export interface BranchProtectionRule {
+  id: string;
+  repo_id: string;
+  branch_pattern: string;
+  require_pr: boolean;
+  required_approvals: number;
+  dismiss_stale_reviews: boolean;
+  require_status_checks: boolean;
+  restrict_pushes: boolean;
+  allow_force_push: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  creator?: User;
+}
+
+export type RepoDiscussionCategory = "general" | "q&a" | "ideas" | "show-and-tell";
+
+export interface RepoDiscussion {
+  id: string;
+  repo_id: string;
+  author_id: string;
+  category: RepoDiscussionCategory;
+  title: string;
+  body: string;
+  is_pinned: boolean;
+  is_answered: boolean;
+  answer_comment_id?: string | null;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+  comments?: RepoDiscussionComment[];
+}
+
+export interface RepoDiscussionComment {
+  id: string;
+  discussion_id: string;
+  author_id: string;
+  parent_comment_id?: string | null;
+  body: string;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+  replies?: RepoDiscussionComment[];
+}
+
+export type PullRequestStatus = "open" | "merged" | "closed";
+export type PullRequestReviewStatus = "approved" | "changes_requested" | "commented" | "pending";
+
+export interface PullRequest {
+  id: string;
+  repo_id: string;
+  number: number;
+  title: string;
+  body: string;
+  source_branch: string;
+  target_branch: string;
+  status: PullRequestStatus;
+  is_draft: boolean;
+  author_id: string;
+  merged_by?: string | null;
+  merged_at?: string | null;
+  closed_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+  merger?: User | null;
+  commits_count?: number;
+  stats?: {
+    additions: number;
+    deletions: number;
+    files_changed: number;
+  };
+}
+
+export interface PullRequestReview {
+  id: string;
+  pull_request_id: string;
+  reviewer_id: string;
+  status: PullRequestReviewStatus;
+  body?: string | null;
+  submitted_at: string;
+  created_at: string;
+  updated_at: string;
+  reviewer?: User;
+}
+
+export interface PullRequestComment {
+  id: string;
+  pull_request_id: string;
+  review_id?: string | null;
+  author_id: string;
+  path?: string | null;
+  position?: number | null;
+  commit_id?: string | null;
+  body: string;
+  is_resolved: boolean;
+  parent_comment_id?: string | null;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+}
+
 export interface GitAccessToken {
   id: string;
   name: string;
@@ -540,10 +773,12 @@ export interface Discussion {
   is_pinned: boolean;
   status: DiscussionStatus;
   decision_summary?: string;
+  answer_reply_id?: string | null;
   created_at: string;
   updated_at: string;
   author?: User;
   replies?: DiscussionReply[];
+  answer_reply?: DiscussionReply | null;
   replyCount?: number;
 }
 
@@ -563,6 +798,8 @@ export interface SpaceUpdate {
   space_id: string;
   author_id: string;
   type: UpdateType;
+  repo_id?: string | null;
+  work_item_id?: string | null;
   title: string;
   content: string;
   what_shipped?: string;
@@ -572,27 +809,132 @@ export interface SpaceUpdate {
   created_at: string;
   updated_at: string;
   author?: User;
+  repo?: Repository | null;
+  work_item?: SpaceWorkItem | null;
 }
 
-export interface SpaceIssue {
+export interface SpaceMilestone {
+  id: string;
+  space_id: string;
+  created_by: string;
+  title: string;
+  description?: string | null;
+  status: MilestoneStatus;
+  target_date?: string | null;
+  position: number;
+  created_at: string;
+  updated_at: string;
+  creator?: User | null;
+}
+
+export interface SpaceWorkViewerState {
+  can_manage: boolean;
+  can_edit_content: boolean;
+  can_claim: boolean;
+  can_start: boolean;
+  can_resolve: boolean;
+  can_bulk_manage: boolean;
+  is_claimed_by_me: boolean;
+  is_member: boolean;
+}
+
+export interface SpaceWorkSummary {
+  total: number;
+  open: number;
+  unassigned: number;
+  blocked: number;
+  overdue: number;
+  due_soon: number;
+  stale: number;
+  ready_for_contributor: number;
+  needs_triage: number;
+  by_status: Record<SpaceIssueStatus, number>;
+}
+
+export interface SpaceWorkComment {
+  id: string;
+  issue_id: string;
+  author_id: string;
+  parent_comment_id?: string | null;
+  body: string;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+}
+
+export interface SpaceWorkActivityChange {
+  field: string;
+  label: string;
+  from?: string | null;
+  to?: string | null;
+}
+
+export interface SpaceWorkActivity {
+  id: string;
+  space_id: string;
+  issue_id: string;
+  actor_user_id?: string | null;
+  event_type: string;
+  payload?: {
+    source?: string;
+    title?: string;
+    type?: string;
+    update_id?: string;
+    comment_id?: string;
+    parent_comment_id?: string | null;
+    body_preview?: string;
+    changes?: SpaceWorkActivityChange[];
+  };
+  created_at: string;
+  actor?: User | null;
+}
+
+export interface SpaceWorkItem {
   id: string;
   space_id: string;
   author_id: string;
   assignee_user_id?: string | null;
+  repo_id?: string | null;
+  milestone_id?: string | null;
+  type: WorkItemType;
   title: string;
   body: string;
   status: SpaceIssueStatus;
   priority: SpaceIssuePriority;
+  good_first_task?: boolean;
+  help_wanted?: boolean;
+  blocked_reason?: string | null;
+  close_reason?: string | null;
+  estimate?: string | null;
+  target_date?: string | null;
+  needed_skill?: string | null;
   created_at: string;
   updated_at: string;
+  due_state?: WorkDueState;
+  is_stale?: boolean;
+  readiness?: WorkReadiness | null;
+  viewer_state?: SpaceWorkViewerState;
   author?: User;
   assignee?: User | null;
+  repo?: Pick<Repository, "id" | "name" | "slug" | "visibility"> | null;
+  milestone?: Pick<SpaceMilestone, "id" | "title" | "status" | "target_date"> | null;
+}
+
+export type SpaceIssue = SpaceWorkItem;
+
+export interface SpaceFollower {
+  id: string;
+  space_id: string;
+  user_id: string;
+  created_at: string;
+  user?: User;
 }
 
 export interface HealthScore {
   score: number;
   band: HealthBand;
   factors: Record<string, number>;
+  metrics?: Record<string, number>;
 }
 
 export interface DecisionEntry {

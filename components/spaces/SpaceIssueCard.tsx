@@ -18,7 +18,7 @@ export default function SpaceIssueCard({
 }) {
   return (
     <Link
-      href={`/spaces/${spaceId}/issues/${issue.id}`}
+      href={`/spaces/${spaceId}/work/${issue.id}`}
       className="block border-b border-zinc-800/60 px-4 py-4 transition-colors hover:bg-zinc-900/30"
     >
       <div className="flex items-start justify-between gap-3">
@@ -26,6 +26,19 @@ export default function SpaceIssueCard({
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <IssueStatusBadge status={issue.status} />
             <IssuePriorityBadge priority={issue.priority} />
+            <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-zinc-300">
+              {issue.type}
+            </span>
+            {issue.good_first_task ? (
+              <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-400">
+                Good first task
+              </span>
+            ) : null}
+            {issue.help_wanted ? (
+              <span className="rounded-full bg-sky-500/10 px-2.5 py-0.5 text-[11px] font-medium text-sky-400">
+                Help wanted
+              </span>
+            ) : null}
           </div>
 
           <h3 className="truncate text-sm font-semibold text-white">{issue.title}</h3>
@@ -37,6 +50,8 @@ export default function SpaceIssueCard({
             <span>Reported {formatRelativeTime(issue.created_at)}</span>
             <span>By {issue.author?.name ?? "Unknown"}</span>
             <span>{issue.assignee ? `Assigned to ${issue.assignee.name}` : "Unassigned"}</span>
+            {issue.repo ? <span>Repo: {issue.repo.name}</span> : null}
+            {issue.needed_skill ? <span>Needs {issue.needed_skill}</span> : null}
           </div>
         </div>
 

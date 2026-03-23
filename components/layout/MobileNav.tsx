@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HomeIcon, CompassIcon, UserIcon, RocketIcon, QuestionMarkCircleIcon, BoltIcon, BellIcon } from "@/components/ui/Icons";
+import {
+  HomeIcon,
+  CompassIcon,
+  UserIcon,
+  RocketIcon,
+  QuestionMarkCircleIcon,
+  BoltIcon,
+  BellIcon,
+  CodeBracketIcon,
+} from "@/components/ui/Icons";
 
 interface MobileNavProps {
   /** username or fallback user ID for the profile link */
@@ -22,6 +31,7 @@ export default function MobileNav({ userId, username, unreadCount = 0 }: MobileN
     { href: "/freelance", icon: <BoltIcon className="w-6 h-6" />, label: "Freelance" },
     { href: "/questions", icon: <QuestionMarkCircleIcon className="w-6 h-6" />, label: "Questions" },
     { href: "/spaces", icon: <RocketIcon className="w-6 h-6" />, label: "Spaces" },
+    { href: "/repos", icon: <CodeBracketIcon className="w-6 h-6" />, label: "Repos" },
     { href: `/profile/${profileSlug}`, icon: <UserIcon className="w-6 h-6" />, label: "Profile" },
   ];
 
@@ -36,6 +46,8 @@ export default function MobileNav({ userId, username, unreadCount = 0 }: MobileN
                 ? pathname.startsWith("/notifications")
               : label === "Freelance"
                 ? pathname.startsWith("/freelance")
+              : label === "Repos"
+                ? pathname.startsWith("/repos")
                 : pathname === href;
 
           return (

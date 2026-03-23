@@ -13,6 +13,7 @@ const CATEGORY_STYLES: Record<string, string> = {
   question: "bg-sky-500/10 text-sky-400",
   blocked: "bg-rose-500/10 text-rose-400",
   retrospective: "bg-amber-500/10 text-amber-400",
+  announcement: "bg-fuchsia-500/10 text-fuchsia-400",
 };
 
 /**
@@ -55,6 +56,16 @@ export default function DiscussionThreadCard({
                   Pinned
                 </span>
               )}
+              {discussion.answer_reply_id ? (
+                <span className="inline-flex items-center gap-1 rounded border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400">
+                  Answered
+                </span>
+              ) : null}
+              {discussion.status === "resolved" ? (
+                <span className="inline-flex items-center gap-1 rounded border border-sky-500/20 bg-sky-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-sky-400">
+                  Resolved
+                </span>
+              ) : null}
             </div>
 
             <h3 className="text-sm font-semibold text-white group-hover:text-sky-300 transition-colors mb-1.5 leading-snug">

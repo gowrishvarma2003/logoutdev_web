@@ -24,9 +24,26 @@ export default function AppShell({ children }: AppShellProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { summary } = useNotificationSummary(Boolean(user));
+  const isPublicSpaceRoute =
+    pathname === "/spaces"
+    || (
+      pathname.startsWith("/spaces/")
+      && pathname !== "/spaces/create"
+      && !pathname.includes("/settings")
+      && !pathname.endsWith("/join")
+      && !pathname.endsWith("/manage")
+    );
+  const isPublicRepoRoute =
+    pathname === "/repos"
+    || (
+      pathname.startsWith("/repos/")
+      && !pathname.endsWith("/settings")
+    );
   const allowsGuest = pathname === "/questions"
     || pathname.startsWith("/questions/")
     || pathname === "/explore"
+    || isPublicSpaceRoute
+    || isPublicRepoRoute
     || pathname === "/launches"
     || pathname === "/freelance"
     || (
@@ -63,7 +80,7 @@ export default function AppShell({ children }: AppShellProps) {
     return (
       <div className="min-h-screen bg-zinc-950">
         <header className="sticky top-0 z-20 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-md">
-          <div className="mx-auto flex max-w-[1120px] items-center justify-between px-4 py-4">
+          <div className="mx-auto flex max-w-[1520px] items-center justify-between px-4 py-4">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
                 <span className="text-xs font-bold text-zinc-950">LD</span>
@@ -88,7 +105,7 @@ export default function AppShell({ children }: AppShellProps) {
           </div>
         </header>
 
-        <main className="mx-auto min-h-screen w-full max-w-[860px] border-x border-zinc-800 bg-zinc-950">
+        <main className="mx-auto min-h-screen w-full max-w-[1020px] border-x border-zinc-800 bg-zinc-950">
           {children}
         </main>
       </div>
@@ -105,8 +122,8 @@ export default function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="min-h-screen bg-zinc-950">
-      {/* ── Centered 3-column wrapper: sidebar(240) + feed(600) + right(280) = 1120px ── */}
-      <div className="mx-auto flex min-h-screen w-full max-w-[1120px]">
+      {/* ── Centered 3-column wrapper with wider content area and reduced outer gutters ── */}
+      <div className="mx-auto flex min-h-screen w-full max-w-[1320px]">
         {/* ── Left sidebar (sticky, desktop only) ── */}
         <aside className="hidden lg:flex flex-col w-[240px] shrink-0 border-r border-zinc-800 bg-zinc-950 sticky top-0 h-screen overflow-y-auto">
           <Sidebar user={user} onLogout={logout} unreadCount={summary.unread_count} />

@@ -13,7 +13,7 @@ import type { DiscussionCategory } from "@/lib/types";
 import RichComposer from "@/components/ui/RichComposer";
 
 const CATEGORIES: DiscussionCategory[] = [
-  "idea", "question", "decision", "blocked", "retrospective",
+  "idea", "question", "decision", "blocked", "retrospective", "announcement",
 ];
 
 

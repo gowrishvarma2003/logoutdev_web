@@ -1,8 +1,11 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useUpdates, useContributors } from "@/lib/hooks/useSpaces";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useRepos } from "@/lib/hooks/useRepos";
+import { useIssues } from "@/lib/hooks/useSpaces";
 import ProgressUpdateCard from "@/components/spaces/ProgressUpdateCard";
 import { SectionHeader, EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
@@ -28,24 +31,59 @@ export default function UpdatesPage({
   params: Promise<{ spaceId: string }>;
 }) {
   const { spaceId } = use(params);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const { contributors } = useContributors(spaceId);
+  const { repos } = useRepos(spaceId);
+  const { issues } = useIssues(spaceId, { page: 1, limit: 100, sort: "updated" });
   const isMember = contributors.some((c) => c.user_id === user?.id);
+  const activeWorkItemId = searchParams.get("workItemId") || "";
+  const composeRequested = searchParams.get("compose") === "true";
+  const linkedWorkItem = useMemo(
+    () => issues.find((issue) => issue.id === activeWorkItemId) ?? null,
+    [issues, activeWorkItemId]
+  );
 
   const [page, setPage] = useState(1);
-  const { updates, total, loading, error, refetch } = useUpdates(spaceId, page);
+  const { updates, total, loading, error, refetch } = useUpdates(spaceId, page, {
+    work_item_id: activeWorkItemId || undefined,
+  });
 
   // Compose state
-  const [showComposer, setShowComposer] = useState(false);
+  const [composerOpen, setComposerOpen] = useState(false);
   const [type, setType] = useState<UpdateType>("devlog");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [whatShipped, setWhatShipped] = useState("");
   const [nextUp, setNextUp] = useState("");
   const [blockers, setBlockers] = useState("");
+  const [repoId, setRepoId] = useState("");
   const [evidenceLinks, setEvidenceLinks] = useState("");
   const [posting, setPosting] = useState(false);
   const [postError, setPostError] = useState("");
+  const showComposer = isMember && (composerOpen || composeRequested);
+
+  function updateQuery(patch: Record<string, string | null>) {
+    const next = new URLSearchParams(searchParams.toString());
+    Object.entries(patch).forEach(([key, value]) => {
+      if (!value) next.delete(key);
+      else next.set(key, value);
+    });
+    const query = next.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  }
+
+  function openComposer() {
+    setComposerOpen(true);
+    if (!composeRequested) updateQuery({ compose: "true" });
+  }
+
+  function closeComposer() {
+    setComposerOpen(false);
+    if (composeRequested) updateQuery({ compose: null });
+  }
 
   async function handlePost(e: React.FormEvent) {
     e.preventDefault();
@@ -62,6 +100,8 @@ export default function UpdatesPage({
         type,
         title: title.trim(),
         content: content.trim(),
+        repo_id: repoId || linkedWorkItem?.repo_id || undefined,
+        work_item_id: activeWorkItemId || undefined,
         what_shipped: whatShipped.trim() || undefined,
         next_up: nextUp.trim() || undefined,
         blockers: blockers.trim() || undefined,
@@ -74,8 +114,10 @@ export default function UpdatesPage({
       setWhatShipped("");
       setNextUp("");
       setBlockers("");
+      setRepoId("");
       setEvidenceLinks("");
-      setShowComposer(false);
+      closeComposer();
+      setPage(1);
       refetch();
     } catch (err: unknown) {
       setPostError(err instanceof Error ? err.message : "Failed to post");
@@ -92,15 +134,40 @@ export default function UpdatesPage({
         action={
           isMember && (
             <button
-              onClick={() => setShowComposer((v) => !v)}
+              onClick={() => {
+                if (showComposer) closeComposer();
+                else openComposer();
+              }}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white text-zinc-950 text-xs font-semibold hover:bg-zinc-100 transition-colors"
             >
               <PlusIcon className="w-3.5 h-3.5" />
-              Post Update
+              {showComposer ? "Close composer" : "Post Update"}
             </button>
           )
         }
       />
+
+      {activeWorkItemId ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 bg-zinc-900/20 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-white">
+              Showing updates for {linkedWorkItem?.title ?? "selected work item"}
+            </p>
+            <p className="text-xs text-zinc-500">
+              New updates from the work detail page will land here automatically.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setPage(1);
+              updateQuery({ workItemId: null });
+            }}
+            className="text-xs text-zinc-400 transition-colors hover:text-white"
+          >
+            Clear filter
+          </button>
+        </div>
+      ) : null}
 
       {/* ── Composer ──────────────────────────────────────────────────────── */}
       {showComposer && (
@@ -114,6 +181,42 @@ export default function UpdatesPage({
               {UPDATE_TYPES.map((t) => (
                 <option key={t.value} value={t.value}>
                   {t.label}
+                </option>
+              ))}
+            </select>
+            <select
+              value={repoId}
+              onChange={(e) => setRepoId(e.target.value)}
+              className="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-zinc-600"
+            >
+              <option value="">
+                {linkedWorkItem?.repo ? `Use linked repo (${linkedWorkItem.repo.name})` : "No linked repo"}
+              </option>
+              {repos.map((repo) => (
+                <option key={repo.id} value={repo.id}>
+                  {repo.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={activeWorkItemId}
+              onChange={(e) => {
+                const nextWorkItemId = e.target.value;
+                if (!repoId) {
+                  const nextWorkItem = issues.find((issue) => issue.id === nextWorkItemId);
+                  if (nextWorkItem?.repo_id) {
+                    setRepoId(nextWorkItem.repo_id);
+                  }
+                }
+                setPage(1);
+                updateQuery({ workItemId: nextWorkItemId || null });
+              }}
+              className="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-zinc-600"
+            >
+              <option value="">No linked work item</option>
+              {issues.slice(0, 50).map((issue) => (
+                <option key={issue.id} value={issue.id}>
+                  {issue.title}
                 </option>
               ))}
             </select>
@@ -136,6 +239,13 @@ export default function UpdatesPage({
             previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-white"
             className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors selection:bg-[#1d9bf0]/30"
           />
+
+          {linkedWorkItem ? (
+            <div className="rounded-xl border border-sky-500/20 bg-sky-500/10 px-3 py-2 text-xs text-sky-100">
+              Posting into <span className="font-semibold">{linkedWorkItem.title}</span>
+              {linkedWorkItem.repo ? ` and linking ${linkedWorkItem.repo.name}` : ""}.
+            </div>
+          ) : null}
 
           {/* Structured fields */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -176,7 +286,7 @@ export default function UpdatesPage({
             )}
             <button
               type="button"
-              onClick={() => setShowComposer(false)}
+              onClick={closeComposer}
               className="px-3 py-1.5 rounded-lg text-xs text-zinc-400 hover:text-white transition-colors"
             >
               Cancel

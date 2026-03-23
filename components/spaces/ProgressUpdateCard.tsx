@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import type { SpaceUpdate } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils";
 import Avatar from "@/components/ui/Avatar";
-import { LinkIcon } from "@/components/ui/Icons";
+import { LinkIcon, CodeBracketIcon, QuestionMarkCircleIcon } from "@/components/ui/Icons";
 import RichText from "@/components/ui/RichText";
 
 const TYPE_STYLES: Record<string, { label: string; icon: string; color: string }> = {
@@ -51,6 +52,28 @@ export default function ProgressUpdateCard({ update }: { update: SpaceUpdate }) 
 
           {/* What shipped / Next up / Blockers */}
           <div className="space-y-2">
+            {(update.repo || update.work_item) && (
+              <div className="flex flex-wrap gap-2 text-xs">
+                {update.repo ? (
+                  <Link
+                    href={`/repos/${update.repo.id}`}
+                    className="inline-flex items-center gap-1 rounded-full bg-zinc-800 px-2 py-1 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+                  >
+                    <CodeBracketIcon className="w-3 h-3" />
+                    {update.repo.name}
+                  </Link>
+                ) : null}
+                {update.work_item ? (
+                  <Link
+                    href={`/spaces/${update.space_id}/work/${update.work_item.id}`}
+                    className="inline-flex items-center gap-1 rounded-full bg-zinc-800 px-2 py-1 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+                  >
+                    <QuestionMarkCircleIcon className="w-3 h-3" />
+                    {update.work_item.title}
+                  </Link>
+                ) : null}
+              </div>
+            )}
             {update.what_shipped && (
               <div className="flex gap-2 text-xs">
                 <span className="text-emerald-400 font-semibold shrink-0">Shipped:</span>

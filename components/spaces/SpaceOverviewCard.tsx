@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ProjectSpace } from "@/lib/types";
 import { StatusBadge, VisibilityBadge } from "./SpaceBadges";
-import { UsersIcon, ChevronRightIcon } from "@/components/ui/Icons";
+import { UsersIcon, ChevronRightIcon, BoltIcon, FolderIcon } from "@/components/ui/Icons";
 import Avatar from "@/components/ui/Avatar";
 
 /**
@@ -48,6 +48,11 @@ export default function SpaceOverviewCard({ space }: { space: ProjectSpace }) {
       <div className="flex items-center gap-2 mb-4 flex-wrap">
         <StatusBadge status={space.status} />
         <VisibilityBadge visibility={space.visibility} />
+        {space.working_in_public ? (
+          <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
+            Build in public
+          </span>
+        ) : null}
       </div>
 
       {/* Stack preview (first 3 techs) */}
@@ -69,12 +74,39 @@ export default function SpaceOverviewCard({ space }: { space: ProjectSpace }) {
         </div>
       )}
 
+      {(space.open_roles?.length ?? 0) > 0 || (space.needed_skills?.length ?? 0) > 0 ? (
+        <div className="mb-4 flex flex-wrap gap-1.5">
+          {(space.open_roles ?? []).slice(0, 2).map((role) => (
+            <span key={role} className="rounded-md bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-300">
+              Role: {role}
+            </span>
+          ))}
+          {(space.needed_skills ?? []).slice(0, 2).map((skill) => (
+            <span key={skill} className="rounded-md bg-sky-500/10 px-2 py-0.5 text-[11px] text-sky-400">
+              {skill}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
       {/* Footer stats */}
       <div className="flex items-center gap-4 text-xs text-zinc-500">
         <span className="flex items-center gap-1">
           <UsersIcon className="w-3.5 h-3.5" />
           {memberCount} member{memberCount !== 1 ? "s" : ""}
         </span>
+        {(space.follower_count ?? 0) > 0 ? (
+          <span className="flex items-center gap-1">
+            <BoltIcon className="w-3.5 h-3.5" />
+            {space.follower_count} follow
+          </span>
+        ) : null}
+        {(space.attached_repos?.length ?? 0) > 0 ? (
+          <span className="flex items-center gap-1">
+            <FolderIcon className="w-3.5 h-3.5" />
+            {space.attached_repos?.length} repo
+          </span>
+        ) : null}
         {/* Member avatars (up to 3) */}
         {space.members && space.members.length > 0 && (
           <div className="flex -space-x-1.5 ml-auto">

@@ -13,8 +13,22 @@ import type {
   DiscussionReply,
   SpaceUpdate,
   SpaceIssue,
+  SpaceWorkItem,
   HealthScore,
   DecisionEntry,
+  SpaceRepoAttachment,
+  SpaceFollower,
+  RepositoryVisibility,
+  WorkItemType,
+  SpaceIssuePriority,
+  SpaceIssueStatus,
+  SpaceMilestone,
+  SpaceWorkActivity,
+  SpaceWorkComment,
+  SpaceWorkSummary,
+  WorkDueState,
+  WorkReadiness,
+  WorkSort,
 } from "../types";
 import { API_BASE_URL } from "../apiBaseUrl";
 
@@ -38,16 +52,27 @@ async function handleRes<T>(res: Response): Promise<T> {
   return data as T;
 }
 
-function qs(params: Record<string, string | number | undefined | boolean>): string {
-  const entries = Object.entries(params).filter(([, value]) => value !== undefined && value !== "");
+function qs(params: Record<string, string | number | undefined | boolean | null>): string {
+  const entries = Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== "");
   if (!entries.length) return "";
   return `?${entries.map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`).join("&")}`;
+}
+
+function mapManagedRepos(attachments: SpaceRepoAttachment[]): SpaceRepo[] {
+  return attachments
+    .filter((attachment) => attachment.kind === "managed" && attachment.repo)
+    .map((attachment) => attachment.repo as SpaceRepo);
 }
 
 export async function listSpaces(filters?: {
   status?: string;
   visibility?: string;
   tag?: string;
+  needed_skill?: string;
+  working_in_public?: boolean;
+  looking_for_contributors?: boolean;
+  good_first_tasks?: boolean;
+  recently_shipped?: boolean;
   mine?: boolean;
   page?: number;
   limit?: number;
@@ -57,6 +82,11 @@ export async function listSpaces(filters?: {
       status: filters?.status,
       visibility: filters?.visibility,
       tag: filters?.tag,
+      needed_skill: filters?.needed_skill,
+      working_in_public: filters?.working_in_public,
+      looking_for_contributors: filters?.looking_for_contributors,
+      good_first_tasks: filters?.good_first_tasks,
+      recently_shipped: filters?.recently_shipped,
       mine: filters?.mine,
       page: filters?.page,
       limit: filters?.limit,
@@ -80,6 +110,12 @@ export async function createSpace(body: {
   status?: string;
   visibility?: string;
   primary_repo_url?: string;
+  working_in_public?: boolean;
+  current_focus?: string;
+  open_roles?: string[];
+  needed_skills?: string[];
+  contribution_guide?: string;
+  response_sla?: string;
 }): Promise<{ space: ProjectSpace }> {
   const res = await fetch(`${API}/api/spaces`, {
     method: "POST",
@@ -98,6 +134,12 @@ export async function updateSpace(
     status: string;
     visibility: string;
     primary_repo_url: string;
+    working_in_public: boolean;
+    current_focus: string;
+    open_roles: string[];
+    needed_skills: string[];
+    contribution_guide: string;
+    response_sla: string;
   }>
 ): Promise<{ space: ProjectSpace }> {
   const res = await fetch(`${API}/api/spaces/${spaceId}`, {
@@ -116,11 +158,59 @@ export async function deleteSpace(spaceId: string): Promise<{ archived: boolean 
   return handleRes(res);
 }
 
-export async function listRepos(spaceId: string): Promise<{ repos: SpaceRepo[] }> {
-  const res = await fetch(`${API}/api/spaces/${spaceId}/repos`, {
+export async function listAttachments(spaceId: string): Promise<{ attachments: SpaceRepoAttachment[] }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/attachments`, {
     headers: { ...authHeaders() },
   });
   return handleRes(res);
+}
+
+export async function createAttachment(
+  spaceId: string,
+  body: {
+    repo_id?: string;
+    external_url?: string;
+    label?: string;
+    is_primary?: boolean;
+  }
+): Promise<{ attachment: SpaceRepoAttachment }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/attachments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function updateAttachment(
+  spaceId: string,
+  attachmentId: string,
+  body: Partial<{
+    label: string;
+    external_url: string;
+    position: number;
+    is_primary: boolean;
+  }>
+): Promise<{ attachment: SpaceRepoAttachment }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/attachments/${attachmentId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function deleteAttachment(spaceId: string, attachmentId: string): Promise<{ removed: boolean }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/attachments/${attachmentId}`, {
+    method: "DELETE",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function listRepos(spaceId: string): Promise<{ repos: SpaceRepo[] }> {
+  const { attachments } = await listAttachments(spaceId);
+  return { repos: mapManagedRepos(attachments) };
 }
 
 export async function createRepo(
@@ -129,6 +219,7 @@ export async function createRepo(
     name: string;
     description?: string;
     default_branch?: string;
+    visibility?: RepositoryVisibility;
   }
 ): Promise<{ repo: SpaceRepo }> {
   const res = await fetch(`${API}/api/spaces/${spaceId}/repos`, {
@@ -154,6 +245,7 @@ export async function updateRepo(
     description: string;
     slug: string;
     default_branch: string;
+    visibility: RepositoryVisibility;
   }>
 ): Promise<{ repo: SpaceRepo }> {
   const res = await fetch(`${API}/api/spaces/${spaceId}/repos/${repoId}`, {
@@ -311,6 +403,29 @@ export async function removeContributor(
   return handleRes(res);
 }
 
+export async function listFollowers(spaceId: string): Promise<{ followers: SpaceFollower[] }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/followers`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function followSpace(spaceId: string): Promise<{ follow: SpaceFollower }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/followers`, {
+    method: "POST",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function unfollowSpace(spaceId: string): Promise<{ removed: boolean }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/followers`, {
+    method: "DELETE",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
 export async function createJoinRequest(
   spaceId: string,
   body: {
@@ -407,6 +522,7 @@ export async function updateDiscussion(
     is_pinned: boolean;
     category: string;
     decision_summary: string;
+    answer_reply_id: string | null;
   }>
 ): Promise<{ thread: Discussion }> {
   const res = await fetch(`${API}/api/spaces/${spaceId}/discussions/${threadId}`, {
@@ -423,6 +539,8 @@ export async function createUpdate(
     type: string;
     title: string;
     content: string;
+    repo_id?: string;
+    work_item_id?: string;
     what_shipped?: string;
     next_up?: string;
     blockers?: string;
@@ -439,10 +557,14 @@ export async function createUpdate(
 
 export async function listUpdates(
   spaceId: string,
-  params?: { page?: number; limit?: number }
+  params?: { page?: number; limit?: number; work_item_id?: string }
 ): Promise<{ updates: SpaceUpdate[]; page: number; limit: number; total?: number }> {
   const res = await fetch(
-    `${API}/api/spaces/${spaceId}/updates${qs({ page: params?.page, limit: params?.limit })}`,
+    `${API}/api/spaces/${spaceId}/updates${qs({
+      page: params?.page,
+      limit: params?.limit,
+      work_item_id: params?.work_item_id,
+    })}`,
     { headers: { ...authHeaders() } }
   );
   return handleRes(res);
@@ -454,6 +576,8 @@ export async function patchUpdate(
   body: Partial<{
     title: string;
     content: string;
+    repo_id: string | null;
+    work_item_id: string | null;
     what_shipped: string;
     next_up: string;
     blockers: string;
@@ -479,15 +603,43 @@ export async function deleteUpdate(
   return handleRes(res);
 }
 
-export async function listIssues(
+export async function listWork(
   spaceId: string,
-  params?: { status?: string; priority?: string; assignee?: string; page?: number; limit?: number }
-): Promise<{ issues: SpaceIssue[]; page: number; limit: number; total?: number }> {
+  params?: {
+    status?: SpaceIssueStatus;
+    priority?: SpaceIssuePriority;
+    assignee?: string;
+    type?: WorkItemType;
+    repo_id?: string;
+    needed_skill?: string;
+    good_first?: boolean;
+    help_wanted?: boolean;
+    blocked?: boolean;
+    q?: string;
+    sort?: WorkSort;
+    due_state?: WorkDueState;
+    stale?: boolean;
+    readiness?: WorkReadiness;
+    page?: number;
+    limit?: number;
+  }
+): Promise<{ issues: SpaceWorkItem[]; page: number; limit: number; total?: number; sort?: WorkSort }> {
   const res = await fetch(
-    `${API}/api/spaces/${spaceId}/issues${qs({
+    `${API}/api/spaces/${spaceId}/work${qs({
       status: params?.status,
       priority: params?.priority,
       assignee: params?.assignee,
+      type: params?.type,
+      repo_id: params?.repo_id,
+      needed_skill: params?.needed_skill,
+      good_first: params?.good_first,
+      help_wanted: params?.help_wanted,
+      blocked: params?.blocked,
+      q: params?.q,
+      sort: params?.sort,
+      due_state: params?.due_state,
+      stale: params?.stale,
+      readiness: params?.readiness,
       page: params?.page,
       limit: params?.limit,
     })}`,
@@ -496,23 +648,264 @@ export async function listIssues(
   return handleRes(res);
 }
 
-export async function getIssue(spaceId: string, issueId: string): Promise<{ issue: SpaceIssue }> {
-  const res = await fetch(`${API}/api/spaces/${spaceId}/issues/${issueId}`, {
+export async function getWork(spaceId: string, issueId: string): Promise<{ issue: SpaceWorkItem }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/work/${issueId}`, {
     headers: { ...authHeaders() },
   });
   return handleRes(res);
 }
 
-export async function createIssue(
+export async function getWorkSummary(
   spaceId: string,
-  body: { title: string; body: string }
-): Promise<{ issue: SpaceIssue }> {
-  const res = await fetch(`${API}/api/spaces/${spaceId}/issues`, {
+  params?: {
+    status?: SpaceIssueStatus;
+    priority?: SpaceIssuePriority;
+    assignee?: string;
+    type?: WorkItemType;
+    repo_id?: string;
+    needed_skill?: string;
+    good_first?: boolean;
+    help_wanted?: boolean;
+    blocked?: boolean;
+    q?: string;
+    sort?: WorkSort;
+    due_state?: WorkDueState;
+    stale?: boolean;
+    readiness?: WorkReadiness;
+  }
+): Promise<{ summary: SpaceWorkSummary }> {
+  const res = await fetch(
+    `${API}/api/spaces/${spaceId}/work/summary${qs({
+      status: params?.status,
+      priority: params?.priority,
+      assignee: params?.assignee,
+      type: params?.type,
+      repo_id: params?.repo_id,
+      needed_skill: params?.needed_skill,
+      good_first: params?.good_first,
+      help_wanted: params?.help_wanted,
+      blocked: params?.blocked,
+      q: params?.q,
+      sort: params?.sort,
+      due_state: params?.due_state,
+      stale: params?.stale,
+      readiness: params?.readiness,
+    })}`,
+    { headers: { ...authHeaders() } }
+  );
+  return handleRes(res);
+}
+
+export async function createWork(
+  spaceId: string,
+  body: {
+    title: string;
+    body: string;
+    type?: WorkItemType;
+    priority?: SpaceIssuePriority;
+    repo_id?: string | null;
+    assignee_user_id?: string | null;
+    milestone_id?: string | null;
+    good_first_task?: boolean;
+    help_wanted?: boolean;
+    blocked_reason?: string;
+    estimate?: string;
+    target_date?: string;
+    needed_skill?: string;
+  }
+): Promise<{ issue: SpaceWorkItem }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/work`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(body),
   });
   return handleRes(res);
+}
+
+export async function updateWork(
+  spaceId: string,
+  issueId: string,
+  body: Partial<{
+    title: string;
+    body: string;
+    status: SpaceIssueStatus;
+    priority: SpaceIssuePriority;
+    type: WorkItemType;
+    repo_id: string | null;
+    assignee_user_id: string | null;
+    milestone_id: string | null;
+    good_first_task: boolean;
+    help_wanted: boolean;
+    blocked_reason: string | null;
+    close_reason: string | null;
+    estimate: string | null;
+    target_date: string | null;
+    needed_skill: string | null;
+  }>
+): Promise<{ issue: SpaceWorkItem }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/work/${issueId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function bulkUpdateWork(
+  spaceId: string,
+  issueIds: string[],
+  changes: Partial<{
+    status: SpaceIssueStatus;
+    priority: SpaceIssuePriority;
+    type: WorkItemType;
+    repo_id: string | null;
+    assignee_user_id: string | null;
+    milestone_id: string | null;
+    good_first_task: boolean;
+    help_wanted: boolean;
+    blocked_reason: string | null;
+    close_reason: string | null;
+    estimate: string | null;
+    target_date: string | null;
+    needed_skill: string | null;
+  }>
+): Promise<{ issues: SpaceWorkItem[]; updated: number }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/work/bulk`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ issue_ids: issueIds, changes }),
+  });
+  return handleRes(res);
+}
+
+export async function listWorkComments(spaceId: string, issueId: string): Promise<{ comments: SpaceWorkComment[] }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/work/${issueId}/comments`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function createWorkComment(
+  spaceId: string,
+  issueId: string,
+  body: string,
+  parentCommentId?: string
+): Promise<{ comment: SpaceWorkComment }> {
+  const path = parentCommentId
+    ? `${API}/api/spaces/${spaceId}/work/${issueId}/comments/${parentCommentId}/replies`
+    : `${API}/api/spaces/${spaceId}/work/${issueId}/comments`;
+  const res = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ body }),
+  });
+  return handleRes(res);
+}
+
+export async function getWorkActivity(
+  spaceId: string,
+  issueId: string,
+  params?: { page?: number; limit?: number }
+): Promise<{ activity: SpaceWorkActivity[]; page: number; limit: number; total?: number }> {
+  const res = await fetch(
+    `${API}/api/spaces/${spaceId}/work/${issueId}/activity${qs({ page: params?.page, limit: params?.limit })}`,
+    {
+    headers: { ...authHeaders() },
+    }
+  );
+  return handleRes(res);
+}
+
+export async function listMilestones(spaceId: string): Promise<{ milestones: SpaceMilestone[] }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/milestones`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function createMilestone(
+  spaceId: string,
+  body: {
+    title: string;
+    description?: string | null;
+    status?: SpaceMilestone["status"];
+    target_date?: string | null;
+  }
+): Promise<{ milestone: SpaceMilestone }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/milestones`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function updateMilestone(
+  spaceId: string,
+  milestoneId: string,
+  body: Partial<{
+    title: string;
+    description: string | null;
+    status: SpaceMilestone["status"];
+    target_date: string | null;
+    position: number;
+  }>
+): Promise<{ milestone: SpaceMilestone }> {
+  const res = await fetch(`${API}/api/spaces/${spaceId}/milestones/${milestoneId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function listIssues(
+  spaceId: string,
+  params?: {
+    status?: SpaceIssueStatus;
+    priority?: SpaceIssuePriority;
+    assignee?: string;
+    type?: WorkItemType;
+    repo_id?: string;
+    needed_skill?: string;
+    good_first?: boolean;
+    help_wanted?: boolean;
+    blocked?: boolean;
+    q?: string;
+    sort?: WorkSort;
+    due_state?: WorkDueState;
+    stale?: boolean;
+    readiness?: WorkReadiness;
+    page?: number;
+    limit?: number;
+  }
+): Promise<{ issues: SpaceIssue[]; page: number; limit: number; total?: number }> {
+  return listWork(spaceId, params);
+}
+
+export async function getIssue(spaceId: string, issueId: string): Promise<{ issue: SpaceIssue }> {
+  return getWork(spaceId, issueId);
+}
+
+export async function createIssue(
+  spaceId: string,
+  body: {
+    title: string;
+    body: string;
+    type?: WorkItemType;
+    priority?: SpaceIssuePriority;
+    repo_id?: string | null;
+    assignee_user_id?: string | null;
+    milestone_id?: string | null;
+    good_first_task?: boolean;
+    help_wanted?: boolean;
+    blocked_reason?: string;
+    estimate?: string;
+    target_date?: string;
+    needed_skill?: string;
+  }
+): Promise<{ issue: SpaceIssue }> {
+  return createWork(spaceId, body);
 }
 
 export async function updateIssue(
@@ -521,17 +914,22 @@ export async function updateIssue(
   body: Partial<{
     title: string;
     body: string;
-    status: string;
-    priority: string;
+    status: SpaceIssueStatus;
+    priority: SpaceIssuePriority;
+    type: WorkItemType;
+    repo_id: string | null;
     assignee_user_id: string | null;
+    milestone_id: string | null;
+    good_first_task: boolean;
+    help_wanted: boolean;
+    blocked_reason: string | null;
+    close_reason: string | null;
+    estimate: string | null;
+    target_date: string | null;
+    needed_skill: string | null;
   }>
 ): Promise<{ issue: SpaceIssue }> {
-  const res = await fetch(`${API}/api/spaces/${spaceId}/issues/${issueId}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json", ...authHeaders() },
-    body: JSON.stringify(body),
-  });
-  return handleRes(res);
+  return updateWork(spaceId, issueId, body);
 }
 
 export async function getHealth(spaceId: string): Promise<{ health: HealthScore }> {

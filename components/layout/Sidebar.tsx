@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
 import type { User } from "@/lib/types";
 import { emailToHandle } from "@/lib/utils";
 import Avatar from "@/components/ui/Avatar";
@@ -15,6 +14,7 @@ import {
   LogOutIcon,
   PencilSquareIcon,
   RocketIcon,
+  CodeBracketIcon,
   CogIcon,
   BoltIcon,
   SparklesIcon,
@@ -62,16 +62,12 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState(searchParams.get("q") || "");
-
-  useEffect(() => {
-    setQuery(searchParams.get("q") || "");
-  }, [searchParams]);
 
   function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const params = new URLSearchParams();
-    const trimmed = query.trim();
+    const formData = new FormData(event.currentTarget);
+    const trimmed = String(formData.get("q") || "").trim();
     if (trimmed) {
       params.set("q", trimmed);
     }
@@ -100,8 +96,9 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
 
       <form onSubmit={handleSearchSubmit} className="mb-6 px-1">
         <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          key={`${pathname}:${searchParams.toString()}`}
+          name="q"
+          defaultValue={searchParams.get("q") || ""}
           placeholder="Search builders, launches, spaces..."
           className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-zinc-700"
         />
@@ -151,6 +148,12 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
           icon={<RocketIcon />}
           label="Spaces"
           active={pathname.startsWith("/spaces")}
+        />
+        <NavItem
+          href="/repos"
+          icon={<CodeBracketIcon className="w-5 h-5" />}
+          label="Repos"
+          active={pathname.startsWith("/repos")}
         />
         <NavItem
           href={`/profile/${user.username || user.id}`}

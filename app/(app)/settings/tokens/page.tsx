@@ -67,7 +67,7 @@ export default function SettingsTokensPage() {
         <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
           <h2 className="text-sm font-semibold text-white">Create a Git access token</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Use this token as the password when cloning or pushing to a private space repository over HTTPS.
+            Use this token as the Git password when pushing to LogoutDev repositories over HTTPS. The same token works for attached space repos and top-level repos.
           </p>
           <p className="mt-1 text-xs text-zinc-600">
             If you set an expiry date, the token will remain valid until the end of that day.

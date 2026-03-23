@@ -38,6 +38,12 @@ export default function CreateSpacePage() {
   const [status, setStatus] = useState<SpaceStatus>("idea");
   const [visibility, setVisibility] = useState<SpaceVisibility>("public");
   const [repoUrl, setRepoUrl] = useState("");
+  const [workingInPublic, setWorkingInPublic] = useState(true);
+  const [currentFocus, setCurrentFocus] = useState("");
+  const [openRoles, setOpenRoles] = useState("");
+  const [neededSkills, setNeededSkills] = useState("");
+  const [contributionGuide, setContributionGuide] = useState("");
+  const [responseSla, setResponseSla] = useState("");
 
   // Stack
   const [stack, setStack] = useState<StackRow[]>([]);
@@ -73,12 +79,25 @@ export default function CreateSpacePage() {
         description: description.trim(),
         status,
         visibility,
-        primary_repo_url: repoUrl.trim() || undefined,
+        working_in_public: workingInPublic,
+        current_focus: currentFocus.trim() || undefined,
+        open_roles: openRoles.split(",").map((item) => item.trim()).filter(Boolean),
+        needed_skills: neededSkills.split(",").map((item) => item.trim()).filter(Boolean),
+        contribution_guide: contributionGuide.trim() || undefined,
+        response_sla: responseSla.trim() || undefined,
       });
 
       // Add stack if any
       if (stack.length > 0) {
         await api.replaceStack(space.id, stack);
+      }
+
+      if (repoUrl.trim()) {
+        await api.createAttachment(space.id, {
+          external_url: repoUrl.trim(),
+          label: "Project repo",
+          is_primary: true,
+        });
       }
 
       router.push(`/spaces/${space.id}`);
@@ -158,7 +177,7 @@ export default function CreateSpacePage() {
           {/* Repo URL */}
           <div>
             <label htmlFor="repo" className="block text-sm font-medium text-zinc-400 mb-1.5">
-              Repository URL
+              External Repo Or Docs Link
             </label>
             <input
               id="repo"
@@ -169,6 +188,22 @@ export default function CreateSpacePage() {
               className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-700 transition-colors"
             />
           </div>
+          <label className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-300">
+            <input
+              type="checkbox"
+              checked={workingInPublic}
+              onChange={(e) => setWorkingInPublic(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-700 bg-zinc-950"
+            />
+            This project is working in public
+          </label>
+          <input
+            type="text"
+            value={currentFocus}
+            onChange={(e) => setCurrentFocus(e.target.value)}
+            placeholder="Current focus, like shipping onboarding or stabilizing API"
+            className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-700 transition-colors"
+          />
         </section>
 
         {/* ── Section 2: Status & Visibility ──────────────────────────────── */}
@@ -293,6 +328,42 @@ export default function CreateSpacePage() {
               <PlusIcon className="w-4 h-4" />
             </button>
           </div>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-sm font-semibold text-zinc-300 uppercase tracking-wide">Collaboration Profile</h2>
+
+          <input
+            type="text"
+            value={openRoles}
+            onChange={(e) => setOpenRoles(e.target.value)}
+            placeholder="Open roles, comma separated"
+            className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-700 transition-colors"
+          />
+
+          <input
+            type="text"
+            value={neededSkills}
+            onChange={(e) => setNeededSkills(e.target.value)}
+            placeholder="Needed skills, comma separated"
+            className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-700 transition-colors"
+          />
+
+          <textarea
+            value={contributionGuide}
+            onChange={(e) => setContributionGuide(e.target.value)}
+            placeholder="How should people contribute? What do you expect from collaborators?"
+            rows={4}
+            className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-700 transition-colors resize-none"
+          />
+
+          <input
+            type="text"
+            value={responseSla}
+            onChange={(e) => setResponseSla(e.target.value)}
+            placeholder="Expected response time, like within 48 hours"
+            className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-700 transition-colors"
+          />
         </section>
 
         {/* ── Error message ───────────────────────────────────────────────── */}

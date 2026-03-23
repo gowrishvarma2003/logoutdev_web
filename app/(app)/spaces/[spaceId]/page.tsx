@@ -3,15 +3,32 @@
 import { use } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { useSpace, useStack, useContributors, useHealth, useDecisions, useUpdates, useIssues } from "@/lib/hooks/useSpaces";
-import { useRepos } from "@/lib/hooks/useRepos";
+import {
+  useSpace,
+  useStack,
+  useContributors,
+  useHealth,
+  useDecisions,
+  useUpdates,
+  useWork,
+  useWorkSummary,
+} from "@/lib/hooks/useSpaces";
 import TechStackPanel from "@/components/spaces/TechStackPanel";
 import CollaborationHealthBadge from "@/components/spaces/CollaborationHealthBadge";
 import DecisionLedgerCard from "@/components/spaces/DecisionLedgerCard";
 import ProgressUpdateCard from "@/components/spaces/ProgressUpdateCard";
 import SpaceIssueCard from "@/components/spaces/SpaceIssueCard";
 import Avatar from "@/components/ui/Avatar";
-import { LinkIcon, UsersIcon, ClockIcon, QuestionMarkCircleIcon } from "@/components/ui/Icons";
+import {
+  UsersIcon,
+  ClockIcon,
+  QuestionMarkCircleIcon,
+  CodeBracketIcon,
+  BoltIcon,
+  ChatBubbleIcon,
+  FolderIcon,
+  ExternalLinkIcon,
+} from "@/components/ui/Icons";
 import { SectionHeader, EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import { formatRelativeTime } from "@/lib/utils";
@@ -32,40 +49,131 @@ export default function SpaceOverviewPage({
   const { health } = useHealth(spaceId);
   const { decisions } = useDecisions(spaceId);
   const { updates } = useUpdates(spaceId);
-  const { issues } = useIssues(spaceId, { page: 1, limit: 10 });
-  const { repos } = useRepos(spaceId);
+  const { issues } = useWork(spaceId, { page: 1, limit: 20, sort: "updated" });
+  const { summary } = useWorkSummary(spaceId);
 
   if (!space) return null;
 
   const currentMembership = contributors.find((member) => member.user_id === user?.id) ?? null;
-  const canSeeRepos = space.owner_id === user?.id || currentMembership?.role === "maintainer" || repos.length > 0;
-  const openIssues = issues.filter((issue) => issue.status !== "resolved" && issue.status !== "closed").slice(0, 3);
+  const isOwnerOrMaintainer = space.owner_id === user?.id || currentMembership?.role === "maintainer";
+  const attachments = space.attached_repos ?? [];
+  const managedRepos = attachments.filter((attachment) => attachment.kind === "managed" && attachment.repo);
+  const resources = attachments.filter((attachment) => attachment.kind === "external");
+  const openWork = issues
+    .filter((issue) => issue.status !== "resolved" && issue.status !== "closed")
+    .slice(0, 4);
+  const openWorkCount = summary?.open ?? openWork.length;
+  const recentUpdates = updates.slice(0, 3);
+  const activeRoles = space.open_roles ?? [];
+  const neededSkills = space.needed_skills ?? [];
 
   return (
     <div className="divide-y divide-zinc-800">
-      {(space.description || space.primary_repo_url) && (
-        <section className="px-4 py-5">
-          {space.description && (
-            <p className="mb-3 whitespace-pre-line text-sm leading-relaxed text-zinc-300">
-              {space.description}
+      <section className="px-4 py-5">
+        <div className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
+          <div className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">Mission</p>
+            <p className="mt-3 whitespace-pre-line text-sm leading-7 text-zinc-300">
+              {space.description || "This space is still getting its public project brief written."}
             </p>
-          )}
-          {space.primary_repo_url && (
-            <a
-              href={space.primary_repo_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm text-sky-400 transition-colors hover:text-sky-300"
-            >
-              <LinkIcon className="h-3.5 w-3.5" />
-              {space.primary_repo_url.replace(/^https?:\/\//, "")}
-            </a>
-          )}
-        </section>
-      )}
 
-      <section className="p-4">
-        <CollaborationHealthBadge health={health} />
+            {space.current_focus ? (
+              <div className="mt-5 rounded-2xl border border-sky-500/20 bg-sky-500/10 px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sky-400">Current focus</p>
+                <p className="mt-1 text-sm text-sky-100">{space.current_focus}</p>
+              </div>
+            ) : null}
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              {space.working_in_public ? (
+                <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
+                  Working in public
+                </span>
+              ) : null}
+              {activeRoles.map((role) => (
+                <span key={role} className="rounded-full bg-zinc-800 px-3 py-1 text-xs font-medium text-zinc-200">
+                  Role: {role}
+                </span>
+              ))}
+              {neededSkills.map((skill) => (
+                <span key={skill} className="rounded-full bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-400">
+                  {skill}
+                </span>
+              ))}
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Link
+                href={user ? `/spaces/${spaceId}/join` : "/login"}
+                className="inline-flex items-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+              >
+                Start contributing
+              </Link>
+              <Link
+                href={`/spaces/${spaceId}/work`}
+                className="inline-flex items-center rounded-xl border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:bg-zinc-800"
+              >
+                Explore work
+              </Link>
+              {space.contribution_guide ? (
+                <a
+                  href={`#contribute`}
+                  className="inline-flex items-center rounded-xl border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:bg-zinc-800"
+                >
+                  Contribution guide
+                </a>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-5">
+              <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
+                <BoltIcon className="h-4 w-4 text-zinc-500" />
+                Build In Public Snapshot
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-3">
+                  <p className="text-[11px] uppercase tracking-wide text-zinc-500">Followers</p>
+                  <p className="mt-1 text-lg font-semibold text-white">{space.follower_count ?? 0}</p>
+                </div>
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-3">
+                  <p className="text-[11px] uppercase tracking-wide text-zinc-500">Contributors</p>
+                  <p className="mt-1 text-lg font-semibold text-white">{contributors.length}</p>
+                </div>
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-3">
+                  <p className="text-[11px] uppercase tracking-wide text-zinc-500">Attached repos</p>
+                  <p className="mt-1 text-lg font-semibold text-white">{managedRepos.length}</p>
+                </div>
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-3">
+                  <p className="text-[11px] uppercase tracking-wide text-zinc-500">Open work</p>
+                  <p className="mt-1 text-lg font-semibold text-white">{openWorkCount}</p>
+                </div>
+              </div>
+              {summary ? (
+                <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 px-3 py-2">
+                    <p className="text-zinc-500">Blocked</p>
+                    <p className="mt-0.5 font-semibold text-white">{summary.blocked}</p>
+                  </div>
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 px-3 py-2">
+                    <p className="text-zinc-500">Needs triage</p>
+                    <p className="mt-0.5 font-semibold text-white">{summary.needs_triage}</p>
+                  </div>
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 px-3 py-2">
+                    <p className="text-zinc-500">Ready</p>
+                    <p className="mt-0.5 font-semibold text-white">{summary.ready_for_contributor}</p>
+                  </div>
+                </div>
+              ) : null}
+              {space.response_sla ? (
+                <p className="mt-4 text-xs text-zinc-400">Expected response time: {space.response_sla}</p>
+              ) : null}
+            </div>
+
+            <CollaborationHealthBadge health={health} />
+          </div>
+        </div>
       </section>
 
       {(space.trust_context || space.next_steps?.length || space.related_entities?.length) ? (
@@ -79,16 +187,74 @@ export default function SpaceOverviewPage({
               <RelatedEntitiesPanel items={space.related_entities} />
             </div>
           ) : null}
-          <div className="mt-4">
-            <Link
-              href={`/feed?shareType=space&shareId=${space.id}&shareTitle=${encodeURIComponent(space.name)}&shareSubtitle=${encodeURIComponent(space.summary || "")}&shareHref=${encodeURIComponent(`/spaces/${space.id}`)}`}
-              className="inline-flex items-center rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-800"
-            >
-              Share update
-            </Link>
-          </div>
         </section>
       ) : null}
+
+      {(managedRepos.length > 0 || resources.length > 0) && (
+        <section>
+          <SectionHeader
+            title="Repos & Resources"
+            count={attachments.length}
+            action={
+              <Link href={`/spaces/${spaceId}/repos`} className="text-xs text-sky-400 transition-colors hover:text-sky-300">
+                Manage links →
+              </Link>
+            }
+          />
+          <div className="space-y-3 px-4 py-4">
+            {managedRepos.length > 0 ? (
+              <div className="grid gap-3">
+                {managedRepos.slice(0, 3).map((attachment) => (
+                  <Link
+                    key={attachment.id}
+                    href={`/repos/${attachment.repo?.id}`}
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 transition-colors hover:bg-zinc-900"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <CodeBracketIcon className="h-4 w-4 text-zinc-500" />
+                        <p className="truncate text-sm font-semibold text-white">{attachment.repo?.name}</p>
+                        {attachment.is_primary ? (
+                          <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                            Primary
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="mt-1 truncate text-xs text-zinc-500">
+                        {attachment.repo?.description || `${attachment.repo?.visibility} repository`}
+                      </p>
+                    </div>
+                    <span className="text-xs uppercase tracking-wide text-zinc-500">{attachment.repo?.my_role ?? "read"}</span>
+                  </Link>
+                ))}
+              </div>
+            ) : null}
+
+            {resources.length > 0 ? (
+              <div className="grid gap-3">
+                {resources.slice(0, 3).map((attachment) => (
+                  <a
+                    key={attachment.id}
+                    href={attachment.external_url ?? "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 transition-colors hover:bg-zinc-900"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <FolderIcon className="h-4 w-4 text-zinc-500" />
+                        <p className="truncate text-sm font-semibold text-white">{attachment.label || attachment.external_url}</p>
+                      </div>
+                      <p className="mt-1 truncate text-xs text-zinc-500">{attachment.external_url}</p>
+                    </div>
+                    <ExternalLinkIcon className="h-4 w-4 text-zinc-500" />
+                  </a>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </section>
+      )}
 
       <section>
         <SectionHeader title="Tech Stack" count={stack.length} />
@@ -107,16 +273,13 @@ export default function SpaceOverviewPage({
           count={updates.length}
           action={
             updates.length > 0 ? (
-              <Link
-                href={`/spaces/${spaceId}/updates`}
-                className="text-xs text-sky-400 transition-colors hover:text-sky-300"
-              >
-                View all â†’
+              <Link href={`/spaces/${spaceId}/updates`} className="text-xs text-sky-400 transition-colors hover:text-sky-300">
+                View all →
               </Link>
             ) : undefined
           }
         />
-        {updates.length === 0 ? (
+        {recentUpdates.length === 0 ? (
           <EmptyState
             icon={<ClockIcon className="w-10 h-10" />}
             title="No updates yet"
@@ -124,7 +287,7 @@ export default function SpaceOverviewPage({
           />
         ) : (
           <div>
-            {updates.slice(0, 3).map((update) => (
+            {recentUpdates.map((update) => (
               <ProgressUpdateCard key={update.id} update={update} />
             ))}
           </div>
@@ -144,26 +307,23 @@ export default function SpaceOverviewPage({
 
       <section>
         <SectionHeader
-          title="Open Issues"
-          count={openIssues.length}
+          title="Open Work"
+          count={openWorkCount}
           action={
-            <Link
-              href={`/spaces/${spaceId}/issues`}
-              className="text-xs text-sky-400 transition-colors hover:text-sky-300"
-            >
-              View all â†’
+            <Link href={`/spaces/${spaceId}/work`} className="text-xs text-sky-400 transition-colors hover:text-sky-300">
+              View all →
             </Link>
           }
         />
-        {openIssues.length === 0 ? (
+        {openWork.length === 0 ? (
           <EmptyState
             icon={<QuestionMarkCircleIcon className="w-10 h-10" />}
-            title="No open issues"
-            description="Problems, blockers, and bugs raised for this space will appear here."
+            title="No open work"
+            description="Tasks, bugs, docs, and research requests will appear here."
           />
         ) : (
           <div>
-            {openIssues.map((issue) => (
+            {openWork.map((issue) => (
               <SpaceIssueCard key={issue.id} issue={issue} spaceId={spaceId} compact />
             ))}
           </div>
@@ -172,14 +332,11 @@ export default function SpaceOverviewPage({
 
       <section>
         <SectionHeader
-          title="Contributors"
+          title="People"
           count={contributors.length}
           action={
-            <Link
-              href={`/spaces/${spaceId}/contributors`}
-              className="text-xs text-sky-400 transition-colors hover:text-sky-300"
-            >
-              View all â†’
+            <Link href={`/spaces/${spaceId}/people`} className="text-xs text-sky-400 transition-colors hover:text-sky-300">
+              View all →
             </Link>
           }
         />
@@ -201,23 +358,27 @@ export default function SpaceOverviewPage({
                 </div>
               </div>
             ))}
-            {contributors.length > 8 && (
-              <Link
-                href={`/spaces/${spaceId}/contributors`}
-                className="flex items-center rounded-xl bg-zinc-800 px-3 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-700"
-              >
-                +{contributors.length - 8} more
-              </Link>
-            )}
           </div>
         )}
       </section>
 
-      {space.recent_posts && space.recent_posts.length > 0 ? (
+      {space.contribution_guide ? (
+        <section id="contribute" className="px-4 py-5">
+          <div className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-5">
+            <div className="mb-3 flex items-center gap-2">
+              <ChatBubbleIcon className="h-4 w-4 text-zinc-500" />
+              <h2 className="text-sm font-semibold text-white">How To Contribute</h2>
+            </div>
+            <p className="whitespace-pre-line text-sm leading-7 text-zinc-300">{space.contribution_guide}</p>
+          </div>
+        </section>
+      ) : null}
+
+      {(space.recent_posts?.length ?? 0) > 0 ? (
         <section>
-          <SectionHeader title="Member posts" count={space.recent_posts.length} />
+          <SectionHeader title="Member Posts" count={space.recent_posts?.length ?? 0} />
           <div className="space-y-3 px-4 py-3">
-            {space.recent_posts.slice(0, 3).map((post) => (
+            {space.recent_posts?.slice(0, 3).map((post) => (
               <Link
                 key={post.id}
                 href={`/post/${post.id}`}
@@ -230,55 +391,16 @@ export default function SpaceOverviewPage({
         </section>
       ) : null}
 
-      {canSeeRepos && (
-        <section>
-          <SectionHeader
-            title="Repositories"
-            count={repos.length}
-            action={
-              <Link
-                href={`/spaces/${spaceId}/repos`}
-                className="text-xs text-sky-400 transition-colors hover:text-sky-300"
-              >
-                View all â†’
-              </Link>
-            }
-          />
-          {repos.length === 0 ? (
-            <EmptyState
-              icon={<LinkIcon className="w-10 h-10" />}
-              title="No repo access yet"
-              description="Private code repositories will appear here once you have access."
-            />
-          ) : (
-            <div className="divide-y divide-zinc-800/50">
-              {repos.slice(0, 3).map((repo) => (
-                <Link
-                  key={repo.id}
-                  href={`/spaces/${spaceId}/repos/${repo.id}`}
-                  className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-zinc-900/30"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-white">{repo.name}</p>
-                    {repo.description && (
-                      <p className="truncate text-xs text-zinc-500">{repo.description}</p>
-                    )}
-                  </div>
-                  <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] uppercase text-sky-400">
-                    {repo.my_role ?? "read"}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-      )}
-
       <section className="px-4 py-4 text-xs text-zinc-600">
         Created {formatRelativeTime(space.created_at)}
-        {space.updated_at && space.updated_at !== space.created_at && (
-          <> Â· Updated {formatRelativeTime(space.updated_at)}</>
-        )}
+        {space.updated_at && space.updated_at !== space.created_at ? (
+          <> · Updated {formatRelativeTime(space.updated_at)}</>
+        ) : null}
+        {isOwnerOrMaintainer ? (
+          <>
+            {" "}· <Link href={`/spaces/${spaceId}/manage`} className="text-zinc-500 transition-colors hover:text-zinc-300">Manage space</Link>
+          </>
+        ) : null}
       </section>
     </div>
   );
