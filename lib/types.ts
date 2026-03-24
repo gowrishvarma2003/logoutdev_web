@@ -481,6 +481,11 @@ export interface Repository {
   can_manage_rules?: boolean;
   can_manage_access?: boolean;
   can_archive?: boolean;
+  can_manage_general?: boolean;
+  can_manage_releases?: boolean;
+  can_manage_branches?: boolean;
+  can_manage_default_branch?: boolean;
+  can_comment?: boolean;
   is_attached?: boolean;
   owner?: User;
   attached_space?: {
