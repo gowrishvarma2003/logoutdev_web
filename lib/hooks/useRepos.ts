@@ -144,6 +144,27 @@ export function useRepoMembers(arg1: string, arg2?: string) {
   return useRepositoryMembers(repoId);
 }
 
+export function useRepoAccess(repoId: string) {
+  const result = useAsync(() => reposApi.getRepositoryAccessOverview(repoId), [repoId]);
+  return {
+    access: (result.data as import("../types").RepoAccessOverview | null)?.access ?? null,
+    collaborators: (result.data as import("../types").RepoAccessOverview | null)?.collaborators ?? [],
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+export function useRepoInsights(repoId: string) {
+  const result = useAsync(() => reposApi.getRepositoryInsights(repoId), [repoId]);
+  return {
+    insights: (result.data as import("../types").RepoInsights | null) ?? null,
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
 export function useRepositoryTree(repoId: string, ref?: string, path?: string) {
   const result = useAsync(() => reposApi.getRepositoryTree(repoId, { ref, path }), [repoId, ref, path]);
   return {
@@ -276,6 +297,41 @@ export function usePullRequests(repoId: string, state?: "open" | "closed" | "all
   };
 }
 
+export function usePullRequestHeadOptions(repoId: string) {
+  const result = useAsync(() => reposApi.getPullRequestHeadOptions(repoId), [repoId]);
+  return {
+    options: (result.data as { options: import("../types").PullRequestHeadOption[] } | null)?.options ?? [],
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+export function usePullRequestCompare(
+  repoId: string,
+  params?: { base_branch?: string; head_branch?: string; head_repo_id?: string }
+) {
+  const enabled = Boolean(params?.base_branch && params?.head_branch);
+  const result = useAsync(
+    () => (
+      enabled
+        ? reposApi.getPullRequestCompare(repoId, {
+            base_branch: params?.base_branch || "",
+            head_branch: params?.head_branch || "",
+            head_repo_id: params?.head_repo_id,
+          })
+        : Promise.resolve(null)
+    ),
+    [repoId, params?.base_branch, params?.head_branch, params?.head_repo_id, enabled]
+  );
+  return {
+    comparison: (result.data as import("../types").PullRequestCompare | null) ?? null,
+    loading: enabled ? result.loading : false,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
 export function usePullRequest(repoId: string, number: number | string) {
   const result = useAsync(() => reposApi.getPullRequest(repoId, number), [repoId, number]);
   return {
@@ -289,7 +345,10 @@ export function usePullRequest(repoId: string, number: number | string) {
 export function usePullRequestDiff(repoId: string, number: number | string) {
   const result = useAsync(() => reposApi.getPullRequestDiff(repoId, number), [repoId, number]);
   return {
-    diff: (result.data as { stats: any; files: any[] } | null) ?? null,
+    diff: (result.data as {
+      stats: { additions: number; deletions: number; files_changed: number };
+      files: import("../types").CommitDiffFile[];
+    } | null) ?? null,
     loading: result.loading,
     error: result.error,
     refetch: result.refetch,
@@ -356,7 +415,7 @@ export function useBranchProtectionRules(repoId: string) {
 export function useRepoDiscussions(repoId: string, category?: string) {
   const result = useAsync(() => reposApi.listRepoDiscussions(repoId, category), [repoId, category]);
   return {
-    discussions: (result.data as import("../types").RepoDiscussion[] | null) ?? [],
+    state: (result.data as import("../types").RepoDiscussionState | null) ?? null,
     loading: result.loading,
     error: result.error,
     refetch: result.refetch,
@@ -366,7 +425,7 @@ export function useRepoDiscussions(repoId: string, category?: string) {
 export function useRepoDiscussion(repoId: string, discussionId: string) {
   const result = useAsync(() => reposApi.getRepoDiscussion(repoId, discussionId), [repoId, discussionId]);
   return {
-    discussion: (result.data as { discussion: import("../types").RepoDiscussion } | null)?.discussion ?? null,
+    state: (result.data as import("../types").RepoDiscussionState | null) ?? null,
     loading: result.loading,
     error: result.error,
     refetch: result.refetch,

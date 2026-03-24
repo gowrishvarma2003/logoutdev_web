@@ -353,9 +353,14 @@ export default function ReposPage({
                     {attachment.repo.description ? (
                       <p className="mt-1 text-sm text-zinc-400">{attachment.repo.description}</p>
                     ) : null}
-                    <p className="mt-2 text-xs text-zinc-600">
-                      Created {new Date(attachment.repo.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                      <span>
+                        Created {new Date(attachment.repo.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </span>
+                      <span className="rounded-full border border-zinc-800 px-2 py-0.5 text-[11px] uppercase tracking-wide text-zinc-400">
+                        Role {attachment.repo.my_role ?? "read"}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -372,6 +377,13 @@ export default function ReposPage({
                     >
                       <ClockIcon className="h-3.5 w-3.5" />
                       Commits
+                    </Link>
+                    <Link
+                      href={`/repos/${attachment.repo.id}/pulls`}
+                      className="inline-flex items-center gap-1 rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-700"
+                    >
+                      <LinkIcon className="h-3.5 w-3.5" />
+                      Pull Requests
                     </Link>
                     {canManage ? (
                       <>

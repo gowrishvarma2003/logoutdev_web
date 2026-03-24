@@ -64,12 +64,20 @@ export default function RepoForksPage() {
               </div>
             </div>
             {fork.repo && (
-              <Link
-                href={`/repos/${fork.repo.id}`}
-                className="rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition-colors hover:bg-zinc-700"
-              >
-                Go to fork
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/repos/${repo.id}/pulls/new?head_repo_id=${encodeURIComponent(fork.repo.id)}`}
+                  className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/20"
+                >
+                  Open PR from this fork
+                </Link>
+                <Link
+                  href={`/repos/${fork.repo.id}`}
+                  className="rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition-colors hover:bg-zinc-700"
+                >
+                  Go to fork
+                </Link>
+              </div>
             )}
           </div>
         ))}

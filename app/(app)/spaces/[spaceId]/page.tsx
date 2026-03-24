@@ -59,6 +59,14 @@ export default function SpaceOverviewPage({
   const attachments = space.attached_repos ?? [];
   const managedRepos = attachments.filter((attachment) => attachment.kind === "managed" && attachment.repo);
   const resources = attachments.filter((attachment) => attachment.kind === "external");
+  const contributionResources = managedRepos.flatMap((attachment) =>
+    (attachment.repo?.community_files ?? []).map((file) => ({
+      key: `${attachment.repo?.id}:${file.key}`,
+      repoId: attachment.repo?.id ?? "",
+      label: `${attachment.repo?.name} · ${file.key}`,
+      path: file.path,
+    }))
+  );
   const openWork = issues
     .filter((issue) => issue.status !== "resolved" && issue.status !== "closed")
     .slice(0, 4);
@@ -115,7 +123,7 @@ export default function SpaceOverviewPage({
               >
                 Explore work
               </Link>
-              {space.contribution_guide ? (
+              {(space.contribution_guide || contributionResources.length > 0) ? (
                 <a
                   href={`#contribute`}
                   className="inline-flex items-center rounded-xl border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:bg-zinc-800"
@@ -362,14 +370,33 @@ export default function SpaceOverviewPage({
         )}
       </section>
 
-      {space.contribution_guide ? (
+      {(space.contribution_guide || contributionResources.length > 0) ? (
         <section id="contribute" className="px-4 py-5">
           <div className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-5">
             <div className="mb-3 flex items-center gap-2">
               <ChatBubbleIcon className="h-4 w-4 text-zinc-500" />
               <h2 className="text-sm font-semibold text-white">How To Contribute</h2>
             </div>
-            <p className="whitespace-pre-line text-sm leading-7 text-zinc-300">{space.contribution_guide}</p>
+            {space.contribution_guide ? (
+              <p className="whitespace-pre-line text-sm leading-7 text-zinc-300">{space.contribution_guide}</p>
+            ) : (
+              <p className="text-sm leading-7 text-zinc-400">
+                Use the linked repo docs below for contribution expectations, then coordinate work and discussion in this Space.
+              </p>
+            )}
+            {contributionResources.length > 0 ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {contributionResources.map((resource) => (
+                  <Link
+                    key={resource.key}
+                    href={`/repos/${resource.repoId}?path=${encodeURIComponent(resource.path)}&view=blob`}
+                    className="rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-800"
+                  >
+                    {resource.label}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
           </div>
         </section>
       ) : null}

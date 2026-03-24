@@ -37,13 +37,15 @@ export default function RepoPullRequestsPage() {
             Closed
           </button>
         </div>
-        <Link
-          href={`/repos/${repo.id}/pulls/new`}
-          className="flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-500 transition-colors"
-        >
-          <PlusIcon className="h-4 w-4" />
-          New pull request
-        </Link>
+        {repo.can_open_pr ? (
+          <Link
+            href={`/repos/${repo.id}/pulls/new`}
+            className="flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-500 transition-colors"
+          >
+            <PlusIcon className="h-4 w-4" />
+            New pull request
+          </Link>
+        ) : null}
       </div>
 
       {loading && (
@@ -89,7 +91,36 @@ export default function RepoPullRequestsPage() {
                   >
                     {pr.title}
                   </Link>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-zinc-500">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                    {pr.is_draft ? (
+                      <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-amber-300">
+                        Draft
+                      </span>
+                    ) : null}
+                    {pr.is_cross_repo ? (
+                      <span className="rounded-full border border-sky-500/20 bg-sky-500/10 px-2 py-0.5 text-sky-300">
+                        Fork
+                      </span>
+                    ) : null}
+                    <span
+                      className={`rounded-full border px-2 py-0.5 ${
+                        pr.mergeable_state === "clean"
+                          ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+                          : pr.mergeable_state === "dirty"
+                            ? "border-rose-500/20 bg-rose-500/10 text-rose-300"
+                            : "border-zinc-700 bg-zinc-800 text-zinc-300"
+                      }`}
+                    >
+                      {pr.mergeable_state || "unknown"}
+                    </span>
+                    <span className="rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-zinc-300">
+                      {pr.review_summary?.approvals_count || 0} approvals
+                    </span>
+                    <span className="rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-zinc-300">
+                      {pr.review_summary?.changes_requested_count || 0} changes requested
+                    </span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-zinc-500">
                     <span>
                       #{pr.number} opened {formatRelativeTime(pr.created_at)} by{" "}
                       <Link href={`/`} className="hover:text-blue-500 hover:underline">
@@ -99,11 +130,11 @@ export default function RepoPullRequestsPage() {
                     <span className="hidden sm:inline">&bull;</span>
                     <div className="flex items-center gap-1.5 font-mono text-xs">
                       <span className="bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">
-                        {pr.target_branch}
+                        {pr.base_label || pr.target_branch}
                       </span>
                       <ArrowsRightLeftIcon className="h-3 w-3" />
                       <span className="bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">
-                        {pr.source_branch}
+                        {pr.head_label || pr.source_branch}
                       </span>
                     </div>
                   </div>

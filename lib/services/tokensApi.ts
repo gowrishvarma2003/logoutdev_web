@@ -32,6 +32,7 @@ export async function listAccessTokens(): Promise<{ tokens: GitAccessToken[] }> 
 export async function createAccessToken(body: {
   name: string;
   expires_at?: string;
+  scopes?: Array<"git:read" | "git:write">;
 }): Promise<{ token: GitAccessToken; plaintext_token: string }> {
   const res = await fetch(`${API}/api/users/me/access-tokens`, {
     method: "POST",

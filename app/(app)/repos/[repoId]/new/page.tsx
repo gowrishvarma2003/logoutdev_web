@@ -22,6 +22,23 @@ export default function NewFilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  if (!repo.can_push) {
+    return (
+      <div className="mx-auto max-w-3xl rounded-xl border border-zinc-800 bg-zinc-950 p-6">
+        <h2 className="text-lg font-semibold text-white">Write access required</h2>
+        <p className="mt-2 text-sm text-zinc-400">
+          You can browse this repository, but adding files from the website requires write access.
+        </p>
+        <Link
+          href={`/repos/${repo.id}?ref=${encodeURIComponent(ref)}&path=${encodeURIComponent(initialPath)}`}
+          className="mt-4 inline-flex rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+        >
+          Back to repository
+        </Link>
+      </div>
+    );
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!filename.trim()) return;

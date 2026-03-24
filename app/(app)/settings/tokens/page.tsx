@@ -12,6 +12,8 @@ export default function SettingsTokensPage() {
   const [name, setName] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
   const [plaintext, setPlaintext] = useState("");
+  const [readScope, setReadScope] = useState(true);
+  const [writeScope, setWriteScope] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
 
@@ -21,6 +23,10 @@ export default function SettingsTokensPage() {
       setFormError("Token name is required.");
       return;
     }
+    if (!readScope && !writeScope) {
+      setFormError("Choose at least one scope.");
+      return;
+    }
 
     setSubmitting(true);
     setFormError("");
@@ -28,10 +34,13 @@ export default function SettingsTokensPage() {
       const response = await api.createAccessToken({
         name: name.trim(),
         expires_at: expiresAt || undefined,
+        scopes: [readScope ? "git:read" : null, writeScope ? "git:write" : null].filter(Boolean) as Array<"git:read" | "git:write">,
       });
       setPlaintext(response.plaintext_token);
       setName("");
       setExpiresAt("");
+      setReadScope(true);
+      setWriteScope(true);
       refetch();
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : "Failed to create token.");
@@ -67,7 +76,7 @@ export default function SettingsTokensPage() {
         <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
           <h2 className="text-sm font-semibold text-white">Create a Git access token</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Use this token as the Git password when pushing to LogoutDev repositories over HTTPS. The same token works for attached space repos and top-level repos.
+            Use this token as the Git password when pushing to LogoutDev repositories over HTTPS. You can now scope tokens to read-only or read/write Git access.
           </p>
           <p className="mt-1 text-xs text-zinc-600">
             If you set an expiry date, the token will remain valid until the end of that day.
@@ -87,6 +96,17 @@ export default function SettingsTokensPage() {
               onChange={(e) => setExpiresAt(e.target.value)}
               className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
             />
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-300">
+              <p className="font-medium text-white">Scopes</p>
+              <label className="mt-3 flex items-center gap-2">
+                <input type="checkbox" checked={readScope} onChange={(e) => setReadScope(e.target.checked)} />
+                <span>git:read</span>
+              </label>
+              <label className="mt-2 flex items-center gap-2">
+                <input type="checkbox" checked={writeScope} onChange={(e) => setWriteScope(e.target.checked)} />
+                <span>git:write</span>
+              </label>
+            </div>
             {formError && <p className="text-sm text-rose-400">{formError}</p>}
             <button
               type="submit"
@@ -129,6 +149,7 @@ export default function SettingsTokensPage() {
                       Prefix: {token.token_prefix}
                       {token.last_used_at ? ` · Last used ${new Date(token.last_used_at).toLocaleString()}` : " · Never used"}
                     </p>
+                    <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-zinc-500">{token.scopes.join(" · ")}</p>
                   </div>
                   <button
                     onClick={() => handleRevoke(token.id)}

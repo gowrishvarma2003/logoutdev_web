@@ -1,12 +1,17 @@
 import type {
+  RepoAccessOverview,
+  RepoCollaboratorCandidate,
   Repository,
   RepoMember,
   RepoTreeResponse,
   RepoBlobResponse,
   RepoReadmeResponse,
   RepoCommitResponse,
+  RepoInsights,
+  RepoRole,
   SpaceRepoAttachment,
   RepositoryVisibility,
+  RepoDiscussionState,
 } from "../types";
 import { API_BASE_URL } from "../apiBaseUrl";
 
@@ -116,7 +121,7 @@ export async function listRepositoryMembers(repoId: string): Promise<{ members: 
 export async function upsertRepositoryMember(
   repoId: string,
   userId: string,
-  role: "read" | "write"
+  role: RepoRole
 ): Promise<{ member: RepoMember }> {
   const res = await fetch(`${API}/api/repos/${repoId}/members/${userId}`, {
     method: "PUT",
@@ -129,6 +134,30 @@ export async function upsertRepositoryMember(
 export async function removeRepositoryMember(repoId: string, userId: string): Promise<{ removed: boolean }> {
   const res = await fetch(`${API}/api/repos/${repoId}/members/${userId}`, {
     method: "DELETE",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function getRepositoryAccessOverview(repoId: string): Promise<RepoAccessOverview> {
+  const res = await fetch(`${API}/api/repos/${repoId}/access`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function searchRepositoryCollaborators(
+  repoId: string,
+  q: string
+): Promise<{ users: RepoCollaboratorCandidate[] }> {
+  const res = await fetch(`${API}/api/repos/${repoId}/collaborators/search${qs({ q })}`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function getRepositoryInsights(repoId: string): Promise<RepoInsights> {
+  const res = await fetch(`${API}/api/repos/${repoId}/insights`, {
     headers: { ...authHeaders() },
   });
   return handleRes(res);
@@ -407,9 +436,30 @@ export async function listPullRequests(repoId: string, params?: { state?: "open"
   return handleRes<import("../types").PullRequest[]>(res);
 }
 
+export async function getPullRequestHeadOptions(repoId: string) {
+  const res = await fetch(`${API}/api/repos/${repoId}/pulls/head-options`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes<{ options: import("../types").PullRequestHeadOption[] }>(res);
+}
+
+export async function getPullRequestCompare(
+  repoId: string,
+  params: { base_branch: string; head_branch: string; head_repo_id?: string }
+) {
+  const res = await fetch(`${API}/api/repos/${repoId}/pulls/compare${qs({
+    base_branch: params.base_branch,
+    head_branch: params.head_branch,
+    head_repo_id: params.head_repo_id,
+  })}`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes<import("../types").PullRequestCompare>(res);
+}
+
 export async function createPullRequest(
   repoId: string,
-  body: { title: string; body?: string; source_branch: string; target_branch: string; is_draft?: boolean }
+  body: { title: string; body?: string; source_branch: string; target_branch: string; is_draft?: boolean; source_repo_id?: string; status_checks?: string[] }
 ) {
   const res = await fetch(`${API}/api/repos/${repoId}/pulls`, {
     method: "POST",
@@ -430,7 +480,7 @@ export async function getPullRequest(repoId: string, number: number | string) {
 export async function updatePullRequest(
   repoId: string,
   number: number | string,
-  body: Partial<{ title: string; body: string; is_draft: boolean }>
+  body: Partial<{ title: string; body: string; is_draft: boolean; status_checks: string[] }>
 ) {
   const res = await fetch(`${API}/api/repos/${repoId}/pulls/${number}`, {
     method: "PATCH",
@@ -591,14 +641,14 @@ export async function listRepoDiscussions(repoId: string, category?: string) {
   const res = await fetch(`${API}/api/repos/${repoId}/discussions${qs({ category })}`, {
     headers: { ...authHeaders() },
   });
-  return handleRes<import("../types").RepoDiscussion[]>(res);
+  return handleRes<RepoDiscussionState>(res);
 }
 
 export async function getRepoDiscussion(repoId: string, discussionId: string) {
   const res = await fetch(`${API}/api/repos/${repoId}/discussions/${discussionId}`, {
     headers: { ...authHeaders() },
   });
-  return handleRes<{ discussion: import("../types").RepoDiscussion }>(res);
+  return handleRes<RepoDiscussionState>(res);
 }
 
 export async function createRepoDiscussion(
@@ -610,7 +660,7 @@ export async function createRepoDiscussion(
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(body),
   });
-  return handleRes<{ discussion: import("../types").RepoDiscussion }>(res);
+  return handleRes<RepoDiscussionState>(res);
 }
 
 export async function addRepoDiscussionComment(
@@ -623,7 +673,7 @@ export async function addRepoDiscussionComment(
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(body),
   });
-  return handleRes<{ comment: import("../types").RepoDiscussionComment }>(res);
+  return handleRes<RepoDiscussionState>(res);
 }
 
 export async function markRepoDiscussionAnswer(repoId: string, discussionId: string, commentId: string) {
@@ -631,5 +681,5 @@ export async function markRepoDiscussionAnswer(repoId: string, discussionId: str
     method: "PUT",
     headers: { ...authHeaders() },
   });
-  return handleRes<{ discussion: import("../types").RepoDiscussion }>(res);
+  return handleRes<RepoDiscussionState>(res);
 }

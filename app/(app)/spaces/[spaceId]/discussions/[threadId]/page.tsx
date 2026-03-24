@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useMemo, useState, useRef, useEffect } from "react";
-import { useDiscussion, useContributors } from "@/lib/hooks/useSpaces";
+import { useDiscussion, useSpace } from "@/lib/hooks/useSpaces";
 import { useAuth } from "@/lib/hooks/useAuth";
 import Avatar from "@/components/ui/Avatar";
 import Spinner from "@/components/ui/Spinner";
@@ -60,9 +60,9 @@ export default function DiscussionThreadPage({
 }) {
   const { spaceId, threadId } = use(params);
   const { user } = useAuth();
+  const { space } = useSpace(spaceId);
   const { discussion, loading, error, refetch } = useDiscussion(spaceId, threadId);
-  const { contributors } = useContributors(spaceId);
-  const isMember = contributors.some((c) => c.user_id === user?.id);
+  const viewerPermissions = space?.viewer_permissions;
 
   const [replyBody, setReplyBody] = useState("");
   const [replying, setReplying] = useState(false);
@@ -78,7 +78,7 @@ export default function DiscussionThreadPage({
     composerRef.current?.adjustHeight?.(160);
   }, [replyBody]);
 
-  const replies = discussion?.replies ?? [];
+  const replies = useMemo(() => discussion?.replies ?? [], [discussion?.replies]);
   const rootReplies = useMemo(
     () => replies.filter((r) => !r.parent_reply_id),
     [replies]
@@ -92,6 +92,11 @@ export default function DiscussionThreadPage({
         return acc;
       }, {}),
     [replies]
+  );
+  const canReply = Boolean(
+    discussion
+    && viewerPermissions?.can_reply
+    && viewerPermissions.allowed_discussion_categories.includes(discussion.category)
   );
 
   async function handleReply(e: React.FormEvent) {
@@ -240,7 +245,7 @@ export default function DiscussionThreadPage({
       {rootReplies.length === 0 ? (
         <div className="flex flex-col items-center py-10 text-center px-4">
           <p className="text-sm text-zinc-600">
-            {isMember
+            {canReply
               ? "Be the first to reply to this discussion."
               : "No replies yet."}
           </p>
@@ -288,10 +293,10 @@ export default function DiscussionThreadPage({
       )}
 
       {/* Spacer so sticky composer doesn't cover last reply */}
-      {isMember && <div className="h-24" />}
+      {canReply && <div className="h-24" />}
 
       {/* ── ⑤ Sticky reply composer ───────────────────────────────────── */}
-      {isMember && (
+      {canReply ? (
         <div className="fixed bottom-0 left-0 right-0 z-20 bg-zinc-950/95 backdrop-blur-md border-t border-zinc-800 shadow-xl">
           <form onSubmit={handleReply} className="max-w-3xl mx-auto px-4 py-3">
             <div className="flex gap-3 items-end">
@@ -345,6 +350,14 @@ export default function DiscussionThreadPage({
               <p className="text-xs text-rose-400 mt-1.5 ml-11">{replyError}</p>
             )}
           </form>
+        </div>
+      ) : user ? (
+        <div className="border-t border-zinc-800 bg-zinc-950/60 px-5 py-4 text-sm text-zinc-400">
+          Replies in this thread are limited to contributors or to viewers allowed for the <span className="text-zinc-200">{discussion.category}</span> category.
+        </div>
+      ) : (
+        <div className="border-t border-zinc-800 bg-zinc-950/60 px-5 py-4 text-sm text-zinc-400">
+          Sign in to reply where this discussion category is open to public participants.
         </div>
       )}
     </div>

@@ -36,6 +36,16 @@ export default function EditFilePage({
     }
   }, [blob]);
 
+  if (!repo.can_push) {
+    return (
+      <EmptyState
+        icon={<DocumentIcon className="h-10 w-10" />}
+        title="Write access required"
+        description="Editing files from the website requires write access to this repository."
+      />
+    );
+  }
+
   if (!filePath) {
     return (
       <EmptyState

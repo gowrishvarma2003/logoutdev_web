@@ -89,10 +89,31 @@ export default function PullRequestLayout({
         <p>
           <span className="font-semibold text-zinc-200">{pr.author?.username}</span> wants to merge{" "}
           {pr.commits_count || 0} commits into{" "}
-          <span className="font-mono rounded bg-zinc-800 px-1.5 py-0.5 text-blue-400">{pr.target_branch}</span> from{" "}
-          <span className="font-mono rounded bg-zinc-800 px-1.5 py-0.5 text-blue-400">{pr.source_branch}</span>
+          <span className="font-mono rounded bg-zinc-800 px-1.5 py-0.5 text-blue-400">{pr.base_label || pr.target_branch}</span> from{" "}
+          <span className="font-mono rounded bg-zinc-800 px-1.5 py-0.5 text-blue-400">{pr.head_label || pr.source_branch}</span>
         </p>
+        {pr.is_cross_repo ? (
+          <span className="rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-300">
+            From fork
+          </span>
+        ) : null}
+        {!pr.source_branch_exists ? (
+          <span className="rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 text-xs font-medium text-rose-300">
+            Head branch missing
+          </span>
+        ) : null}
       </div>
+
+      {pr.rule_evaluation?.blocking_reasons?.length ? (
+        <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+          <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">Merge status</p>
+          <div className="mt-3 space-y-1 text-sm text-zinc-300">
+            {pr.rule_evaluation.blocking_reasons.map((reason) => (
+              <p key={reason}>{reason}</p>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {/* Tabs */}
       <div className="mb-6 flex overflow-x-auto border-b border-zinc-800">

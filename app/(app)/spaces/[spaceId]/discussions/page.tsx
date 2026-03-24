@@ -1,21 +1,17 @@
 "use client";
 
-import { use, useState } from "react";
-import { useDiscussions, useContributors } from "@/lib/hooks/useSpaces";
+import { use, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useDiscussions, useSpace } from "@/lib/hooks/useSpaces";
 import { useAuth } from "@/lib/hooks/useAuth";
 import DiscussionThreadCard from "../../../../../components/spaces/DiscussionThreadCard";
 import { EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import Avatar from "@/components/ui/Avatar";
-import { ChatBubbleIcon } from "@/components/ui/Icons";
+import { ChatBubbleIcon, LockIcon } from "@/components/ui/Icons";
 import * as api from "@/lib/services/spacesApi";
 import type { DiscussionCategory } from "@/lib/types";
 import RichComposer from "@/components/ui/RichComposer";
-
-const CATEGORIES: DiscussionCategory[] = [
-  "idea", "question", "decision", "blocked", "retrospective", "announcement",
-];
-
 
 /**
  * /spaces/[spaceId]/discussions
@@ -30,8 +26,13 @@ export default function DiscussionsPage({
 }) {
   const { spaceId } = use(params);
   const { user } = useAuth();
-  const { contributors } = useContributors(spaceId);
-  const isMember = contributors.some((c) => c.user_id === user?.id);
+  const { space } = useSpace(spaceId);
+  const viewerPermissions = space?.viewer_permissions;
+  const allowedCategories = useMemo(
+    () => viewerPermissions?.allowed_discussion_categories ?? [],
+    [viewerPermissions?.allowed_discussion_categories]
+  );
+  const canCreateDiscussion = Boolean(viewerPermissions?.can_create_discussion);
 
   const [page, setPage] = useState(1);
   const { discussions, total, loading, error, refetch } = useDiscussions(spaceId, page);
@@ -56,7 +57,7 @@ export default function DiscussionsPage({
       });
       setTitle("");
       setBody("");
-      setCategory("idea");
+      setCategory(allowedCategories[0] ?? "idea");
       refetch();
     } catch (err: unknown) {
       setPostError(err instanceof Error ? err.message : "Failed to post");
@@ -64,6 +65,21 @@ export default function DiscussionsPage({
       setPosting(false);
     }
   }
+
+  const postingHelpText = !user
+    ? "Sign in to join the discussion."
+    : canCreateDiscussion
+      ? "Spaces are the public collaboration home for this project."
+      : space?.visibility === "private"
+        ? "Only space contributors can post in this private space."
+        : "You can read discussions here, but posting is limited to categories available to your account.";
+
+  useEffect(() => {
+    if (allowedCategories.length === 0) return;
+    if (!allowedCategories.includes(category)) {
+      setCategory(allowedCategories[0]);
+    }
+  }, [allowedCategories, category]);
 
   return (
     <div className="flex flex-col">
@@ -79,7 +95,37 @@ export default function DiscussionsPage({
         </div>
       </div>
 
-      {isMember && (
+      {!user ? (
+        <div className="px-5 py-4 border-b border-zinc-800 bg-zinc-950/40">
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 px-4 py-3 text-sm text-zinc-300">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-semibold text-white">Sign in to participate</p>
+                <p className="mt-1 text-zinc-400">Public discussions are readable to everyone, but posting requires an account.</p>
+              </div>
+              <Link href="/login" className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+                Sign in
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {user && !canCreateDiscussion ? (
+        <div className="px-5 py-4 border-b border-zinc-800 bg-zinc-950/40">
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 px-4 py-3 text-sm text-zinc-300">
+            <div className="flex items-start gap-3">
+              <LockIcon className="mt-0.5 h-4 w-4 text-zinc-500" />
+              <div>
+                <p className="font-semibold text-white">Read-only for now</p>
+                <p className="mt-1 text-zinc-400">{postingHelpText}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {user && canCreateDiscussion && (
         <form onSubmit={handlePost} className="px-5 py-4 border-b border-zinc-800 bg-zinc-950/40">
           <div className="flex items-start gap-3">
             <Avatar user={user} size="sm" className="mt-1" />
@@ -106,7 +152,7 @@ export default function DiscussionsPage({
                   onChange={(e) => setCategory(e.target.value as DiscussionCategory)}
                   className="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 focus:outline-none focus:border-zinc-600"
                 >
-                  {CATEGORIES.map((c) => (
+                  {allowedCategories.map((c) => (
                     <option key={c} value={c}>
                       {c.charAt(0).toUpperCase() + c.slice(1)}
                     </option>
@@ -122,6 +168,7 @@ export default function DiscussionsPage({
                   {posting ? "Posting…" : "Post"}
                 </button>
               </div>
+              <p className="text-xs text-zinc-500">{postingHelpText}</p>
             </div>
           </div>
         </form>
@@ -139,7 +186,7 @@ export default function DiscussionsPage({
         <EmptyState
           icon={<ChatBubbleIcon className="w-10 h-10" />}
           title="No discussions yet"
-          description={isMember ? "Post the first idea for this space." : "No discussions have been started yet."}
+          description={canCreateDiscussion ? "Post the first idea for this space." : "No discussions have been started yet."}
         />
       )}
 

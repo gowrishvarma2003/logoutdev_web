@@ -9,7 +9,8 @@ import { Repository } from "@/lib/types";
 import { EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import { FolderIcon } from "@/components/ui/Icons";
-import { CodeBracketIcon, ClockIcon, Cog6ToothIcon, StarIcon, ArrowsRightLeftIcon, ChatBubbleLeftRightIcon, TagIcon, QueueListIcon } from "@heroicons/react/24/outline";
+import RepoCollaborationBanner from "@/components/repos/RepoCollaborationBanner";
+import { CodeBracketIcon, ClockIcon, Cog6ToothIcon, StarIcon, ArrowsRightLeftIcon, TagIcon, QueueListIcon, ChartBarIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 
 interface RepoContextType {
   repo: Repository;
@@ -85,15 +86,17 @@ export default function RepoLayout({
     );
   }
 
+  const canManageSettings = Boolean(repo.can_manage_general || repo.can_manage_access || repo.can_manage_rules);
+
   const tabs = [
     { name: "Code", href: `/repos/${repo.id}`, icon: CodeBracketIcon },
-    { name: "Discussions", href: `/repos/${repo.id}/discussions`, icon: ChatBubbleLeftRightIcon },
     { name: "Commits", href: `/repos/${repo.id}/commits`, icon: ClockIcon },
     { name: "Branches", href: `/repos/${repo.id}/branches`, icon: ArrowsRightLeftIcon },
     { name: "Pull Requests", href: `/repos/${repo.id}/pulls`, icon: QueueListIcon },
     { name: "Releases", href: `/repos/${repo.id}/releases`, icon: TagIcon },
     { name: "Forks", href: `/repos/${repo.id}/forks`, icon: ArrowsRightLeftIcon },
-    { name: "Settings", href: `/repos/${repo.id}/settings`, icon: Cog6ToothIcon },
+    { name: "Insights", href: `/repos/${repo.id}/insights`, icon: ChartBarIcon },
+    ...(canManageSettings ? [{ name: "Settings", href: `/repos/${repo.id}/settings`, icon: Cog6ToothIcon }] : []),
   ];
 
   return (
@@ -115,9 +118,31 @@ export default function RepoLayout({
                 <span className="ml-2 rounded-full border border-zinc-700 px-2 py-0.5 text-xs font-medium capitalize text-zinc-400">
                   {repo.visibility}
                 </span>
+                {repo.protected_default_branch ? (
+                  <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-300">
+                    <ShieldCheckIcon className="h-3.5 w-3.5" />
+                    Protected {repo.default_branch}
+                  </span>
+                ) : null}
               </div>
 
               <div className="flex items-center gap-2">
+                {repo.forked_from ? (
+                  <Link
+                    href={`/repos/${repo.forked_from.id}/pulls/new?head_repo_id=${encodeURIComponent(repo.id)}`}
+                    className="rounded-md border border-emerald-400/20 px-3 py-1.5 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-500/10"
+                  >
+                    Contribute Upstream
+                  </Link>
+                ) : null}
+                {repo.attached_space ? (
+                  <Link
+                    href={`/spaces/${repo.attached_space.id}`}
+                    className="rounded-md border border-sky-400/20 px-3 py-1.5 text-xs font-medium text-sky-300 transition-colors hover:bg-sky-500/10"
+                  >
+                    Open Space
+                  </Link>
+                ) : null}
                 <div className="flex h-[28px] overflow-hidden rounded-md border border-zinc-700 bg-zinc-800 text-xs font-medium text-zinc-300">
                   <button 
                     onClick={handleToggleStar}
@@ -173,6 +198,9 @@ export default function RepoLayout({
 
         {/* Action Content */}
         <main className="mx-auto max-w-[1280px] px-4 py-6 md:px-8">
+          <div className="mb-6">
+            <RepoCollaborationBanner repo={repo} />
+          </div>
           {children}
         </main>
       </div>

@@ -74,6 +74,22 @@ export interface NextStepItem {
   priority: number;
 }
 
+export interface SpaceViewerPermissions {
+  can_read: boolean;
+  can_reply: boolean;
+  can_create_discussion: boolean;
+  allowed_discussion_categories: DiscussionCategory[];
+  can_manage_discussions: boolean;
+}
+
+export interface RepositoryCollaborationHome {
+  type: "space" | "none";
+  space_id?: string;
+  href?: string;
+  can_contribute: boolean;
+  can_start_discussion: boolean;
+}
+
 export interface TrustContext {
   label: string;
   user: {
@@ -368,7 +384,7 @@ export type RepositoryVisibility = "public" | "private";
 export type StackCategory = "frontend" | "backend" | "database" | "infra" | "tooling" | "other";
 export type StackMaturity = "planned" | "in-use" | "deprecated";
 export type MemberRole = "owner" | "maintainer" | "contributor";
-export type RepoRole = "read" | "write" | "admin";
+export type RepoRole = "read" | "triage" | "write" | "maintain" | "admin";
 export type JoinRequestStatus = "pending" | "accepted" | "rejected" | "need-info" | "withdrawn";
 export type DiscussionCategory = "idea" | "decision" | "question" | "blocked" | "retrospective" | "announcement";
 export type DiscussionStatus = "open" | "in-progress" | "resolved" | "closed";
@@ -435,6 +451,7 @@ export interface ProjectSpace {
   related_entities?: RelatedEntityRef[];
   trust_context?: TrustContext | null;
   recent_posts?: Post[];
+  viewer_permissions?: SpaceViewerPermissions;
 }
 
 export interface Repository {
@@ -451,6 +468,19 @@ export interface Repository {
   created_at: string;
   updated_at: string;
   my_role?: RepoRole;
+  effective_role?: RepoRole | null;
+  inherited_role?: RepoRole | null;
+  direct_role?: RepoRole | null;
+  is_outside_collaborator?: boolean;
+  permissions?: RepoPermissions;
+  can_read?: boolean;
+  can_push?: boolean;
+  can_open_pr?: boolean;
+  can_review?: boolean;
+  can_merge?: boolean;
+  can_manage_rules?: boolean;
+  can_manage_access?: boolean;
+  can_archive?: boolean;
   is_attached?: boolean;
   owner?: User;
   attached_space?: {
@@ -459,6 +489,7 @@ export interface Repository {
     slug: string;
     visibility: SpaceVisibility;
   } | null;
+  collaboration_home?: RepositoryCollaborationHome;
   community_files?: Array<{
     key: string;
     path: string;
@@ -467,15 +498,40 @@ export interface Repository {
   star_count?: number;
   watcher_count?: number;
   fork_count?: number;
+  collaborator_count?: number;
   is_starred?: boolean;
   is_watching?: boolean;
   watch_level?: "all" | "releases" | "ignore" | null;
+  protected_default_branch?: {
+    branch_pattern: string;
+    require_pr: boolean;
+    required_approvals: number;
+    require_status_checks: boolean;
+  } | null;
   forked_from?: {
     id: string;
     name: string;
     slug: string;
     owner?: { id: string; name: string; username: string };
   } | null;
+}
+
+export interface RepoPermissions {
+  can_read: boolean;
+  can_push: boolean;
+  can_open_pr: boolean;
+  can_review: boolean;
+  can_merge: boolean;
+  can_manage_rules: boolean;
+  can_manage_access: boolean;
+  can_archive: boolean;
+  can_manage_general?: boolean;
+  can_manage_releases?: boolean;
+  can_manage_branches?: boolean;
+  can_manage_default_branch?: boolean;
+  can_comment?: boolean;
+  direct_role?: RepoRole | null;
+  inherited_role?: RepoRole | null;
 }
 
 export type SpaceRepo = Repository;
@@ -495,8 +551,13 @@ export interface RepoMember {
   id: string;
   repo_id: string;
   user_id: string;
-  role: Exclude<RepoRole, "admin">;
-  granted_by: string;
+  role?: RepoRole;
+  direct_role?: RepoRole | null;
+  inherited_role?: RepoRole | null;
+  effective_role?: RepoRole | null;
+  source?: string;
+  is_outside_collaborator?: boolean;
+  granted_by?: string | null;
   created_at: string;
   user?: User;
 }
@@ -618,6 +679,25 @@ export interface RepoForkEntry {
   created_at: string;
 }
 
+export interface RepoRefSummary {
+  id: string;
+  name: string;
+  slug: string;
+  owner_id: string;
+  default_branch: string;
+  visibility: RepositoryVisibility;
+  owner?: {
+    id: string;
+    name: string;
+    username: string;
+  } | null;
+  space?: {
+    id: string;
+    slug: string;
+    name: string;
+  } | null;
+}
+
 export interface BranchProtectionRule {
   id: string;
   repo_id: string;
@@ -626,8 +706,12 @@ export interface BranchProtectionRule {
   required_approvals: number;
   dismiss_stale_reviews: boolean;
   require_status_checks: boolean;
+  required_status_contexts: string[];
   restrict_pushes: boolean;
+  push_role_min: "write" | "maintain" | "admin";
   allow_force_push: boolean;
+  allow_deletions: boolean;
+  require_linear_history: boolean;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -664,12 +748,62 @@ export interface RepoDiscussionComment {
   replies?: RepoDiscussionComment[];
 }
 
+export interface RepoDiscussionState {
+  mode: "space_handoff" | "setup_required";
+  message: string;
+  collaboration_home: RepositoryCollaborationHome;
+  viewer_permissions?: SpaceViewerPermissions;
+}
+
 export type PullRequestStatus = "open" | "merged" | "closed";
 export type PullRequestReviewStatus = "approved" | "changes_requested" | "commented" | "pending";
+export type PullRequestMergeableState = "clean" | "blocked" | "draft" | "dirty" | "unknown" | "head_missing";
+
+export interface PullRequestCompare {
+  base_repo_id: string;
+  base_branch: string;
+  head_repo_id: string;
+  head_branch: string;
+  head_label: string;
+  base_label: string;
+  is_cross_repo: boolean;
+  base_branch_exists: boolean;
+  source_branch_exists: boolean;
+  ahead_by: number;
+  behind_by: number;
+  mergeability_state: PullRequestMergeableState;
+  blocking_reasons: string[];
+  commits: RepoCommit[];
+  diff: {
+    stats: {
+      additions: number;
+      deletions: number;
+      files_changed: number;
+    };
+    files: CommitDiffFile[];
+  };
+  existing_open_pull_request?: {
+    id: string;
+    number: number;
+    title: string;
+    status: PullRequestStatus;
+  } | null;
+}
+
+export interface PullRequestHeadOption {
+  repo_id: string;
+  owner_username: string;
+  repo_name: string;
+  is_same_repo: boolean;
+  is_fork: boolean;
+  default_branch: string;
+  writable_branches: string[];
+}
 
 export interface PullRequest {
   id: string;
   repo_id: string;
+  source_repo_id: string;
   number: number;
   title: string;
   body: string;
@@ -677,6 +811,7 @@ export interface PullRequest {
   target_branch: string;
   status: PullRequestStatus;
   is_draft: boolean;
+  status_checks?: string[];
   author_id: string;
   merged_by?: string | null;
   merged_at?: string | null;
@@ -685,7 +820,55 @@ export interface PullRequest {
   updated_at: string;
   author?: User;
   merger?: User | null;
+  base_repo?: RepoRefSummary | null;
+  source_repo?: RepoRefSummary | null;
+  is_cross_repo?: boolean;
+  source_branch_exists?: boolean;
+  head_label?: string;
+  base_label?: string;
+  compare_summary?: {
+    ahead_by: number;
+    behind_by: number;
+    base_branch_exists: boolean;
+    source_branch_exists: boolean;
+  };
   commits_count?: number;
+  mergeable_state?: PullRequestMergeableState;
+  review_summary?: {
+    approvals_count: number;
+    changes_requested_count: number;
+    commenters_count: number;
+    stale_reviews_count: number;
+    latest_by_reviewer: Array<{
+      reviewer_id: string;
+      reviewer?: User | null;
+      status: PullRequestReviewStatus;
+      submitted_at: string;
+      is_stale: boolean;
+    }>;
+  };
+  rule_evaluation?: {
+    protected_branch: boolean;
+    required_approvals: number;
+    dismiss_stale_reviews?: boolean;
+    require_status_checks?: boolean;
+    review_summary: PullRequest["review_summary"];
+    source_branch_exists?: boolean;
+    status_checks: {
+      required: string[];
+      passed: string[];
+      pending: string[];
+      satisfied: boolean;
+    };
+    merge_allowed: boolean;
+    mergeable_state: PullRequestMergeableState;
+    blocking_reasons: string[];
+  };
+  reviewer_eligibility?: {
+    can_review: boolean;
+    can_approve: boolean;
+    can_request_changes: boolean;
+  };
   stats?: {
     additions: number;
     deletions: number;
@@ -719,16 +902,72 @@ export interface PullRequestComment {
   created_at: string;
   updated_at: string;
   author?: User;
+  replies?: PullRequestComment[];
 }
 
 export interface GitAccessToken {
   id: string;
   name: string;
   token_prefix: string;
+  scopes: Array<"git:read" | "git:write">;
   last_used_at?: string | null;
   expires_at?: string | null;
   revoked_at?: string | null;
   created_at: string;
+}
+
+export interface RepoAccessOverview {
+  access: {
+    user_id?: string | null;
+    repo_id: string;
+    effective_role: RepoRole | null;
+    direct_role: RepoRole | null;
+    inherited_role: RepoRole | null;
+    is_outside_collaborator: boolean;
+    permissions: RepoPermissions;
+  };
+  collaborators: RepoMember[];
+}
+
+export interface RepoCollaboratorCandidate {
+  id: string;
+  name: string;
+  email: string;
+  username?: string;
+  effective_role?: RepoRole | null;
+  inherited_role?: RepoRole | null;
+  direct_role?: RepoRole | null;
+  is_outside_collaborator?: boolean;
+}
+
+export interface RepoInsights {
+  summary: {
+    stars: number;
+    watchers: number;
+    forks: number;
+    pull_requests_total: number;
+    open_pull_requests: number;
+    merged_pull_requests: number;
+    collaborator_count: number;
+    commit_count: number;
+  };
+  contributors: Array<{
+    author_name: string;
+    author_email: string;
+    commit_count: number;
+    latest_commit_at: string;
+  }>;
+  commit_activity: Array<{
+    date: string;
+    count: number;
+  }>;
+  maintainers: RepoMember[];
+  reviewers: Array<{
+    reviewer_id: string;
+    review_count: number;
+    approvals: number;
+  }>;
+  collaborators: RepoMember[];
 }
 
 export interface StackEntry {

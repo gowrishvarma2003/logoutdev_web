@@ -50,6 +50,7 @@ export default function ManagePage({
       <LinkedLaunchSection space={space} />
       <JoinRequestsSection spaceId={spaceId} requests={requests} loading={reqLoading} refetch={refetchReqs} />
       <StackManagementSection spaceId={spaceId} stack={stack} refetch={refetchStack} />
+      <RepoDocsSection repos={repos} />
       <RepoManagementSection spaceId={spaceId} repos={repos} />
     </div>
   );
@@ -568,6 +569,42 @@ function StackManagementSection({
       ) : (
         <TechStackPanel stack={stack} />
       )}
+    </section>
+  );
+}
+
+function RepoDocsSection({
+  repos,
+}: {
+  repos: ReturnType<typeof useRepos>["repos"];
+}) {
+  const resources = repos.flatMap((repo) =>
+    (repo.community_files ?? []).map((file) => ({
+      key: `${repo.id}:${file.key}`,
+      repoId: repo.id,
+      repoName: repo.name,
+      label: file.key,
+      path: file.path,
+    }))
+  );
+
+  if (resources.length === 0) return null;
+
+  return (
+    <section className="p-4">
+      <SectionHeader title="Contribution Resources" count={resources.length} />
+      <div className="grid gap-3 px-4 py-4 sm:grid-cols-2">
+        {resources.map((resource) => (
+          <Link
+            key={resource.key}
+            href={`/repos/${resource.repoId}?path=${encodeURIComponent(resource.path)}&view=blob`}
+            className="rounded-2xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 transition-colors hover:bg-zinc-900"
+          >
+            <p className="text-sm font-semibold text-white">{resource.label}</p>
+            <p className="mt-1 text-xs text-zinc-500">{resource.repoName}</p>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }
