@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useLaunches } from "@/lib/hooks/useLaunches";
 
 // Icon components for features
 function CodeIcon() {
@@ -137,6 +138,8 @@ const stats = [
 
 export default function Home() {
   const router = useRouter();
+  const { launches: betaLaunches } = useLaunches({ launch_phase: "beta", limit: 3, sort: "newest" });
+  const { launches: liveLaunches } = useLaunches({ launch_phase: "live", limit: 3, sort: "newest" });
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -258,6 +261,83 @@ export default function Home() {
               <div className="text-sm text-zinc-500 mt-1">{stat.label}</div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">Launches</p>
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-white">Beta first, then live</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
+                Builders can gather real beta users first or ship the public product link when they are ready.
+              </p>
+            </div>
+            <Link
+              href="/launches"
+              className="inline-flex items-center justify-center rounded-xl border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:bg-zinc-800"
+            >
+              Explore launches
+            </Link>
+          </div>
+
+          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-5">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">Beta</p>
+                  <p className="mt-1 text-sm text-zinc-500">Request access before the public launch.</p>
+                </div>
+                <Link href="/launches" className="text-xs text-zinc-500 hover:text-zinc-300">View all</Link>
+              </div>
+              <div className="mt-4 space-y-3">
+                {betaLaunches.slice(0, 3).map((launch) => (
+                  <Link
+                    key={launch.id}
+                    href={`/launches/${launch.id}`}
+                    className="block rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 transition-colors hover:border-zinc-700"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-white">{launch.name}</p>
+                      <span className="rounded-full bg-sky-500/10 px-2.5 py-1 text-[11px] font-medium text-sky-300">
+                        {launch.beta_summary?.approved_count ?? 0}
+                        {launch.beta_summary?.capacity ? ` / ${launch.beta_summary.capacity}` : ""} approved
+                      </span>
+                    </div>
+                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-zinc-400">{launch.tagline}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-5">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">Live</p>
+                  <p className="mt-1 text-sm text-zinc-500">Public products with reviews and feedback.</p>
+                </div>
+                <Link href="/launches" className="text-xs text-zinc-500 hover:text-zinc-300">View all</Link>
+              </div>
+              <div className="mt-4 space-y-3">
+                {liveLaunches.slice(0, 3).map((launch) => (
+                  <Link
+                    key={launch.id}
+                    href={`/launches/${launch.id}`}
+                    className="block rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 transition-colors hover:border-zinc-700"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-white">{launch.name}</p>
+                      <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
+                        {launch.review_count} reviews
+                      </span>
+                    </div>
+                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-zinc-400">{launch.tagline}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

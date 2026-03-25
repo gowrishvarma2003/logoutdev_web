@@ -3,8 +3,7 @@
 import { CodeBracketIcon, DocumentTextIcon, ExternalLinkIcon, GitHubIcon, LinkIcon } from "@/components/ui/Icons";
 import type { Launch } from "@/lib/types";
 
-const LINKS = [
-  { key: "demo_url", label: "Live demo", icon: ExternalLinkIcon, primary: true },
+const SECONDARY_LINKS = [
   { key: "website_url", label: "Website", icon: LinkIcon, primary: false },
   { key: "github_url", label: "GitHub", icon: GitHubIcon, primary: false },
   { key: "docs_url", label: "Docs", icon: DocumentTextIcon, primary: false },
@@ -15,7 +14,17 @@ function getLinkHost(value: string) {
 }
 
 export default function LaunchLinkBar({ launch }: { launch: Launch }) {
-  const availableLinks = LINKS.filter(({ key }) => Boolean(launch[key]));
+  const primaryHref = launch.launch_phase === "live"
+    ? (launch.live_url || launch.demo_url || launch.website_url || null)
+    : null;
+  const availableLinks = [
+    ...(primaryHref
+      ? [{ key: "primary_live" as const, label: "Open product", icon: ExternalLinkIcon, primary: true, href: primaryHref }]
+      : []),
+    ...SECONDARY_LINKS
+      .filter(({ key }) => Boolean(launch[key]))
+      .map(({ key, label, icon, primary }) => ({ key, label, icon, primary, href: launch[key] as string })),
+  ];
 
   if (availableLinks.length === 0) {
     return (
@@ -28,10 +37,7 @@ export default function LaunchLinkBar({ launch }: { launch: Launch }) {
 
   return (
     <div className="grid gap-2.5">
-      {availableLinks.map(({ key, label, icon: Icon, primary }) => {
-        const href = launch[key];
-        if (!href) return null;
-
+      {availableLinks.map(({ key, label, icon: Icon, primary, href }) => {
         return (
           <a
             key={key}

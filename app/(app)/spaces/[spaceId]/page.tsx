@@ -123,6 +123,16 @@ export default function SpaceOverviewPage({
               >
                 Explore work
               </Link>
+              {isOwnerOrMaintainer ? (
+                <Link
+                  href={space.linked_launch
+                    ? `/launches/${space.linked_launch.id}/edit`
+                    : `/launches/new?spaceId=${encodeURIComponent(spaceId)}&spaceName=${encodeURIComponent(space.name)}`}
+                  className="inline-flex items-center rounded-xl border border-sky-500/30 px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-sky-500/10"
+                >
+                  {space.linked_launch ? "Edit launch" : "Create launch"}
+                </Link>
+              ) : null}
               {(space.contribution_guide || contributionResources.length > 0) ? (
                 <a
                   href={`#contribute`}
@@ -173,6 +183,16 @@ export default function SpaceOverviewPage({
                     <p className="mt-0.5 font-semibold text-white">{summary.ready_for_contributor}</p>
                   </div>
                 </div>
+              ) : null}
+              {space.linked_launch ? (
+                <Link
+                  href={`/launches/${space.linked_launch.id}`}
+                  className="mt-4 block rounded-2xl border border-sky-500/20 bg-sky-500/8 px-4 py-3 transition-colors hover:bg-sky-500/12"
+                >
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-sky-300">Linked launch</p>
+                  <p className="mt-1 text-sm font-semibold text-white">{space.linked_launch.name}</p>
+                  <p className="mt-1 text-xs text-zinc-500">{space.linked_launch.tagline}</p>
+                </Link>
               ) : null}
               {space.response_sla ? (
                 <p className="mt-4 text-xs text-zinc-400">Expected response time: {space.response_sla}</p>

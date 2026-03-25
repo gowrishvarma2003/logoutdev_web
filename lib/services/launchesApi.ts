@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "../apiBaseUrl";
 import type {
   Launch,
+  LaunchBetaRegistration,
   LaunchCollaborationRequestPayload,
   LaunchFeedbackItem,
   LaunchListResponse,
@@ -38,6 +39,7 @@ export async function listLaunches(filters?: {
   q?: string;
   product_type?: string;
   development_stage?: string;
+  launch_phase?: string;
   stack?: string;
   seeking_collaborators?: boolean;
   sort?: string;
@@ -49,6 +51,7 @@ export async function listLaunches(filters?: {
       q: filters?.q,
       product_type: filters?.product_type,
       development_stage: filters?.development_stage,
+      launch_phase: filters?.launch_phase,
       stack: filters?.stack,
       seeking_collaborators: filters?.seeking_collaborators,
       sort: filters?.sort,
@@ -76,6 +79,10 @@ export async function createLaunch(body: {
   description: string;
   product_type: string;
   development_stage: string;
+  launch_phase: string;
+  beta_capacity?: number | null;
+  beta_access_url?: string;
+  live_url?: string;
   demo_url?: string;
   website_url?: string;
   github_url?: string;
@@ -105,6 +112,10 @@ export async function updateLaunch(
     description: string;
     product_type: string;
     development_stage: string;
+    launch_phase: string;
+    beta_capacity: number | null;
+    beta_access_url: string;
+    live_url: string;
     demo_url: string;
     website_url: string;
     github_url: string;
@@ -137,6 +148,26 @@ export async function archiveLaunch(launchId: string): Promise<{ launch: Launch 
   const res = await fetch(`${API}/api/launches/${launchId}/archive`, {
     method: "POST",
     headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function deleteLaunch(launchId: string): Promise<{ deleted: boolean; launch_id: string }> {
+  const res = await fetch(`${API}/api/launches/${launchId}`, {
+    method: "DELETE",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function goLiveLaunch(
+  launchId: string,
+  body?: { live_url?: string }
+): Promise<{ launch: Launch }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/go-live`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body ?? {}),
   });
   return handleRes(res);
 }
@@ -212,6 +243,59 @@ export async function createLaunchFeedback(
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function requestBetaAccess(
+  launchId: string,
+  body?: { message?: string }
+): Promise<{ registration: LaunchBetaRegistration }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/beta-registrations`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body ?? {}),
+  });
+  return handleRes(res);
+}
+
+export async function withdrawBetaAccess(
+  launchId: string
+): Promise<{ registration: LaunchBetaRegistration }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/beta-registrations/me`, {
+    method: "DELETE",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function listBetaRegistrations(
+  launchId: string
+): Promise<{ registrations: LaunchBetaRegistration[] }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/beta-registrations`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function approveBetaRegistration(
+  launchId: string,
+  registrationId: string
+): Promise<{ registration: LaunchBetaRegistration }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/beta-registrations/${registrationId}/approve`, {
+    method: "POST",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function rejectBetaRegistration(
+  launchId: string,
+  registrationId: string
+): Promise<{ registration: LaunchBetaRegistration }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/beta-registrations/${registrationId}/reject`, {
+    method: "POST",
+    headers: { ...authHeaders() },
   });
   return handleRes(res);
 }

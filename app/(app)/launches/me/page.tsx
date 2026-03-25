@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import Spinner from "@/components/ui/Spinner";
-import { PlusIcon, SparklesIcon } from "@/components/ui/Icons";
+import { DotsIcon, PlusIcon, SparklesIcon } from "@/components/ui/Icons";
 import { useMyLaunches } from "@/lib/hooks/useLaunches";
 import * as launchesApi from "@/lib/services/launchesApi";
 import type { LaunchListItem } from "@/lib/types";
@@ -23,14 +24,30 @@ function LaunchManageRow({
   launch,
   onPublish,
   onArchive,
+  onDelete,
 }: {
   launch: LaunchListItem;
   onPublish: (id: string) => Promise<void>;
   onArchive: (id: string) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }) {
   const screenshot = launch.screenshots?.[0]?.image_url;
   const dot = STATUS_DOT[launch.status] ?? "bg-zinc-500";
   const badge = STATUS_LABEL[launch.status] ?? { label: launch.status, classes: "text-zinc-400 bg-zinc-800" };
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  async function runAction(action: () => Promise<void>) {
+    if (actionLoading) return;
+
+    setActionLoading(true);
+    try {
+      await action();
+      setMenuOpen(false);
+    } finally {
+      setActionLoading(false);
+    }
+  }
 
   return (
     <div className="group flex items-start gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 transition-colors hover:border-zinc-700">
@@ -68,28 +85,66 @@ function LaunchManageRow({
         >
           View
         </Link>
-        <Link
-          href={`/launches/${launch.id}/edit`}
-          className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800 transition-colors"
-        >
-          Edit
-        </Link>
-        {launch.status !== "published" && (
+
+        <div className="relative">
           <button
-            onClick={() => onPublish(launch.id)}
-            className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950 hover:bg-zinc-100 transition-colors"
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 transition-colors hover:bg-zinc-800"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            aria-label="Launch settings"
           >
-            Publish
+            <DotsIcon className="h-3.5 w-3.5" />
+            Settings
           </button>
-        )}
-        {launch.status !== "archived" && (
-          <button
-            onClick={() => onArchive(launch.id)}
-            className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-500 hover:bg-zinc-800 hover:text-rose-400 transition-colors"
-          >
-            Archive
-          </button>
-        )}
+
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+              <div className="absolute right-0 top-9 z-20 min-w-44 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
+                <Link
+                  href={`/launches/${launch.id}/edit`}
+                  onClick={() => setMenuOpen(false)}
+                  className="block px-4 py-2.5 text-sm text-zinc-200 transition-colors hover:bg-zinc-800"
+                >
+                  Edit launch
+                </Link>
+
+                {launch.status !== "published" && (
+                  <button
+                    type="button"
+                    disabled={actionLoading}
+                    onClick={() => runAction(() => onPublish(launch.id))}
+                    className="block w-full px-4 py-2.5 text-left text-sm font-semibold text-zinc-100 transition-colors hover:bg-zinc-800 disabled:opacity-60"
+                  >
+                    Publish launch
+                  </button>
+                )}
+
+                {launch.status !== "archived" && (
+                  <button
+                    type="button"
+                    disabled={actionLoading}
+                    onClick={() => runAction(() => onArchive(launch.id))}
+                    className="block w-full px-4 py-2.5 text-left text-sm text-zinc-200 transition-colors hover:bg-zinc-800 disabled:opacity-60"
+                  >
+                    Archive launch
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  disabled={actionLoading}
+                  onClick={() => runAction(() => onDelete(launch.id))}
+                  className="block w-full border-t border-zinc-800 px-4 py-2.5 text-left text-sm text-rose-400 transition-colors hover:bg-rose-500/10 disabled:opacity-60"
+                >
+                  Delete launch
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -109,6 +164,15 @@ export default function MyLaunchesPage() {
 
   async function handleArchive(launchId: string) {
     await launchesApi.archiveLaunch(launchId);
+    await refetch();
+  }
+
+  async function handleDelete(launchId: string) {
+    if (!window.confirm("Delete this launch permanently? This cannot be undone.")) {
+      return;
+    }
+
+    await launchesApi.deleteLaunch(launchId);
     await refetch();
   }
 
@@ -163,6 +227,7 @@ export default function MyLaunchesPage() {
                     launch={launch}
                     onPublish={handlePublish}
                     onArchive={handleArchive}
+                    onDelete={handleDelete}
                   />
                 ))}
               </div>
@@ -181,6 +246,7 @@ export default function MyLaunchesPage() {
                     launch={launch}
                     onPublish={handlePublish}
                     onArchive={handleArchive}
+                    onDelete={handleDelete}
                   />
                 ))}
               </div>
@@ -199,6 +265,7 @@ export default function MyLaunchesPage() {
                     launch={launch}
                     onPublish={handlePublish}
                     onArchive={handleArchive}
+                    onDelete={handleDelete}
                   />
                 ))}
               </div>

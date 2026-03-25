@@ -406,11 +406,14 @@ export type FreelanceProjectStatus = "open" | "in_review" | "awarded" | "complet
 export type FreelanceProposalStatus = "submitted" | "shortlisted" | "accepted" | "rejected" | "withdrawn";
 export type LaunchProductType = "web-app" | "mobile-app" | "developer-tool" | "api" | "ai-tool" | "open-source" | "experimental" | "other";
 export type LaunchDevelopmentStage = "prototype" | "mvp" | "beta" | "live" | "maintained" | "paused";
+export type LaunchPhase = "beta" | "live";
 export type LaunchCollaborationMode = "off" | "looking";
 export type LaunchStatus = "draft" | "published" | "archived";
 export type LaunchReviewRecommendation = "recommend" | "mixed" | "not_recommend";
 export type LaunchFeedbackType = "suggestion" | "bug" | "idea";
 export type LaunchFeedbackStatus = "open" | "acknowledged" | "planned" | "resolved" | "closed";
+export type LaunchFeedbackVisibilityScope = "beta" | "public";
+export type LaunchBetaRegistrationStatus = "pending" | "approved" | "rejected" | "withdrawn";
 
 export interface ProjectSpace {
   id: string;
@@ -443,6 +446,7 @@ export interface ProjectSpace {
     name: string;
     slug: string;
     tagline: string;
+    launch_phase?: LaunchPhase;
     status: LaunchStatus;
     upvote_count: number;
     review_count: number;
@@ -1299,6 +1303,43 @@ export interface LaunchViewerState {
   can_request_collaboration: boolean;
   can_edit: boolean;
   can_publish: boolean;
+  beta_registration_status?: LaunchBetaRegistrationStatus | null;
+  can_request_beta: boolean;
+  can_access_beta: boolean;
+  can_moderate_beta: boolean;
+  is_early_supporter: boolean;
+  can_submit_feedback: boolean;
+  can_submit_review: boolean;
+}
+
+export interface LaunchBetaSummary {
+  capacity?: number | null;
+  approved_count: number;
+  pending_count: number;
+  remaining_seats?: number | null;
+  is_full: boolean;
+}
+
+export interface LaunchEarlySupporter {
+  id: string;
+  name: string;
+  username?: string | null;
+  headline?: string | null;
+  joined_at?: string | null;
+}
+
+export interface LaunchBetaRegistration {
+  id: string;
+  launch_id: string;
+  user_id: string;
+  status: LaunchBetaRegistrationStatus;
+  message?: string | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  user?: User | null;
+  reviewer?: User | null;
 }
 
 export interface LaunchReview {
@@ -1331,6 +1372,7 @@ export interface LaunchFeedbackItem {
   title: string;
   body: string;
   status: LaunchFeedbackStatus;
+  visibility_scope: LaunchFeedbackVisibilityScope;
   created_at: string;
   updated_at: string;
   author?: User;
@@ -1347,6 +1389,12 @@ export interface Launch {
   description: string;
   product_type: LaunchProductType;
   development_stage: LaunchDevelopmentStage;
+  launch_phase: LaunchPhase;
+  beta_capacity?: number | null;
+  beta_access_url?: string | null;
+  beta_opened_at?: string | null;
+  live_url?: string | null;
+  went_live_at?: string | null;
   demo_url?: string | null;
   website_url?: string | null;
   github_url?: string | null;
@@ -1372,6 +1420,9 @@ export interface Launch {
     status: SpaceStatus;
   } | null;
   viewer_state?: LaunchViewerState;
+  beta_summary?: LaunchBetaSummary;
+  early_supporters?: LaunchEarlySupporter[];
+  early_supporter_count?: number;
   next_steps?: NextStepItem[];
   related_entities?: RelatedEntityRef[];
   trust_context?: TrustContext | null;

@@ -11,6 +11,8 @@ interface LaunchFeedbackBoardProps {
   feedback: LaunchFeedbackItem[];
   activeType: string;
   onActiveTypeChange: (value: string) => void;
+  canPostFeedback?: boolean;
+  disabledMessage?: string | null;
   loading?: boolean;
   error?: string | null;
   onCreateFeedback: (payload: { type: string; title: string; body: string }) => Promise<void> | void;
@@ -49,6 +51,8 @@ export default function LaunchFeedbackBoard({
   feedback,
   activeType,
   onActiveTypeChange,
+  canPostFeedback = true,
+  disabledMessage = null,
   loading = false,
   error = null,
   onCreateFeedback,
@@ -83,7 +87,7 @@ export default function LaunchFeedbackBoard({
         </p>
       </div>
 
-      {currentUser && !launch.viewer_state?.is_owner && (
+      {currentUser && !launch.viewer_state?.is_owner && canPostFeedback && (
         <form
           onSubmit={async (e) => {
             e.preventDefault();
@@ -133,6 +137,12 @@ export default function LaunchFeedbackBoard({
           </div>
         </form>
       )}
+
+      {currentUser && !launch.viewer_state?.is_owner && !canPostFeedback ? (
+        <p className="rounded-2xl border border-zinc-800 bg-zinc-950/50 px-4 py-3 text-sm text-zinc-500">
+          {disabledMessage || "Feedback is not available right now."}
+        </p>
+      ) : null}
 
       {feedback.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/40 px-4 py-6 text-center text-sm text-zinc-500">

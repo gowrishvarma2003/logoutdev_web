@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { Launch, LaunchFeedbackItem, LaunchReview } from "../types";
+import type { LaunchBetaRegistration, LaunchFeedbackItem, LaunchReview } from "../types";
 import * as api from "../services/launchesApi";
 
 interface AsyncState<T> {
@@ -36,6 +36,7 @@ export function useLaunches(filters?: {
   q?: string;
   product_type?: string;
   development_stage?: string;
+  launch_phase?: string;
   stack?: string;
   seeking_collaborators?: boolean;
   sort?: string;
@@ -46,6 +47,7 @@ export function useLaunches(filters?: {
     filters?.q,
     filters?.product_type,
     filters?.development_stage,
+    filters?.launch_phase,
     filters?.stack,
     filters?.seeking_collaborators,
     filters?.sort,
@@ -111,6 +113,20 @@ export function useLaunchFeedback(
   return {
     feedback: result.data?.feedback ?? ([] as LaunchFeedbackItem[]),
     total: result.data?.total ?? 0,
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+export function useLaunchBetaRegistrations(launchId: string, enabled = true) {
+  const result = useAsync(
+    () => (enabled ? api.listBetaRegistrations(launchId) : Promise.resolve({ registrations: [] as LaunchBetaRegistration[] })),
+    [launchId, enabled]
+  );
+
+  return {
+    registrations: result.data?.registrations ?? ([] as LaunchBetaRegistration[]),
     loading: result.loading,
     error: result.error,
     refetch: result.refetch,

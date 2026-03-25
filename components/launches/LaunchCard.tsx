@@ -3,107 +3,87 @@
 import Link from "next/link";
 import type { LaunchListItem } from "@/lib/types";
 import { SparklesIcon, HeartIcon, ChatBubbleIcon } from "@/components/ui/Icons";
+import ExternalImage from "@/components/ui/ExternalImage";
 
-function humanize(v: string) {
-  return v.replace(/-/g, " ");
-}
-
-const STATUS_DOT: Record<string, string> = {
-  published: "bg-emerald-400",
-  draft: "bg-amber-400",
-  archived: "bg-zinc-500",
-};
-
-const STAGE_BADGE: Record<string, string> = {
-  live: "text-emerald-300 bg-emerald-500/10",
-  maintained: "text-emerald-300 bg-emerald-500/10",
-  beta: "text-sky-300 bg-sky-500/10",
-  mvp: "text-sky-300 bg-sky-500/10",
-  prototype: "text-zinc-300 bg-zinc-800",
-  paused: "text-rose-300 bg-rose-500/10",
+const PHASE_BADGE: Record<string, string> = {
+  beta: "bg-sky-500 text-white",
+  live: "bg-emerald-500 text-white",
 };
 
 export default function LaunchCard({ launch }: { launch: LaunchListItem }) {
   const screenshot = launch.screenshots?.[0]?.image_url;
-  const dotClass = STATUS_DOT[launch.status] ?? "bg-zinc-500";
-  const stageClass = STAGE_BADGE[launch.development_stage] ?? "text-zinc-300 bg-zinc-800";
+  const phaseClass = PHASE_BADGE[launch.launch_phase] ?? "bg-zinc-700 text-zinc-200";
+  const techStack = launch.tech_stack ?? [];
+  const visibleTech = techStack.slice(0, 2);
+  const hiddenTechCount = Math.max(techStack.length - 2, 0);
+  const builderName = launch.builder?.name ?? launch.builder?.username;
+  const reviewCount = launch.review_count;
 
   return (
     <Link
       href={`/launches/${launch.id}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 transition-all duration-200 hover:border-zinc-700 hover:shadow-lg hover:shadow-black/20"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-800/60 bg-zinc-900/50 transition-all duration-200 hover:border-zinc-700 hover:bg-zinc-900"
     >
-      {/* Thumbnail */}
-      <div className="aspect-[16/9] w-full shrink-0 overflow-hidden bg-zinc-950">
+      {/* Thumbnail with phase badge overlay */}
+      <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-zinc-950">
         {screenshot ? (
-          <img
+          <ExternalImage
             src={screenshot}
             alt={launch.name}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            fallbackClassName="h-full w-full"
           />
         ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-zinc-900 to-zinc-950">
-            <SparklesIcon className="h-10 w-10 text-zinc-700" />
+          <div className="flex h-full items-center justify-center bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950">
+            <SparklesIcon className="h-12 w-12 text-zinc-800" />
           </div>
         )}
+        
+        {/* Phase badge on thumbnail */}
+        <span className={`absolute left-3 top-3 rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide shadow-lg ${phaseClass}`}>
+          {launch.launch_phase}
+        </span>
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col p-4">
-        {/* Name + status dot */}
-        <div className="mb-1.5 flex items-start gap-2">
-          <h3 className="flex-1 truncate text-[15px] font-semibold leading-snug text-white transition-colors group-hover:text-sky-300">
-            {launch.name}
-          </h3>
-          <span
-            className={`mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full ${dotClass}`}
-            title={launch.status}
-          />
-        </div>
+      <div className="flex flex-1 flex-col px-4 py-4">
+        {/* Name */}
+        <h3 className="mb-1 text-base font-semibold leading-snug text-white transition-colors group-hover:text-sky-300">
+          {launch.name}
+        </h3>
 
         {/* Tagline */}
-        <p className="mb-3 line-clamp-2 text-[13px] leading-relaxed text-zinc-400">{launch.tagline}</p>
+        <p className="mb-4 line-clamp-2 text-[13px] leading-relaxed text-zinc-400">
+          {launch.tagline}
+        </p>
 
-        {/* Type + stage */}
-        <div className="mb-3 flex flex-wrap gap-1.5">
-          <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] font-medium capitalize text-zinc-300">
-            {humanize(launch.product_type)}
-          </span>
-          <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${stageClass}`}>
-            {humanize(launch.development_stage)}
-          </span>
-        </div>
+        {/* Builder + Tech stack inline */}
+        <p className="mb-4 text-[13px] text-zinc-500">
+          {builderName && (
+            <span className="text-zinc-400">By {builderName}</span>
+          )}
+          {builderName && visibleTech.length > 0 && (
+            <span className="mx-1.5 text-zinc-700">•</span>
+          )}
+          {visibleTech.length > 0 && (
+            <span className="text-zinc-500">
+              {visibleTech.map((t) => t.technology).join(", ")}
+              {hiddenTechCount > 0 && ` +${hiddenTechCount}`}
+            </span>
+          )}
+        </p>
 
-        {/* Tech stack pills */}
-        {(launch.tech_stack ?? []).length > 0 && (
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            {(launch.tech_stack ?? []).slice(0, 3).map((item) => (
-              <span
-                key={item.id}
-                className="rounded-full bg-sky-500/10 px-2 py-0.5 text-[11px] font-medium text-sky-300"
-              >
-                {item.technology}
-              </span>
-            ))}
-            {(launch.tech_stack ?? []).length > 3 && (
-              <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-500">
-                +{(launch.tech_stack ?? []).length - 3}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Stats */}
-        <div className="mt-auto flex items-center gap-4 border-t border-zinc-800 pt-3 text-[12px] text-zinc-500">
+        {/* Stats row */}
+        <div className="mt-auto flex items-center gap-4 text-[13px] text-zinc-500">
           <span className="inline-flex items-center gap-1.5">
-            <HeartIcon className="h-3.5 w-3.5 text-rose-400" />
-            {launch.upvote_count}
+            <HeartIcon className="h-4 w-4 text-rose-400/80" />
+            <span className="tabular-nums">{launch.upvote_count}</span>
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <ChatBubbleIcon className="h-3.5 w-3.5" />
-            {launch.review_count}
+            <ChatBubbleIcon className="h-4 w-4 text-zinc-500" />
+            <span className="tabular-nums">{reviewCount}</span>
+            <span className="text-zinc-600">reviews</span>
           </span>
-          <span className="ml-auto text-zinc-600">{launch.feedback_count} feedback</span>
         </div>
       </div>
     </Link>
