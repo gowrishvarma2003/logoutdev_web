@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useQuestion, useQuestionAnswers, useQuestionDiscussion } from "@/lib/hooks/useQuestions";
 import * as api from "@/lib/services/questionsApi";
+import { createPost } from "@/lib/api";
 import AnswerList from "@/components/questions/AnswerList";
 import DiscussionPanel from "@/components/questions/DiscussionPanel";
 import McqAnswerForm from "@/components/questions/McqAnswerForm";
@@ -39,6 +40,8 @@ export default function QuestionDetailPage({
     refetch: refetchDiscussion,
   } = useQuestionDiscussion(questionId, Boolean(question && canLoadLocked));
   const [actionError, setActionError] = useState("");
+  const [sharingResults, setSharingResults] = useState(false);
+  const [sharedResults, setSharedResults] = useState(false);
 
   const myAnswer = useMemo(
     () => answers.find((answer) => answer.author_id === user?.id) ?? null,
@@ -108,6 +111,33 @@ export default function QuestionDetailPage({
       await api.upvoteAnswer(resolvedQuestion.id, answerId);
     }
     await refetchAnswers();
+  }
+
+  async function handleShareResults() {
+    if (sharingResults || sharedResults || resolvedQuestion.type !== "mcq") return;
+    setSharingResults(true);
+    try {
+      const options = resolvedQuestion.options ?? [];
+      const totalVotes = options.reduce((sum, opt) => sum + (opt.vote_count ?? 0), 0);
+      const correctOption = options.find((opt) => opt.is_correct);
+      const correctPct = correctOption && totalVotes > 0
+        ? Math.round(((correctOption.vote_count ?? 0) / totalVotes) * 100)
+        : null;
+
+      let content = `MCQ: ${resolvedQuestion.title}`;
+      if (correctPct !== null) {
+        content += `\n${correctPct}% got it right out of ${totalVotes} answer${totalVotes !== 1 ? "s" : ""}.`;
+      } else if (totalVotes > 0) {
+        content += `\n${totalVotes} answer${totalVotes !== 1 ? "s" : ""} so far.`;
+      }
+
+      await createPost(content, { type: "question", id: resolvedQuestion.id });
+      setSharedResults(true);
+    } catch {
+      setActionError("Failed to share results. Please try again.");
+    } finally {
+      setSharingResults(false);
+    }
   }
 
   return (
@@ -309,13 +339,23 @@ export default function QuestionDetailPage({
 
         {actionError && <p className="text-sm text-rose-400">{actionError}</p>}
 
-        <div>
+        <div className="flex flex-wrap gap-2">
           <Link
             href={`/feed?shareType=question&shareId=${resolvedQuestion.id}&shareTitle=${encodeURIComponent(resolvedQuestion.title)}&shareSubtitle=${encodeURIComponent(resolvedQuestion.body || "")}&shareHref=${encodeURIComponent(`/questions/${resolvedQuestion.id}`)}`}
             className="inline-flex rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-800"
           >
-            Share update
+            Share to feed
           </Link>
+          {isAuthor && resolvedQuestion.type === "mcq" && resolvedQuestion.viewer_state?.can_view_locked_content && (
+            <button
+              type="button"
+              onClick={handleShareResults}
+              disabled={sharingResults || sharedResults}
+              className="inline-flex rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {sharedResults ? "Results shared!" : sharingResults ? "Sharing…" : "Share MCQ results"}
+            </button>
+          )}
         </div>
 
         {!resolvedQuestion.viewer_state?.can_view_locked_content ? (

@@ -251,6 +251,15 @@ export interface ActivityItem {
   };
 }
 
+export interface PollOptionItem {
+  id: string;
+  position: number;
+  text: string;
+  vote_count: number;
+  vote_percent: number;
+  voted_by_me: boolean;
+}
+
 export interface Post {
   id: string;
   user_id: string;
@@ -271,6 +280,10 @@ export interface Post {
   linked_entity_type?: string | null;
   linked_entity_id?: string | null;
   linked_entity?: EntityRef | null;
+  is_poll?: boolean;
+  poll_options?: PollOptionItem[];
+  poll_total_votes?: number;
+  poll_voted_by_me?: boolean;
 }
 
 export type QuestionType = "open" | "mcq";
@@ -523,6 +536,40 @@ export interface Repository {
     slug: string;
     owner?: { id: string; name: string; username: string };
   } | null;
+}
+
+export interface RepoAiDocStatus {
+  repo_id: string;
+  status: "idle" | "queued" | "running" | "completed" | "failed" | "missing";
+  source_branch?: string | null;
+  source_commit?: string | null;
+  current_source_commit?: string | null;
+  document_source_commit?: string | null;
+  is_stale?: boolean;
+  has_document?: boolean;
+  ai_branch: string;
+  last_run_id?: string | null;
+  active_run_id?: string | null;
+  last_error?: string | null;
+  result_commit?: string | null;
+  document_path?: string | null;
+  updated_at?: string | null;
+  started_at?: string | null;
+  completed_at?: string | null;
+  last_completed_at?: string | null;
+  metrics?: Record<string, unknown>;
+}
+
+export interface RepoAiDocRun {
+  id: string;
+  status: "queued" | "running" | "completed" | "failed";
+  source_branch: string;
+  source_commit: string;
+  trigger: string;
+  result_commit?: string | null;
+  last_error?: string | null;
+  created_at?: string | null;
+  completed_at?: string | null;
 }
 
 export interface RepoPermissions {

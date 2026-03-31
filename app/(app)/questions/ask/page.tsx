@@ -53,7 +53,21 @@ export default function AskQuestionPage() {
         </div>
       </header>
 
-      <AskQuestionForm onCreated={(questionId) => router.push(`/questions/${questionId}`)} />
+      <AskQuestionForm
+        onCreated={(questionId, shareToFeed, questionTitle) => {
+          if (shareToFeed && questionTitle) {
+            const params = new URLSearchParams({
+              shareType: "question",
+              shareId: questionId,
+              shareTitle: questionTitle,
+              shareHref: `/questions/${questionId}`,
+            });
+            router.push(`/feed?${params.toString()}`);
+          } else {
+            router.push(`/questions/${questionId}`);
+          }
+        }}
+      />
     </div>
   );
 }

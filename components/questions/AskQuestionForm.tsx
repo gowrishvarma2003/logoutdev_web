@@ -30,7 +30,7 @@ function splitTags(value: string) {
 export default function AskQuestionForm({
   onCreated,
 }: {
-  onCreated: (questionId: string) => void;
+  onCreated: (questionId: string, shareToFeed?: boolean, questionTitle?: string) => void;
 }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -43,6 +43,7 @@ export default function AskQuestionForm({
   const [topicTagsInput, setTopicTagsInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [shareToFeed, setShareToFeed] = useState(false);
 
   function toggleRole(role: string) {
     setRoleTags((prev) => {
@@ -93,7 +94,7 @@ export default function AskQuestionForm({
       }
 
       const result = await api.createQuestion(payload);
-      onCreated(result.question.id);
+      onCreated(result.question.id, shareToFeed, title);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create question.");
     } finally {
@@ -267,7 +268,17 @@ export default function AskQuestionForm({
 
       {error && <p className="text-sm text-rose-400">{error}</p>}
 
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <label className="flex cursor-pointer items-center gap-2.5 text-sm text-zinc-400">
+          <input
+            type="checkbox"
+            checked={shareToFeed}
+            onChange={(e) => setShareToFeed(e.target.checked)}
+            className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 accent-white"
+          />
+          Also share to my feed
+        </label>
+
         <button
           type="submit"
           disabled={submitting}

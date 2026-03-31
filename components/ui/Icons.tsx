@@ -398,3 +398,12 @@ export function ShareIcon({ className = "w-4 h-4" }: IconProps) {
     </svg>
   );
 }
+
+
+export function PollIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.5h6v6H3v-6zm0-9h6v6H3v-6zm9 9h9v6h-9v-6zm0-9h6v3h-6v-3z" />
+    </svg>
+  );
+}

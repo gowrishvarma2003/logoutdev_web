@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { type ReactNode, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createReply, deletePost } from "@/lib/api";
-import type { Post, PostHashtagEntity, PostMentionEntity, User } from "@/lib/types";
+import { createReply, deletePost, submitPollVote } from "@/lib/api";
+import type { Post, PollOptionItem, PostHashtagEntity, PostMentionEntity, User } from "@/lib/types";
 import { formatRelativeTime, emailToHandle } from "@/lib/utils";
 import Avatar from "@/components/ui/Avatar";
 import PostActions from "./PostActions";
@@ -98,6 +98,105 @@ function PostContent({ text, hashtags, mentions, clickable }: { text: string; ha
   );
 }
 
+function PollCard({
+  post,
+  currentUser,
+  onUpdate,
+  clickable,
+}: {
+  post: Post;
+  currentUser: User;
+  onUpdate: (updated: Post) => void;
+  clickable: boolean;
+}) {
+  const [voting, setVoting] = useState(false);
+  const isOwn = post.user_id === currentUser.id;
+  const options = post.poll_options ?? [];
+  const hasVoted = post.poll_voted_by_me ?? false;
+  const totalVotes = post.poll_total_votes ?? 0;
+
+  const handleVote = async (e: React.MouseEvent, option: PollOptionItem) => {
+    e.stopPropagation();
+    if (voting || isOwn) return;
+    setVoting(true);
+    try {
+      const res = await submitPollVote(post.id, option.id);
+      const votedOptionId = res.option_id;
+      const newTotalVotes = res.voted
+        ? (option.voted_by_me ? totalVotes : totalVotes + 1)
+        : totalVotes - 1;
+
+      const updatedOptions = options.map((opt) => {
+        const wasVoted = opt.voted_by_me;
+        const isNowVoted = opt.id === votedOptionId && res.voted;
+        let newCount = opt.vote_count;
+        if (wasVoted && !isNowVoted) newCount = Math.max(0, newCount - 1);
+        if (!wasVoted && isNowVoted) newCount = newCount + 1;
+        const total = newTotalVotes > 0 ? newTotalVotes : 1;
+        return {
+          ...opt,
+          vote_count: newCount,
+          vote_percent: Math.round((newCount / total) * 100),
+          voted_by_me: isNowVoted,
+        };
+      });
+
+      onUpdate({
+        ...post,
+        poll_options: updatedOptions,
+        poll_total_votes: newTotalVotes,
+        poll_voted_by_me: res.voted,
+      });
+    } finally {
+      setVoting(false);
+    }
+  };
+
+  return (
+    <div className="mt-3 space-y-2 rounded-2xl border border-zinc-800 bg-zinc-900/30 p-3">
+      {options.map((option) => {
+        const showResults = hasVoted || isOwn;
+        return (
+          <div key={option.id}>
+            {showResults ? (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-sm ${option.voted_by_me ? "font-semibold text-white" : "text-zinc-300"}`}>
+                    {option.text}
+                    {option.voted_by_me && (
+                      <span className="ml-2 text-[11px] font-medium text-sky-400">Your vote</span>
+                    )}
+                  </span>
+                  <span className="tabular-nums text-zinc-500">{option.vote_percent}%</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800">
+                  <div
+                    className={`h-full rounded-full transition-all ${option.voted_by_me ? "bg-sky-400" : "bg-zinc-500"}`}
+                    style={{ width: `${option.vote_percent}%` }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={voting}
+                onClick={(e) => handleVote(e, option)}
+                className="w-full rounded-xl border border-zinc-700 px-3 py-2 text-left text-sm text-zinc-300 transition-colors hover:border-zinc-500 hover:bg-zinc-800 disabled:cursor-wait"
+              >
+                {option.text}
+              </button>
+            )}
+          </div>
+        );
+      })}
+      <p className="text-[11px] text-zinc-600">
+        {totalVotes} vote{totalVotes !== 1 ? "s" : ""}
+        {isOwn ? " · You can't vote on your own poll" : ""}
+      </p>
+    </div>
+  );
+}
+
 export default function PostCard({
   post,
   currentUser,
@@ -168,6 +267,15 @@ export default function PostCard({
             mentions={post.mentions}
             clickable={clickable}
           />
+
+          {post.is_poll && post.poll_options && post.poll_options.length > 0 ? (
+            <PollCard
+              post={post}
+              currentUser={currentUser}
+              onUpdate={onUpdate}
+              clickable={clickable}
+            />
+          ) : null}
 
           {post.linked_entity ? (
             <div className="mt-3">

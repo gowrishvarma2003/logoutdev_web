@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { createPost, suggestHashtags, suggestUsers } from "@/lib/api";
+import { PollIcon } from "@/components/ui/Icons";
 import type {
   EntityRef,
   HashtagSuggestion,
@@ -90,6 +91,8 @@ export default function ComposeBox({
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [hasPoll, setHasPoll] = useState(false);
+  const [pollOptions, setPollOptions] = useState(["", ""]);
   const [activeToken, setActiveToken] = useState<ActiveToken | null>(null);
   const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
   const [relatedTags, setRelatedTags] = useState<RelatedHashtag[]>([]);
@@ -98,7 +101,9 @@ export default function ComposeBox({
 
   const remaining = MAX_LENGTH - content.length;
   const isOverLimit = remaining < 0;
-  const isEmpty = content.trim().length === 0;
+  const cleanedPollOptions = pollOptions.map((o) => o.trim()).filter(Boolean);
+  const isPollValid = !hasPoll || (cleanedPollOptions.length >= 2 && cleanedPollOptions.length <= 4);
+  const isEmpty = content.trim().length === 0 && (!hasPoll || cleanedPollOptions.length < 2);
   const isSuggestionOpen = !!activeToken && suggestions.length > 0;
 
   useEffect(() => {
@@ -212,7 +217,7 @@ export default function ComposeBox({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (isEmpty || isOverLimit || isLoading) return;
+    if (isEmpty || isOverLimit || isLoading || !isPollValid) return;
 
     setIsLoading(true);
     setError("");
@@ -226,11 +231,14 @@ export default function ComposeBox({
           content.trim(),
           linkedEntityType && linkedEntityId
             ? { type: linkedEntityType, id: linkedEntityId }
-            : null
+            : null,
+          hasPoll && cleanedPollOptions.length >= 2 ? cleanedPollOptions : null
         );
         post = res.post;
       }
       setContent("");
+      setHasPoll(false);
+      setPollOptions(["", ""]);
       setActiveToken(null);
       setSuggestions([]);
       setRelatedTags([]);
@@ -342,24 +350,84 @@ export default function ComposeBox({
           )}
         </div>
 
+        {hasPoll && (
+          <div className="mt-3 space-y-2 rounded-2xl border border-zinc-800 bg-zinc-900/30 p-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-zinc-400">Poll options</p>
+              {pollOptions.length < 4 && (
+                <button
+                  type="button"
+                  onClick={() => setPollOptions((prev) => [...prev, ""])}
+                  className="text-xs font-semibold text-sky-400 hover:text-sky-300"
+                >
+                  Add option
+                </button>
+              )}
+            </div>
+            {pollOptions.map((opt, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <input
+                  value={opt}
+                  onChange={(e) => {
+                    const next = [...pollOptions];
+                    next[index] = e.target.value;
+                    setPollOptions(next);
+                  }}
+                  placeholder={`Option ${index + 1}`}
+                  maxLength={200}
+                  className="flex-1 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-600"
+                />
+                {pollOptions.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => setPollOptions((prev) => prev.filter((_, i) => i !== index))}
+                    className="rounded-xl border border-zinc-700 px-2.5 py-1.5 text-xs text-zinc-400 hover:bg-zinc-800"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         {error && <p className="mt-1 text-xs text-rose-500">{error}</p>}
 
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-800">
-          <span
-            className={`text-xs tabular-nums ${
-              isOverLimit
-                ? "text-rose-400 font-medium"
-                : remaining <= 50
-                  ? "text-amber-400"
-                  : "text-zinc-500"
-            }`}
-          >
-            {remaining}
-          </span>
+          <div className="flex items-center gap-1">
+            <span
+              className={`text-xs tabular-nums ${
+                isOverLimit
+                  ? "text-rose-400 font-medium"
+                  : remaining <= 50
+                    ? "text-amber-400"
+                    : "text-zinc-500"
+              }`}
+            >
+              {remaining}
+            </span>
+            {!compact && !onSubmit && (
+              <button
+                type="button"
+                onClick={() => {
+                  setHasPoll((prev) => !prev);
+                  if (hasPoll) setPollOptions(["", ""]);
+                }}
+                title="Add poll"
+                className={`ml-2 rounded-full p-1.5 transition-colors ${
+                  hasPoll
+                    ? "bg-sky-500/15 text-sky-400"
+                    : "text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"
+                }`}
+              >
+                <PollIcon className="h-4 w-4" />
+              </button>
+            )}
+          </div>
 
           <button
             type="submit"
-            disabled={isEmpty || isOverLimit || isLoading}
+            disabled={isEmpty || isOverLimit || isLoading || !isPollValid}
             className="px-5 py-1.5 rounded-full bg-white text-zinc-950 text-sm font-semibold
               disabled:opacity-30 disabled:cursor-not-allowed
               hover:bg-zinc-100 active:scale-95 transition-all"

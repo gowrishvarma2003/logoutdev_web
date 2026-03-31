@@ -12,6 +12,8 @@ import type {
   SpaceRepoAttachment,
   RepositoryVisibility,
   RepoDiscussionState,
+  RepoAiDocStatus,
+  RepoAiDocRun,
 } from "../types";
 import { API_BASE_URL } from "../apiBaseUrl";
 
@@ -159,6 +161,44 @@ export async function searchRepositoryCollaborators(
 export async function getRepositoryInsights(repoId: string): Promise<RepoInsights> {
   const res = await fetch(`${API}/api/repos/${repoId}/insights`, {
     headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function getRepositoryAiDocStatus(repoId: string): Promise<RepoAiDocStatus> {
+  const res = await fetch(`${API}/api/repos/${repoId}/ai-doc`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function getRepositoryAiDocRuns(repoId: string): Promise<{ repo_id: string; runs: RepoAiDocRun[] }> {
+  const res = await fetch(`${API}/api/repos/${repoId}/ai-doc/runs`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function ensureRepositoryAiDoc(
+  repoId: string,
+  body?: { source_branch?: string; trigger?: string }
+): Promise<{ job_id: string; status: string; deduplicated?: boolean }> {
+  const res = await fetch(`${API}/api/repos/${repoId}/ai-doc/ensure`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body ?? {}),
+  });
+  return handleRes(res);
+}
+
+export async function regenerateRepositoryAiDoc(
+  repoId: string,
+  body?: { source_branch?: string }
+): Promise<{ job_id: string; status: string; deduplicated?: boolean }> {
+  const res = await fetch(`${API}/api/repos/${repoId}/ai-doc/regenerate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body ?? {}),
   });
   return handleRes(res);
 }

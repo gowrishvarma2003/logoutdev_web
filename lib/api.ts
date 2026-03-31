@@ -93,7 +93,8 @@ export async function getExplore(cursor?: string): Promise<FeedResponse> {
 
 export async function createPost(
   content: string,
-  linkedEntity?: { type: string; id: string } | null
+  linkedEntity?: { type: string; id: string } | null,
+  pollOptions?: string[] | null
 ): Promise<{ post: Post }> {
   const res = await fetch(`${API_BASE_URL}/api/posts`, {
     method: "POST",
@@ -105,9 +106,25 @@ export async function createPost(
       content,
       linked_entity_type: linkedEntity?.type,
       linked_entity_id: linkedEntity?.id,
+      poll_options: pollOptions ?? undefined,
     }),
   });
   return handleResponse<{ post: Post }>(res);
+}
+
+export async function submitPollVote(
+  postId: string,
+  optionId: string
+): Promise<{ voted: boolean; option_id: string | null }> {
+  const res = await fetch(`${API_BASE_URL}/api/posts/${postId}/poll-vote`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ option_id: optionId }),
+  });
+  return handleResponse(res);
 }
 
 export async function getPost(id: string): Promise<PostResponse> {

@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import { FolderIcon } from "@/components/ui/Icons";
 import RepoCollaborationBanner from "@/components/repos/RepoCollaborationBanner";
+import RepoAiDocBanner from "@/components/repos/RepoAiDocBanner";
 import { CodeBracketIcon, ClockIcon, Cog6ToothIcon, StarIcon, ArrowsRightLeftIcon, TagIcon, QueueListIcon, ChartBarIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 
 interface RepoContextType {
@@ -200,6 +201,9 @@ export default function RepoLayout({
         <main className="mx-auto max-w-[1280px] px-4 py-6 md:px-8">
           <div className="mb-6">
             <RepoCollaborationBanner repo={repo} />
+          </div>
+          <div className="mb-6">
+            <RepoAiDocBanner repo={repo} />
           </div>
           {children}
         </main>

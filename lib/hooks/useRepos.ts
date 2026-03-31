@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type {
+  RepoAiDocStatus,
   RepoBlobResponse,
   RepoCommit,
   RepoMember,
@@ -159,6 +160,16 @@ export function useRepoInsights(repoId: string) {
   const result = useAsync(() => reposApi.getRepositoryInsights(repoId), [repoId]);
   return {
     insights: (result.data as import("../types").RepoInsights | null) ?? null,
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+export function useRepoAiDocStatus(repoId: string) {
+  const result = useAsync(() => reposApi.getRepositoryAiDocStatus(repoId), [repoId]);
+  return {
+    status: (result.data as RepoAiDocStatus | null) ?? null,
     loading: result.loading,
     error: result.error,
     refetch: result.refetch,

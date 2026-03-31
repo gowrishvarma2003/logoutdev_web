@@ -12,6 +12,12 @@ const LABELS: Record<string, string> = {
   post: "Post",
 };
 
+const TYPE_STYLES: Record<string, string> = {
+  question: "text-sky-400",
+  launch: "text-emerald-400",
+  space: "text-violet-400",
+};
+
 export default function LinkedEntityCard({
   entity,
   compact = false,
@@ -19,16 +25,36 @@ export default function LinkedEntityCard({
   entity: EntityRef;
   compact?: boolean;
 }) {
+  const isQuestion = entity.type === "question";
+  const labelStyle = TYPE_STYLES[entity.type] || "text-zinc-500";
+
   const content = (
     <div className={`rounded-2xl border border-zinc-800 bg-zinc-900/60 ${compact ? "p-3" : "p-4"}`}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
-        {LABELS[entity.type] || entity.type}
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${labelStyle}`}>
+          {LABELS[entity.type] || entity.type}
+        </p>
+        {isQuestion && entity.tags && entity.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {entity.tags.slice(0, compact ? 2 : 4).map((tag) => (
+              <span
+                key={`${entity.id}:${tag}`}
+                className="rounded-full border border-zinc-700 px-1.5 py-0.5 text-[10px] text-zinc-500"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
       <p className="mt-1 text-sm font-semibold text-white">{entity.title}</p>
-      {entity.subtitle ? (
-        <p className="mt-1 text-xs leading-5 text-zinc-400">{entity.subtitle}</p>
+      {entity.subtitle && !isQuestion ? (
+        <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-400">{entity.subtitle}</p>
       ) : null}
-      {entity.tags && entity.tags.length > 0 ? (
+      {isQuestion && entity.subtitle ? (
+        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-zinc-400">{entity.subtitle}</p>
+      ) : null}
+      {!isQuestion && entity.tags && entity.tags.length > 0 ? (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {entity.tags.slice(0, compact ? 3 : 5).map((tag) => (
             <span
