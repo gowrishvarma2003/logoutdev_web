@@ -13,14 +13,17 @@ export default function LaunchesPage() {
   const [launchPhase, setLaunchPhase] = useState("beta");
   const [stack, setStack] = useState("");
   const [sort, setSort] = useState("newest");
+  const [page, setPage] = useState(1);
 
   const launches = useLaunches({
     q: q || undefined,
     launch_phase: launchPhase,
     stack: stack || undefined,
     sort,
-    page: 1,
+    page,
   });
+
+  const hasMore = launches.launches.length >= 20;
 
   return (
     <div className="flex flex-col">
@@ -89,11 +92,33 @@ export default function LaunchesPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {launches.launches.map((launch) => (
-              <LaunchCard key={launch.id} launch={launch} />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {launches.launches.map((launch) => (
+                <LaunchCard key={launch.id} launch={launch} />
+              ))}
+            </div>
+
+            {(page > 1 || hasMore) && (
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <span className="text-xs text-zinc-500">Page {page}</span>
+                <button
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={!hasMore}
+                  className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

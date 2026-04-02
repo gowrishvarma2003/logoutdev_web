@@ -95,16 +95,22 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
       </Link>
 
       <form onSubmit={handleSearchSubmit} className="mb-6 px-1">
-        <input
-          key={`${pathname}:${searchParams.toString()}`}
-          name="q"
-          defaultValue={searchParams.get("q") || ""}
-          placeholder="Search builders, launches, spaces..."
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-zinc-700"
-        />
+        <div className="relative">
+          <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+          </svg>
+          <input
+            key={`${pathname}:${searchParams.toString()}`}
+            name="q"
+            aria-label="Search"
+            defaultValue={searchParams.get("q") || ""}
+            placeholder="Search builders, launches, spaces..."
+            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 pl-9 pr-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-zinc-700"
+          />
+        </div>
       </form>
 
-      {/* Navigation items */}
+      {/* Main navigation */}
       <div className="flex flex-col gap-1">
         <NavItem
           href="/feed"
@@ -125,6 +131,11 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
           active={pathname.startsWith("/notifications")}
           badge={unreadCount}
         />
+      </div>
+
+      {/* Build section */}
+      <div className="my-1 mx-3 border-t border-zinc-800/60" />
+      <div className="flex flex-col gap-1">
         <NavItem
           href="/launches"
           icon={<SparklesIcon />}
@@ -155,6 +166,11 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
           label="Repos"
           active={pathname.startsWith("/repos")}
         />
+      </div>
+
+      {/* You section */}
+      <div className="my-1 mx-3 border-t border-zinc-800/60" />
+      <div className="flex flex-col gap-1">
         <NavItem
           href={`/profile/${user.username || user.id}`}
           icon={<UserIcon />}

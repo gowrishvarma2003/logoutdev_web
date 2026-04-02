@@ -50,8 +50,13 @@ export default function SettingsTokensPage() {
   }
 
   async function handleRevoke(tokenId: string) {
-    await api.revokeAccessToken(tokenId);
-    refetch();
+    if (!window.confirm("Revoke this token? Any scripts or Git clients using it will stop working.")) return;
+    try {
+      await api.revokeAccessToken(tokenId);
+      refetch();
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : "Failed to revoke token.");
+    }
   }
 
   return (

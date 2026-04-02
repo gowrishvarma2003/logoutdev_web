@@ -86,8 +86,7 @@ export default function ExplorePage() {
           <div>
             <h1 className="text-[17px] font-bold text-white">Explore</h1>
             <p className="mt-0.5 text-sm text-zinc-500">
-              Search once and move across builders, launches, spaces, questions,
-              and freelance work.
+              Discover builders, projects, and opportunities across LogoutDev.
             </p>
           </div>
           {!user ? (

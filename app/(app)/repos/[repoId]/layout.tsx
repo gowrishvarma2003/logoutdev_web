@@ -10,7 +10,8 @@ import { EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import { FolderIcon } from "@/components/ui/Icons";
 import RepoCollaborationBanner from "@/components/repos/RepoCollaborationBanner";
-import { CodeBracketIcon, ClockIcon, Cog6ToothIcon, StarIcon, ArrowsRightLeftIcon, TagIcon, QueueListIcon, ChartBarIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
+import { ArrowUturnLeftIcon } from "@heroicons/react/24/outline";
+import { CodeBracketIcon, ClockIcon, Cog6ToothIcon, StarIcon, ArrowsRightLeftIcon, TagIcon, QueueListIcon, ChartBarIcon, ShieldCheckIcon, ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 
 interface RepoContextType {
   repo: Repository;
@@ -39,6 +40,7 @@ export default function RepoLayout({
 
   const [isStarring, setIsStarring] = useState(false);
   const [isForking, setIsForking] = useState(false);
+  const [actionError, setActionError] = useState("");
 
   const handleToggleStar = async () => {
     if (!repo || isStarring) return;
@@ -47,7 +49,7 @@ export default function RepoLayout({
       await reposApi.toggleStar(repo.id);
       refetch();
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Failed to toggle star");
+      setActionError(err instanceof Error ? err.message : "Failed to toggle star");
     } finally {
       setIsStarring(false);
     }
@@ -60,7 +62,7 @@ export default function RepoLayout({
       const res = await reposApi.forkRepository(repo.id);
       router.push(`/repos/${res.repo.id}`);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Failed to fork repository");
+      setActionError(err instanceof Error ? err.message : "Failed to fork repository");
     } finally {
       setIsForking(false);
     }
@@ -93,8 +95,9 @@ export default function RepoLayout({
     { name: "Commits", href: `/repos/${repo.id}/commits`, icon: ClockIcon },
     { name: "Branches", href: `/repos/${repo.id}/branches`, icon: ArrowsRightLeftIcon },
     { name: "Pull Requests", href: `/repos/${repo.id}/pulls`, icon: QueueListIcon },
+    { name: "Discussions", href: `/repos/${repo.id}/discussions`, icon: ChatBubbleLeftRightIcon },
     { name: "Releases", href: `/repos/${repo.id}/releases`, icon: TagIcon },
-    { name: "Forks", href: `/repos/${repo.id}/forks`, icon: ArrowsRightLeftIcon },
+    { name: "Forks", href: `/repos/${repo.id}/forks`, icon: ArrowUturnLeftIcon },
     { name: "Insights", href: `/repos/${repo.id}/insights`, icon: ChartBarIcon },
     ...(canManageSettings ? [{ name: "Settings", href: `/repos/${repo.id}/settings`, icon: Cog6ToothIcon }] : []),
   ];
@@ -108,7 +111,7 @@ export default function RepoLayout({
             <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2 text-xl text-zinc-300">
                 <FolderIcon className="h-6 w-6 text-zinc-500" />
-                <Link href={`/`} className="hover:text-blue-500 hover:underline">
+                <Link href={`/profile/${repo.owner?.username || repo.owner_id}`} className="hover:text-blue-500 hover:underline">
                   {repo.owner?.username}
                 </Link>
                 <span className="text-zinc-500">/</span>
@@ -172,6 +175,13 @@ export default function RepoLayout({
                 </div>
               </div>
             </div>
+
+            {actionError && (
+              <div className="mt-2 flex items-center justify-between rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-2">
+                <p className="text-sm text-rose-400">{actionError}</p>
+                <button type="button" onClick={() => setActionError("")} className="text-xs text-rose-400 hover:text-rose-300">Dismiss</button>
+              </div>
+            )}
 
             {/* Tabs */}
             <nav className="-mb-px flex gap-6 overflow-x-auto no-scrollbar">

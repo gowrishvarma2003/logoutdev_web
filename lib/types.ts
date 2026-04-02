@@ -9,7 +9,6 @@ export interface User {
   website_url?: string;
   github_url?: string;
   linkedin_url?: string;
-  createdAt?: string;
   created_at?: string;
 }
 

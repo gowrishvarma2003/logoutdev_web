@@ -72,9 +72,7 @@ export default function QuestionsPage() {
         isAuthenticated={Boolean(user)}
       />
 
-      <div className="border-b border-zinc-800 px-4 py-3 text-xs text-zinc-500">
-        {loading ? "Loading questions…" : `${total} questions`}
-      </div>
+
 
       {loading ? (
         <div className="flex justify-center py-16">

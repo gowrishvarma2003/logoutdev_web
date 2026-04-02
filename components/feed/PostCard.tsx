@@ -62,8 +62,7 @@ function PostContent({ text, hashtags, mentions, clickable }: { text: string; ha
           onClick={(event) => {
             if (clickable) event.stopPropagation();
           }}
-          style={{ color: "#1d9bf0" }}
-          className="hover:underline"
+          className="text-sky-400 hover:underline"
         >
           {rawValue}
         </Link>
@@ -76,8 +75,7 @@ function PostContent({ text, hashtags, mentions, clickable }: { text: string; ha
           onClick={(event) => {
             if (clickable) event.stopPropagation();
           }}
-          style={{ color: "#1d9bf0" }}
-          className="hover:underline"
+          className="text-sky-400 hover:underline"
         >
           {rawValue}
         </Link>
@@ -120,6 +118,7 @@ export default function PostCard({
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isDeleting) return;
+    if (!window.confirm("Are you sure you want to delete this post? This action cannot be undone.")) return;
 
     setIsDeleting(true);
     try {

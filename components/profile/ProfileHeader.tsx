@@ -50,7 +50,7 @@ function ExternalLink({
 }
 
 export default function ProfileHeader({ profile, is_me }: ProfileHeaderProps) {
-  const joinDate = profile.created_at || profile.createdAt;
+  const joinDate = profile.created_at;
 
   // Format join date as "Joined Month YYYY"
   const formattedJoin = joinDate

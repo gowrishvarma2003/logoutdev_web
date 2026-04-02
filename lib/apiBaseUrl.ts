@@ -5,10 +5,15 @@ function resolveApiBaseUrl() {
     return process.env.NODE_ENV === "development" ? "http://localhost:3000" : "";
   }
 
-  const isBrowserHttps =
-    typeof window !== "undefined" && window.location.protocol === "https:";
-
-  if (isBrowserHttps && configuredApiBaseUrl.startsWith("http://")) {
+  if (
+    typeof window !== "undefined" &&
+    window.location.protocol === "https:" &&
+    configuredApiBaseUrl.startsWith("http://")
+  ) {
+    console.warn(
+      `[LogoutDev] API base URL "${configuredApiBaseUrl}" is HTTP, but the site is on HTTPS. ` +
+      `This will cause mixed-content errors. Set NEXT_PUBLIC_API_BASE_URL to an HTTPS URL.`
+    );
     return "";
   }
 

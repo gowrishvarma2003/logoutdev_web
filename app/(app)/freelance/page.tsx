@@ -14,6 +14,7 @@ export default function FreelancePage() {
   const [skill, setSkill] = useState("");
   const [pricingModel, setPricingModel] = useState("");
   const [engagementType, setEngagementType] = useState("");
+  const [page, setPage] = useState(1);
 
   const freelance = useFreelanceProjects({
     q: q || undefined,
@@ -22,16 +23,30 @@ export default function FreelancePage() {
     engagement_type: engagementType || undefined,
     status: "open",
     sort: "newest",
-    page: 1,
+    page,
   });
+
+  const hasMore = freelance.projects.length >= 20;
 
   return (
     <div>
       <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/80 px-4 py-4 backdrop-blur-md">
-        <h1 className="text-[17px] font-bold text-white">Freelance</h1>
-        <p className="mt-0.5 text-sm text-zinc-500">
-          Browse freelance projects, submit proposals, and move accepted work into private spaces.
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h1 className="text-[17px] font-bold text-white">Freelance</h1>
+            <p className="mt-0.5 text-sm text-zinc-500">
+              Find and post freelance projects.
+            </p>
+          </div>
+          {user && (
+            <Link
+              href="/freelance/create"
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+            >
+              Post a project
+            </Link>
+          )}
+        </div>
       </header>
 
       <FreelanceFilters
@@ -76,6 +91,26 @@ export default function FreelancePage() {
         {freelance.projects.map((project) => (
           <FreelanceProjectCard key={project.id} project={project} />
         ))}
+
+        {!freelance.loading && !freelance.error && freelance.projects.length > 0 && (page > 1 || hasMore) && (
+          <div className="mt-4 flex items-center justify-center gap-3">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <span className="text-xs text-zinc-500">Page {page}</span>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={!hasMore}
+              className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,8 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getPost, getReplies } from "@/lib/api";
-import { createReply } from "@/lib/api";
+import { getPost, getReplies, createReply } from "@/lib/api";
 import { useAuth } from "@/lib/hooks/useAuth";
 import type { Post } from "@/lib/types";
 import PostCard from "@/components/feed/PostCard";

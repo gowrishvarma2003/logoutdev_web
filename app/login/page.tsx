@@ -3,17 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { API_BASE_URL } from "@/lib/api";
-
-type AuthResponse = {
-  token: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  error?: string;
-};
+import { loginUser } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,29 +24,12 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
-
-      const data: AuthResponse = await response.json();
-
-      if (!response.ok) {
-        setErrorMessage(data.error || "Login failed.");
-        return;
-      }
-
+      const data = await loginUser(email, password);
       localStorage.setItem("authToken", data.token);
       localStorage.setItem("currentUser", JSON.stringify(data.user));
       router.push("/feed");
     } catch (error) {
-      setErrorMessage("Unable to connect to server.");
+      setErrorMessage(error instanceof Error ? error.message : "Unable to connect to server.");
     } finally {
       setIsLoading(false);
     }
@@ -85,9 +58,9 @@ export default function LoginPage() {
           <span className="mb-8 block text-lg font-bold text-white lg:hidden">LogoutDev</span>
 
           <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-          <p className="text-sm text-zinc-500" style={{marginTop: '4px'}}>Sign in to your account to continue.</p>
+          <p className="mt-1 text-sm text-zinc-500">Sign in to your account to continue.</p>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5" style={{marginTop: '32px'}}>
+          <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
               <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                 Email address
