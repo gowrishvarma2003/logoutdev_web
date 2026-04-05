@@ -16,6 +16,14 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## React Grab (Development Only)
+
+This frontend includes [React Grab](https://www.npmjs.com/package/react-grab) for faster AI-agent context capture while developing.
+
+- It is loaded only when `NODE_ENV=development`.
+- In the browser, hover the element you want to capture and press `Ctrl+C` on Linux/Windows (or `Cmd+C` on macOS).
+- React Grab should not be active in production builds.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
