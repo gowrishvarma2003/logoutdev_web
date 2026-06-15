@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRepositoryList } from "@/lib/hooks/useRepos";
+import * as reposApi from "@/lib/services/reposApi";
 import Spinner from "@/components/ui/Spinner";
 import { SearchIcon, FolderIcon } from "@/components/ui/Icons";
 import { StarIcon } from "@primer/octicons-react";
 import { formatRelativeTime } from "@/lib/utils";
+import type { Repository } from "@/lib/types";
 import CreateRepoModal from "./CreateRepoModal";
 
 export default function RepositoriesPage() {
@@ -14,6 +16,8 @@ export default function RepositoriesPage() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [starringRepoId, setStarringRepoId] = useState<string | null>(null);
+  const [displayRepos, setDisplayRepos] = useState<Repository[]>([]);
 
   const { repos, loading, error, refetch } = useRepositoryList({
     scope,
@@ -21,6 +25,32 @@ export default function RepositoriesPage() {
     page,
     limit: 30,
   });
+
+  const reposKey = repos.map((r) => `${r.id}:${r.is_starred}:${r.star_count}`).join(",");
+  const stableRepos = useMemo(() => repos, [reposKey]);
+
+  useEffect(() => {
+    setDisplayRepos(stableRepos);
+  }, [stableRepos]);
+
+  const handleToggleStar = async (repoId: string) => {
+    if (starringRepoId) return;
+    setStarringRepoId(repoId);
+    try {
+      const result = await reposApi.toggleStar(repoId);
+      setDisplayRepos((prev) =>
+        prev.map((r) =>
+          r.id === repoId
+            ? { ...r, is_starred: result.starred, star_count: result.star_count }
+            : r
+        )
+      );
+    } catch {
+      // silently fail
+    } finally {
+      setStarringRepoId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -80,7 +110,7 @@ export default function RepositoriesPage() {
 
         {error ? <p className="py-12 text-center text-sm text-rose-400">{error}</p> : null}
 
-        {!loading && !error && repos.length === 0 ? (
+        {!loading && !error && displayRepos.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-zinc-800 border-dashed py-24">
             {query || scope !== "all" ? (
               <>
@@ -111,9 +141,9 @@ export default function RepositoriesPage() {
           </div>
         ) : null}
 
-        {!loading && !error && repos.length > 0 ? (
+        {!loading && !error && displayRepos.length > 0 ? (
           <div className="divide-y divide-zinc-800 border-t border-zinc-800">
-            {repos.map((repo) => (
+            {displayRepos.map((repo) => (
               <div key={repo.id} className="py-5 flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -167,9 +197,13 @@ export default function RepositoriesPage() {
 
                 <div className="hidden sm:flex flex-col items-end shrink-0 gap-2">
                   <div className="h-[28px] flex overflow-hidden rounded-md border border-zinc-700 bg-zinc-800 font-medium text-xs text-zinc-300">
-                    <button className="flex items-center gap-1.5 px-2.5 py-1 hover:bg-zinc-700 border-r border-zinc-700">
-                      <StarIcon size={14} className="text-zinc-400" />
-                      Star
+                    <button
+                      onClick={() => handleToggleStar(repo.id)}
+                      disabled={starringRepoId === repo.id}
+                      className="flex items-center gap-1.5 px-2.5 py-1 hover:bg-zinc-700 border-r border-zinc-700 disabled:opacity-50"
+                    >
+                      <StarIcon size={14} className={repo.is_starred ? "text-yellow-500" : "text-zinc-400"} />
+                      {repo.is_starred ? "Unstar" : "Star"}
                     </button>
                     <button className="flex items-center px-2 py-1 hover:bg-zinc-700">
                       <span className="font-semibold px-0.5">{repo.star_count || 0}</span>
@@ -181,7 +215,7 @@ export default function RepositoriesPage() {
           </div>
         ) : null}
 
-        {page > 1 || repos.length >= 30 ? (
+        {page > 1 || displayRepos.length >= 30 ? (
           <div className="mt-8 flex justify-center">
             <div className="inline-flex items-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
               <button
@@ -193,7 +227,7 @@ export default function RepositoriesPage() {
               </button>
               <button
                 onClick={() => setPage(p => p + 1)}
-                disabled={repos.length < 30}
+                disabled={displayRepos.length < 30}
                 className="border-l border-zinc-800 px-4 py-2 text-sm font-medium text-blue-500 hover:bg-zinc-800 disabled:text-zinc-500 disabled:hover:bg-transparent"
               >
                 Next
