@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { loginUser } from "@/lib/api";
+import { resetPassword } from "@/lib/api";
 
-export default function LoginPage() {
+export default function ResetPasswordPage() {
   const router = useRouter();
 
   useEffect(() => {
@@ -14,20 +14,20 @@ export default function LoginPage() {
   }, [router]);
 
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErrorMessage("");
+    setSuccessMessage("");
     setIsLoading(true);
 
     try {
-      const data = await loginUser(email, password);
-      localStorage.setItem("authToken", data.token);
-      localStorage.setItem("currentUser", JSON.stringify(data.user));
-      router.push("/feed");
+      const data = await resetPassword(email, newPassword);
+      setSuccessMessage(data.message);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unable to connect to server.");
     } finally {
@@ -57,8 +57,8 @@ export default function LoginPage() {
           {/* Mobile logo */}
           <span className="mb-8 block text-lg font-bold text-white lg:hidden">LogoutDev</span>
 
-          <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-          <p className="mt-1 text-sm text-zinc-500">Sign in to your account to continue.</p>
+          <h1 className="text-2xl font-bold text-white">Reset password</h1>
+          <p className="mt-1 text-sm text-zinc-500">Enter your email and a new password.</p>
 
           <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
             <div className="flex flex-col gap-1.5">
@@ -77,14 +77,14 @@ export default function LoginPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                Password
+              <label htmlFor="newPassword" className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                New password
               </label>
               <input
-                id="password"
+                id="newPassword"
                 type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
                 required
                 placeholder="••••••••"
                 className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500 focus:ring-2 focus:ring-white/10 transition"
@@ -98,25 +98,24 @@ export default function LoginPage() {
               </div>
             ) : null}
 
+            {successMessage ? (
+              <div className="flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3">
+                <p className="text-sm text-emerald-400">{successMessage}</p>
+              </div>
+            ) : null}
+
             <button
               type="submit"
               disabled={isLoading}
               className="w-full rounded-xl bg-white px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Resetting..." : "Reset password"}
             </button>
-
-            <div className="text-right">
-              <Link href="/reset-password" className="text-xs text-zinc-500 hover:text-white transition">
-                Forgot password?
-              </Link>
-            </div>
           </form>
 
           <p className="mt-6 text-center text-sm text-zinc-500">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="font-semibold text-white hover:underline">
-              Create one
+            <Link href="/login" className="font-semibold text-white hover:underline">
+              Back to sign in
             </Link>
           </p>
         </div>
