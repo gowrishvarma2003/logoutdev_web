@@ -6,7 +6,7 @@
  * Individual sub-pages render as {children}.
  */
 
-import { use } from "react";
+import { use, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useProfile } from "@/lib/hooks/useProfile";
@@ -49,9 +49,34 @@ export default function ProfileLayout({ params, children }: ProfileLayoutProps) 
   const { id: username } = use(params);
   const pathname = usePathname();
 
-  const { profile, is_me, stats, loading, error } = useProfile(username);
+  const { profile, is_me, is_following, stats, loading, error } = useProfile(username);
+  const [followOverride, setFollowOverride] = useState<{
+    profileId: string;
+    following: boolean;
+    followerCount: number;
+  } | null>(null);
 
   const base = `/profile/${username}`;
+
+  const activeFollowOverride = followOverride?.profileId === profile?.id ? followOverride : null;
+  const displayFollowing = activeFollowOverride?.following ?? is_following;
+  const displayStats = useMemo(
+    () => (
+      stats && activeFollowOverride
+        ? { ...stats, followers: activeFollowOverride.followerCount }
+        : stats
+    ),
+    [activeFollowOverride, stats]
+  );
+
+  const handleFollowChange = (next: { following: boolean; followerCount: number }) => {
+    if (!profile) return;
+    setFollowOverride({
+      profileId: profile.id,
+      following: next.following,
+      followerCount: next.followerCount,
+    });
+  };
 
   if (loading) {
     return (
@@ -106,10 +131,16 @@ export default function ProfileLayout({ params, children }: ProfileLayoutProps) 
       </header>
 
       {/* ── Profile header (avatar, bio, links) ── */}
-      <ProfileHeader profile={profile} is_me={is_me} />
+      <ProfileHeader
+        profile={profile}
+        is_me={is_me}
+        is_following={displayFollowing}
+        followerCount={displayStats?.followers ?? 0}
+        onFollowChange={handleFollowChange}
+      />
 
       {/* ── Stats bar ── */}
-      {stats && <ProfileStats stats={stats} username={username} />}
+      {displayStats && <ProfileStats stats={displayStats} username={username} />}
 
       {/* ── Tab navigation ── */}
       <nav

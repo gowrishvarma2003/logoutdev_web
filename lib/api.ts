@@ -240,7 +240,7 @@ export async function undoRepost(
 
 export async function followUser(
   userId: string
-): Promise<{ following: boolean }> {
+): Promise<{ following: boolean; follower_count?: number }> {
   const res = await fetch(`${API_BASE_URL}/api/users/${userId}/follow`, {
     method: "POST",
     headers: { ...getAuthHeaders() },
@@ -250,7 +250,7 @@ export async function followUser(
 
 export async function unfollowUser(
   userId: string
-): Promise<{ following: boolean }> {
+): Promise<{ following: boolean; follower_count?: number }> {
   const res = await fetch(`${API_BASE_URL}/api/users/${userId}/follow`, {
     method: "DELETE",
     headers: { ...getAuthHeaders() },

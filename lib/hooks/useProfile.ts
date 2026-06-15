@@ -9,7 +9,6 @@ import { useCallback, useEffect, useState } from "react";
 import type {
   ProfileResponse,
   ProofOfWorkSignals,
-  UserProfileSkill,
   UserFeaturedProject,
   Post,
   ProjectSpace,
@@ -68,6 +67,7 @@ export function useProfile(username: string) {
   return {
     profile: result.data?.profile ?? null,
     is_me: result.data?.is_me ?? false,
+    is_following: result.data?.is_following ?? false,
     stats: result.data?.stats ?? null,
     skills: result.data?.skills ?? [],
     featured_projects: result.data?.featured_projects ?? [],

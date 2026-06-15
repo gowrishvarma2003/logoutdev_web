@@ -222,6 +222,7 @@ export interface CareerSummary {
 export interface ProfileResponse {
   profile: User;
   is_me: boolean;
+  is_following?: boolean;
   stats: ProfileStats;
   skills: UserProfileSkill[];
   featured_projects: UserFeaturedProject[];
@@ -1492,6 +1493,9 @@ export interface DiscoveryEntityMeta {
   eyebrow: string;
   byline?: string | null;
   stats?: string | null;
+  follower_count?: number;
+  is_following?: boolean;
+  can_follow?: boolean;
   updated_at?: string | null;
   collaboration_label?: string | null;
   status_label?: string | null;

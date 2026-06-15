@@ -9,6 +9,7 @@
 import Link from "next/link";
 import type { User } from "@/lib/types";
 import Avatar from "@/components/ui/Avatar";
+import FollowButton from "@/components/profile/FollowButton";
 import {
   MapPinIcon,
   GitHubIcon,
@@ -21,6 +22,9 @@ import {
 interface ProfileHeaderProps {
   profile: User;
   is_me: boolean;
+  is_following?: boolean;
+  followerCount?: number;
+  onFollowChange?: (next: { following: boolean; followerCount: number }) => void;
 }
 
 function ExternalLink({
@@ -49,7 +53,7 @@ function ExternalLink({
   );
 }
 
-export default function ProfileHeader({ profile, is_me }: ProfileHeaderProps) {
+export default function ProfileHeader({ profile, is_me, is_following = false, followerCount = 0, onFollowChange }: ProfileHeaderProps) {
   const joinDate = profile.created_at;
 
   // Format join date as "Joined Month YYYY"
@@ -72,7 +76,7 @@ export default function ProfileHeader({ profile, is_me }: ProfileHeaderProps) {
       <div className="flex items-start justify-between mb-4">
         <Avatar user={profile} size="lg" className="ring-2 ring-zinc-800" />
 
-        {is_me && (
+        {is_me ? (
           <Link
             href="/settings/profile"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-700 text-sm font-medium text-zinc-300 hover:border-zinc-500 hover:text-white transition-colors"
@@ -80,6 +84,14 @@ export default function ProfileHeader({ profile, is_me }: ProfileHeaderProps) {
             <EditIcon className="w-3.5 h-3.5" />
             Edit profile
           </Link>
+        ) : (
+          <FollowButton
+            userId={profile.id}
+            initialFollowing={is_following}
+            initialFollowerCount={followerCount}
+            isMe={is_me}
+            onChange={onFollowChange}
+          />
         )}
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRepoContext } from "./layout";
@@ -10,13 +10,15 @@ import { EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import { API_BASE_URL } from "@/lib/apiBaseUrl";
 import { formatFileSize, formatRelativeTime } from "@/lib/utils";
-import { FolderIcon, DocumentIcon, ClockIcon, CodeBracketIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, ChevronDownIcon, FolderIcon, DocumentIcon, ClockIcon, CodeBracketIcon } from "@heroicons/react/24/outline";
 
 export default function RepoCodePage() {
   const { repo } = useRepoContext();
   const { user } = useAuth();
   const [showCodePanel, setShowCodePanel] = useState(false);
+  const [showBranchMenu, setShowBranchMenu] = useState(false);
   const [copiedField, setCopiedField] = useState<"url" | "commands" | null>(null);
+  const branchMenuRef = useRef<HTMLDivElement | null>(null);
   const searchParams = useSearchParams();
   const currentPath = searchParams.get("path") || "";
   const currentView = searchParams.get("view") || "tree";
@@ -58,6 +60,27 @@ export default function RepoCodePage() {
   const { readme } = useRepositoryReadme(repo.id, activeRef);
   const { commits } = useRepositoryCommits(repo.id, activeRef, undefined, 1);
 
+  const branchOptions = useMemo(() => {
+    const uniqueBranches = new Map(branches.map((branch) => [branch.name, branch]));
+
+    if (!uniqueBranches.has(activeRef)) {
+      uniqueBranches.set(activeRef, {
+        name: activeRef,
+        oid: "",
+        is_default: activeRef === defaultBranch,
+        is_head: false,
+      });
+    }
+
+    return [...uniqueBranches.values()].sort((a, b) => {
+      if (a.name === activeRef) return -1;
+      if (b.name === activeRef) return 1;
+      if (a.name === defaultBranch) return -1;
+      if (b.name === defaultBranch) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [activeRef, branches, defaultBranch]);
+
   const breadcrumb = useMemo(() => {
     const parts = directoryPath ? directoryPath.split("/") : [];
     return parts.map((part, index) => ({
@@ -68,6 +91,37 @@ export default function RepoCodePage() {
 
   const latestCommit = commits?.[0];
   const isRepoOwner = Boolean(user?.id && repo.owner_id === user.id);
+
+  useEffect(() => {
+    if (!showBranchMenu) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (branchMenuRef.current?.contains(event.target as Node)) return;
+      setShowBranchMenu(false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowBranchMenu(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showBranchMenu]);
+
+  const branchHref = (branchName: string) => {
+    const params = new URLSearchParams();
+    params.set("ref", branchName);
+    if (currentPath) params.set("path", currentPath);
+    if (currentView !== "tree") params.set("view", currentView);
+    return `/repos/${repo.id}?${params.toString()}`;
+  };
 
   const handleCopy = async (value: string, field: "url" | "commands") => {
     try {
@@ -134,13 +188,65 @@ export default function RepoCodePage() {
       {/* Branch selector & Actions */}
       <div className="relative flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 rounded-md bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-200 hover:bg-zinc-700">
-            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="fill-current text-zinc-400">
-              <path d="M11.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.493 2.493 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25ZM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM3.5 3.25a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0Z"></path>
-            </svg>
-            <span className="max-w-[150px] truncate">{activeRef}</span>
-            <span className="text-zinc-500">v</span>
-          </button>
+          <div ref={branchMenuRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setShowBranchMenu((current) => !current)}
+              className="flex min-w-0 items-center gap-2 rounded-md bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-200 hover:bg-zinc-700"
+              aria-expanded={showBranchMenu}
+              aria-haspopup="menu"
+            >
+              <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="shrink-0 fill-current text-zinc-400">
+                <path d="M11.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.493 2.493 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25ZM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM3.5 3.25a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0Z"></path>
+              </svg>
+              <span className="max-w-[150px] truncate">{activeRef}</span>
+              <ChevronDownIcon className={`h-4 w-4 shrink-0 text-zinc-500 transition-transform ${showBranchMenu ? "rotate-180" : ""}`} />
+            </button>
+
+            {showBranchMenu ? (
+              <div
+                className="absolute left-0 top-full z-30 mt-2 w-72 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/40"
+                role="menu"
+              >
+                <div className="border-b border-zinc-800 px-3 py-2">
+                  <p className="text-xs font-semibold text-zinc-300">Switch branches</p>
+                </div>
+                <div className="max-h-80 overflow-y-auto py-1">
+                  {branchOptions.map((branch) => {
+                    const isActive = branch.name === activeRef;
+                    const isDefault = branch.name === defaultBranch;
+
+                    return (
+                      <Link
+                        key={branch.name}
+                        href={branchHref(branch.name)}
+                        onClick={() => setShowBranchMenu(false)}
+                        role="menuitem"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
+                      >
+                        <CheckIcon className={`h-4 w-4 shrink-0 ${isActive ? "text-blue-400" : "text-transparent"}`} />
+                        <span className="min-w-0 flex-1 truncate">{branch.name}</span>
+                        {isDefault ? (
+                          <span className="shrink-0 rounded-full border border-zinc-700 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                            Default
+                          </span>
+                        ) : null}
+                      </Link>
+                    );
+                  })}
+                </div>
+                <div className="border-t border-zinc-800 px-3 py-2">
+                  <Link
+                    href={`/repos/${repo.id}/branches`}
+                    onClick={() => setShowBranchMenu(false)}
+                    className="text-xs font-medium text-blue-400 hover:text-blue-300"
+                  >
+                    View all branches
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+          </div>
           
           <div className="flex items-center gap-3 text-sm text-zinc-400 ml-2 border-l border-zinc-800 pl-4 hidden sm:flex">
             <Link href={`/repos/${repo.id}/branches`} className="hover:text-blue-400 font-semibold flex items-center gap-1">

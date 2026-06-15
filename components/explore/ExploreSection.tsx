@@ -3,15 +3,15 @@
 import Link from "next/link";
 import type { DiscoveryEntity, DiscoverySection as DiscoverySectionType } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils";
+import FollowButton from "@/components/profile/FollowButton";
 
 function DiscoveryCard({ item }: { item: DiscoveryEntity }) {
+  const isBuilder = item.type === "builder";
+
   return (
-    <Link
-      href={item.href}
-      className="group flex h-full flex-col rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 transition-colors hover:border-zinc-700 hover:bg-zinc-900"
-    >
+    <div className="group flex h-full flex-col rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 transition-colors hover:border-zinc-700 hover:bg-zinc-900">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        <Link href={item.href} className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
             {item.meta.eyebrow}
           </p>
@@ -19,15 +19,24 @@ function DiscoveryCard({ item }: { item: DiscoveryEntity }) {
             {item.title}
           </h3>
           {item.meta.byline ? <p className="mt-1 text-xs text-zinc-500">{item.meta.byline}</p> : null}
-        </div>
-        {item.meta.status_label ? (
+        </Link>
+        {isBuilder ? (
+          <FollowButton
+            userId={item.id}
+            initialFollowing={Boolean(item.meta.is_following)}
+            initialFollowerCount={item.meta.follower_count ?? 0}
+            size="sm"
+          />
+        ) : item.meta.status_label ? (
           <span className="rounded-full bg-zinc-800 px-2 py-1 text-[11px] font-medium capitalize text-zinc-300">
             {item.meta.status_label.replace(/_/g, " ")}
           </span>
         ) : null}
       </div>
 
-      <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-zinc-400">{item.subtitle}</p>
+      <Link href={item.href} className="mt-3 line-clamp-3 text-sm leading-relaxed text-zinc-400 hover:text-zinc-300">
+        {item.subtitle}
+      </Link>
 
       {item.tags.length > 0 ? (
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -50,7 +59,7 @@ function DiscoveryCard({ item }: { item: DiscoveryEntity }) {
           {item.meta.updated_at ? <span>Updated {formatRelativeTime(item.meta.updated_at)}</span> : null}
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 

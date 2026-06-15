@@ -41,13 +41,18 @@ export default function NewFilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!filename.trim()) return;
+    const trimmedFilename = filename.trim();
+    const trimmedCommitMessage = commitMessage.trim();
+
+    if (!trimmedFilename) return;
+
+    if (!trimmedCommitMessage) {
+      setError("Commit message is required.");
+      return;
+    }
 
     // Combine current directory path with new filename
-    const fullPath = initialPath ? `${initialPath}/${filename}` : filename;
-
-    // Generate default commit message if empty
-    const finalMessage = commitMessage.trim() || `Create ${fullPath}`;
+    const fullPath = initialPath ? `${initialPath}/${trimmedFilename}` : trimmedFilename;
 
     setIsSubmitting(true);
     setError("");
@@ -57,7 +62,7 @@ export default function NewFilePage() {
         branch: ref,
         path: fullPath,
         content,
-        message: finalMessage,
+        message: trimmedCommitMessage,
       });
 
       router.push(`/repos/${repo.id}?ref=${encodeURIComponent(ref)}&path=${encodeURIComponent(fullPath)}&view=blob`);
@@ -123,15 +128,16 @@ export default function NewFilePage() {
               type="text"
               value={commitMessage}
               onChange={(e) => setCommitMessage(e.target.value)}
-              placeholder={`Create ${initialPath ? `${initialPath}/` : ""}${filename || "new_file"}`}
+              placeholder="Enter a commit message"
               className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
             />
           </div>
           
           <div className="flex items-center gap-3 border-t border-zinc-800/50 pt-4">
             <button
               type="submit"
-              disabled={isSubmitting || !filename.trim()}
+              disabled={isSubmitting || !filename.trim() || !commitMessage.trim()}
               className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
             >
               {isSubmitting ? <Spinner size="sm" className="mr-2 inline" /> : null}

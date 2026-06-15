@@ -3,7 +3,7 @@
 import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRepo, useRepoAccess } from "@/lib/hooks/useRepos";
+import { useBranches, useRepo, useRepoAccess } from "@/lib/hooks/useRepos";
 import { useSpaceList } from "@/lib/hooks/useSpaces";
 import * as reposApi from "@/lib/services/reposApi";
 import type { RepoCollaboratorCandidate, RepoRole } from "@/lib/types";
@@ -26,6 +26,7 @@ export default function RepoSettingsPage({
   const router = useRouter();
   const { repo, loading: repoLoading, error, refetch } = useRepo(repoId);
   const { collaborators, loading: accessLoading, refetch: refetchAccess } = useRepoAccess(repoId);
+  const { branches } = useBranches(repoId);
   const { data: spacesData, loading: spacesLoading, error: spacesError } = useSpaceList({ mine: true, page: 1, limit: 100 });
 
   const [name, setName] = useState("");
@@ -34,6 +35,8 @@ export default function RepoSettingsPage({
   const [defaultBranch, setDefaultBranch] = useState("main");
   const [visibility, setVisibility] = useState<"public" | "private">("private");
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [selectedSpaceId, setSelectedSpaceId] = useState("");
   const [attachmentSaving, setAttachmentSaving] = useState(false);
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
@@ -96,6 +99,8 @@ export default function RepoSettingsPage({
     event.preventDefault();
     if (!repo) return;
     setSaving(true);
+    setSaveError(null);
+    setSaveSuccess(null);
     try {
       await reposApi.updateRepository(repo.id, {
         name: name.trim(),
@@ -105,6 +110,9 @@ export default function RepoSettingsPage({
         visibility,
       });
       refetch();
+      setSaveSuccess("Repository settings saved.");
+    } catch (err: unknown) {
+      setSaveError(err instanceof Error ? err.message : "Failed to save repository settings.");
     } finally {
       setSaving(false);
     }
@@ -229,46 +237,98 @@ export default function RepoSettingsPage({
       <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50">
         <SectionHeader title="General" />
         <form onSubmit={handleSave} className="space-y-4 px-4 py-4">
+          {saveError ? (
+            <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+              {saveError}
+            </div>
+          ) : null}
+          {saveSuccess ? (
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+              {saveSuccess}
+            </div>
+          ) : null}
           <div className="grid gap-4 md:grid-cols-2">
-            <input
-              type="text"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              disabled={!repo.can_manage_general}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none disabled:opacity-60"
-            />
-            <input
-              type="text"
-              value={slug}
-              onChange={(event) => setSlug(event.target.value)}
-              disabled={!repo.can_manage_general}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none disabled:opacity-60"
-            />
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">Repository name</span>
+              <input
+                type="text"
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value);
+                  setSaveError(null);
+                  setSaveSuccess(null);
+                }}
+                disabled={!repo.can_manage_general}
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none disabled:opacity-60"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">URL slug</span>
+              <input
+                type="text"
+                value={slug}
+                onChange={(event) => {
+                  setSlug(event.target.value);
+                  setSaveError(null);
+                  setSaveSuccess(null);
+                }}
+                disabled={!repo.can_manage_general}
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none disabled:opacity-60"
+              />
+            </label>
           </div>
-          <textarea
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            rows={3}
-            disabled={!repo.can_manage_general}
-            className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none disabled:opacity-60"
-          />
-          <div className="grid gap-4 md:grid-cols-2">
-            <input
-              type="text"
-              value={defaultBranch}
-              onChange={(event) => setDefaultBranch(event.target.value)}
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">Description</span>
+            <textarea
+              value={description}
+              onChange={(event) => {
+                setDescription(event.target.value);
+                setSaveError(null);
+                setSaveSuccess(null);
+              }}
+              rows={3}
               disabled={!repo.can_manage_general}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none disabled:opacity-60"
+              className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none disabled:opacity-60"
             />
-            <select
-              value={visibility}
-              onChange={(event) => setVisibility(event.target.value as "public" | "private")}
-              disabled={!repo.can_manage_general}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none disabled:opacity-60"
-            >
-              <option value="private">Private</option>
-              <option value="public">Public</option>
-            </select>
+          </label>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">Default branch</span>
+              <select
+                value={defaultBranch}
+                onChange={(event) => {
+                  setDefaultBranch(event.target.value);
+                  setSaveError(null);
+                  setSaveSuccess(null);
+                }}
+                disabled={!repo.can_manage_general || branches.length === 0}
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none disabled:opacity-60"
+              >
+                {branches.length === 0 ? (
+                  <option value={defaultBranch}>{defaultBranch}</option>
+                ) : branches.map((branch) => (
+                  <option key={branch.name} value={branch.name}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">Visibility</span>
+              <select
+                value={visibility}
+                onChange={(event) => {
+                  setVisibility(event.target.value as "public" | "private");
+                  setSaveError(null);
+                  setSaveSuccess(null);
+                }}
+                disabled={!repo.can_manage_general}
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none disabled:opacity-60"
+              >
+                <option value="private">Private</option>
+                <option value="public">Public</option>
+              </select>
+            </label>
           </div>
           <div className="flex items-center justify-between gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-xs text-zinc-500">
             <div>

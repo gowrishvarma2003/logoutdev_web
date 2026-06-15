@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ExploreFilters from "@/components/explore/ExploreFilters";
 import ExploreSection from "@/components/explore/ExploreSection";
+import FollowButton from "@/components/profile/FollowButton";
 import { SparklesIcon } from "@/components/ui/Icons";
 import Spinner from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -127,26 +128,37 @@ export default function ExplorePage() {
               </div>
               <div className="grid gap-3 md:grid-cols-3">
                 {discovery.data.featured_entities.map((entity) => (
-                  <Link
+                  <div
                     key={`featured:${entity.type}:${entity.id}`}
-                    href={entity.href}
                     className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 transition-colors hover:border-zinc-700 hover:bg-zinc-900"
                   >
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                      {entity.meta.eyebrow}
-                    </p>
-                    <h2 className="mt-2 line-clamp-1 text-base font-semibold text-white">
-                      {entity.title}
-                    </h2>
-                    <p className="mt-2 line-clamp-2 text-sm text-zinc-400">
+                    <div className="flex items-start justify-between gap-3">
+                      <Link href={entity.href} className="min-w-0">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                          {entity.meta.eyebrow}
+                        </p>
+                        <h2 className="mt-2 line-clamp-1 text-base font-semibold text-white hover:text-sky-300">
+                          {entity.title}
+                        </h2>
+                      </Link>
+                      {entity.type === "builder" ? (
+                        <FollowButton
+                          userId={entity.id}
+                          initialFollowing={Boolean(entity.meta.is_following)}
+                          initialFollowerCount={entity.meta.follower_count ?? 0}
+                          size="sm"
+                        />
+                      ) : null}
+                    </div>
+                    <Link href={entity.href} className="mt-2 block line-clamp-2 text-sm text-zinc-400 hover:text-zinc-300">
                       {entity.subtitle}
-                    </p>
+                    </Link>
                     <p className="mt-4 text-xs text-sky-300">
                       {entity.rank_explanation.reasons[0] ||
                         entity.meta.collaboration_label ||
                         entity.meta.stats}
                     </p>
-                  </Link>
+                  </div>
                 ))}
               </div>
             </section>
