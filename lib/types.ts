@@ -466,6 +466,12 @@ export interface Repository {
   visibility: RepositoryVisibility;
   description?: string | null;
   default_branch: string;
+  language?: string | null;
+  languages?: Array<{
+    name: string;
+    bytes: number;
+    percentage: number;
+  }>;
   created_by: string;
   archived_at?: string | null;
   created_at: string;

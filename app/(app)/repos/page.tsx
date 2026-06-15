@@ -11,6 +11,31 @@ import { formatRelativeTime } from "@/lib/utils";
 import type { Repository } from "@/lib/types";
 import CreateRepoModal from "./CreateRepoModal";
 
+const LANGUAGE_COLORS: Record<string, string> = {
+  "C#": "#178600",
+  "C++": "#f34b7d",
+  C: "#555555",
+  CSS: "#563d7c",
+  Dart: "#00B4AB",
+  Dockerfile: "#384d54",
+  Go: "#00ADD8",
+  HTML: "#e34c26",
+  Java: "#b07219",
+  JavaScript: "#f1e05a",
+  Kotlin: "#A97BFF",
+  Makefile: "#427819",
+  PHP: "#4F5D95",
+  Python: "#3572A5",
+  Ruby: "#701516",
+  Rust: "#dea584",
+  SCSS: "#c6538c",
+  SQL: "#e38c00",
+  Shell: "#89e051",
+  Swift: "#F05138",
+  TypeScript: "#3178c6",
+  Vue: "#41b883",
+};
+
 export default function RepositoriesPage() {
   const [scope, setScope] = useState<"all" | "mine" | "shared" | "public">("all");
   const [query, setQuery] = useState("");
@@ -171,11 +196,15 @@ export default function RepositoriesPage() {
                   ) : null}
 
                   <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-500">
-                    {/* Placeholder language dot */}
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-3 w-3 rounded-full bg-yellow-400" />
-                      <span>TypeScript</span>
-                    </div>
+                    {repo.language ? (
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className="h-3 w-3 rounded-full"
+                          style={{ backgroundColor: LANGUAGE_COLORS[repo.language] || "#8b949e" }}
+                        />
+                        <span>{repo.language}</span>
+                      </div>
+                    ) : null}
 
                     {(repo.star_count || 0) > 0 ? (
                       <span className="flex items-center gap-1">
