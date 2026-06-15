@@ -42,10 +42,13 @@ function qs(params: Record<string, string | number | undefined | boolean>): stri
 }
 
 export async function listRepositories(filters?: {
-  scope?: "all" | "mine" | "shared" | "public";
+  scope?: "all" | "mine" | "shared" | "public" | "recommended";
   visibility?: RepositoryVisibility;
   attached?: boolean;
   q?: string;
+  stack?: string;
+  language?: string;
+  sort?: "updated" | "newest" | "stars";
   page?: number;
   limit?: number;
 }): Promise<{ repos: Repository[]; page: number; limit: number; total?: number }> {
@@ -55,6 +58,9 @@ export async function listRepositories(filters?: {
       visibility: filters?.visibility,
       attached: filters?.attached,
       q: filters?.q,
+      stack: filters?.stack,
+      language: filters?.language,
+      sort: filters?.sort,
       page: filters?.page,
       limit: filters?.limit,
     })}`,

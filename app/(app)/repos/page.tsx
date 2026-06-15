@@ -1,15 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useMemo } from "react";
+import type { ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { StarIcon } from "@primer/octicons-react";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { useRepositoryList } from "@/lib/hooks/useRepos";
 import * as reposApi from "@/lib/services/reposApi";
 import Spinner from "@/components/ui/Spinner";
-import { SearchIcon, FolderIcon } from "@/components/ui/Icons";
-import { StarIcon } from "@primer/octicons-react";
+import {
+  CodeBracketIcon,
+  FolderIcon,
+  GlobeIcon,
+  LockIcon,
+  SearchIcon,
+  SparklesIcon,
+} from "@/components/ui/Icons";
 import { formatRelativeTime } from "@/lib/utils";
 import type { Repository } from "@/lib/types";
 import CreateRepoModal from "./CreateRepoModal";
+
+const PAGE_LIMIT = 20;
 
 const LANGUAGE_COLORS: Record<string, string> = {
   "C#": "#178600",
@@ -36,98 +47,386 @@ const LANGUAGE_COLORS: Record<string, string> = {
   Vue: "#41b883",
 };
 
+type RepoTab = "mine" | "recommended" | "public";
+type RepoSort = "updated" | "newest" | "stars";
+type StarOverride = { is_starred: boolean; star_count: number };
+
+const TABS: Array<{ key: RepoTab; label: string; icon: ReactNode }> = [
+  { key: "mine", label: "My Repos", icon: <FolderIcon className="h-4 w-4" /> },
+  { key: "recommended", label: "Recommended", icon: <SparklesIcon className="h-4 w-4" /> },
+  { key: "public", label: "All Public", icon: <GlobeIcon className="h-4 w-4" /> },
+];
+
+function scoreLabel(score: number) {
+  if (score >= 75) return "Strong match";
+  if (score >= 50) return "Good match";
+  return "Worth a look";
+}
+
+function repoOwnerName(repo: Repository) {
+  return repo.owner?.username || repo.owner?.name || "unknown";
+}
+
+function VisibilityBadge({ visibility }: { visibility: Repository["visibility"] }) {
+  const isPublic = visibility === "public";
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-zinc-700 px-2 py-0.5 text-xs font-medium capitalize text-zinc-400">
+      {isPublic ? <GlobeIcon className="h-3 w-3" /> : <LockIcon className="h-3 w-3" />}
+      {visibility}
+    </span>
+  );
+}
+
+function RepoRecommendation({ repo }: { repo: Repository }) {
+  if (!repo.recommendation) return null;
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2">
+      <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-300">
+        <SparklesIcon className="h-3.5 w-3.5" />
+        {scoreLabel(repo.recommendation.score)}
+      </span>
+      {repo.recommendation.reasons.slice(0, 3).map((reason) => (
+        <span
+          key={`${repo.id}:${reason}`}
+          className="rounded-full bg-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-300"
+        >
+          {reason}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function RepoMeta({ repo }: { repo: Repository }) {
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-zinc-500">
+      {repo.language ? (
+        <span className="inline-flex items-center gap-1.5">
+          <span
+            className="h-3 w-3 rounded-full"
+            style={{ backgroundColor: LANGUAGE_COLORS[repo.language] || "#8b949e" }}
+          />
+          {repo.language}
+        </span>
+      ) : null}
+
+      <span className="inline-flex items-center gap-1">
+        <StarIcon size={14} />
+        {repo.star_count || 0}
+      </span>
+
+      {(repo.fork_count || 0) > 0 ? (
+        <Link href={`/repos/${repo.id}/forks`} className="inline-flex items-center gap-1 hover:text-sky-300">
+          <CodeBracketIcon className="h-3.5 w-3.5" />
+          {repo.fork_count}
+        </Link>
+      ) : null}
+
+      {repo.attached_space ? (
+        <Link href={`/spaces/${repo.attached_space.id}`} className="truncate hover:text-sky-300">
+          {repo.attached_space.name}
+        </Link>
+      ) : null}
+
+      <span>Updated {formatRelativeTime(repo.updated_at)}</span>
+    </div>
+  );
+}
+
+function RepoCard({
+  repo,
+  isStarring,
+  onToggleStar,
+}: {
+  repo: Repository;
+  isStarring: boolean;
+  onToggleStar: (repoId: string) => void;
+}) {
+  return (
+    <article className="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-4 transition-colors hover:border-zinc-700">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={`/repos/${repo.id}`}
+              className="break-words text-base font-semibold text-sky-300 hover:text-sky-200"
+            >
+              {repoOwnerName(repo)}/{repo.name}
+            </Link>
+            <VisibilityBadge visibility={repo.visibility} />
+          </div>
+
+          {repo.forked_from ? (
+            <p className="mt-1 text-xs text-zinc-500">
+              Forked from{" "}
+              <Link href={`/repos/${repo.forked_from.id}`} className="hover:text-sky-300">
+                {repo.forked_from.owner?.username}/{repo.forked_from.name}
+              </Link>
+            </p>
+          ) : null}
+
+          {repo.description ? (
+            <p className="mt-2 line-clamp-2 max-w-3xl text-sm leading-relaxed text-zinc-400">
+              {repo.description}
+            </p>
+          ) : null}
+
+          <RepoRecommendation repo={repo} />
+          <RepoMeta repo={repo} />
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onToggleStar(repo.id)}
+          disabled={isStarring}
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-900 px-3 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800 disabled:opacity-50"
+          aria-label={repo.is_starred ? "Unstar repository" : "Star repository"}
+        >
+          <StarIcon size={14} className={repo.is_starred ? "text-yellow-500" : "text-zinc-400"} />
+          <span className="hidden sm:inline">{repo.is_starred ? "Unstar" : "Star"}</span>
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function EmptyState({
+  tab,
+  hasFilters,
+  onCreate,
+  onClear,
+  signedIn,
+}: {
+  tab: RepoTab;
+  hasFilters: boolean;
+  onCreate: () => void;
+  onClear: () => void;
+  signedIn: boolean;
+}) {
+  if (hasFilters) {
+    return (
+      <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
+        <h3 className="text-base font-semibold text-white">No repositories matched</h3>
+        <button type="button" onClick={onClear} className="mt-3 text-sm font-medium text-sky-300 hover:text-sky-200">
+          Clear filters
+        </button>
+      </div>
+    );
+  }
+
+  if (tab === "mine") {
+    return (
+      <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
+        <FolderIcon className="mx-auto h-11 w-11 text-zinc-700" />
+        <h3 className="mt-4 text-base font-semibold text-white">
+          {signedIn ? "No repos yet" : "Sign in to see your repos"}
+        </h3>
+        {signedIn ? (
+          <button
+            type="button"
+            onClick={onCreate}
+            className="mt-5 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700"
+          >
+            Create repository
+          </button>
+        ) : (
+          <Link
+            href="/login"
+            className="mt-5 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+          >
+            Sign in
+          </Link>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
+      <SparklesIcon className="mx-auto h-10 w-10 text-zinc-700" />
+      <h3 className="mt-4 text-base font-semibold text-white">
+        {tab === "recommended" ? "No recommendations yet" : "No public repositories yet"}
+      </h3>
+      <p className="mx-auto mt-2 max-w-md text-sm text-zinc-500">
+        {tab === "recommended"
+          ? "Fresh public projects will appear here as builders publish repos and spaces."
+          : "Public repos from the community will appear here."}
+      </p>
+    </div>
+  );
+}
+
 export default function RepositoriesPage() {
-  const [scope, setScope] = useState<"all" | "mine" | "shared" | "public">("all");
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<RepoTab>("mine");
   const [query, setQuery] = useState("");
+  const [stack, setStack] = useState("");
+  const [sort, setSort] = useState<RepoSort>("updated");
   const [page, setPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [starringRepoId, setStarringRepoId] = useState<string | null>(null);
-  const [displayRepos, setDisplayRepos] = useState<Repository[]>([]);
-
-  const { repos, loading, error, refetch } = useRepositoryList({
-    scope,
-    q: query || undefined,
-    page,
-    limit: 30,
-  });
-
-  const reposKey = repos.map((r) => `${r.id}:${r.is_starred}:${r.star_count}`).join(",");
-  const stableRepos = useMemo(() => repos, [reposKey]);
+  const [starOverrides, setStarOverrides] = useState<Record<string, StarOverride>>({});
 
   useEffect(() => {
-    setDisplayRepos(stableRepos);
-  }, [stableRepos]);
+    if (!user && activeTab === "mine") {
+      setActiveTab("recommended");
+    }
+  }, [activeTab, user]);
 
-  const handleToggleStar = async (repoId: string) => {
+  const apiScope = activeTab === "public" ? "public" : activeTab;
+  const hasFilters = Boolean(query.trim() || stack.trim() || (activeTab === "public" && sort !== "updated"));
+  const { repos, loading, error, total, refetch } = useRepositoryList({
+    scope: apiScope,
+    q: query || undefined,
+    stack: stack || undefined,
+    sort: activeTab === "public" ? sort : "updated",
+    page,
+    limit: PAGE_LIMIT,
+  });
+
+  const displayRepos = useMemo(
+    () =>
+      repos.map((repo) => {
+        const override = starOverrides[repo.id];
+        return override
+          ? { ...repo, is_starred: override.is_starred, star_count: override.star_count }
+          : repo;
+      }),
+    [repos, starOverrides]
+  );
+
+  function switchTab(tab: RepoTab) {
+    setActiveTab(tab);
+    setPage(1);
+  }
+
+  function clearFilters() {
+    setQuery("");
+    setStack("");
+    setSort("updated");
+    setPage(1);
+  }
+
+  async function handleToggleStar(repoId: string) {
     if (starringRepoId) return;
     setStarringRepoId(repoId);
     try {
       const result = await reposApi.toggleStar(repoId);
-      setDisplayRepos((prev) =>
-        prev.map((r) =>
-          r.id === repoId
-            ? { ...r, is_starred: result.starred, star_count: result.star_count }
-            : r
-        )
-      );
+      setStarOverrides((current) => ({
+        ...current,
+        [repoId]: { is_starred: result.starred, star_count: result.star_count },
+      }));
     } catch {
-      // silently fail
+      // Keep the repo list stable if the star request fails.
     } finally {
       setStarringRepoId(null);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950">
-      <div className="border-b border-zinc-800 bg-zinc-950 px-4 md:px-8">
-        <div className="mx-auto max-w-[1280px]">
-          <div className="flex items-center justify-between py-5">
-            <h1 className="text-xl font-semibold text-white">Repositories</h1>
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-green-700"
-            >
-              <FolderIcon className="h-4 w-4" />
-              New
-            </button>
+      <header className="border-b border-zinc-800 bg-zinc-950 px-4 md:px-8">
+        <div className="mx-auto max-w-[1180px]">
+          <div className="flex flex-wrap items-center justify-between gap-3 py-5">
+            <div>
+              <h1 className="text-xl font-semibold text-white">Repositories</h1>
+              <p className="mt-1 text-sm text-zinc-500">Your code, contribution matches, and public projects.</p>
+            </div>
+            {user ? (
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(true)}
+                className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700"
+              >
+                <FolderIcon className="h-4 w-4" />
+                New
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-900"
+              >
+                Sign in
+              </Link>
+            )}
           </div>
 
-          <div className="flex flex-col gap-4 pb-4 md:flex-row md:items-center md:justify-between">
-            <div className="relative flex-1 md:max-w-md">
-              <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+          <div className="flex gap-2 overflow-x-auto pb-3">
+            {TABS.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => switchTab(tab.key)}
+                className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition-colors ${
+                  activeTab === tab.key
+                    ? "bg-white text-zinc-950"
+                    : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-3 pb-4 md:flex-row md:items-center">
+            <div className="relative min-w-0 flex-1">
+              <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
               <input
-                type="text"
+                type="search"
                 placeholder="Find a repository..."
                 value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
+                onChange={(event) => {
+                  setQuery(event.target.value);
                   setPage(1);
                 }}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-1.5 pl-9 pr-3 text-sm text-white placeholder:text-zinc-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="h-10 w-full rounded-lg border border-zinc-800 bg-zinc-900 pl-9 pr-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-sky-500"
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <input
+              type="search"
+              placeholder="Stack or language"
+              value={stack}
+              onChange={(event) => {
+                setStack(event.target.value);
+                setPage(1);
+              }}
+              className="h-10 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-sky-500 md:w-44"
+            />
+
+            {activeTab === "public" ? (
               <select
-                value={scope}
-                onChange={(e) => {
-                  setScope(e.target.value as "all" | "mine" | "shared" | "public");
+                value={sort}
+                onChange={(event) => {
+                  setSort(event.target.value as RepoSort);
                   setPage(1);
                 }}
-                className="rounded-lg border border-zinc-800 bg-zinc-900 py-1.5 pl-3 pr-8 text-sm text-zinc-300 focus:border-blue-500 focus:outline-none"
+                className="h-10 rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-300 outline-none transition-colors focus:border-sky-500"
               >
-                <option value="all">All</option>
-                <option value="public">Public</option>
-                <option value="mine">Owned</option>
-                <option value="shared">Shared</option>
+                <option value="updated">Recently updated</option>
+                <option value="stars">Most starred</option>
+                <option value="newest">Newest</option>
               </select>
-            </div>
+            ) : null}
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="mx-auto max-w-[1280px] p-4 md:px-8 md:py-6">
-        {loading && !repos.length ? (
+      <main className="mx-auto max-w-[1180px] px-4 py-5 md:px-8">
+        <div className="mb-4 flex items-center justify-between gap-3 text-sm">
+          <p className="text-zinc-500">
+            {loading ? "Loading repositories..." : `${total || displayRepos.length} repositories`}
+          </p>
+          {hasFilters ? (
+            <button type="button" onClick={clearFilters} className="font-medium text-sky-300 hover:text-sky-200">
+              Clear filters
+            </button>
+          ) : null}
+        </div>
+
+        {loading && !displayRepos.length ? (
           <div className="flex justify-center py-16">
             <Spinner size="lg" />
           </div>
@@ -136,135 +435,51 @@ export default function RepositoriesPage() {
         {error ? <p className="py-12 text-center text-sm text-rose-400">{error}</p> : null}
 
         {!loading && !error && displayRepos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-zinc-800 border-dashed py-24">
-            {query || scope !== "all" ? (
-              <>
-                <h3 className="mb-2 text-lg font-semibold text-white">No repositories match that criteria.</h3>
-                <button
-                  onClick={() => {
-                    setQuery("");
-                    setScope("all");
-                  }}
-                  className="text-sm font-medium text-blue-500 hover:underline"
-                >
-                  Clear filters
-                </button>
-              </>
-            ) : (
-              <>
-                <FolderIcon className="mb-4 h-12 w-12 text-zinc-700" />
-                <h3 className="mb-2 text-lg font-semibold text-white">You don&apos;t have any repositories</h3>
-                <p className="mb-6 text-sm text-zinc-400">Repositories contain all your project files and revision history.</p>
-                <button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
-                >
-                  Create a repository
-                </button>
-              </>
-            )}
-          </div>
+          <EmptyState
+            tab={activeTab}
+            hasFilters={hasFilters}
+            onCreate={() => setIsCreateModalOpen(true)}
+            onClear={clearFilters}
+            signedIn={Boolean(user)}
+          />
         ) : null}
 
-        {!loading && !error && displayRepos.length > 0 ? (
-          <div className="divide-y divide-zinc-800 border-t border-zinc-800">
+        {!error && displayRepos.length > 0 ? (
+          <div className="grid gap-3">
             {displayRepos.map((repo) => (
-              <div key={repo.id} className="py-5 flex items-start justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <Link
-                      href={`/repos/${repo.id}`}
-                      className="text-lg font-semibold text-blue-500 hover:underline break-words"
-                    >
-                      {repo.owner?.username ? `${repo.owner.username}/` : ""}{repo.name}
-                    </Link>
-                    <span className="rounded-full border border-zinc-700 px-2 py-0.5 text-xs font-medium text-zinc-400 capitalize">
-                      {repo.visibility}
-                    </span>
-                  </div>
-
-                  {repo.forked_from ? (
-                    <p className="mb-2 text-xs text-zinc-500">
-                      Forked from <Link href={`/repos/${repo.forked_from.id}`} className="hover:text-blue-500 hover:underline">{repo.forked_from.owner?.username}/{repo.forked_from.name}</Link>
-                    </p>
-                  ) : null}
-
-                  {repo.description ? (
-                    <p className="mb-3 text-sm text-zinc-400 pr-4 line-clamp-2 md:w-3/4">
-                      {repo.description}
-                    </p>
-                  ) : null}
-
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-500">
-                    {repo.language ? (
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          className="h-3 w-3 rounded-full"
-                          style={{ backgroundColor: LANGUAGE_COLORS[repo.language] || "#8b949e" }}
-                        />
-                        <span>{repo.language}</span>
-                      </div>
-                    ) : null}
-
-                    {(repo.star_count || 0) > 0 ? (
-                      <span className="flex items-center gap-1">
-                        <StarIcon size={14} />
-                        <span>{repo.star_count}</span>
-                      </span>
-                    ) : null}
-
-                    {(repo.fork_count || 0) > 0 ? (
-                      <Link href={`/repos/${repo.id}/forks`} className="flex items-center gap-1 hover:text-blue-500">
-                        <svg className="w-3.5 h-3.5 text-zinc-500" viewBox="0 0 16 16" fill="currentColor"><path fillRule="evenodd" d="M5 3.254V3.25v.005a.75.75 0 1 1-1.5 0V2.75C3.5 1.784 4.284 1 5.25 1h5.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 10.75 15h-5.5A1.75 1.75 0 0 1 3.5 13.25V8.75a.75.75 0 0 1 1.5 0v4.5c0 .138.112.25.25.25h5.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25h-5.5a.25.25 0 0 0-.25.25v.504Z"></path></svg>
-                        <span>{repo.fork_count}</span>
-                      </Link>
-                    ) : null}
-
-                    <span>Updated {formatRelativeTime(repo.updated_at)}</span>
-                  </div>
-                </div>
-
-                <div className="hidden sm:flex flex-col items-end shrink-0 gap-2">
-                  <div className="h-[28px] flex overflow-hidden rounded-md border border-zinc-700 bg-zinc-800 font-medium text-xs text-zinc-300">
-                    <button
-                      onClick={() => handleToggleStar(repo.id)}
-                      disabled={starringRepoId === repo.id}
-                      className="flex items-center gap-1.5 px-2.5 py-1 hover:bg-zinc-700 border-r border-zinc-700 disabled:opacity-50"
-                    >
-                      <StarIcon size={14} className={repo.is_starred ? "text-yellow-500" : "text-zinc-400"} />
-                      {repo.is_starred ? "Unstar" : "Star"}
-                    </button>
-                    <button className="flex items-center px-2 py-1 hover:bg-zinc-700">
-                      <span className="font-semibold px-0.5">{repo.star_count || 0}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <RepoCard
+                key={repo.id}
+                repo={repo}
+                isStarring={starringRepoId === repo.id}
+                onToggleStar={handleToggleStar}
+              />
             ))}
           </div>
         ) : null}
 
-        {page > 1 || displayRepos.length >= 30 ? (
-          <div className="mt-8 flex justify-center">
-            <div className="inline-flex items-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
+        {page > 1 || displayRepos.length >= PAGE_LIMIT ? (
+          <div className="mt-6 flex justify-center">
+            <div className="inline-flex overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
               <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
+                type="button"
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
                 disabled={page <= 1}
-                className="px-4 py-2 text-sm font-medium text-blue-500 hover:bg-zinc-800 disabled:text-zinc-500 disabled:hover:bg-transparent"
+                className="px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-zinc-800 disabled:text-zinc-600 disabled:hover:bg-transparent"
               >
                 Previous
               </button>
               <button
-                onClick={() => setPage(p => p + 1)}
-                disabled={displayRepos.length < 30}
-                className="border-l border-zinc-800 px-4 py-2 text-sm font-medium text-blue-500 hover:bg-zinc-800 disabled:text-zinc-500 disabled:hover:bg-transparent"
+                type="button"
+                onClick={() => setPage((current) => current + 1)}
+                disabled={displayRepos.length < PAGE_LIMIT}
+                className="border-l border-zinc-800 px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-zinc-800 disabled:text-zinc-600 disabled:hover:bg-transparent"
               >
                 Next
               </button>
             </div>
           </div>
         ) : null}
-      </div>
+      </main>
 
       <CreateRepoModal
         isOpen={isCreateModalOpen}
@@ -272,8 +487,8 @@ export default function RepositoriesPage() {
         onSuccess={() => {
           refetch();
           setPage(1);
-          setQuery("");
-          setScope("all");
+          setActiveTab("mine");
+          clearFilters();
         }}
       />
     </div>

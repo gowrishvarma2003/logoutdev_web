@@ -73,16 +73,29 @@ function managedRepos(attachments: SpaceRepoAttachment[]) {
 }
 
 export function useRepositoryList(filters?: {
-  scope?: "all" | "mine" | "shared" | "public";
+  scope?: "all" | "mine" | "shared" | "public" | "recommended";
   visibility?: "public" | "private";
   attached?: boolean;
   q?: string;
+  stack?: string;
+  language?: string;
+  sort?: "updated" | "newest" | "stars";
   page?: number;
   limit?: number;
 }) {
   const result = useAsync(
     () => reposApi.listRepositories(filters),
-    [filters?.scope, filters?.visibility, filters?.attached, filters?.q, filters?.page, filters?.limit]
+    [
+      filters?.scope,
+      filters?.visibility,
+      filters?.attached,
+      filters?.q,
+      filters?.stack,
+      filters?.language,
+      filters?.sort,
+      filters?.page,
+      filters?.limit,
+    ]
   );
 
   return {

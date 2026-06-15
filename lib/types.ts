@@ -528,6 +528,22 @@ export interface Repository {
     slug: string;
     owner?: { id: string; name: string; username: string };
   } | null;
+  recommendation?: RepositoryRecommendation | null;
+}
+
+export interface RepositoryRecommendation {
+  score: number;
+  reasons: string[];
+  matched_stacks: string[];
+  freshness_bucket: string;
+  signal_breakdown: {
+    collaboration_fit: number;
+    stack_fit: number;
+    freshness_activity: number;
+    social_proof: number;
+    completeness_trust: number;
+  };
+  source: "logoutdev";
 }
 
 export interface RepoPermissions {
