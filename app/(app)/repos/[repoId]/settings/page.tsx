@@ -43,6 +43,9 @@ export default function RepoSettingsPage({
   const [selectedUser, setSelectedUser] = useState<RepoCollaboratorCandidate | null>(null);
   const [candidateRole, setCandidateRole] = useState<RepoRole>("read");
   const [memberSaving, setMemberSaving] = useState(false);
+  const [deleteConfirmName, setDeleteConfirmName] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!repo) return;
@@ -107,11 +110,18 @@ export default function RepoSettingsPage({
     }
   }
 
-  async function handleArchive() {
+  async function handleDelete() {
     if (!repo) return;
-    if (!confirm(`Archive ${repo.name}?`)) return;
-    await reposApi.archiveRepository(repo.id);
-    router.push("/repos");
+    if (deleteConfirmName !== repo.name) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await reposApi.deleteRepository(repo.id);
+      router.push("/repos");
+    } catch (err: unknown) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete repository.");
+      setDeleting(false);
+    }
   }
 
   async function handleAttachmentSave() {
@@ -263,7 +273,7 @@ export default function RepoSettingsPage({
           <div className="flex items-center justify-between gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-xs text-zinc-500">
             <div>
               <p className="font-medium text-zinc-300">Admin-only controls</p>
-              <p>Visibility, archive actions, and repo home binding follow repository admin access.</p>
+              <p>Visibility, repo home binding, and access controls follow repository admin access.</p>
             </div>
             <CogIcon className="h-4 w-4 text-zinc-500" />
           </div>
@@ -489,14 +499,38 @@ export default function RepoSettingsPage({
 
       <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50">
         <SectionHeader title="Danger Zone" />
-        <div className="px-4 py-4">
-          <button
-            onClick={handleArchive}
-            disabled={!repo.can_archive}
-            className="rounded-lg border border-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-400 transition-colors hover:bg-rose-500/10 disabled:opacity-50"
-          >
-            Archive Repository
-          </button>
+        <div className="space-y-4 px-4 py-4">
+          <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 px-4 py-3">
+            <p className="text-sm font-medium text-rose-200">Delete this repository</p>
+            <p className="mt-1 text-xs text-rose-300/80">
+              This permanently removes the repo record, Git storage, releases, pull requests, discussions, stars, watchers, collaborators, and fork links. Space work items and updates will remain but lose their repo link.
+            </p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+            <input
+              type="text"
+              value={deleteConfirmName}
+              onChange={(event) => {
+                setDeleteConfirmName(event.target.value);
+                setDeleteError(null);
+              }}
+              placeholder={`Type ${repo.name} to confirm`}
+              disabled={!repo.can_delete || deleting}
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none disabled:opacity-60"
+            />
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={!repo.can_delete || deleting || deleteConfirmName !== repo.name}
+              className="rounded-lg border border-rose-500/30 px-3 py-2 text-xs font-semibold text-rose-300 transition-colors hover:bg-rose-500/10 disabled:opacity-50"
+            >
+              {deleting ? "Deleting..." : "Delete Repository"}
+            </button>
+          </div>
+          {!repo.can_delete ? (
+            <p className="text-xs text-zinc-500">Only the repository owner can permanently delete this repository.</p>
+          ) : null}
+          {deleteError ? <p className="text-xs text-rose-400">{deleteError}</p> : null}
         </div>
       </section>
     </div>

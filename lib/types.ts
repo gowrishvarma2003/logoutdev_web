@@ -490,6 +490,7 @@ export interface Repository {
   can_manage_rules?: boolean;
   can_manage_access?: boolean;
   can_archive?: boolean;
+  can_delete?: boolean;
   can_manage_general?: boolean;
   can_manage_releases?: boolean;
   can_manage_branches?: boolean;
@@ -555,6 +556,7 @@ export interface RepoPermissions {
   can_manage_rules: boolean;
   can_manage_access: boolean;
   can_archive: boolean;
+  can_delete: boolean;
   can_manage_general?: boolean;
   can_manage_releases?: boolean;
   can_manage_branches?: boolean;

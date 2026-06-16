@@ -109,7 +109,7 @@ export async function updateRepository(
   return handleRes(res);
 }
 
-export async function archiveRepository(repoId: string): Promise<{ archived: boolean }> {
+export async function deleteRepository(repoId: string): Promise<{ deleted: boolean }> {
   const res = await fetch(`${API}/api/repos/${repoId}`, {
     method: "DELETE",
     headers: { ...authHeaders() },
