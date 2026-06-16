@@ -16,7 +16,7 @@ import type { User } from "@/lib/types";
 
 export default function SettingsProfilePage() {
   const router = useRouter();
-  const { user: currentUser, refreshUser } = useAuth();
+  const { user: currentUser, isLoaded, refreshUser } = useAuth();
 
   // Use current user's username (or id fallback) to fetch full profile data
   const profileSlug = currentUser?.username || currentUser?.id || "";
@@ -30,7 +30,7 @@ export default function SettingsProfilePage() {
     refetch,
   } = useProfile(profileSlug);
 
-  if (!currentUser) {
+  if (!isLoaded || !currentUser) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <Spinner size="lg" />

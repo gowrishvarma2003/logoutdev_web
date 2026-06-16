@@ -29,15 +29,20 @@ interface AsyncState<T> {
 
 function useAsync<T>(
   fetcher: () => Promise<T>,
-  deps: unknown[] = []
+  deps: unknown[] = [],
+  enabled = true
 ): AsyncState<T> & { refetch: () => void } {
   const [state, setState] = useState<AsyncState<T>>({
     data: null,
-    loading: true,
+    loading: enabled,
     error: null,
   });
 
   const load = useCallback(async () => {
+    if (!enabled) {
+      setState({ data: null, loading: false, error: null });
+      return;
+    }
     setState((s) => ({ ...s, loading: true, error: null }));
     try {
       const data = await fetcher();
@@ -47,7 +52,7 @@ function useAsync<T>(
       setState({ data: null, loading: false, error: msg });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [enabled, ...deps]);
 
   useEffect(() => {
     load();
@@ -60,9 +65,11 @@ function useAsync<T>(
 
 /** Full profile overview — stats, skills, featured projects */
 export function useProfile(username: string) {
+  const canFetch = username.trim().length > 0;
   const result = useAsync<ProfileResponse>(
     () => api.getProfile(username),
-    [username]
+    [username],
+    canFetch
   );
   return {
     profile: result.data?.profile ?? null,
@@ -83,9 +90,11 @@ export function useProfile(username: string) {
 
 /** Proof-of-work score and factor breakdown */
 export function useProfileSignals(username: string) {
+  const canFetch = username.trim().length > 0;
   const result = useAsync<{ signals: ProofOfWorkSignals }>(
     () => api.getProfileSignals(username),
-    [username]
+    [username],
+    canFetch
   );
   return {
     signals: result.data?.signals ?? null,
@@ -96,12 +105,13 @@ export function useProfileSignals(username: string) {
 
 /** Paginated projects (owned + contributed) */
 export function useProfileProjects(username: string, page = 1) {
+  const canFetch = username.trim().length > 0;
   const result = useAsync<{
     projects: ProjectSpace[];
     total: number;
     page: number;
     limit: number;
-  }>(() => api.getProfileProjects(username, page), [username, page]);
+  }>(() => api.getProfileProjects(username, page), [username, page], canFetch);
   return {
     projects: result.data?.projects ?? [],
     total: result.data?.total ?? 0,
@@ -113,12 +123,13 @@ export function useProfileProjects(username: string, page = 1) {
 
 /** Paginated posts (no replies) */
 export function useProfilePosts(username: string, page = 1) {
+  const canFetch = username.trim().length > 0;
   const result = useAsync<{
     posts: Post[];
     total: number;
     page: number;
     limit: number;
-  }>(() => api.getProfilePosts(username, page), [username, page]);
+  }>(() => api.getProfilePosts(username, page), [username, page], canFetch);
   return {
     posts: result.data?.posts ?? [],
     total: result.data?.total ?? 0,
@@ -130,12 +141,13 @@ export function useProfilePosts(username: string, page = 1) {
 
 /** Paginated unified activity timeline */
 export function useProfileActivity(username: string, page = 1) {
+  const canFetch = username.trim().length > 0;
   const result = useAsync<{
     activity: ActivityItem[];
     total: number;
     page: number;
     limit: number;
-  }>(() => api.getProfileActivity(username, page), [username, page]);
+  }>(() => api.getProfileActivity(username, page), [username, page], canFetch);
   return {
     activity: result.data?.activity ?? [],
     total: result.data?.total ?? 0,
@@ -146,9 +158,11 @@ export function useProfileActivity(username: string, page = 1) {
 }
 
 export function useProfileLaunches(username: string) {
+  const canFetch = username.trim().length > 0;
   const result = useAsync<{ launches: Launch[] }>(
     () => api.getProfileLaunches(username),
-    [username]
+    [username],
+    canFetch
   );
   return {
     launches: result.data?.launches ?? [],
@@ -159,9 +173,11 @@ export function useProfileLaunches(username: string) {
 }
 
 export function useProfileFreelance(username: string) {
+  const canFetch = username.trim().length > 0;
   const result = useAsync<{ client_projects: FreelanceProject[]; wins: FreelanceProposal[] }>(
     () => api.getProfileFreelance(username),
-    [username]
+    [username],
+    canFetch
   );
   return {
     client_projects: result.data?.client_projects ?? [],
