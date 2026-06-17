@@ -385,6 +385,7 @@ export type StackCategory = "frontend" | "backend" | "database" | "infra" | "too
 export type StackMaturity = "planned" | "in-use" | "deprecated";
 export type MemberRole = "owner" | "maintainer" | "contributor";
 export type RepoRole = "read" | "triage" | "write" | "maintain" | "admin";
+export type RepoMemberStatus = "pending" | "accepted";
 export type JoinRequestStatus = "pending" | "accepted" | "rejected" | "need-info" | "withdrawn";
 export type DiscussionCategory = "idea" | "decision" | "question" | "blocked" | "retrospective" | "announcement";
 export type DiscussionStatus = "open" | "in-progress" | "resolved" | "closed";
@@ -585,6 +586,7 @@ export interface RepoMember {
   repo_id: string;
   user_id: string;
   role?: RepoRole;
+  status?: RepoMemberStatus;
   direct_role?: RepoRole | null;
   inherited_role?: RepoRole | null;
   effective_role?: RepoRole | null;
@@ -593,6 +595,20 @@ export interface RepoMember {
   granted_by?: string | null;
   created_at: string;
   user?: User;
+}
+
+export interface RepoInvitation {
+  id: string;
+  repo_id: string;
+  user_id: string;
+  role: RepoRole;
+  status: RepoMemberStatus;
+  granted_by?: string | null;
+  created_at: string;
+  repo?: Pick<
+    Repository,
+    "id" | "name" | "slug" | "description" | "visibility" | "default_branch" | "owner" | "attached_space"
+  > | null;
 }
 
 export interface RepoTreeEntry {

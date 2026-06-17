@@ -15,6 +15,7 @@ import {
   LockIcon,
   SearchIcon,
   SparklesIcon,
+  UsersIcon,
 } from "@/components/ui/Icons";
 import { formatRelativeTime } from "@/lib/utils";
 import type { Repository } from "@/lib/types";
@@ -47,12 +48,14 @@ const LANGUAGE_COLORS: Record<string, string> = {
   Vue: "#41b883",
 };
 
-type RepoTab = "mine" | "recommended" | "public";
+type RepoTab = "mine" | "shared" | "starred" | "recommended" | "public";
 type RepoSort = "updated" | "newest" | "stars";
 type StarOverride = { is_starred: boolean; star_count: number };
 
 const TABS: Array<{ key: RepoTab; label: string; icon: ReactNode }> = [
   { key: "mine", label: "My Repos", icon: <FolderIcon className="h-4 w-4" /> },
+  { key: "shared", label: "Shared", icon: <UsersIcon className="h-4 w-4" /> },
+  { key: "starred", label: "Starred", icon: <StarIcon size={16} /> },
   { key: "recommended", label: "Recommended", icon: <SparklesIcon className="h-4 w-4" /> },
   { key: "public", label: "All Public", icon: <GlobeIcon className="h-4 w-4" /> },
 ];
@@ -242,6 +245,40 @@ function EmptyState({
     );
   }
 
+  if (tab === "shared" || tab === "starred") {
+    const isShared = tab === "shared";
+    return (
+      <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
+        {isShared ? (
+          <UsersIcon className="mx-auto h-11 w-11 text-zinc-700" />
+        ) : (
+          <StarIcon size={42} className="mx-auto text-zinc-700" />
+        )}
+        <h3 className="mt-4 text-base font-semibold text-white">
+          {signedIn
+            ? isShared
+              ? "No shared repos yet"
+              : "No starred repos yet"
+            : "Sign in to see this section"}
+        </h3>
+        {signedIn ? (
+          <p className="mx-auto mt-2 max-w-md text-sm text-zinc-500">
+            {isShared
+              ? "Repos appear here after you accept a contributor invitation."
+              : "Star repositories you want to keep close and they will appear here."}
+          </p>
+        ) : (
+          <Link
+            href="/login"
+            className="mt-5 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+          >
+            Sign in
+          </Link>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
       <SparklesIcon className="mx-auto h-10 w-10 text-zinc-700" />
@@ -269,7 +306,7 @@ export default function RepositoriesPage() {
   const [starOverrides, setStarOverrides] = useState<Record<string, StarOverride>>({});
 
   useEffect(() => {
-    if (!user && activeTab === "mine") {
+    if (!user && ["mine", "shared", "starred"].includes(activeTab)) {
       setActiveTab("recommended");
     }
   }, [activeTab, user]);

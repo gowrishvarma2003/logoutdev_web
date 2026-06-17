@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { use, useEffect, useMemo, useState, type ReactNode } from "react";
+import { use, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   usePathname,
   useRouter,
@@ -35,7 +35,7 @@ import type {
   WorkSort,
   WorkView,
 } from "@/lib/types";
-import { buildWorkHref, parseWorkSearchParams, serializeWorkQuery } from "@/lib/workFilters";
+import { buildWorkHref, parseWorkSearchParams, serializeWorkQuery, type WorkSearchState } from "@/lib/workFilters";
 import RichComposer from "@/components/ui/RichComposer";
 
 const STATUS_OPTIONS: Array<{ value: "" | SpaceIssueStatus; label: string }> = [
@@ -153,7 +153,6 @@ export default function WorkPage({
   const { repos } = useRepos(spaceId);
   const { contributors } = useContributors(spaceId);
   const { milestones, refetch: refetchMilestones } = useMilestones(spaceId);
-  const storageKey = `space-work-view:${spaceId}`;
 
   const filters = useMemo(() => parseWorkSearchParams(new URLSearchParams(searchParams.toString())), [searchParams]);
   const pageLimit = filters.view === "list" ? 20 : 100;
@@ -252,6 +251,17 @@ export default function WorkPage({
   const [showMetrics, setShowMetrics] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
+  const updateFilters = useCallback(
+    (patch: Partial<Record<keyof WorkSearchState, string | number | boolean | undefined | null>>) => {
+      router.replace(
+        buildWorkHref(pathname, new URLSearchParams(searchParams.toString()), patch, {
+          keepDefaultView: patch.view === "list",
+        })
+      );
+    },
+    [pathname, router, searchParams]
+  );
+
   useEffect(() => {
     const issueIdSet = new Set(issues.map((issue) => issue.id));
     setSelectedIds((current) => {
@@ -277,35 +287,9 @@ export default function WorkPage({
     }, 300);
 
     return () => window.clearTimeout(handle);
-  }, [filters.q, searchInput]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const currentQuery = searchParams.toString();
-    if (!currentQuery) {
-      const savedQuery = window.localStorage.getItem(storageKey);
-      if (savedQuery) {
-        router.replace(`${pathname}?${savedQuery}`);
-      }
-      return;
-    }
-
-    window.localStorage.setItem(storageKey, currentQuery);
-  }, [pathname, router, searchParams, storageKey]);
-
-  function updateFilters(
-    patch: Partial<Record<string, string | number | boolean | undefined | null>>
-  ) {
-    router.replace(
-      buildWorkHref(pathname, new URLSearchParams(searchParams.toString()), patch)
-    );
-  }
+  }, [filters.q, searchInput, updateFilters]);
 
   function clearFilters() {
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem(storageKey);
-    }
     router.replace(pathname);
   }
 

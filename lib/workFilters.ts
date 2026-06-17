@@ -72,7 +72,8 @@ export function parseWorkSearchParams(searchParams: URLSearchParams): WorkSearch
 export function buildWorkHref(
   pathname: string,
   current: URLSearchParams,
-  patch: Partial<Record<keyof WorkSearchState, string | number | boolean | undefined | null>>
+  patch: Partial<Record<keyof WorkSearchState, string | number | boolean | undefined | null>>,
+  options: { keepDefaultView?: boolean } = {}
 ) {
   const next = new URLSearchParams(current.toString());
 
@@ -88,7 +89,7 @@ export function buildWorkHref(
       continue;
     }
 
-    if (isDefaultSearchValue(key, value)) {
+    if (isDefaultSearchValue(key, value) && !(key === "view" && options.keepDefaultView)) {
       next.delete(key);
       continue;
     }

@@ -464,7 +464,7 @@ export default function RepoSettingsPage({
                   disabled={!selectedUser || memberSaving || !repo.can_manage_access}
                   className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-50"
                 >
-                  {memberSaving ? "Saving..." : "Grant access"}
+                  {memberSaving ? "Saving..." : "Send invite"}
                 </button>
               </div>
             </div>
@@ -497,7 +497,16 @@ export default function RepoSettingsPage({
                   </div>
                   <div className="grid gap-2 md:grid-cols-2">
                     <div className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-300">
-                      Effective: <span className="font-semibold text-white">{member.effective_role || "none"}</span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span>
+                          Effective: <span className="font-semibold text-white">{member.effective_role || "none"}</span>
+                        </span>
+                        {member.status === "pending" ? (
+                          <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
+                            Pending invite
+                          </span>
+                        ) : null}
+                      </div>
                       <div className="mt-1 text-zinc-500">
                         Direct {member.direct_role || "none"} / Inherited {member.inherited_role || "none"}
                       </div>

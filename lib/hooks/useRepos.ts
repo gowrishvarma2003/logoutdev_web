@@ -5,6 +5,7 @@ import type {
   RepoBlobResponse,
   RepoCommit,
   RepoMember,
+  RepoInvitation,
   RepoTreeEntry,
   Repository,
   SpaceRepo,
@@ -73,7 +74,7 @@ function managedRepos(attachments: SpaceRepoAttachment[]) {
 }
 
 export function useRepositoryList(filters?: {
-  scope?: "all" | "mine" | "shared" | "public" | "recommended";
+  scope?: "all" | "mine" | "shared" | "starred" | "public" | "recommended";
   visibility?: "public" | "private";
   attached?: boolean;
   q?: string;
@@ -103,6 +104,16 @@ export function useRepositoryList(filters?: {
     total: (result.data as { repos: Repository[]; total?: number } | null)?.total ?? 0,
     page: (result.data as { page?: number } | null)?.page ?? filters?.page ?? 1,
     limit: (result.data as { limit?: number } | null)?.limit ?? filters?.limit ?? 20,
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+export function useRepositoryInvitations() {
+  const result = useAsync(() => reposApi.listRepositoryInvitations(), []);
+  return {
+    invitations: (result.data as { invitations: RepoInvitation[] } | null)?.invitations ?? [],
     loading: result.loading,
     error: result.error,
     refetch: result.refetch,

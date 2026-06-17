@@ -12,6 +12,7 @@ import type {
   SpaceRepoAttachment,
   RepositoryVisibility,
   RepoDiscussionState,
+  RepoInvitation,
 } from "../types";
 import { API_BASE_URL } from "../apiBaseUrl";
 
@@ -42,7 +43,7 @@ function qs(params: Record<string, string | number | undefined | boolean>): stri
 }
 
 export async function listRepositories(filters?: {
-  scope?: "all" | "mine" | "shared" | "public" | "recommended";
+  scope?: "all" | "mine" | "shared" | "starred" | "public" | "recommended";
   visibility?: RepositoryVisibility;
   attached?: boolean;
   q?: string;
@@ -66,6 +67,29 @@ export async function listRepositories(filters?: {
     })}`,
     { headers: { ...authHeaders() } }
   );
+  return handleRes(res);
+}
+
+export async function listRepositoryInvitations(): Promise<{ invitations: RepoInvitation[] }> {
+  const res = await fetch(`${API}/api/repos/invitations`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function acceptRepositoryInvitation(memberId: string): Promise<{ invitation: RepoInvitation }> {
+  const res = await fetch(`${API}/api/repos/invitations/${memberId}/accept`, {
+    method: "POST",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function rejectRepositoryInvitation(memberId: string): Promise<{ rejected: boolean }> {
+  const res = await fetch(`${API}/api/repos/invitations/${memberId}/reject`, {
+    method: "POST",
+    headers: { ...authHeaders() },
+  });
   return handleRes(res);
 }
 
