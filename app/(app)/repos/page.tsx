@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { StarIcon } from "@primer/octicons-react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useRepositoryList } from "@/lib/hooks/useRepos";
@@ -304,12 +304,6 @@ export default function RepositoriesPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [starringRepoId, setStarringRepoId] = useState<string | null>(null);
   const [starOverrides, setStarOverrides] = useState<Record<string, StarOverride>>({});
-
-  useEffect(() => {
-    if (!user && ["mine", "shared", "starred"].includes(activeTab)) {
-      setActiveTab("recommended");
-    }
-  }, [activeTab, user]);
 
   const apiScope = activeTab === "public" ? "public" : activeTab;
   const hasFilters = Boolean(query.trim() || stack.trim() || (activeTab === "public" && sort !== "updated"));

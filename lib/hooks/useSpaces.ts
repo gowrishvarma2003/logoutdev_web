@@ -86,6 +86,8 @@ export function useSpaceList(filters?: {
   good_first_tasks?: boolean;
   recently_shipped?: boolean;
   mine?: boolean;
+  followed?: boolean;
+  working?: boolean;
   page?: number;
   limit?: number;
 }) {
@@ -101,6 +103,8 @@ export function useSpaceList(filters?: {
       filters?.good_first_tasks,
       filters?.recently_shipped,
       filters?.mine,
+      filters?.followed,
+      filters?.working,
       filters?.page,
       filters?.limit,
     ]

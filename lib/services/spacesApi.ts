@@ -74,6 +74,8 @@ export async function listSpaces(filters?: {
   good_first_tasks?: boolean;
   recently_shipped?: boolean;
   mine?: boolean;
+  followed?: boolean;
+  working?: boolean;
   page?: number;
   limit?: number;
 }): Promise<{ spaces: ProjectSpace[]; page: number; limit: number; total?: number }> {
@@ -88,6 +90,8 @@ export async function listSpaces(filters?: {
       good_first_tasks: filters?.good_first_tasks,
       recently_shipped: filters?.recently_shipped,
       mine: filters?.mine,
+      followed: filters?.followed,
+      working: filters?.working,
       page: filters?.page,
       limit: filters?.limit,
     })}`,

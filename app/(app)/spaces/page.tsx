@@ -1,281 +1,337 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import type { ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { useSpaceList } from "@/lib/hooks/useSpaces";
+import { useAuth } from "@/lib/hooks/useAuth";
+import type { ProjectSpace } from "@/lib/types";
 import SpaceOverviewCard from "@/components/spaces/SpaceOverviewCard";
-import { EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
-import { PlusIcon, RocketIcon, SearchIcon, ChevronDownIcon } from "@/components/ui/Icons";
+import {
+  BoltIcon,
+  FolderIcon,
+  GlobeIcon,
+  PlusIcon,
+  RocketIcon,
+  SearchIcon,
+  SparklesIcon,
+  UsersIcon,
+} from "@/components/ui/Icons";
+
+const PAGE_LIMIT = 20;
+
+type SpaceTab = "mine" | "working" | "followed" | "recommended" | "public";
+
+const TABS: Array<{ key: SpaceTab; label: string; icon: ReactNode }> = [
+  { key: "mine", label: "My Spaces", icon: <FolderIcon className="h-4 w-4" /> },
+  { key: "working", label: "Working", icon: <UsersIcon className="h-4 w-4" /> },
+  { key: "followed", label: "Followed", icon: <BoltIcon className="h-4 w-4" /> },
+  { key: "recommended", label: "Recommended", icon: <SparklesIcon className="h-4 w-4" /> },
+  { key: "public", label: "All Public", icon: <GlobeIcon className="h-4 w-4" /> },
+];
 
 const STATUS_FILTERS = [
-  { value: "", label: "All" },
+  { value: "", label: "Any status" },
   { value: "idea", label: "Idea" },
   { value: "building", label: "Building" },
   { value: "shipping", label: "Shipping" },
   { value: "paused", label: "Paused" },
 ];
 
-const TOGGLE_FILTERS = [
-  { key: "working_in_public", label: "Working in public" },
-  { key: "looking_for_contributors", label: "Looking for contributors" },
-  { key: "good_first_tasks", label: "Good first tasks" },
-  { key: "recently_shipped", label: "Recently shipped" },
-] as const;
+const SIGNED_IN_TABS: SpaceTab[] = ["mine", "working", "followed"];
+
+function EmptyTabState({
+  tab,
+  hasFilters,
+  signedIn,
+  onClear,
+}: {
+  tab: SpaceTab;
+  hasFilters: boolean;
+  signedIn: boolean;
+  onClear: () => void;
+}) {
+  if (hasFilters) {
+    return (
+      <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
+        <h3 className="text-base font-semibold text-white">No spaces matched</h3>
+        <button type="button" onClick={onClear} className="mt-3 text-sm font-medium text-sky-300 hover:text-sky-200">
+          Clear filters
+        </button>
+      </div>
+    );
+  }
+
+  if (tab === "mine") {
+    return (
+      <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
+        <FolderIcon className="mx-auto h-11 w-11 text-zinc-700" />
+        <h3 className="mt-4 text-base font-semibold text-white">
+          {signedIn ? "No spaces yet" : "Sign in to see your spaces"}
+        </h3>
+        {signedIn ? (
+          <Link
+            href="/spaces/create"
+            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+          >
+            <PlusIcon className="h-4 w-4" />
+            Create Space
+          </Link>
+        ) : (
+          <Link
+            href="/login"
+            className="mt-5 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+          >
+            Sign in
+          </Link>
+        )}
+      </div>
+    );
+  }
+
+  if (tab === "working" || tab === "followed") {
+    const isWorking = tab === "working";
+    return (
+      <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
+        {isWorking ? (
+          <UsersIcon className="mx-auto h-11 w-11 text-zinc-700" />
+        ) : (
+          <BoltIcon className="mx-auto h-11 w-11 text-zinc-700" />
+        )}
+        <h3 className="mt-4 text-base font-semibold text-white">
+          {signedIn
+            ? isWorking
+              ? "No working spaces yet"
+              : "No followed spaces yet"
+            : "Sign in to see this section"}
+        </h3>
+        {signedIn ? (
+          <p className="mx-auto mt-2 max-w-md text-sm text-zinc-500">
+            {isWorking
+              ? "Spaces appear here when you join a project as a contributor or maintainer."
+              : "Follow spaces you want to keep close and they will appear here."}
+          </p>
+        ) : (
+          <Link
+            href="/login"
+            className="mt-5 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+          >
+            Sign in
+          </Link>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
+      <SparklesIcon className="mx-auto h-10 w-10 text-zinc-700" />
+      <h3 className="mt-4 text-base font-semibold text-white">
+        {tab === "recommended" ? "No recommendations yet" : "No public spaces yet"}
+      </h3>
+      <p className="mx-auto mt-2 max-w-md text-sm text-zinc-500">
+        {tab === "recommended"
+          ? "Recommended spaces will appear as public projects add contribution signals."
+          : "Public spaces from the community will appear here."}
+      </p>
+    </div>
+  );
+}
 
 export default function SpacesDiscoverPage() {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<SpaceTab>("mine");
   const [status, setStatus] = useState("");
   const [tag, setTag] = useState("");
   const [neededSkill, setNeededSkill] = useState("");
   const [page, setPage] = useState(1);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [toggles, setToggles] = useState<Record<(typeof TOGGLE_FILTERS)[number]["key"], boolean>>({
-    working_in_public: false,
-    looking_for_contributors: false,
-    good_first_tasks: false,
-    recently_shipped: false,
-  });
 
-  const { data, loading, error } = useSpaceList({
+  const visibleTab = !user && SIGNED_IN_TABS.includes(activeTab) ? "recommended" : activeTab;
+
+  const queryFilters = {
     status: status || undefined,
     tag: tag || undefined,
     needed_skill: neededSkill || undefined,
-    working_in_public: toggles.working_in_public || undefined,
-    looking_for_contributors: toggles.looking_for_contributors || undefined,
-    good_first_tasks: toggles.good_first_tasks || undefined,
-    recently_shipped: toggles.recently_shipped || undefined,
+    looking_for_contributors: visibleTab === "recommended" ? true : undefined,
+    mine: visibleTab === "mine" || undefined,
+    followed: visibleTab === "followed" || undefined,
+    working: visibleTab === "working" || undefined,
     page,
-  });
+    limit: PAGE_LIMIT,
+  };
 
-  const spaces = data?.spaces ?? [];
+  const { data, loading, error } = useSpaceList(queryFilters);
   const total = data?.total ?? 0;
-  const hasMore = spaces.length >= 20;
+  const hasFilters = Boolean(status || tag.trim() || neededSkill.trim());
 
-  const hasActiveFilters =
-    neededSkill.trim().length > 0 ||
-    status !== "" ||
-    Object.values(toggles).some(Boolean);
-  const activeCount =
-    (neededSkill.trim().length > 0 ? 1 : 0) +
-    (status !== "" ? 1 : 0) +
-    Object.values(toggles).filter(Boolean).length;
+  const spaces = useMemo(() => {
+    const listedSpaces = data?.spaces ?? [];
+    if (visibleTab === "mine") {
+      return listedSpaces.filter((space) => !user || space.owner_id === user.id);
+    }
+    return listedSpaces;
+  }, [data?.spaces, user, visibleTab]);
+
+  function switchTab(tab: SpaceTab) {
+    setActiveTab(!user && SIGNED_IN_TABS.includes(tab) ? "recommended" : tab);
+    setPage(1);
+  }
 
   function clearFilters() {
-    setNeededSkill("");
     setStatus("");
-    setToggles({
-      working_in_public: false,
-      looking_for_contributors: false,
-      good_first_tasks: false,
-      recently_shipped: false,
-    });
+    setTag("");
+    setNeededSkill("");
     setPage(1);
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md">
-        {/* Header row */}
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2.5">
-            <RocketIcon className="h-5 w-5 text-white" />
-            <h1 className="text-lg font-bold text-white">Spaces</h1>
-            {total > 0 ? (
-              <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs text-zinc-500">{total}</span>
-            ) : null}
-          </div>
-          <Link
-            href="/spaces/create"
-            className="flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
-          >
-            <PlusIcon className="h-4 w-4" />
-            New Space
-          </Link>
-        </div>
-
-        {/* Search + Filters row */}
-        <div className="flex flex-wrap items-center gap-3 px-4 pb-3">
-          <div className="relative min-w-0 flex-1">
-            <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-            <input
-              type="text"
-              placeholder="Search stack or project theme"
-              value={tag}
-              onChange={(e) => { setTag(e.target.value); setPage(1); }}
-              aria-label="Search spaces"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600 focus:outline-none transition-colors"
-            />
-          </div>
-
-          {/* Filters dropdown */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setFiltersOpen(!filtersOpen)}
-              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm transition-colors ${
-                hasActiveFilters
-                  ? "border-sky-500/30 bg-sky-500/10 text-sky-300"
-                  : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              Filters
-              {activeCount > 0 && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-[10px] font-bold text-white">
-                  {activeCount}
-                </span>
-              )}
-              <ChevronDownIcon className={`h-4 w-4 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
-            </button>
-
-            {filtersOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setFiltersOpen(false)} />
-                <div className="absolute right-0 top-full z-20 mt-2 w-72 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 p-4 shadow-xl">
-                  <div className="space-y-4">
-                    {/* Needed skill */}
-                    <div>
-                      <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-zinc-500">
-                        Needed Skill
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Rust, Design..."
-                        value={neededSkill}
-                        onChange={(e) => { setNeededSkill(e.target.value); setPage(1); }}
-                        aria-label="Filter by needed skill"
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600 focus:outline-none"
-                      />
-                    </div>
-
-                    {/* Status filter */}
-                    <div>
-                      <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-zinc-500">
-                        Status
-                      </label>
-                      <div className="flex flex-wrap gap-1.5">
-                        {STATUS_FILTERS.map((filter) => (
-                          <button
-                            key={filter.value || "all"}
-                            onClick={() => { setStatus(filter.value); setPage(1); }}
-                            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                              status === filter.value
-                                ? "bg-white text-zinc-950"
-                                : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
-                            }`}
-                          >
-                            {filter.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Toggle filters */}
-                    <div>
-                      <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-zinc-500">
-                        Signals
-                      </label>
-                      <div className="flex flex-col gap-1.5">
-                        {TOGGLE_FILTERS.map((filter) => (
-                          <button
-                            key={filter.key}
-                            onClick={() => {
-                              setToggles((c) => ({ ...c, [filter.key]: !c[filter.key] }));
-                              setPage(1);
-                            }}
-                            className={`rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                              toggles[filter.key]
-                                ? "bg-sky-500/10 text-sky-400"
-                                : "text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200"
-                            }`}
-                          >
-                            {toggles[filter.key] ? "✓ " : ""}{filter.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Clear */}
-                    {hasActiveFilters && (
-                      <button
-                        type="button"
-                        onClick={clearFilters}
-                        className="w-full rounded-lg border border-zinc-700 py-2 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
-                      >
-                        Clear filters
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </>
+    <div className="min-h-screen bg-zinc-950">
+      <header className="border-b border-zinc-800 bg-zinc-950 px-4 md:px-8">
+        <div className="mx-auto max-w-[1180px]">
+          <div className="flex flex-wrap items-center justify-between gap-3 py-5">
+            <div>
+              <div className="flex items-center gap-2">
+                <RocketIcon className="h-5 w-5 text-white" />
+                <h1 className="text-xl font-semibold text-white">Spaces</h1>
+              </div>
+              <p className="mt-1 text-sm text-zinc-500">Your project spaces, followed builds, and places to contribute.</p>
+            </div>
+            {user ? (
+              <Link
+                href="/spaces/create"
+                className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+              >
+                <PlusIcon className="h-4 w-4" />
+                New
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-900"
+              >
+                Sign in
+              </Link>
             )}
           </div>
-        </div>
-      </div>
 
-      <div className="p-4">
-        {loading ? (
+          <div className="flex gap-2 overflow-x-auto pb-3">
+            {TABS.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => switchTab(tab.key)}
+                className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition-colors ${
+                  visibleTab === tab.key
+                    ? "bg-white text-zinc-950"
+                    : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-3 pb-4 md:flex-row md:items-center">
+            <div className="relative min-w-0 flex-1">
+              <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <input
+                type="search"
+                placeholder="Search stack or project theme"
+                value={tag}
+                onChange={(event) => {
+                  setTag(event.target.value);
+                  setPage(1);
+                }}
+                className="h-10 w-full rounded-lg border border-zinc-800 bg-zinc-900 pl-9 pr-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-sky-500"
+              />
+            </div>
+
+            <input
+              type="search"
+              placeholder="Needed skill"
+              value={neededSkill}
+              onChange={(event) => {
+                setNeededSkill(event.target.value);
+                setPage(1);
+              }}
+              className="h-10 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-sky-500 md:w-44"
+            />
+
+            <select
+              value={status}
+              onChange={(event) => {
+                setStatus(event.target.value);
+                setPage(1);
+              }}
+              className="h-10 rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-300 outline-none transition-colors focus:border-sky-500"
+            >
+              {STATUS_FILTERS.map((filter) => (
+                <option key={filter.value || "all"} value={filter.value}>
+                  {filter.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-[1180px] px-4 py-5 md:px-8">
+        <div className="mb-4 flex items-center justify-between gap-3 text-sm">
+          <p className="text-zinc-500">
+            {loading ? "Loading spaces..." : `${total || spaces.length} spaces`}
+          </p>
+          {hasFilters ? (
+            <button type="button" onClick={clearFilters} className="font-medium text-sky-300 hover:text-sky-200">
+              Clear filters
+            </button>
+          ) : null}
+        </div>
+
+        {loading && !spaces.length ? (
           <div className="flex justify-center py-16">
             <Spinner size="lg" />
           </div>
         ) : null}
 
-        {error ? (
-          <div className="py-16 text-center">
-            <p className="text-sm text-rose-400">{error}</p>
+        {error ? <p className="py-12 text-center text-sm text-rose-400">{error}</p> : null}
+
+        {!loading && !error && spaces.length === 0 ? (
+          <EmptyTabState tab={visibleTab} hasFilters={hasFilters} signedIn={Boolean(user)} onClear={clearFilters} />
+        ) : null}
+
+        {!error && spaces.length > 0 ? (
+          <div className="grid gap-3">
+            {spaces.map((space: ProjectSpace) => (
+              <SpaceOverviewCard key={space.id} space={space} />
+            ))}
           </div>
         ) : null}
 
-        {!loading && !error && spaces.length === 0 ? (
-          <EmptyState
-            icon={<RocketIcon className="h-12 w-12" />}
-            title="No spaces found"
-            description={
-              tag || status || neededSkill || Object.values(toggles).some(Boolean)
-                ? "Try widening the filters or exploring a different skill signal."
-                : "Be the first to create a public project space."
-            }
-            action={
-              <Link
-                href="/spaces/create"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+        {page > 1 || spaces.length >= PAGE_LIMIT ? (
+          <div className="mt-6 flex justify-center">
+            <div className="inline-flex overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
+              <button
+                type="button"
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                disabled={page <= 1}
+                className="px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-zinc-800 disabled:text-zinc-600 disabled:hover:bg-transparent"
               >
-                <PlusIcon className="h-4 w-4" />
-                Create Space
-              </Link>
-            }
-          />
-        ) : null}
-
-        {!loading && !error && spaces.length > 0 ? (
-          <>
-            <div className="grid gap-3">
-              {spaces.map((space) => (
-                <SpaceOverviewCard key={space.id} space={space} />
-              ))}
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage((current) => current + 1)}
+                disabled={spaces.length < PAGE_LIMIT}
+                className="border-l border-zinc-800 px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-zinc-800 disabled:text-zinc-600 disabled:hover:bg-transparent"
+              >
+                Next
+              </button>
             </div>
-
-            {page > 1 || hasMore ? (
-              <div className="mt-6 flex items-center justify-center gap-3">
-                <button
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
-                  disabled={page <= 1}
-                  className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-                <span className="text-xs text-zinc-500">Page {page}</span>
-                <button
-                  onClick={() => setPage((current) => current + 1)}
-                  disabled={!hasMore}
-                  className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
-              </div>
-            ) : null}
-          </>
+          </div>
         ) : null}
-      </div>
+      </main>
     </div>
   );
 }
