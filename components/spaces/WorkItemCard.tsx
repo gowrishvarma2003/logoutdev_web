@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Avatar from "@/components/ui/Avatar";
 import { IssuePriorityBadge, IssueStatusBadge } from "@/components/spaces/SpaceIssueBadges";
 import type { SpaceWorkItem } from "@/lib/types";
@@ -44,13 +45,22 @@ export default function WorkItemCard({
   onMarkTriaged?: () => void;
   onAssignToMe?: () => void;
 }) {
+  const router = useRouter();
   const href = queryString
     ? `/spaces/${spaceId}/work/${issue.id}?${queryString}`
     : `/spaces/${spaceId}/work/${issue.id}`;
   const isBusy = Boolean(busyAction);
 
+  function handleCardClick(e: React.MouseEvent<HTMLElement>) {
+    const target = e.target as HTMLElement;
+    if (target.closest("button, input, a")) return;
+    router.push(href);
+  }
+
   return (
-    <article className="border-b border-zinc-800/60 px-4 py-4 transition-colors hover:bg-zinc-900/20">
+    <article
+      onClick={handleCardClick}
+      className="cursor-pointer border-b border-zinc-800/60 px-4 py-4 transition-colors hover:bg-zinc-800/30">
       <div className="flex items-start gap-3">
         {selectable ? (
           <input

@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
 import { type ReactNode, useState } from "react";
@@ -108,6 +109,8 @@ export default function PostCard({
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [replyOpen, setReplyOpen] = useState(showReplies);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const isOwn = post.user_id === currentUser.id;
 
@@ -115,19 +118,10 @@ export default function PostCard({
     if (clickable) router.push(`/post/${post.id}`);
   };
 
-  const handleDelete = async (e: React.MouseEvent) => {
+  const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isDeleting) return;
-    if (!window.confirm("Are you sure you want to delete this post? This action cannot be undone.")) return;
-
-    setIsDeleting(true);
-    try {
-      await deletePost(post.id);
-      onDelete(post.id);
-    } finally {
-      setIsDeleting(false);
-      setMenuOpen(false);
-    }
+    setShowDeleteConfirm(true);
+    setMenuOpen(false);
   };
 
   return (
@@ -168,11 +162,13 @@ export default function PostCard({
             clickable={clickable}
           />
 
-          {post.linked_entity ? (
-            <div className="mt-3">
-              <LinkedEntityCard entity={post.linked_entity} compact />
-            </div>
-          ) : null}
+          {(post.entity_tags?.length ? post.entity_tags : post.linked_entity ? [post.linked_entity] : []).map((entity) => <div className="mt-3" key={`${entity.type}:${entity.id}`} onClick={(event) => event.stopPropagation()}><LinkedEntityCard entity={entity} compact /></div>)}
+
+          {post.images && post.images.length > 0 && <div className={`mt-3 grid gap-1 overflow-hidden rounded-2xl border border-zinc-800 ${post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`} onClick={(event) => event.stopPropagation()}>{post.images.map((image, index) => <button key={image.id} type="button" onClick={() => setLightboxImage(image.url)} className={`${post.images?.length === 3 && index === 0 ? "col-span-2" : ""} overflow-hidden bg-zinc-900`} aria-label={`Open image ${index + 1}`}>
+            <img src={image.url} alt={`Post image ${index + 1}`} className={`w-full object-cover ${post.images?.length === 1 ? "max-h-[520px]" : "h-48"}`} />
+          </button>)}</div>}
+
+          {post.audience === "restricted" && <div className="mt-2 text-xs text-amber-300">Restricted audience</div>}
 
           <PostActions
             post={post}
@@ -228,13 +224,67 @@ export default function PostCard({
             currentUser={currentUser}
             placeholder="Write a reply..."
             compact
-            onSubmit={async (content) => {
-              const res = await createReply(post.id, content);
+            onSubmit={async (content, entityTags, images) => {
+              const res = await createReply(post.id, content, entityTags.map(({ type, id }) => ({ type, id })), images);
               onUpdate({ ...post, reply_count: (post.reply_count ?? 0) + 1 });
               return res.reply;
             }}
             onPostCreated={() => setReplyOpen(false)}
           />
+        </div>
+      )}
+      {lightboxImage && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4" role="dialog" aria-modal="true" aria-label="Post image preview" onClick={(event) => { event.stopPropagation(); setLightboxImage(null); }}>
+        <img src={lightboxImage} alt="Expanded post image" className="max-h-full max-w-full object-contain" />
+        <button type="button" className="absolute right-5 top-5 rounded-full bg-zinc-900 px-3 py-2 text-white" aria-label="Close image preview" onClick={() => setLightboxImage(null)}>×</button>
+      </div>}
+
+      {showDeleteConfirm && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowDeleteConfirm(false);
+          }}
+        >
+          <div 
+            className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl transition-all duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-base font-bold text-white mb-2">Delete Post?</h3>
+            <p className="text-xs text-zinc-400 mb-5 leading-relaxed">
+              Are you sure you want to delete this post? This action cannot be undone and it will be permanently removed from the feed.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 px-4 py-2 text-xs font-semibold text-zinc-300 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (isDeleting) return;
+                  setIsDeleting(true);
+                  try {
+                    await deletePost(post.id);
+                    onDelete(post.id);
+                  } catch (err) {
+                    console.error(err);
+                  } finally {
+                    setIsDeleting(false);
+                    setShowDeleteConfirm(false);
+                  }
+                }}
+                disabled={isDeleting}
+                className="rounded-xl bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500 hover:text-zinc-950 px-4 py-2 text-xs font-bold text-rose-400 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </article>

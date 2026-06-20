@@ -94,8 +94,8 @@ export default function PostDetailPage({ params }: PostPageProps) {
             <ComposeBox
               currentUser={user}
               placeholder="Write a reply…"
-              onSubmit={async (content) => {
-                const res = await createReply(post.id, content);
+              onSubmit={async (content, entityTags, images) => {
+                const res = await createReply(post.id, content, entityTags.map(({ type, id }) => ({ type, id })), images);
                 return res.reply;
               }}
               onPostCreated={(reply) => {

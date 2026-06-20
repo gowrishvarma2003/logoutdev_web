@@ -154,14 +154,6 @@ export default function RightPanel({ currentUser }: RightPanelProps) {
 
   return (
     <div className="flex flex-col gap-6 p-4 pt-6">
-      <div className="flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900 p-3">
-        <Avatar user={currentUser} size="md" />
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-white">{currentUser.name}</p>
-          <p className="truncate text-xs text-zinc-500">@{handle}</p>
-        </div>
-      </div>
-
       <section>
         {pathname === "/explore" && railModules.length > 0 ? (
           <div className="flex flex-col gap-6">

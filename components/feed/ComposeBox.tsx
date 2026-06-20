@@ -1,7 +1,8 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { createPost, suggestHashtags, suggestUsers } from "@/lib/api";
+import { createPost, suggestHashtags, suggestUsers, suggestPlatformEntities } from "@/lib/api";
 import type {
   EntityRef,
   HashtagSuggestion,
@@ -9,17 +10,19 @@ import type {
   RelatedHashtag,
   User,
   UserSuggestion,
+  PlatformEntity,
 } from "@/lib/types";
 import Avatar from "@/components/ui/Avatar";
 import RichComposer, { type RichComposerHandle } from "@/components/ui/RichComposer";
 import { findActiveRichToken } from "@/lib/richText";
 import LinkedEntityCard from "@/components/connected/LinkedEntityCard";
+import Spinner from "@/components/ui/Spinner";
 
 interface ComposeBoxProps {
   currentUser: User;
   onPostCreated: (post: Post) => void;
   placeholder?: string;
-  onSubmit?: (content: string) => Promise<Post>;
+  onSubmit?: (content: string, entityTags: PlatformEntity[], images: File[]) => Promise<Post>;
   compact?: boolean;
   initialLinkedEntity?: EntityRef | null;
   linkedEntityType?: string | null;
@@ -94,11 +97,22 @@ export default function ComposeBox({
   const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
   const [relatedTags, setRelatedTags] = useState<RelatedHashtag[]>([]);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [entityPickerOpen, setEntityPickerOpen] = useState(false);
+  const [entityQuery, setEntityQuery] = useState("");
+  const [entityType, setEntityType] = useState("");
+  const [entityResults, setEntityResults] = useState<PlatformEntity[]>([]);
+  const [entityHighlight, setEntityHighlight] = useState(0);
+  const [entityLoading, setEntityLoading] = useState(false);
+  const entityCacheRef = useRef<Record<string, PlatformEntity[]>>({});
+  const [selectedEntities, setSelectedEntities] = useState<PlatformEntity[]>(initialLinkedEntity ? [initialLinkedEntity as PlatformEntity] : []);
+  const [selectedImages, setSelectedImages] = useState<Array<{ file: File; url: string }>>([]);
+  const imagesRef = useRef(selectedImages);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const composerRef = useRef<RichComposerHandle>(null);
 
   const remaining = MAX_LENGTH - content.length;
   const isOverLimit = remaining < 0;
-  const isEmpty = content.trim().length === 0;
+  const isEmpty = content.trim().length === 0 && selectedEntities.length === 0 && selectedImages.length === 0;
   const isSuggestionOpen = !!activeToken && suggestions.length > 0;
 
   useEffect(() => {
@@ -137,6 +151,47 @@ export default function ComposeBox({
       window.clearTimeout(timeout);
     };
   }, [activeToken]);
+
+  useEffect(() => { imagesRef.current = selectedImages; }, [selectedImages]);
+  useEffect(() => () => imagesRef.current.forEach((image) => URL.revokeObjectURL(image.url)), []);
+
+  useEffect(() => {
+    if (!entityPickerOpen) return;
+
+    const cacheKey = `${entityType}:${entityQuery}`;
+    const cached = entityCacheRef.current[cacheKey];
+
+    if (cached) {
+      setEntityResults(cached.filter((entity) => !selectedEntities.some((selected) => selected.type === entity.type && selected.id === entity.id)));
+      setEntityHighlight(0);
+      setEntityLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setEntityLoading(true);
+    const timer = window.setTimeout(async () => {
+      try {
+        const result = await suggestPlatformEntities(entityQuery, entityType ? [entityType] : []);
+        if (!cancelled) {
+          entityCacheRef.current[cacheKey] = result.entities;
+          setEntityResults(result.entities.filter((entity) => !selectedEntities.some((selected) => selected.type === entity.type && selected.id === entity.id)));
+          setEntityHighlight(0);
+        }
+      } catch { 
+        if (!cancelled) setEntityResults([]); 
+      } finally {
+        if (!cancelled) setEntityLoading(false);
+      }
+    }, 180);
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [entityPickerOpen, entityQuery, entityType, selectedEntities]);
+
+  useEffect(() => {
+    if (!initialLinkedEntity) return;
+    setSelectedEntities((current) => current.some((item) => item.type === initialLinkedEntity.type && item.id === initialLinkedEntity.id)
+      ? current : [initialLinkedEntity as PlatformEntity, ...current].slice(0, 5));
+  }, [initialLinkedEntity]);
 
   function updateTextareaHeight() {
     composerRef.current?.adjustHeight?.();
@@ -220,20 +275,20 @@ export default function ComposeBox({
     try {
       let post: Post;
       if (onSubmit) {
-        post = await onSubmit(content.trim());
+        post = await onSubmit(content.trim(), selectedEntities, selectedImages.map((image) => image.file));
       } else {
-        const res = await createPost(
-          content.trim(),
-          linkedEntityType && linkedEntityId
-            ? { type: linkedEntityType, id: linkedEntityId }
-            : null
-        );
+        const tags = selectedEntities.length ? selectedEntities : linkedEntityType && linkedEntityId ? [{ type: linkedEntityType, id: linkedEntityId } as PlatformEntity] : [];
+        const res = await createPost(content.trim(), tags.map(({ type, id }) => ({ type, id })), selectedImages.map((image) => image.file));
         post = res.post;
       }
       setContent("");
       setActiveToken(null);
       setSuggestions([]);
       setRelatedTags([]);
+      setSelectedEntities([]);
+      entityCacheRef.current = {};
+      selectedImages.forEach((image) => URL.revokeObjectURL(image.url));
+      setSelectedImages([]);
       composerRef.current?.resetHeight?.();
       onPostCreated(post);
     } catch (err) {
@@ -252,20 +307,12 @@ export default function ComposeBox({
 
       <div className="flex-1 min-w-0">
         <div className="relative">
-          {initialLinkedEntity ? (
-            <div className="mb-3">
-              <LinkedEntityCard entity={initialLinkedEntity} compact />
-              {onClearLinkedEntity ? (
-                <button
-                  type="button"
-                  onClick={onClearLinkedEntity}
-                  className="mt-2 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
-                >
-                  Remove attachment
-                </button>
-              ) : null}
+          {selectedEntities.length > 0 && <div className="mb-3 space-y-2">{selectedEntities.map((entity) => (
+            <div key={`${entity.type}:${entity.id}`} className="relative">
+              <LinkedEntityCard entity={entity} compact />
+              <button type="button" aria-label={`Remove ${entity.title}`} onClick={() => { setSelectedEntities((items) => items.filter((item) => item !== entity)); if (initialLinkedEntity?.id === entity.id) onClearLinkedEntity?.(); }} className="absolute right-2 top-2 rounded-full bg-zinc-950/90 px-2 py-1 text-xs text-zinc-300 hover:text-white">×</button>
             </div>
-          ) : null}
+          ))}</div>}
 
           <RichComposer
             ref={composerRef}
@@ -342,9 +389,114 @@ export default function ComposeBox({
           )}
         </div>
 
+        {selectedImages.length > 0 && <div className="mt-3 grid grid-cols-2 gap-2">{selectedImages.map((image, index) => (
+          <div key={image.url} className="relative overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900">
+            <img src={image.url} alt={`Selected image ${index + 1}`} className="h-32 w-full object-cover" />
+            <button type="button" aria-label={`Remove image ${index + 1}`} onClick={() => { URL.revokeObjectURL(image.url); setSelectedImages((items) => items.filter((item) => item !== image)); }} className="absolute right-2 top-2 rounded-full bg-black/75 px-2 py-1 text-sm text-white">×</button>
+          </div>
+        ))}</div>}
+
+        {entityPickerOpen && (
+          <div className="mt-3 overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-900">
+            <div className="flex items-center justify-between border-b border-zinc-800 p-2">
+              <div className="flex flex-wrap gap-1">
+                {[
+                  ["", "All"],
+                  ["launch", "Launches"],
+                  ["repo", "Repos"],
+                  ["space", "Spaces"],
+                  ["question", "Questions"],
+                  ["freelance_project", "Freelance"]
+                ].map(([value, label]) => (
+                  <button
+                    type="button"
+                    key={value}
+                    onClick={() => setEntityType(value)}
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors cursor-pointer ${
+                      entityType === value ? "bg-white text-zinc-950" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-750"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setEntityPickerOpen(false)}
+                className="rounded-lg px-2 py-1 text-xs text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all font-semibold cursor-pointer shrink-0 ml-2"
+                aria-label="Close tagging component"
+              >
+                Close
+              </button>
+            </div>
+            <input
+              autoFocus
+              value={entityQuery}
+              onChange={(event) => setEntityQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "ArrowDown") {
+                  event.preventDefault();
+                  setEntityHighlight((value) => Math.min(value + 1, entityResults.length - 1));
+                }
+                if (event.key === "ArrowUp") {
+                  event.preventDefault();
+                  setEntityHighlight((value) => Math.max(value - 1, 0));
+                }
+                if (event.key === "Enter" && entityResults[entityHighlight]) {
+                  event.preventDefault();
+                  setSelectedEntities((items) => [...items, entityResults[entityHighlight]].slice(0, 5));
+                }
+                if (event.key === "Escape") setEntityPickerOpen(false);
+              }}
+              placeholder="Search platform items"
+              className="w-full border-b border-zinc-800 bg-transparent px-3 py-2 text-sm text-white outline-none"
+            />
+            {entityLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Spinner size="sm" />
+              </div>
+            ) : (
+              <div className="max-h-64 overflow-y-auto">
+                {entityResults.map((entity, index) => (
+                  <button
+                    type="button"
+                    key={`${entity.type}:${entity.id}`}
+                    onClick={() => setSelectedEntities((items) => [...items, entity].slice(0, 5))}
+                    className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left cursor-pointer ${
+                      index === entityHighlight ? "bg-zinc-800" : "hover:bg-zinc-800/70"
+                    }`}
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm text-white">{entity.title}</span>
+                      <span className="block truncate text-xs text-zinc-500">
+                        {entity.owner?.name || entity.type.replace("_", " ")}
+                      </span>
+                    </span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] uppercase ${
+                        entity.visibility === "private"
+                          ? "bg-amber-500/15 text-amber-300"
+                          : "bg-emerald-500/15 text-emerald-300"
+                      }`}
+                    >
+                      {entity.visibility}
+                    </span>
+                  </button>
+                ))}
+                {!entityLoading && entityResults.length === 0 && (
+                  <p className="text-center text-xs text-zinc-500 py-8">No results found.</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {error && <p className="mt-1 text-xs text-rose-500">{error}</p>}
 
+        {selectedEntities.some((entity) => entity.visibility === "private") && <p className="mt-2 text-xs text-amber-300">Restricted: only people who can access every private tagged item can view this post.</p>}
+
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-800">
+          <div className="flex items-center gap-2"><button type="button" disabled={selectedEntities.length >= 5} onClick={() => setEntityPickerOpen((open) => !open)} className="rounded-full border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800 disabled:opacity-40">Tag item {selectedEntities.length}/5</button><button type="button" disabled={selectedImages.length >= 4} onClick={() => fileInputRef.current?.click()} className="rounded-full border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800 disabled:opacity-40">Add images {selectedImages.length}/4</button><input ref={fileInputRef} hidden type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => { const picked = Array.from(event.target.files || []); const files = picked.filter((file) => !selectedImages.some((image) => image.file.name === file.name && image.file.size === file.size && image.file.lastModified === file.lastModified)); if (files.length !== picked.length) setError("That image is already selected."); if (selectedImages.length + files.length > 4) { setError("You can attach at most 4 images."); event.target.value = ""; return; } const invalid = files.find((file) => file.size > 10 * 1024 * 1024); if (invalid) { setError("Each image must be 10MB or smaller."); event.target.value = ""; return; } setSelectedImages((items) => [...items, ...files.map((file) => ({ file, url: URL.createObjectURL(file) }))]); event.target.value = ""; }} /></div>
           <span
             className={`text-xs tabular-nums ${
               isOverLimit

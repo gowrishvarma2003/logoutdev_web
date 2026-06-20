@@ -1,55 +1,122 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRepoContext } from "../layout";
-import { useRepositoryCommits } from "@/lib/hooks/useRepos";
+import { useBranches, useRepositoryCommits } from "@/lib/hooks/useRepos";
 import { EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
-import { ClockIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, ChevronDownIcon, ClockIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
+
+function getAuthorName(name?: string | null) {
+  const normalized = name?.trim();
+  return normalized ? normalized : "Unknown author";
+}
 
 export default function RepoCommitsPage() {
   const { repo } = useRepoContext();
   const searchParams = useSearchParams();
-  const activeRef = searchParams.get("ref") || repo.default_branch || "main";
+  const defaultBranch = repo.default_branch || "main";
+  const activeRef = searchParams.get("ref") || defaultBranch;
   const author = searchParams.get("author");
-
-  const getAuthorName = (name?: string | null) => {
-    const normalized = name?.trim();
-    return normalized ? normalized : "Unknown author";
-  };
+  const authorFilter = author ?? "";
+  const queryKey = `${activeRef}\0${authorFilter}`;
+  const [showBranchMenu, setShowBranchMenu] = useState(false);
+  const branchMenuRef = useRef<HTMLDivElement | null>(null);
   
-  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ queryKey, page: 1 });
+  const page = pagination.queryKey === queryKey ? pagination.page : 1;
   const { commits, loading, error } = useRepositoryCommits(repo.id, activeRef, undefined, page);
+  const { branches } = useBranches(repo.id);
 
-  // Group commits by day
-  const groupedCommits = useMemo(() => {
-    const groups: { date: string; commits: typeof commits }[] = [];
-    
-    // Simple filter by author if provided
-    const filteredCommits = author 
-      ? commits.filter(c => getAuthorName(c.author_name).toLowerCase().includes(author.toLowerCase())) 
-      : commits;
+  const branchOptions = useMemo(() => {
+    const uniqueBranches = new Map(branches.map((branch) => [branch.name, branch]));
 
-    filteredCommits.forEach((commit) => {
-      const date = new Date(commit.authored_at);
-      const dateString = date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
+    if (!uniqueBranches.has(activeRef)) {
+      uniqueBranches.set(activeRef, {
+        name: activeRef,
+        oid: "",
+        is_default: activeRef === defaultBranch,
+        is_head: false,
       });
-      
-      const lastGroup = groups[groups.length - 1];
-      if (lastGroup && lastGroup.date === dateString) {
-        lastGroup.commits.push(commit);
-      } else {
-        groups.push({ date: dateString, commits: [commit] });
-      }
+    }
+
+    return [...uniqueBranches.values()].sort((a, b) => {
+      if (a.name === activeRef) return -1;
+      if (b.name === activeRef) return 1;
+      if (a.name === defaultBranch) return -1;
+      if (b.name === defaultBranch) return 1;
+      return a.name.localeCompare(b.name);
     });
-    
-    return groups;
-  }, [commits, author]);
+  }, [activeRef, branches, defaultBranch]);
+
+  useEffect(() => {
+    if (!showBranchMenu) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (branchMenuRef.current?.contains(event.target as Node)) return;
+      setShowBranchMenu(false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowBranchMenu(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showBranchMenu]);
+
+  const branchHref = (branchName: string) => {
+    const params = new URLSearchParams();
+    params.set("ref", branchName);
+    if (author) params.set("author", author);
+    return `/repos/${repo.id}/commits?${params.toString()}`;
+  };
+
+  const authorHref = (authorName: string) => {
+    const params = new URLSearchParams();
+    params.set("ref", activeRef);
+    params.set("author", authorName);
+    return `/repos/${repo.id}/commits?${params.toString()}`;
+  };
+
+  const setPage = (nextPage: number | ((current: number) => number)) => {
+    setPagination((current) => {
+      const currentPage = current.queryKey === queryKey ? current.page : 1;
+      const resolvedPage = typeof nextPage === "function" ? nextPage(currentPage) : nextPage;
+      return { queryKey, page: resolvedPage };
+    });
+  };
+
+  const groupedCommits: { date: string; commits: typeof commits }[] = [];
+  const normalizedAuthor = authorFilter.toLowerCase();
+  const filteredCommits = normalizedAuthor
+    ? commits.filter((commit) => getAuthorName(commit.author_name).toLowerCase().includes(normalizedAuthor))
+    : commits;
+
+  filteredCommits.forEach((commit) => {
+    const date = new Date(commit.authored_at);
+    const dateString = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    const lastGroup = groupedCommits[groupedCommits.length - 1];
+    if (lastGroup && lastGroup.date === dateString) {
+      lastGroup.commits.push(commit);
+    } else {
+      groupedCommits.push({ date: dateString, commits: [commit] });
+    }
+  });
 
   const handleCopyHash = (hash: string) => {
     navigator.clipboard.writeText(hash);
@@ -59,13 +126,65 @@ export default function RepoCommitsPage() {
     <div className="space-y-6">
       {/* Branch selector & Filters */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <button className="flex items-center gap-2 rounded-md bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-200 hover:bg-zinc-700">
-          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="fill-current text-zinc-400">
-            <path d="M11.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.493 2.493 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25ZM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM3.5 3.25a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0Z"></path>
-          </svg>
-          <span className="max-w-[150px] truncate">{activeRef}</span>
-          <span className="text-zinc-500">▼</span>
-        </button>
+        <div ref={branchMenuRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setShowBranchMenu((current) => !current)}
+            className="flex min-w-0 items-center gap-2 rounded-md bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-200 hover:bg-zinc-700"
+            aria-expanded={showBranchMenu}
+            aria-haspopup="menu"
+          >
+            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="shrink-0 fill-current text-zinc-400">
+              <path d="M11.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.493 2.493 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25ZM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM3.5 3.25a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0Z"></path>
+            </svg>
+            <span className="max-w-[150px] truncate">{activeRef}</span>
+            <ChevronDownIcon className={`h-4 w-4 shrink-0 text-zinc-500 transition-transform ${showBranchMenu ? "rotate-180" : ""}`} />
+          </button>
+
+          {showBranchMenu ? (
+            <div
+              className="absolute left-0 top-full z-30 mt-2 w-72 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/40"
+              role="menu"
+            >
+              <div className="border-b border-zinc-800 px-3 py-2">
+                <p className="text-xs font-semibold text-zinc-300">Switch branches</p>
+              </div>
+              <div className="max-h-80 overflow-y-auto py-1">
+                {branchOptions.map((branch) => {
+                  const isActive = branch.name === activeRef;
+                  const isDefault = branch.name === defaultBranch;
+
+                  return (
+                    <Link
+                      key={branch.name}
+                      href={branchHref(branch.name)}
+                      onClick={() => setShowBranchMenu(false)}
+                      role="menuitem"
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
+                    >
+                      <CheckIcon className={`h-4 w-4 shrink-0 ${isActive ? "text-blue-400" : "text-transparent"}`} />
+                      <span className="min-w-0 flex-1 truncate">{branch.name}</span>
+                      {isDefault ? (
+                        <span className="shrink-0 rounded-full border border-zinc-700 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                          Default
+                        </span>
+                      ) : null}
+                    </Link>
+                  );
+                })}
+              </div>
+              <div className="border-t border-zinc-800 px-3 py-2">
+                <Link
+                  href={`/repos/${repo.id}/branches`}
+                  onClick={() => setShowBranchMenu(false)}
+                  className="text-xs font-medium text-blue-400 hover:text-blue-300"
+                >
+                  View all branches
+                </Link>
+              </div>
+            </div>
+          ) : null}
+        </div>
 
         {author && (
           <div className="flex items-center gap-2">
@@ -87,7 +206,7 @@ export default function RepoCommitsPage() {
 
       {!loading && error ? <p className="px-4 py-10 text-center text-sm text-rose-400">{error}</p> : null}
 
-      {!loading && !error && commits.length === 0 ? (
+      {!loading && !error && filteredCommits.length === 0 ? (
         <EmptyState
           icon={<ClockIcon className="h-10 w-10" />}
           title="No commits yet"
@@ -95,7 +214,7 @@ export default function RepoCommitsPage() {
         />
       ) : null}
 
-      {!loading && !error && commits.length > 0 ? (
+      {!loading && !error && filteredCommits.length > 0 ? (
         <div className="space-y-6">
           {groupedCommits.map((group) => (
             <div key={group.date}>
@@ -120,7 +239,7 @@ export default function RepoCommitsPage() {
                         </Link>
                         
                         <div className="mt-1 flex items-center gap-2 text-xs text-zinc-400">
-                          <Link href={`/repos/${repo.id}/commits?author=${encodeURIComponent(getAuthorName(commit.author_name))}`} className="flex items-center gap-1.5 hover:text-blue-400">
+                          <Link href={authorHref(getAuthorName(commit.author_name))} className="flex items-center gap-1.5 hover:text-blue-400">
                             <div className="h-4 w-4 rounded-full bg-blue-500/20 flex items-center justify-center font-bold text-blue-400 text-[9px]">
                               {getAuthorName(commit.author_name).charAt(0).toUpperCase()}
                             </div>

@@ -59,15 +59,8 @@ function Composer({
   const isReply = Boolean(parentCommentId);
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={
-        isReply
-          ? "space-y-2"
-          : "space-y-3 rounded-2xl border border-zinc-800/80 bg-zinc-950/50 p-3 sm:p-4"
-      }
-    >
-      <div className="flex gap-2.5 sm:gap-3">
+    <form onSubmit={handleSubmit} className="space-y-2 mt-3">
+      <div className="flex gap-3">
         <Avatar user={currentUser} size="xs" className="mt-1 shrink-0" />
         <div className="min-w-0 flex-1 space-y-2">
           <RichComposer
@@ -75,26 +68,24 @@ function Composer({
             onChange={(value) => setBody(value)}
             rows={2}
             placeholder={placeholder}
-            previewClassName="rounded-xl border border-zinc-800 bg-zinc-950/90 px-3 py-2.5 text-sm leading-relaxed text-white"
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-950/90 px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white outline-none transition-colors focus:border-zinc-600 selection:bg-[#1d9bf0]/30"
+            previewClassName="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white"
+            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-sm text-white outline-none focus:border-zinc-700"
           />
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <span className="mr-auto text-[11px] text-zinc-500">
-              Keep it constructive and specific.
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] text-zinc-500">
+              Format with markdown.
             </span>
             <button
               type="submit"
               disabled={submitting || !body.trim()}
-              className="rounded-xl bg-white px-3.5 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-lg bg-zinc-200 px-3 py-1.5 text-xs font-semibold text-zinc-955 hover:bg-white disabled:opacity-40 transition-colors cursor-pointer"
             >
               {submitting ? "Posting..." : ctaLabel}
             </button>
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-end gap-2">
-        {error ? <p className="mr-auto text-xs text-rose-400">{error}</p> : null}
-      </div>
+      {error ? <p className="text-xs text-rose-400">{error}</p> : null}
     </form>
   );
 }
@@ -117,41 +108,49 @@ function CommentNode({
   depth?: number;
 }) {
   const [showReply, setShowReply] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const children = childrenMap[comment.id] ?? [];
   const hasReplies = children.length > 0;
 
   return (
-    <div className={depth > 0 ? "ml-4 border-l border-zinc-800/80 pl-4 sm:ml-6" : ""}>
-      <article className="rounded-2xl border border-zinc-800/80 bg-zinc-950/40 p-3 sm:p-4">
-        <div className="flex gap-3">
-        <Avatar user={comment.author ?? null} size="sm" className="mt-0.5 shrink-0" />
+    <div className="group/node py-3.5">
+      <div className="flex gap-3">
+        <Avatar user={comment.author ?? null} size={depth === 0 ? "sm" : "xs"} className="mt-0.5 shrink-0" />
         <div className="min-w-0 flex-1">
-          <div className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+          {/* Header metadata */}
+          <div className="flex items-center gap-2 text-xs mb-1">
             <span className="font-semibold text-white">{comment.author?.name ?? "Unknown"}</span>
-            <span className="text-zinc-700">•</span>
+            <span className="text-zinc-600">•</span>
             <span className="text-zinc-500">{formatRelativeTime(comment.created_at)}</span>
-            {hasReplies ? (
-              <span className="rounded-full border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-400">
-                {children.length} repl{children.length === 1 ? "y" : "ies"}
-              </span>
-            ) : null}
           </div>
+          
+          {/* Comment body */}
           <RichText text={comment.body} className="whitespace-pre-line text-sm leading-relaxed text-zinc-300" />
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            {currentUser ? (
+          {/* Action Row */}
+          <div className="mt-2.5 flex items-center gap-3 text-xs text-zinc-500">
+            {currentUser && (
               <button
                 onClick={() => setShowReply((value) => !value)}
-                className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 px-2.5 py-1 text-xs text-zinc-400 transition-colors hover:border-sky-400/40 hover:text-sky-300"
+                className="hover:text-zinc-300 cursor-pointer flex items-center gap-1 transition-colors"
               >
-                <ChatIcon className="h-3.5 w-3.5" />
+                <ChatIcon className="h-3 w-3" />
                 {showReply ? "Cancel" : "Reply"}
               </button>
-            ) : null}
+            )}
+            
+            {hasReplies && (
+              <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="hover:text-zinc-300 cursor-pointer transition-colors"
+              >
+                {isCollapsed ? `Show replies (${children.length})` : "Hide replies"}
+              </button>
+            )}
           </div>
 
-          {showReply && currentUser ? (
-            <div className="mt-3">
+          {showReply && currentUser && (
+            <div className="max-w-xl">
               <Composer
                 spaceId={spaceId}
                 issueId={issueId}
@@ -162,13 +161,14 @@ function CommentNode({
                   onRefresh();
                 }}
                 placeholder="Write a reply..."
-                ctaLabel="Post reply"
+                ctaLabel="Reply"
               />
             </div>
-          ) : null}
+          )}
 
-          {hasReplies ? (
-            <div className="mt-3 space-y-2">
+          {/* Indented reply threads */}
+          {hasReplies && !isCollapsed && (
+            <div className="mt-3 pl-4 border-l border-zinc-800 space-y-2">
               {children.map((child) => (
                 <CommentNode
                   key={child.id}
@@ -182,10 +182,9 @@ function CommentNode({
                 />
               ))}
             </div>
-          ) : null}
+          )}
         </div>
-        </div>
-      </article>
+      </div>
     </div>
   );
 }
@@ -213,6 +212,7 @@ export default function WorkCommentsPanel({
     () => rootComments.slice(0, visibleRootCount),
     [rootComments, visibleRootCount]
   );
+
   const totalComments = comments.length;
   const hasMoreRootComments = rootComments.length > visibleRootCount;
 
@@ -221,73 +221,67 @@ export default function WorkCommentsPanel({
   }, [issueId]);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/20">
-      <div className="border-b border-zinc-800 bg-gradient-to-r from-zinc-900 via-zinc-900/80 to-zinc-900/30 px-4 py-4 sm:px-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h3 className="text-base font-semibold text-white">Comments</h3>
-            <p className="mt-1 text-xs text-zinc-500">
-              Use @mentions for context and keep discussion attached to this work item.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-[11px] text-zinc-400">
-            <span className="rounded-full border border-zinc-700 bg-zinc-900/70 px-2.5 py-1">
-              {totalComments} total
-            </span>
-            <span className="rounded-full border border-zinc-700 bg-zinc-900/70 px-2.5 py-1">
-              {rootComments.length} threads
-            </span>
-          </div>
+    <section className="space-y-4">
+      {/* Simple Clean Header */}
+      <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+        <div>
+          <h3 className="text-base font-semibold text-white">Discussion</h3>
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Keep conversation specific to this work item.
+          </p>
+        </div>
+        <div className="text-xs text-zinc-400 font-medium bg-zinc-900 border border-zinc-800 rounded-full px-3 py-1">
+          {totalComments} comment{totalComments === 1 ? "" : "s"}
         </div>
       </div>
 
-      <div className="space-y-4 p-4 sm:p-5">
-        {currentUser ? (
-          <Composer
-            spaceId={spaceId}
-            issueId={issueId}
-            currentUser={currentUser}
-            onPosted={onRefresh}
-            placeholder="Add to the work thread..."
-            ctaLabel="Post comment"
-          />
-        ) : (
-          <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/50 px-4 py-3 text-xs text-zinc-500">
-            Sign in to add a comment.
-          </div>
-        )}
+      {/* Main Composer */}
+      {currentUser ? (
+        <Composer
+          spaceId={spaceId}
+          issueId={issueId}
+          currentUser={currentUser}
+          onPosted={onRefresh}
+          placeholder="Type a message to start a discussion thread..."
+          ctaLabel="Comment"
+        />
+      ) : (
+        <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-950/20 px-4 py-3 text-xs text-zinc-500">
+          Sign in to join the discussion.
+        </div>
+      )}
 
-        {rootComments.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/40 px-4 py-10 text-center text-sm text-zinc-500">
-            No comments yet.
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {visibleRootComments.map((comment) => (
-              <CommentNode
-                key={comment.id}
-                spaceId={spaceId}
-                issueId={issueId}
-                comment={comment}
-                childrenMap={childrenMap}
-                currentUser={currentUser}
-                onRefresh={onRefresh}
-              />
-            ))}
-            {hasMoreRootComments ? (
-              <div className="pt-1 text-center">
-                <button
-                  type="button"
-                  onClick={() => setVisibleRootCount((current) => current + 20)}
-                  className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
-                >
-                  Load more comments
-                </button>
-              </div>
-            ) : null}
-          </div>
-        )}
-      </div>
+      {/* Discussion Threads List */}
+      {rootComments.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-950/10 px-4 py-8 text-center text-sm text-zinc-500">
+          No messages in this discussion yet.
+        </div>
+      ) : (
+        <div className="divide-y divide-zinc-800/60">
+          {visibleRootComments.map((comment) => (
+            <CommentNode
+              key={comment.id}
+              spaceId={spaceId}
+              issueId={issueId}
+              comment={comment}
+              childrenMap={childrenMap}
+              currentUser={currentUser}
+              onRefresh={onRefresh}
+            />
+          ))}
+          {hasMoreRootComments ? (
+            <div className="pt-4 text-center">
+              <button
+                type="button"
+                onClick={() => setVisibleRootCount((current) => current + 20)}
+                className="rounded-lg border border-zinc-800 bg-zinc-900/40 px-3.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+              >
+                Load more comments
+              </button>
+            </div>
+          ) : null}
+        </div>
+      )}
     </section>
   );
 }

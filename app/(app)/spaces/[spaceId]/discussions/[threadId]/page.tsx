@@ -59,10 +59,11 @@ export default function DiscussionThreadPage({
   params: Promise<{ spaceId: string; threadId: string }>;
 }) {
   const { spaceId, threadId } = use(params);
-  const { user } = useAuth();
-  const { space } = useSpace(spaceId);
+  const { user, isLoaded: authLoaded } = useAuth();
+  const { space, loading: spaceLoading } = useSpace(spaceId);
   const { discussion, loading, error, refetch } = useDiscussion(spaceId, threadId);
   const viewerPermissions = space?.viewer_permissions;
+  const permissionsLoaded = Boolean(viewerPermissions) && !spaceLoading;
 
   const [replyBody, setReplyBody] = useState("");
   const [replying, setReplying] = useState(false);
@@ -95,7 +96,7 @@ export default function DiscussionThreadPage({
   );
   const canReply = Boolean(
     discussion
-    && viewerPermissions?.can_reply
+    && viewerPermissions?.can_reply === true
     && viewerPermissions.allowed_discussion_categories.includes(discussion.category)
   );
 
@@ -351,15 +352,21 @@ export default function DiscussionThreadPage({
             )}
           </form>
         </div>
-      ) : user ? (
+      ) : authLoaded && user && !permissionsLoaded ? (
+        <div className="border-t border-zinc-800 bg-zinc-950/60 px-5 py-4">
+          <div className="flex justify-center">
+            <Spinner />
+          </div>
+        </div>
+      ) : authLoaded && user ? (
         <div className="border-t border-zinc-800 bg-zinc-950/60 px-5 py-4 text-sm text-zinc-400">
           Replies in this thread are limited to contributors or to viewers allowed for the <span className="text-zinc-200">{discussion.category}</span> category.
         </div>
-      ) : (
+      ) : authLoaded ? (
         <div className="border-t border-zinc-800 bg-zinc-950/60 px-5 py-4 text-sm text-zinc-400">
           Sign in to reply where this discussion category is open to public participants.
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

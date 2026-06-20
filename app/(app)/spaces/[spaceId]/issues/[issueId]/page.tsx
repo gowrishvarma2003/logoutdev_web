@@ -26,6 +26,8 @@ import type { SpaceIssuePriority, SpaceIssueStatus, SpaceWorkItem, WorkItemType 
 import { parseWorkSearchParams, serializeWorkQuery } from "@/lib/workFilters";
 import RichComposer from "@/components/ui/RichComposer";
 import RichText from "@/components/ui/RichText";
+import ExternalImage from "@/components/ui/ExternalImage";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 const STATUS_OPTIONS: SpaceIssueStatus[] = ["open", "triaged", "in-progress", "resolved", "closed"];
 const PRIORITY_OPTIONS: SpaceIssuePriority[] = ["low", "medium", "high", "critical"];
@@ -69,6 +71,7 @@ export default function WorkDetailPage({
   const [quickCloseReason, setQuickCloseReason] = useState("");
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [statusUpdateError, setStatusUpdateError] = useState("");
+  const [previewAttachmentIndex, setPreviewAttachmentIndex] = useState<number | null>(null);
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -111,6 +114,27 @@ export default function WorkDetailPage({
     if (!issue) return;
     populateDraftFromIssue(issue);
   }, [issue]);
+
+  useEffect(() => {
+    if (previewAttachmentIndex === null) return;
+    const attachmentCount = issue?.attachments?.length ?? 0;
+    if (attachmentCount === 0 || previewAttachmentIndex >= attachmentCount) {
+      setPreviewAttachmentIndex(null);
+    }
+  }, [issue?.attachments?.length, previewAttachmentIndex]);
+
+  useEffect(() => {
+    if (previewAttachmentIndex === null) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setPreviewAttachmentIndex(null);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [previewAttachmentIndex]);
 
   useEffect(() => {
     setActivity((current) => {
@@ -254,7 +278,11 @@ export default function WorkDetailPage({
     );
   }
 
+  const attachments = issue.attachments ?? [];
+  const previewAttachment = previewAttachmentIndex === null ? null : attachments[previewAttachmentIndex] ?? null;
+
   return (
+    <>
     <div className="mx-auto max-w-6xl p-4">
       <Link
         href={backHref}
@@ -579,6 +607,32 @@ export default function WorkDetailPage({
                   <RichText text={issue.body} className="mt-3 whitespace-pre-line text-sm leading-relaxed text-zinc-300" />
                 </section>
 
+                {attachments.length ? (
+                  <section>
+                    <h2 className="text-sm font-semibold text-white">Photos</h2>
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      {attachments.map((attachment, index) => (
+                        <button
+                          key={attachment.id}
+                          type="button"
+                          onClick={() => setPreviewAttachmentIndex(index)}
+                          className="group overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 transition-colors hover:border-zinc-700"
+                        >
+                          <ExternalImage
+                            src={attachment.url}
+                            alt={attachment.filename}
+                            className="aspect-video w-full object-cover transition-transform group-hover:scale-[1.02]"
+                            fallbackClassName="aspect-video w-full"
+                          />
+                          <div className="border-t border-zinc-800 px-3 py-2">
+                            <p className="truncate text-left text-xs font-medium text-zinc-300">{attachment.filename}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                ) : null}
+
                 <section className="grid gap-4 border-t border-zinc-800 pt-5 sm:grid-cols-2">
                   <div>
                     <p className="text-xs uppercase tracking-wide text-zinc-500">Status</p>
@@ -780,5 +834,66 @@ export default function WorkDetailPage({
         )}
       </div>
     </div>
+    {previewAttachment ? (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
+        onClick={() => setPreviewAttachmentIndex(null)}
+      >
+        <button
+          type="button"
+          onClick={() => setPreviewAttachmentIndex(null)}
+          className="absolute right-4 top-4 rounded-full bg-zinc-800/80 p-2 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+          aria-label="Close image preview"
+        >
+          <XMarkIcon className="h-5 w-5" />
+        </button>
+
+        <div className="relative max-h-[85vh] max-w-[90vw]" onClick={(event) => event.stopPropagation()}>
+          <ExternalImage
+            src={previewAttachment.url}
+            alt={previewAttachment.filename}
+            className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
+            fallbackClassName="h-[50vh] w-[50vw] rounded-lg"
+          />
+          <p className="mt-3 text-center text-sm text-zinc-400">{previewAttachment.filename}</p>
+
+          {attachments.length > 1 ? (
+            <div className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setPreviewAttachmentIndex((current) => (
+                    current === null ? 0 : (current - 1 + attachments.length) % attachments.length
+                  ));
+                }}
+                className="pointer-events-auto -ml-12 rounded-full bg-zinc-800/80 p-2 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+                aria-label="Previous photo"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setPreviewAttachmentIndex((current) => (
+                    current === null ? 0 : (current + 1) % attachments.length
+                  ));
+                }}
+                className="pointer-events-auto -mr-12 rounded-full bg-zinc-800/80 p-2 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+                aria-label="Next photo"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    ) : null}
+    </>
   );
 }

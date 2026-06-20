@@ -61,6 +61,22 @@ export interface EntityRef {
   tags?: string[];
 }
 
+export interface PlatformEntity extends EntityRef {
+  owner?: Pick<User, "id" | "name" | "username"> | null;
+  owner_id?: string;
+  position?: number;
+  namespace?: string;
+}
+
+export interface PostImage {
+  id: string;
+  url: string;
+  filename: string;
+  content_type: string;
+  size_bytes: number;
+  position: number;
+}
+
 export interface RelatedEntityRef extends EntityRef {
   reason?: string | null;
 }
@@ -271,6 +287,9 @@ export interface Post {
   linked_entity_type?: string | null;
   linked_entity_id?: string | null;
   linked_entity?: EntityRef | null;
+  entity_tags?: PlatformEntity[];
+  images?: PostImage[];
+  audience?: "public" | "restricted";
 }
 
 export type QuestionType = "open" | "mcq";
@@ -1177,6 +1196,17 @@ export interface SpaceWorkActivity {
   actor?: User | null;
 }
 
+export interface SpaceWorkAttachment {
+  id: string;
+  kind: "image";
+  url: string;
+  filename: string;
+  content_type: string;
+  size_bytes: number;
+  position: number;
+  created_at: string;
+}
+
 export interface SpaceWorkItem {
   id: string;
   space_id: string;
@@ -1206,6 +1236,7 @@ export interface SpaceWorkItem {
   assignee?: User | null;
   repo?: Pick<Repository, "id" | "name" | "slug" | "visibility"> | null;
   milestone?: Pick<SpaceMilestone, "id" | "title" | "status" | "target_date"> | null;
+  attachments?: SpaceWorkAttachment[];
 }
 
 export type SpaceIssue = SpaceWorkItem;

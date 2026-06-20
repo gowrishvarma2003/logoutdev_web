@@ -187,20 +187,22 @@ export default function SpacesDiscoverPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950">
-      <header className="border-b border-zinc-800 bg-zinc-950 px-4 md:px-8">
-        <div className="mx-auto max-w-[1180px]">
-          <div className="flex flex-wrap items-center justify-between gap-3 py-5">
-            <div>
+      <header className="border-b border-zinc-800 bg-zinc-950 px-4 sm:px-5 lg:px-6">
+        <div className="mx-auto max-w-[1080px]">
+          <div className="flex flex-wrap items-center justify-between gap-3 py-4">
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <RocketIcon className="h-5 w-5 text-white" />
+                <RocketIcon className="h-5 w-5 shrink-0 text-white" />
                 <h1 className="text-xl font-semibold text-white">Spaces</h1>
               </div>
-              <p className="mt-1 text-sm text-zinc-500">Your project spaces, followed builds, and places to contribute.</p>
+              <p className="mt-1 max-w-2xl text-sm leading-5 text-zinc-500">
+                Your project spaces, followed builds, and places to contribute.
+              </p>
             </div>
             {user ? (
               <Link
                 href="/spaces/create"
-                className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+                className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg bg-white px-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
               >
                 <PlusIcon className="h-4 w-4" />
                 New
@@ -208,7 +210,7 @@ export default function SpacesDiscoverPage() {
             ) : (
               <Link
                 href="/login"
-                className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-900"
+                className="inline-flex h-9 shrink-0 items-center rounded-lg border border-zinc-700 px-3 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-900"
               >
                 Sign in
               </Link>
@@ -233,7 +235,7 @@ export default function SpacesDiscoverPage() {
             ))}
           </div>
 
-          <div className="flex flex-col gap-3 pb-4 md:flex-row md:items-center">
+          <div className="flex flex-col gap-2.5 pb-4 sm:flex-row sm:items-center">
             <div className="relative min-w-0 flex-1">
               <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
               <input
@@ -244,7 +246,7 @@ export default function SpacesDiscoverPage() {
                   setTag(event.target.value);
                   setPage(1);
                 }}
-                className="h-10 w-full rounded-lg border border-zinc-800 bg-zinc-900 pl-9 pr-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-sky-500"
+                className="h-9 w-full rounded-lg border border-zinc-800 bg-zinc-900 pl-9 pr-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-sky-500"
               />
             </div>
 
@@ -256,7 +258,7 @@ export default function SpacesDiscoverPage() {
                 setNeededSkill(event.target.value);
                 setPage(1);
               }}
-              className="h-10 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-sky-500 md:w-44"
+              className="h-9 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-sky-500 sm:w-40 lg:w-48"
             />
 
             <select
@@ -265,7 +267,7 @@ export default function SpacesDiscoverPage() {
                 setStatus(event.target.value);
                 setPage(1);
               }}
-              className="h-10 rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-300 outline-none transition-colors focus:border-sky-500"
+              className="h-9 rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-300 outline-none transition-colors focus:border-sky-500 sm:w-36"
             >
               {STATUS_FILTERS.map((filter) => (
                 <option key={filter.value || "all"} value={filter.value}>
@@ -277,8 +279,8 @@ export default function SpacesDiscoverPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1180px] px-4 py-5 md:px-8">
-        <div className="mb-4 flex items-center justify-between gap-3 text-sm">
+      <main className="mx-auto max-w-[1080px] px-4 py-4 sm:px-5 lg:px-6">
+        <div className="mb-3 flex items-center justify-between gap-3 text-sm">
           <p className="text-zinc-500">
             {loading ? "Loading spaces..." : `${total || spaces.length} spaces`}
           </p>
@@ -302,7 +304,7 @@ export default function SpacesDiscoverPage() {
         ) : null}
 
         {!error && spaces.length > 0 ? (
-          <div className="grid gap-3">
+          <div className="grid gap-2.5">
             {spaces.map((space: ProjectSpace) => (
               <SpaceOverviewCard key={space.id} space={space} />
             ))}

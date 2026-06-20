@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { use, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { use, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   usePathname,
   useRouter,
@@ -37,6 +37,17 @@ import type {
 } from "@/lib/types";
 import { buildWorkHref, parseWorkSearchParams, serializeWorkQuery, type WorkSearchState } from "@/lib/workFilters";
 import RichComposer from "@/components/ui/RichComposer";
+import { PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
+
+const MAX_WORK_PHOTOS = 6;
+const MAX_WORK_PHOTO_SIZE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_WORK_PHOTO_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
+
+interface SelectedWorkPhoto {
+  id: string;
+  file: File;
+  previewUrl: string;
+}
 
 const STATUS_OPTIONS: Array<{ value: "" | SpaceIssueStatus; label: string }> = [
   { value: "", label: "All statuses" },
@@ -212,6 +223,9 @@ export default function WorkPage({
   const [postError, setPostError] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [composerPhotos, setComposerPhotos] = useState<SelectedWorkPhoto[]>([]);
+  const composerPhotosRef = useRef<SelectedWorkPhoto[]>([]);
+  const [composerPhotoError, setComposerPhotoError] = useState("");
   const [composerType, setComposerType] = useState<WorkItemType>("task");
   const [composerPriority, setComposerPriority] = useState<SpaceIssuePriority>("medium");
   const [composerRepoId, setComposerRepoId] = useState("");
@@ -250,6 +264,14 @@ export default function WorkPage({
   // Collapsible UI state
   const [showMetrics, setShowMetrics] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    composerPhotosRef.current = composerPhotos;
+  }, [composerPhotos]);
+
+  useEffect(() => () => {
+    composerPhotosRef.current.forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
+  }, []);
 
   const updateFilters = useCallback(
     (patch: Partial<Record<keyof WorkSearchState, string | number | boolean | undefined | null>>) => {
@@ -296,6 +318,57 @@ export default function WorkPage({
   async function refreshWork() {
     refetch();
     refetchSummary();
+  }
+
+  function clearComposerPhotos() {
+    composerPhotosRef.current.forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
+    composerPhotosRef.current = [];
+    setComposerPhotos([]);
+    setComposerPhotoError("");
+  }
+
+  function handlePhotoSelection(event: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = "";
+    if (!files.length) return;
+
+    setComposerPhotos((current) => {
+      if (current.length + files.length > MAX_WORK_PHOTOS) {
+        setComposerPhotoError(`You can attach at most ${MAX_WORK_PHOTOS} photos.`);
+        return current;
+      }
+
+      const invalidType = files.find((file) => !ALLOWED_WORK_PHOTO_TYPES.has(file.type));
+      if (invalidType) {
+        setComposerPhotoError("Only PNG, JPG, WebP, or GIF images can be attached.");
+        return current;
+      }
+
+      const oversized = files.find((file) => file.size > MAX_WORK_PHOTO_SIZE_BYTES);
+      if (oversized) {
+        setComposerPhotoError("Each attached photo must be 10MB or smaller.");
+        return current;
+      }
+
+      setComposerPhotoError("");
+      return [
+        ...current,
+        ...files.map((file) => ({
+          id: `${file.name}-${file.size}-${file.lastModified}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          file,
+          previewUrl: URL.createObjectURL(file),
+        })),
+      ];
+    });
+  }
+
+  function removeComposerPhoto(photoId: string) {
+    setComposerPhotos((current) => {
+      const photo = current.find((item) => item.id === photoId);
+      if (photo) URL.revokeObjectURL(photo.previewUrl);
+      return current.filter((item) => item.id !== photoId);
+    });
+    setComposerPhotoError("");
   }
 
   function resetMilestoneForm() {
@@ -352,6 +425,10 @@ export default function WorkPage({
   async function handlePost(event: React.FormEvent) {
     event.preventDefault();
     if (!title.trim() || !body.trim()) return;
+    if (composerPhotos.length > MAX_WORK_PHOTOS) {
+      setComposerPhotoError(`You can attach at most ${MAX_WORK_PHOTOS} photos.`);
+      return;
+    }
 
     setPosting(true);
     setPostError("");
@@ -368,9 +445,11 @@ export default function WorkPage({
         needed_skill: composerNeededSkill.trim() || undefined,
         estimate: composerEstimate.trim() || undefined,
         target_date: composerTargetDate || undefined,
+        attachments: composerPhotos.map((photo) => photo.file),
       });
       setTitle("");
       setBody("");
+      clearComposerPhotos();
       setComposerType("task");
       setComposerPriority("medium");
       setComposerRepoId("");
@@ -940,6 +1019,53 @@ export default function WorkPage({
             previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-white"
             className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:border-zinc-600 focus:outline-none selection:bg-[#1d9bf0]/30"
           />
+
+          <div className="space-y-3 rounded-xl border border-zinc-800 bg-zinc-950/50 p-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-white">Photos</p>
+                <p className="text-xs text-zinc-500">Attach up to 6 PNG, JPG, WebP, or GIF images. 10MB each.</p>
+              </div>
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-800">
+                <PhotoIcon className="h-4 w-4" />
+                Add photos
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  multiple
+                  onChange={handlePhotoSelection}
+                  className="sr-only"
+                  disabled={posting || composerPhotos.length >= MAX_WORK_PHOTOS}
+                />
+              </label>
+            </div>
+
+            {composerPhotoError ? (
+              <p className="text-xs text-rose-400">{composerPhotoError}</p>
+            ) : null}
+
+            {composerPhotos.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {composerPhotos.map((photo) => (
+                  <div key={photo.id} className="group relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photo.previewUrl} alt={photo.file.name} className="aspect-video w-full object-cover" />
+                    <div className="absolute inset-x-0 bottom-0 bg-black/70 px-2 py-1.5">
+                      <p className="truncate text-xs font-medium text-white">{photo.file.name}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeComposerPhoto(photo.id)}
+                      className="absolute right-2 top-2 rounded-full bg-black/70 p-1 text-white transition-colors hover:bg-rose-500"
+                      aria-label={`Remove ${photo.file.name}`}
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
 
           <div className="grid gap-3 md:grid-cols-3">
             <input

@@ -716,12 +716,40 @@ export async function createWork(
     estimate?: string;
     target_date?: string;
     needed_skill?: string;
+    attachments?: File[];
   }
 ): Promise<{ issue: SpaceWorkItem }> {
+  if (body.attachments?.length) {
+    const formData = new FormData();
+    formData.set("title", body.title);
+    formData.set("body", body.body);
+    if (body.type) formData.set("type", body.type);
+    if (body.priority) formData.set("priority", body.priority);
+    if (body.repo_id) formData.set("repo_id", body.repo_id);
+    if (body.assignee_user_id) formData.set("assignee_user_id", body.assignee_user_id);
+    if (body.milestone_id) formData.set("milestone_id", body.milestone_id);
+    if (body.good_first_task !== undefined) formData.set("good_first_task", String(body.good_first_task));
+    if (body.help_wanted !== undefined) formData.set("help_wanted", String(body.help_wanted));
+    if (body.blocked_reason) formData.set("blocked_reason", body.blocked_reason);
+    if (body.estimate) formData.set("estimate", body.estimate);
+    if (body.target_date) formData.set("target_date", body.target_date);
+    if (body.needed_skill) formData.set("needed_skill", body.needed_skill);
+    body.attachments.forEach((file) => formData.append("attachments", file));
+
+    const res = await fetch(`${API}/api/spaces/${spaceId}/work`, {
+      method: "POST",
+      headers: { ...authHeaders() },
+      body: formData,
+    });
+    return handleRes(res);
+  }
+
+  const jsonBody = { ...body };
+  delete jsonBody.attachments;
   const res = await fetch(`${API}/api/spaces/${spaceId}/work`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
-    body: JSON.stringify(body),
+    body: JSON.stringify(jsonBody),
   });
   return handleRes(res);
 }

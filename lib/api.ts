@@ -10,6 +10,7 @@ import type {
   RelatedHashtag,
   User,
   UserSuggestion,
+  PlatformEntity,
 } from "./types";
 import { API_BASE_URL } from "./apiBaseUrl";
 
@@ -105,19 +106,17 @@ export async function getExplore(cursor?: string): Promise<FeedResponse> {
 
 export async function createPost(
   content: string,
-  linkedEntity?: { type: string; id: string } | null
+  entityTags: Array<{ type: string; id: string }> = [],
+  images: File[] = []
 ): Promise<{ post: Post }> {
+  const body = new FormData();
+  body.set("content", content);
+  body.set("entity_tags", JSON.stringify(entityTags));
+  images.forEach((image) => body.append("images", image));
   const res = await fetch(`${API_BASE_URL}/api/posts`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
-    body: JSON.stringify({
-      content,
-      linked_entity_type: linkedEntity?.type,
-      linked_entity_id: linkedEntity?.id,
-    }),
+    headers: { ...getAuthHeaders() },
+    body,
   });
   return handleResponse<{ post: Post }>(res);
 }
@@ -139,17 +138,28 @@ export async function deletePost(id: string): Promise<{ message: string }> {
 
 export async function createReply(
   postId: string,
-  content: string
+  content: string,
+  entityTags: Array<{ type: string; id: string }> = [],
+  images: File[] = []
 ): Promise<{ reply: Post }> {
+  const body = new FormData();
+  body.set("content", content);
+  body.set("entity_tags", JSON.stringify(entityTags));
+  images.forEach((image) => body.append("images", image));
   const res = await fetch(`${API_BASE_URL}/api/posts/${postId}/replies`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeaders(),
-    },
-    body: JSON.stringify({ content }),
+    headers: { ...getAuthHeaders() },
+    body,
   });
   return handleResponse<{ reply: Post }>(res);
+}
+
+export async function suggestPlatformEntities(query = "", types: string[] = []): Promise<{ entities: PlatformEntity[] }> {
+  const params = new URLSearchParams();
+  if (query.trim()) params.set("q", query.trim());
+  if (types.length) params.set("types", types.join(","));
+  const res = await fetch(`${API_BASE_URL}/api/discovery/entities?${params}`, { headers: { ...getAuthHeaders() } });
+  return handleResponse<{ entities: PlatformEntity[] }>(res);
 }
 
 export async function getReplies(

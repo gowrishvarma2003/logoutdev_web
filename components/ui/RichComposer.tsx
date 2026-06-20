@@ -135,6 +135,10 @@ const RichComposer = forwardRef<RichComposerHandle, RichComposerProps>(function 
         maxLength={maxLength}
         rows={rows}
         className={className}
+        style={{
+          caretColor: "#ffffff",
+          WebkitTextFillColor: "transparent",
+        }}
       />
 
       {overlay}

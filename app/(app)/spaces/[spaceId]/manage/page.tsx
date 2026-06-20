@@ -7,7 +7,7 @@ import { useSpace, useJoinRequests, useStack } from "@/lib/hooks/useSpaces";
 import { useRepos } from "@/lib/hooks/useRepos";
 import { useAuth } from "@/lib/hooks/useAuth";
 import Avatar from "@/components/ui/Avatar";
-import { SectionHeader, EmptyState } from "@/components/spaces/SpaceBadges";
+import { StatusBadge, VisibilityBadge } from "@/components/spaces/SpaceBadges";
 import TechStackPanel from "@/components/spaces/TechStackPanel";
 import Spinner from "@/components/ui/Spinner";
 import {
@@ -16,6 +16,12 @@ import {
   XCircleIcon,
   ChatBubbleIcon,
   UsersIcon,
+  TrashIcon,
+  CodeBracketIcon,
+  DocumentTextIcon,
+  GitHubIcon,
+  LinkIcon,
+  ExternalLinkIcon,
 } from "@/components/ui/Icons";
 import * as api from "@/lib/services/spacesApi";
 import { formatRelativeTime } from "@/lib/utils";
@@ -45,13 +51,25 @@ export default function ManagePage({
   }
 
   return (
-    <div className="divide-y divide-zinc-800">
-      <ProjectSettingsSection space={space} refetch={refetchSpace} onDelete={() => router.push("/spaces")} />
+    <div className="max-w-5xl mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+      {/* Linked Marketplace Launch banner */}
       <LinkedLaunchSection space={space} />
-      <JoinRequestsSection spaceId={spaceId} requests={requests} loading={reqLoading} refetch={refetchReqs} />
-      <StackManagementSection spaceId={spaceId} stack={stack} refetch={refetchStack} />
-      <RepoDocsSection repos={repos} />
-      <RepoManagementSection spaceId={spaceId} repos={repos} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main section (Left/Center Column) */}
+        <div className="lg:col-span-2 space-y-6">
+          <JoinRequestsSection spaceId={spaceId} requests={requests} loading={reqLoading} refetch={refetchReqs} />
+          <RepoManagementSection spaceId={spaceId} repos={repos} />
+          <RepoDocsSection repos={repos} />
+        </div>
+
+        {/* Sidebar section (Right Column) */}
+        <div className="space-y-6">
+          <ProjectSettingsSection space={space} refetch={refetchSpace} />
+          <StackManagementSection spaceId={spaceId} stack={stack} refetch={refetchStack} />
+          <DangerZoneSection space={space} onDelete={() => router.push("/spaces")} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -64,36 +82,42 @@ function LinkedLaunchSection({
   if (!space?.linked_launch) return null;
 
   return (
-    <section className="p-4">
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
-        <div className="mb-2 flex items-center justify-between gap-3">
-          <div>
-            <h3 className="text-sm font-semibold text-white">Linked launch</h3>
-            <p className="mt-1 text-xs text-zinc-500">This space is attached to a marketplace launch page.</p>
+    <div className="relative overflow-hidden rounded-2xl border border-sky-500/10 bg-gradient-to-r from-sky-500/5 to-transparent p-4 sm:p-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase text-sky-400 border border-sky-500/10 mb-2">
+            Marketplace Launch
+          </span>
+          <h3 className="text-base font-bold text-white">{space.linked_launch.name}</h3>
+          <p className="mt-1 text-sm text-zinc-400">{space.linked_launch.tagline}</p>
+          
+          <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs text-zinc-400 font-medium">
+            <span className="capitalize">{space.linked_launch.status}</span>
+            <span>·</span>
+            <span>{space.linked_launch.upvote_count} upvotes</span>
+            <span>·</span>
+            <span>{space.linked_launch.review_count} reviews</span>
           </div>
-          <Link href={`/launches/${space.linked_launch.id}`} className="text-xs text-sky-400 hover:text-sky-300 transition-colors">
-            Open launch →
-          </Link>
         </div>
 
-        <p className="text-sm font-medium text-white">{space.linked_launch.name}</p>
-        <p className="mt-1 text-sm text-zinc-400">{space.linked_launch.tagline}</p>
-        <p className="mt-2 text-xs text-zinc-500">
-          {space.linked_launch.status} · {space.linked_launch.upvote_count} upvotes · {space.linked_launch.review_count} reviews
-        </p>
+        <Link
+          href={`/launches/${space.linked_launch.id}`}
+          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 px-4 py-2.5 text-xs font-semibold text-white transition-all hover:bg-zinc-855"
+        >
+          Open Launch Page
+          <ExternalLinkIcon className="w-3.5 h-3.5 text-zinc-400" />
+        </Link>
       </div>
-    </section>
+    </div>
   );
 }
 
 function ProjectSettingsSection({
   space,
   refetch,
-  onDelete,
 }: {
   space: ReturnType<typeof useSpace>["space"];
   refetch: () => void;
-  onDelete: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(space?.name ?? "");
@@ -108,7 +132,6 @@ function ProjectSettingsSection({
   const [contributionGuide, setContributionGuide] = useState(space?.contribution_guide ?? "");
   const [responseSla, setResponseSla] = useState(space?.response_sla ?? "");
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!space) return;
@@ -149,163 +172,254 @@ function ProjectSettingsSection({
     }
   }
 
-  async function handleDelete() {
-    if (!space) return;
-    if (!confirm("Archive this space? It can be restored later.")) return;
-    setDeleting(true);
-    try {
-      await api.deleteSpace(space.id);
-      onDelete();
-    } catch {
-      setDeleting(false);
-    }
-  }
-
   if (!space) return null;
 
   return (
-    <section className="p-4">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
-          <CogIcon className="w-4 h-4" />
-          Project Settings
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm relative">
+      <div className="flex items-center justify-between mb-4 border-b border-zinc-800/60 pb-3">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-white uppercase tracking-wide">
+          <CogIcon className="w-4 h-4 text-zinc-450" />
+          Project Profile
         </h3>
         {!editing && (
           <button
             onClick={() => setEditing(true)}
-            className="rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
+            className="rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-zinc-850 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 transition-colors cursor-pointer"
           >
-            Edit
+            Edit Profile
           </button>
         )}
       </div>
 
       {editing ? (
-        <div className="space-y-3">
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none transition-colors"
-          />
-          <input
-            type="text"
-            value={summary}
-            onChange={(e) => setSummary(e.target.value)}
-            maxLength={300}
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none transition-colors"
-          />
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            className="w-full resize-none rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none transition-colors"
-          />
-          <label className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-300">
+        <div className="space-y-3.5">
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Project Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-700 focus:outline-none transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Summary</label>
+            <input
+              type="text"
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              maxLength={300}
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-955 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-700 focus:outline-none transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-955 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-700 focus:outline-none transition-colors"
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as SpaceStatus)}
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-955 px-3 py-2 text-xs text-white focus:border-zinc-750 focus:outline-none"
+              >
+                {["idea", "building", "shipping", "paused", "archived"].map((item) => (
+                  <option key={item} value={item}>
+                    {item.charAt(0).toUpperCase() + item.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Visibility</label>
+              <select
+                value={visibility}
+                onChange={(e) => setVisibility(e.target.value as SpaceVisibility)}
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-955 px-3 py-2 text-xs text-white focus:border-zinc-750 focus:outline-none"
+              >
+                <option value="public">Public</option>
+                <option value="private">Private</option>
+              </select>
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-xs text-zinc-355 cursor-pointer">
             <input
               type="checkbox"
               checked={workingInPublic}
               onChange={(e) => setWorkingInPublic(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-700 bg-zinc-950"
+              className="h-4 w-4 rounded border-zinc-700 bg-zinc-955"
             />
             Working in public
           </label>
-          <input
-            type="text"
-            value={currentFocus}
-            onChange={(e) => setCurrentFocus(e.target.value)}
-            placeholder="Current focus"
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none transition-colors"
-          />
-          <input
-            type="text"
-            value={openRoles}
-            onChange={(e) => setOpenRoles(e.target.value)}
-            placeholder="Open roles, comma separated"
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none transition-colors"
-          />
-          <input
-            type="text"
-            value={neededSkills}
-            onChange={(e) => setNeededSkills(e.target.value)}
-            placeholder="Needed skills, comma separated"
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none transition-colors"
-          />
-          <textarea
-            value={contributionGuide}
-            onChange={(e) => setContributionGuide(e.target.value)}
-            rows={4}
-            placeholder="How people should contribute"
-            className="w-full resize-none rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none transition-colors"
-          />
-          <input
-            type="text"
-            value={responseSla}
-            onChange={(e) => setResponseSla(e.target.value)}
-            placeholder="Expected response time"
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none transition-colors"
-          />
-          <div className="flex gap-2">
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as SpaceStatus)}
-              className="rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-xs text-white focus:border-zinc-600 focus:outline-none"
-            >
-              {["idea", "building", "shipping", "paused", "archived"].map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-            <select
-              value={visibility}
-              onChange={(e) => setVisibility(e.target.value as SpaceVisibility)}
-              className="rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-xs text-white focus:border-zinc-600 focus:outline-none"
-            >
-              <option value="public">Public</option>
-              <option value="private">Private</option>
-            </select>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Current Focus</label>
+            <input
+              type="text"
+              value={currentFocus}
+              onChange={(e) => setCurrentFocus(e.target.value)}
+              placeholder="e.g. shipping alpha"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-705 focus:outline-none transition-colors"
+            />
           </div>
-          <div className="flex justify-end gap-2">
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Open Roles</label>
+            <input
+              type="text"
+              value={openRoles}
+              onChange={(e) => setOpenRoles(e.target.value)}
+              placeholder="React Engineer, Designer (comma separated)"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-705 focus:outline-none transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Needed Skills</label>
+            <input
+              type="text"
+              value={neededSkills}
+              onChange={(e) => setNeededSkills(e.target.value)}
+              placeholder="Next.js, UI Design (comma separated)"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-955 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-705 focus:outline-none transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Contribution Guide</label>
+            <textarea
+              value={contributionGuide}
+              onChange={(e) => setContributionGuide(e.target.value)}
+              rows={3}
+              placeholder="How people should contribute..."
+              className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-955 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-705 focus:outline-none transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Response SLA</label>
+            <input
+              type="text"
+              value={responseSla}
+              onChange={(e) => setResponseSla(e.target.value)}
+              placeholder="e.g. within 2 days"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-white placeholder:text-zinc-655 focus:border-zinc-705 focus:outline-none transition-colors"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-zinc-800/60 mt-3.5">
             <button
               onClick={() => setEditing(false)}
-              className="rounded-lg px-3 py-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
+              className="rounded-lg px-2.5 py-1.5 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="rounded-lg bg-white px-4 py-1.5 text-xs font-semibold text-zinc-950 hover:bg-zinc-100 disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-white px-3.5 py-1.5 text-xs font-bold text-zinc-955 hover:bg-zinc-100 disabled:opacity-50 transition-colors cursor-pointer"
             >
               {saving ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </div>
       ) : (
-        <div className="space-y-2 text-sm text-zinc-400">
-          <p><span className="text-zinc-500">Name:</span> <span className="text-white">{space.name}</span></p>
-          <p><span className="text-zinc-500">Summary:</span> {space.summary}</p>
-          <p><span className="text-zinc-500">Status:</span> {space.status}</p>
-          <p><span className="text-zinc-500">Visibility:</span> {space.visibility}</p>
-          <p><span className="text-zinc-500">Working in public:</span> {space.working_in_public ? "Yes" : "No"}</p>
-          {space.current_focus ? <p><span className="text-zinc-500">Current focus:</span> {space.current_focus}</p> : null}
-          {(space.open_roles?.length ?? 0) > 0 ? <p><span className="text-zinc-500">Open roles:</span> {space.open_roles?.join(", ")}</p> : null}
-          {(space.needed_skills?.length ?? 0) > 0 ? <p><span className="text-zinc-500">Needed skills:</span> {space.needed_skills?.join(", ")}</p> : null}
-          {space.response_sla ? <p><span className="text-zinc-500">Response SLA:</span> {space.response_sla}</p> : null}
+        <div className="space-y-3.5 text-xs text-zinc-400">
+          <div className="grid grid-cols-2 gap-4 pb-2.5 border-b border-zinc-800/40">
+            <div>
+              <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Status</span>
+              <StatusBadge status={space.status} />
+            </div>
+            <div>
+              <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Visibility</span>
+              <VisibilityBadge visibility={space.visibility} />
+            </div>
+          </div>
+
+          <div className="pb-2.5 border-b border-zinc-800/40">
+            <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Project Details</span>
+            <p className="text-sm font-semibold text-white">{space.name}</p>
+            <p className="mt-0.5 text-zinc-450 text-xs leading-relaxed">{space.summary}</p>
+          </div>
+
+          {space.description && (
+            <div className="pb-2.5 border-b border-zinc-800/40">
+              <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Description</span>
+              <p className="text-zinc-350 leading-relaxed text-xs whitespace-pre-line">{space.description}</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4 pb-2.5 border-b border-zinc-800/40">
+            <div>
+              <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Working in public</span>
+              <span className={`inline-flex items-center gap-1.5 rounded-lg px-2 py-0.5 border text-[10px] font-bold ${
+                space.working_in_public 
+                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/10" 
+                  : "bg-zinc-850 text-zinc-500 border-zinc-800"
+              }`}>
+                {space.working_in_public ? "Yes" : "No"}
+              </span>
+            </div>
+            {space.response_sla && (
+              <div>
+                <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Response SLA</span>
+                <span className="text-white font-medium text-xs">{space.response_sla}</span>
+              </div>
+            )}
+          </div>
+
+          {space.current_focus && (
+            <div className="pb-2.5 border-b border-zinc-800/40">
+              <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Current Focus</span>
+              <p className="text-white font-semibold text-xs">{space.current_focus}</p>
+            </div>
+          )}
+
+          {(space.open_roles?.length ?? 0) > 0 && (
+            <div className="pb-2.5 border-b border-zinc-800/40">
+              <span className="block text-[9px] uppercase font-bold text-zinc-555 mb-0.5">Open Roles</span>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {space.open_roles?.map((role) => (
+                  <span key={role} className="rounded-lg bg-zinc-800 border border-zinc-750 px-2 py-0.5 text-[10px] font-medium text-zinc-300">
+                    {role}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {(space.needed_skills?.length ?? 0) > 0 && (
+            <div className="pb-2.5 border-b border-zinc-800/40">
+              <span className="block text-[9px] uppercase font-bold text-zinc-555 mb-0.5">Needed Skills</span>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {space.needed_skills?.map((skill) => (
+                  <span key={skill} className="rounded-lg bg-sky-500/10 border border-sky-500/10 px-2 py-0.5 text-[10px] font-medium text-sky-400">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {space.contribution_guide && (
+            <div>
+              <span className="block text-[9px] uppercase font-bold text-zinc-555 mb-0.5">Contribution Guide</span>
+              <p className="text-zinc-450 text-xs leading-relaxed whitespace-pre-line">
+                {space.contribution_guide}
+              </p>
+            </div>
+          )}
         </div>
       )}
-
-      <div className="mt-6 border-t border-zinc-800 pt-4">
-        <button
-          onClick={handleDelete}
-          disabled={deleting}
-          className="rounded-lg border border-rose-500/20 px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 disabled:opacity-50 transition-colors"
-        >
-          {deleting ? "Archiving..." : "Archive Space"}
-        </button>
-      </div>
-    </section>
+    </div>
   );
 }
 
@@ -333,105 +447,159 @@ function JoinRequestsSection({
   }
 
   return (
-    <section>
-      <SectionHeader title="Pending Join Requests" count={requests.length} />
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-4 border-b border-zinc-800/60 pb-3">
+        <div className="flex items-center gap-2.5">
+          <UsersIcon className="w-4 h-4 text-zinc-455" />
+          <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
+            Pending Join Requests
+          </h3>
+          {requests.length > 0 && (
+            <span className="rounded-full bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 text-xs font-bold text-sky-400">
+              {requests.length}
+            </span>
+          )}
+        </div>
+      </div>
 
       {loading && (
-        <div className="flex justify-center py-8">
+        <div className="flex justify-center py-10">
           <Spinner />
         </div>
       )}
 
       {!loading && requests.length === 0 && (
-        <EmptyState
-          icon={<UsersIcon className="w-10 h-10" />}
-          title="No pending requests"
-          description="Join requests from interested contributors will appear here."
-        />
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-xl bg-zinc-900/5">
+          <UsersIcon className="w-10 h-10 text-zinc-650 mb-3" />
+          <h4 className="text-sm font-semibold text-zinc-455 mb-1">No Pending Requests</h4>
+          <p className="text-xs text-zinc-550 max-w-[280px]">
+            Join requests from interested developers will show up here.
+          </p>
+        </div>
       )}
 
       {!loading && requests.length > 0 && (
-        <div className="divide-y divide-zinc-800/50">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {requests.map((request) => (
-            <div key={request.id} className="px-4 py-4">
-              <div className="flex items-start gap-3">
-                <Avatar user={request.applicant} size="md" />
-                <div className="min-w-0 flex-1">
-                  <div className="mb-1 flex items-center gap-2">
-                    <p className="text-sm font-semibold text-white">{request.applicant?.name ?? "Unknown"}</p>
-                    <span className="text-[11px] text-zinc-500">{formatRelativeTime(request.created_at)}</span>
-                  </div>
-
-                  <RichText text={request.message} className="mb-2 text-sm text-zinc-300" />
-
-                  {request.skills && request.skills.length > 0 && (
-                    <div className="mb-2 flex flex-wrap gap-1">
-                      {request.skills.map((skill) => (
-                        <span
-                          key={skill}
-                          className="rounded-md bg-sky-500/10 px-2 py-0.5 text-[11px] font-medium text-sky-400"
+            <div
+              key={request.id}
+              className="flex flex-col justify-between rounded-xl border border-zinc-800/80 bg-zinc-950/20 p-4 hover:border-zinc-700/80 transition-all duration-200"
+            >
+              <div>
+                {/* Header Row */}
+                <div className="flex items-center justify-between gap-3 mb-2.5 pb-2 border-b border-zinc-900/40">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    {request.applicant ? (
+                      <>
+                        <Link
+                          href={`/profile/${request.applicant.username || request.applicant.id}`}
+                          className="shrink-0 cursor-pointer hover:opacity-85 transition-opacity"
                         >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                          <Avatar user={request.applicant} size="sm" />
+                        </Link>
+                        <div className="min-w-0">
+                          <Link
+                            href={`/profile/${request.applicant.username || request.applicant.id}`}
+                            className="hover:underline hover:text-sky-450 transition-colors cursor-pointer block truncate text-xs font-bold text-white"
+                          >
+                            {request.applicant.name ?? "Unknown Developer"}
+                          </Link>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Avatar user={null} size="sm" className="shrink-0" />
+                        <div className="min-w-0">
+                          <span className="block truncate text-xs font-bold text-white">
+                            Unknown Developer
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <span className="text-[9px] text-zinc-500 shrink-0">
+                    {formatRelativeTime(request.created_at)}
+                  </span>
+                </div>
 
+                {/* Message Box */}
+                <div className="text-xs text-zinc-300 leading-relaxed line-clamp-3 mb-3 whitespace-pre-line">
+                  <RichText text={request.message} />
+                </div>
+
+                {/* Skills & Availability badges */}
+                <div className="flex flex-wrap gap-1 mb-2.5">
+                  {request.skills && request.skills.slice(0, 3).map((skill) => (
+                    <span
+                      key={skill}
+                      className="rounded bg-sky-500/5 border border-sky-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-sky-400"
+                    >
+                      {skill}
+                    </span>
+                  ))}
                   {request.availability_hours && (
-                    <p className="mb-2 text-[11px] text-zinc-500">
-                      Available {request.availability_hours} hrs/week
-                    </p>
+                    <span className="rounded bg-violet-500/5 border border-violet-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-violet-400">
+                      {request.availability_hours}h/wk
+                    </span>
                   )}
+                </div>
 
-                  {request.proof_links && request.proof_links.length > 0 && (
-                    <div className="mb-3 flex flex-wrap gap-1.5">
-                      {request.proof_links.map((link, index) => (
+                {/* Proof Links Row */}
+                {request.proof_links && request.proof_links.length > 0 && (
+                  <div className="mb-3.5 flex flex-wrap gap-1.5">
+                    {request.proof_links.slice(0, 2).map((link, index) => {
+                      const isGithub = link.includes("github.com");
+                      return (
                         <a
                           key={index}
                           href={link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[11px] text-sky-400 underline hover:text-sky-300"
+                          className="inline-flex items-center gap-1 rounded border border-zinc-850 bg-zinc-950/40 px-2 py-0.5 text-[9px] text-zinc-500 hover:text-white hover:border-zinc-700 transition-colors"
                         >
-                          {link}
+                          {isGithub ? <GitHubIcon className="w-2.5 h-2.5 text-zinc-500" /> : <LinkIcon className="w-2.5 h-2.5 text-zinc-500" />}
+                          <span className="truncate max-w-[100px]">{link.replace(/^https?:\/\/(www\.)?/, "")}</span>
                         </a>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleAction(request.id, "accept")}
-                      disabled={acting === request.id}
-                      className="flex items-center gap-1 rounded-lg bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50 transition-colors"
-                    >
-                      <CheckCircleIcon className="h-3.5 w-3.5" />
-                      Accept
-                    </button>
-                    <button
-                      onClick={() => handleAction(request.id, "need-info")}
-                      disabled={acting === request.id}
-                      className="flex items-center gap-1 rounded-lg bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-400 hover:bg-amber-500/20 disabled:opacity-50 transition-colors"
-                    >
-                      <ChatBubbleIcon className="h-3.5 w-3.5" />
-                      Need Info
-                    </button>
-                    <button
-                      onClick={() => handleAction(request.id, "reject")}
-                      disabled={acting === request.id}
-                      className="flex items-center gap-1 rounded-lg bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/20 disabled:opacity-50 transition-colors"
-                    >
-                      <XCircleIcon className="h-3.5 w-3.5" />
-                      Reject
-                    </button>
+                      );
+                    })}
                   </div>
-                </div>
+                )}
+              </div>
+
+              {/* Actions Row */}
+              <div className="flex items-center gap-1.5 border-t border-zinc-900/60 pt-2.5 mt-auto">
+                <button
+                  onClick={() => handleAction(request.id, "accept")}
+                  disabled={acting === request.id}
+                  className="flex-1 inline-flex items-center justify-center gap-1 rounded bg-emerald-500/10 border border-emerald-500/20 py-1 text-[10px] font-semibold text-emerald-400 hover:bg-emerald-500 hover:text-zinc-955 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  <CheckCircleIcon className="h-3 w-3" />
+                  Accept
+                </button>
+                
+                <button
+                  onClick={() => handleAction(request.id, "need-info")}
+                  disabled={acting === request.id}
+                  className="flex-1 inline-flex items-center justify-center gap-1 rounded bg-amber-500/10 border border-amber-500/20 py-1 text-[10px] font-semibold text-amber-400 hover:bg-amber-500 hover:text-zinc-955 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  <ChatBubbleIcon className="h-3 w-3" />
+                  Info
+                </button>
+
+                <button
+                  onClick={() => handleAction(request.id, "reject")}
+                  disabled={acting === request.id}
+                  className="inline-flex items-center justify-center gap-1 rounded bg-zinc-900 border border-zinc-800 px-2 py-1 text-[10px] font-semibold text-zinc-500 hover:bg-rose-500/10 hover:text-rose-455 hover:border-rose-500/20 transition-all disabled:opacity-50 cursor-pointer"
+                  title="Reject"
+                >
+                  <XCircleIcon className="h-3 w-3" />
+                </button>
               </div>
             </div>
           ))}
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
@@ -471,16 +639,18 @@ function StackManagementSection({
   }
 
   return (
-    <section>
-      <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
-        <h3 className="text-sm font-semibold text-white">Tech Stack</h3>
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-4 border-b border-zinc-800/60 pb-3">
+        <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
+          Tech Stack
+        </h3>
         {!editing && (
           <button
             onClick={() => {
               setItems(stack.map((entry) => ({ category: entry.category, technology: entry.technology, maturity: entry.maturity })));
               setEditing(true);
             }}
-            className="rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
+            className="rounded-lg bg-zinc-900 hover:bg-zinc-855 border border-zinc-855 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 transition-colors cursor-pointer"
           >
             Edit Stack
           </button>
@@ -488,79 +658,102 @@ function StackManagementSection({
       </div>
 
       {editing ? (
-        <div className="space-y-3 p-4">
-          {items.map((item, index) => (
-            <div
-              key={`${item.category}-${item.technology}-${index}`}
-              className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2"
-            >
-              <span className="text-xs text-zinc-400">
-                <span className="uppercase text-zinc-500">{item.category}</span> · {item.technology}{" "}
-                <span className="text-zinc-600">({item.maturity})</span>
-              </span>
-              <button
-                onClick={() => setItems((prev) => prev.filter((_, idx) => idx !== index))}
-                className="text-xs text-zinc-600 hover:text-rose-400 transition-colors"
+        <div className="space-y-3.5">
+          <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+            {items.map((item, index) => (
+              <div
+                key={`${item.category}-${item.technology}-${index}`}
+                className="flex items-center justify-between rounded-xl border border-zinc-855 bg-zinc-955 px-3 py-2"
               >
-                Remove
-              </button>
-            </div>
-          ))}
-
-          <div className="flex flex-wrap gap-2">
-            <select
-              value={newCat}
-              onChange={(e) => setNewCat(e.target.value as StackCategory)}
-              className="rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-white focus:border-zinc-600 focus:outline-none"
-            >
-              {(["frontend", "backend", "database", "infra", "tooling", "other"] as StackCategory[]).map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              value={newTech}
-              onChange={(e) => setNewTech(e.target.value)}
-              placeholder="Technology"
-              className="min-w-[100px] flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addItem();
-                }
-              }}
-            />
-            <select
-              value={newMat}
-              onChange={(e) => setNewMat(e.target.value as StackMaturity)}
-              className="rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs text-white focus:border-zinc-600 focus:outline-none"
-            >
-              <option value="in-use">In Use</option>
-              <option value="planned">Planned</option>
-              <option value="deprecated">Deprecated</option>
-            </select>
-            <button
-              type="button"
-              onClick={addItem}
-              className="rounded-lg bg-zinc-800 px-2 py-1.5 text-xs text-white hover:bg-zinc-700 transition-colors"
-            >
-              Add
-            </button>
+                <div className="min-w-0">
+                  <span className="block text-[9px] uppercase font-bold text-zinc-500">
+                    {item.category}
+                  </span>
+                  <span className="text-xs font-semibold text-white truncate block mt-0.5">
+                    {item.technology} <span className="text-[10px] text-zinc-500 font-medium font-mono capitalize">({item.maturity})</span>
+                  </span>
+                </div>
+                <button
+                  onClick={() => setItems((prev) => prev.filter((_, idx) => idx !== index))}
+                  className="rounded p-1 text-zinc-500 hover:bg-zinc-900 hover:text-rose-455 transition-colors cursor-pointer"
+                >
+                  <TrashIcon className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+            {items.length === 0 && (
+              <p className="text-xs text-zinc-550 py-4 text-center">No technologies added yet.</p>
+            )}
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="rounded-xl border border-zinc-850 bg-zinc-955/60 p-3 space-y-2.5">
+            <span className="block text-[9px] uppercase font-bold text-zinc-450">Add Technology</span>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[9px] text-zinc-500 uppercase font-semibold mb-1">Category</label>
+                <select
+                  value={newCat}
+                  onChange={(e) => setNewCat(e.target.value as StackCategory)}
+                  className="w-full rounded-lg border border-zinc-855 bg-zinc-955 px-2 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
+                >
+                  {(["frontend", "backend", "database", "infra", "tooling", "other"] as StackCategory[]).map((category) => (
+                    <option key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-[9px] text-zinc-500 uppercase font-semibold mb-1">Maturity</label>
+                <select
+                  value={newMat}
+                  onChange={(e) => setNewMat(e.target.value as StackMaturity)}
+                  className="w-full rounded-lg border border-zinc-855 bg-zinc-955 px-2 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
+                >
+                  <option value="in-use">In Use</option>
+                  <option value="planned">Planned</option>
+                  <option value="deprecated">Deprecated</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newTech}
+                onChange={(e) => setNewTech(e.target.value)}
+                placeholder="Technology (e.g. Next.js)"
+                className="flex-1 rounded-lg border border-zinc-850 bg-zinc-955 px-2.5 py-1.5 text-xs text-white placeholder:text-zinc-650 focus:outline-none focus:border-zinc-705"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addItem();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={addItem}
+                className="rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-1.5 text-xs font-bold text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-zinc-800/60 mt-3.5">
             <button
               onClick={() => setEditing(false)}
-              className="rounded-lg px-3 py-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
+              className="rounded-lg px-2.5 py-1.5 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="rounded-lg bg-white px-4 py-1.5 text-xs font-semibold text-zinc-950 hover:bg-zinc-100 disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-white px-3.5 py-1.5 text-xs font-bold text-zinc-955 hover:bg-zinc-100 disabled:opacity-50 transition-colors cursor-pointer"
             >
               {saving ? "Saving..." : "Save Stack"}
             </button>
@@ -569,7 +762,7 @@ function StackManagementSection({
       ) : (
         <TechStackPanel stack={stack} />
       )}
-    </section>
+    </div>
   );
 }
 
@@ -591,21 +784,37 @@ function RepoDocsSection({
   if (resources.length === 0) return null;
 
   return (
-    <section className="p-4">
-      <SectionHeader title="Contribution Resources" count={resources.length} />
-      <div className="grid gap-3 px-4 py-4 sm:grid-cols-2">
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-4 border-b border-zinc-800/60 pb-3">
+        <div className="flex items-center gap-2">
+          <DocumentTextIcon className="w-4 h-4 text-zinc-450" />
+          <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
+            Contribution Resources
+          </h3>
+          <span className="rounded-full bg-zinc-800 border border-zinc-700/60 px-2 py-0.5 text-xs font-bold text-zinc-450">
+            {resources.length}
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {resources.map((resource) => (
           <Link
             key={resource.key}
             href={`/repos/${resource.repoId}?path=${encodeURIComponent(resource.path)}&view=blob`}
-            className="rounded-2xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 transition-colors hover:bg-zinc-900"
+            className="flex items-center gap-3 rounded-xl border border-zinc-800/80 bg-zinc-955/20 px-4 py-3 hover:border-zinc-700 hover:bg-zinc-900/10 transition-all duration-200"
           >
-            <p className="text-sm font-semibold text-white">{resource.label}</p>
-            <p className="mt-1 text-xs text-zinc-500">{resource.repoName}</p>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800 text-sky-400">
+              <DocumentTextIcon className="w-4 h-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-bold text-white">{resource.label}</p>
+              <p className="truncate text-[10px] text-zinc-550 font-medium">{resource.repoName}</p>
+            </div>
           </Link>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -617,45 +826,132 @@ function RepoManagementSection({
   repos: ReturnType<typeof useRepos>["repos"];
 }) {
   return (
-    <section>
-      <SectionHeader
-        title="Repositories"
-        count={repos.length}
-        action={
-          <Link
-            href={`/spaces/${spaceId}/repos`}
-            className="text-xs text-sky-400 hover:text-sky-300 transition-colors"
-          >
-            Open repos →
-          </Link>
-        }
-      />
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-4 border-b border-zinc-800/60 pb-3">
+        <div className="flex items-center gap-2">
+          <CodeBracketIcon className="w-4 h-4 text-zinc-455" />
+          <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
+            Repositories
+          </h3>
+          {repos.length > 0 && (
+            <span className="rounded-full bg-zinc-800 border border-zinc-700/60 px-2 py-0.5 text-xs font-bold text-zinc-450">
+              {repos.length}
+            </span>
+          )}
+        </div>
+        
+        <Link
+          href={`/spaces/${spaceId}/repos`}
+          className="text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors"
+        >
+          Manage Repositories →
+        </Link>
+      </div>
 
       {repos.length === 0 ? (
-        <EmptyState
-          icon={<CogIcon className="w-10 h-10" />}
-          title="No repositories yet"
-          description="Create and manage private code repos from the space repos page."
-        />
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-xl bg-zinc-900/5">
+          <CodeBracketIcon className="w-10 h-10 text-zinc-650 mb-3" />
+          <h4 className="text-sm font-semibold text-zinc-400 mb-1">No Repositories</h4>
+          <p className="text-xs text-zinc-550 max-w-[280px]">
+            Connect private repositories to manage your code directly from the Space.
+          </p>
+        </div>
       ) : (
-        <div className="divide-y divide-zinc-800/50">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {repos.map((repo) => (
-            <Link
+            <div
               key={repo.id}
-              href={`/spaces/${spaceId}/repos/${repo.id}/settings`}
-              className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-zinc-900/30 transition-colors"
+              className="group relative rounded-xl border border-zinc-805 bg-zinc-950/20 p-4 hover:border-zinc-700 hover:bg-zinc-900/10 transition-all duration-200"
             >
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">{repo.name}</p>
-                <p className="truncate text-xs text-zinc-500">
-                  {repo.description || "No description"} · {repo.default_branch}
-                </p>
+              <div className="flex items-start justify-between gap-3 mb-1.5">
+                <div className="min-w-0 flex-1">
+                  <Link
+                    href={`/repos/${repo.id}`}
+                    className="hover:underline hover:text-sky-400 transition-colors cursor-pointer block truncate text-sm font-bold text-white"
+                  >
+                    {repo.name}
+                  </Link>
+                </div>
+                
+                <Link
+                  href={`/spaces/${spaceId}/repos/${repo.id}/settings`}
+                  className="rounded-lg p-1.5 text-zinc-550 hover:bg-zinc-800 hover:text-white transition-colors shrink-0"
+                  title="Repo Settings"
+                >
+                  <CogIcon className="w-3.5 h-3.5" />
+                </Link>
               </div>
-              <span className="text-xs text-zinc-400">Settings</span>
-            </Link>
+
+              <p className="line-clamp-2 text-xs text-zinc-455 h-8 mb-3">
+                {repo.description || "No description provided."}
+              </p>
+
+              <div className="flex items-center justify-between border-t border-zinc-900/80 pt-2.5">
+                <span className="inline-flex items-center gap-1 rounded-md bg-zinc-900 border border-zinc-850 px-2 py-0.5 text-[10px] font-semibold text-zinc-450">
+                  <svg className="w-3 h-3 text-zinc-555" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="18" cy="18" r="3" />
+                    <circle cx="6" cy="6" r="3" />
+                    <circle cx="6" cy="18" r="3" />
+                    <path d="M6 9v6" />
+                    <path d="M9 15h6v3" />
+                  </svg>
+                  {repo.default_branch}
+                </span>
+
+                <Link
+                  href={`/repos/${repo.id}`}
+                  className="text-[11px] font-semibold text-zinc-550 hover:text-white hover:underline transition-colors cursor-pointer"
+                >
+                  Explore Files →
+                </Link>
+              </div>
+            </div>
           ))}
         </div>
       )}
-    </section>
+    </div>
+  );
+}
+
+function DangerZoneSection({
+  space,
+  onDelete,
+}: {
+  space: ReturnType<typeof useSpace>["space"];
+  onDelete: () => void;
+}) {
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete() {
+    if (!space) return;
+    if (!confirm("Archive this space? It can be restored later.")) return;
+    setDeleting(true);
+    try {
+      await api.deleteSpace(space.id);
+      onDelete();
+    } catch {
+      setDeleting(false);
+    }
+  }
+
+  if (!space) return null;
+
+  return (
+    <div className="rounded-2xl border border-rose-500/10 bg-rose-500/[0.01] p-5 backdrop-blur-sm">
+      <h3 className="text-sm font-semibold text-rose-450 uppercase tracking-wide mb-2">
+        Danger Zone
+      </h3>
+      <p className="text-xs text-zinc-500 mb-3.5 leading-relaxed">
+        Archiving this space will hide it from the search index and your active active spaces list. Contributors will no longer be able to submit join requests. You can restore it later if needed.
+      </p>
+      
+      <button
+        onClick={handleDelete}
+        disabled={deleting}
+        className="w-full rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-2 text-xs font-bold text-rose-400 hover:bg-rose-500/20 hover:text-rose-350 disabled:opacity-50 transition-colors text-center cursor-pointer"
+      >
+        {deleting ? "Archiving Space..." : "Archive Space"}
+      </button>
+    </div>
   );
 }

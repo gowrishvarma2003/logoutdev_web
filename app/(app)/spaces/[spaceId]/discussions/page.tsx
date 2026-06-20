@@ -25,14 +25,15 @@ export default function DiscussionsPage({
   params: Promise<{ spaceId: string }>;
 }) {
   const { spaceId } = use(params);
-  const { user } = useAuth();
-  const { space } = useSpace(spaceId);
+  const { user, isLoaded: authLoaded } = useAuth();
+  const { space, loading: spaceLoading } = useSpace(spaceId);
   const viewerPermissions = space?.viewer_permissions;
   const allowedCategories = useMemo(
     () => viewerPermissions?.allowed_discussion_categories ?? [],
     [viewerPermissions?.allowed_discussion_categories]
   );
-  const canCreateDiscussion = Boolean(viewerPermissions?.can_create_discussion);
+  const permissionsLoaded = Boolean(viewerPermissions) && !spaceLoading;
+  const canCreateDiscussion = viewerPermissions?.can_create_discussion === true;
 
   const [page, setPage] = useState(1);
   const { discussions, total, loading, error, refetch } = useDiscussions(spaceId, page);
@@ -95,7 +96,7 @@ export default function DiscussionsPage({
         </div>
       </div>
 
-      {!user ? (
+      {authLoaded && !user ? (
         <div className="px-5 py-4 border-b border-zinc-800 bg-zinc-950/40">
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 px-4 py-3 text-sm text-zinc-300">
             <div className="flex items-center justify-between gap-3">
@@ -111,7 +112,15 @@ export default function DiscussionsPage({
         </div>
       ) : null}
 
-      {user && !canCreateDiscussion ? (
+      {authLoaded && user && !permissionsLoaded ? (
+        <div className="px-5 py-4 border-b border-zinc-800 bg-zinc-950/40">
+          <div className="flex items-center justify-center py-4">
+            <Spinner />
+          </div>
+        </div>
+      ) : null}
+
+      {authLoaded && user && permissionsLoaded && !canCreateDiscussion ? (
         <div className="px-5 py-4 border-b border-zinc-800 bg-zinc-950/40">
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 px-4 py-3 text-sm text-zinc-300">
             <div className="flex items-start gap-3">
@@ -125,7 +134,7 @@ export default function DiscussionsPage({
         </div>
       ) : null}
 
-      {user && canCreateDiscussion && (
+      {authLoaded && user && permissionsLoaded && canCreateDiscussion && (
         <form onSubmit={handlePost} className="px-5 py-4 border-b border-zinc-800 bg-zinc-950/40">
           <div className="flex items-start gap-3">
             <Avatar user={user} size="sm" className="mt-1" />

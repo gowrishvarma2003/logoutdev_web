@@ -16,6 +16,9 @@ export default function SettingsTokensPage() {
   const [writeScope, setWriteScope] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [tokenToRevoke, setTokenToRevoke] = useState<{ id: string; name: string } | null>(null);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -49,13 +52,29 @@ export default function SettingsTokensPage() {
     }
   }
 
-  async function handleRevoke(tokenId: string) {
-    if (!window.confirm("Revoke this token? Any scripts or Git clients using it will stop working.")) return;
+  function confirmRevoke(tokenId: string, tokenName: string) {
+    setTokenToRevoke({ id: tokenId, name: tokenName });
+    setFormError("");
+  }
+
+  function cancelRevoke() {
+    if (revokingId) return;
+    setTokenToRevoke(null);
+  }
+
+  async function handleRevoke() {
+    if (!tokenToRevoke) return;
+    setRevokingId(tokenToRevoke.id);
+    setFormError("");
     try {
-      await api.revokeAccessToken(tokenId);
-      refetch();
+      await api.revokeAccessToken(tokenToRevoke.id);
+      await refetch();
+      setSuccessMessage("Token has been revoked successfully.");
+      setTokenToRevoke(null);
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : "Failed to revoke token.");
+    } finally {
+      setRevokingId(null);
     }
   }
 
@@ -136,6 +155,19 @@ export default function SettingsTokensPage() {
         <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
           <h2 className="text-sm font-semibold text-white">Existing tokens</h2>
 
+          {successMessage && (
+            <div className="mt-3 flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3">
+              <p className="text-sm text-emerald-400">{successMessage}</p>
+              <button
+                type="button"
+                onClick={() => setSuccessMessage(null)}
+                className="ml-auto shrink-0 text-xs text-emerald-400 hover:text-emerald-300"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
           {loading ? (
             <div className="flex justify-center py-10">
               <Spinner />
@@ -146,24 +178,77 @@ export default function SettingsTokensPage() {
             <p className="mt-3 text-sm text-zinc-500">No tokens created yet.</p>
           ) : (
             <div className="mt-4 divide-y divide-zinc-800/60">
-              {tokens.map((token) => (
-                <div key={token.id} className="flex items-center gap-3 py-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-white">{token.name}</p>
-                    <p className="text-xs text-zinc-500">
-                      Prefix: {token.token_prefix}
-                      {token.last_used_at ? ` · Last used ${new Date(token.last_used_at).toLocaleString()}` : " · Never used"}
-                    </p>
-                    <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-zinc-500">{token.scopes.join(" · ")}</p>
+              {tokens.map((token) => {
+                const isRevoked = Boolean(token.revoked_at);
+
+                return (
+                  <div key={token.id} className="flex items-center gap-3 py-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className={`truncate text-sm font-medium ${isRevoked ? "text-zinc-500" : "text-white"}`}>{token.name}</p>
+                        {isRevoked && (
+                          <span className="rounded-full border border-zinc-700 bg-zinc-800/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+                            Token revoked
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-zinc-500">
+                        {isRevoked ? "Token revoked" : `Prefix: ${token.token_prefix}`}
+                        {token.last_used_at ? ` · Last used ${new Date(token.last_used_at).toLocaleString()}` : " · Never used"}
+                        {isRevoked && token.revoked_at ? ` · Revoked ${new Date(token.revoked_at).toLocaleString()}` : ""}
+                      </p>
+                      <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-zinc-500">{token.scopes.join(" · ")}</p>
+                    </div>
+                    {isRevoked ? (
+                      <span className="rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-500">Revoked</span>
+                    ) : (
+                      <button
+                        onClick={() => confirmRevoke(token.id, token.name)}
+                        disabled={revokingId === token.id}
+                        className="rounded-lg px-3 py-1.5 text-xs font-medium text-rose-400 hover:bg-rose-500/10 transition-colors disabled:opacity-50"
+                      >
+                        {revokingId === token.id ? "Revoking..." : "Revoke"}
+                      </button>
+                    )}
                   </div>
+                );
+              })}
+            </div>
+          )}
+
+          {tokenToRevoke && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+              <div className="mx-4 w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
+                <p className="text-sm font-semibold text-white">Revoke access token?</p>
+                <p className="mt-2 text-sm text-zinc-400">
+                  Any scripts or Git clients using <span className="font-medium text-white">{tokenToRevoke.name}</span> will stop working immediately.
+                </p>
+                <div className="mt-5 flex items-center justify-end gap-3">
                   <button
-                    onClick={() => handleRevoke(token.id)}
-                    className="rounded-lg px-3 py-1.5 text-xs font-medium text-rose-400 hover:bg-rose-500/10 transition-colors"
+                    type="button"
+                    onClick={cancelRevoke}
+                    disabled={Boolean(revokingId)}
+                    className="rounded-xl px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Revoke
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRevoke}
+                    disabled={Boolean(revokingId)}
+                    className="inline-flex min-w-32 items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 transition-colors disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {revokingId ? (
+                      <>
+                        <Spinner size="sm" />
+                        Revoking...
+                      </>
+                    ) : (
+                      "Revoke token"
+                    )}
                   </button>
                 </div>
-              ))}
+              </div>
             </div>
           )}
         </section>

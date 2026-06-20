@@ -24,6 +24,7 @@ export default function AppShell({ children }: AppShellProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { summary } = useNotificationSummary(Boolean(user));
+  const hideRightPanel = false;
   const isPublicSpaceRoute =
     pathname === "/spaces"
     || (
@@ -123,7 +124,7 @@ export default function AppShell({ children }: AppShellProps) {
   return (
     <div className="min-h-screen bg-zinc-950">
       {/* ── Centered 3-column wrapper with wider content area and reduced outer gutters ── */}
-      <div className="mx-auto flex min-h-screen w-full max-w-[1320px]">
+      <div className="flex min-h-screen w-full">
         {/* ── Left sidebar (sticky, desktop only) ── */}
         <aside className="hidden lg:flex flex-col w-[240px] shrink-0 border-r border-zinc-800 bg-zinc-950 sticky top-0 h-screen overflow-y-auto">
           <Sidebar user={user} onLogout={logout} unreadCount={summary.unread_count} />
@@ -136,10 +137,11 @@ export default function AppShell({ children }: AppShellProps) {
           </div>
         </main>
 
-        {/* ── Right info panel (sticky, xl+ only) ── */}
-        <aside className="hidden xl:flex flex-col w-[280px] shrink-0 border-l border-zinc-800 bg-zinc-950 sticky top-0 h-screen overflow-y-auto">
-          <RightPanel currentUser={user} />
-        </aside>
+        {!hideRightPanel ? (
+          <aside className="hidden xl:flex flex-col w-[280px] shrink-0 border-l border-zinc-800 bg-zinc-950 sticky top-0 h-screen overflow-y-auto">
+            <RightPanel currentUser={user} />
+          </aside>
+        ) : null}
       </div>
 
       {/* ── Mobile bottom navigation bar ── */}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { User } from "@/lib/types";
@@ -62,6 +63,30 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  
+  const placeholders = ["builders...", "launches...", "spaces...", "questions...", "repos..."];
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [isFading, setIsFading] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+
+  const q = searchParams.get("q") || "";
+  useEffect(() => {
+    setSearchValue(q);
+  }, [q]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsFading(true);
+      setTimeout(() => {
+        setPlaceholderIndex((prev) => (prev + 1) % placeholders.length);
+        setIsFading(false);
+      }, 300);
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, []);
 
   function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -83,7 +108,8 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
   }
 
   return (
-    <nav className="flex flex-col h-full px-4 py-6">
+    <>
+      <nav className="flex flex-col h-full px-4 py-6">
       {/* Logo */}
       <Link href="/feed" className="flex items-center gap-2.5 px-3 mb-8">
         <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0">
@@ -104,9 +130,23 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
             name="q"
             aria-label="Search"
             defaultValue={searchParams.get("q") || ""}
-            placeholder="Search builders, launches, spaces..."
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 pl-9 pr-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-zinc-700"
+            onChange={(e) => setSearchValue(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 pl-9 pr-3 text-sm text-white outline-none transition-colors focus:border-zinc-700"
           />
+          {!searchValue && !isFocused && (
+            <div className="absolute left-9 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-zinc-500 flex items-center gap-1">
+              <span>Search</span>
+              <span
+                className={`inline-block transition-all duration-300 ${
+                  isFading ? "opacity-0 -translate-y-1" : "opacity-100 translate-y-0"
+                }`}
+              >
+                {placeholders[placeholderIndex]}
+              </span>
+            </div>
+          )}
         </div>
       </form>
 
@@ -172,12 +212,6 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
       <div className="my-1 mx-3 border-t border-zinc-800/60" />
       <div className="flex flex-col gap-1">
         <NavItem
-          href={`/profile/${user.username || user.id}`}
-          icon={<UserIcon />}
-          label="Profile"
-          active={pathname.startsWith("/profile/")}
-        />
-        <NavItem
           href="/settings/profile"
           icon={<CogIcon />}
           label="Settings"
@@ -199,18 +233,23 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
 
       {/* User footer */}
       <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-zinc-800/60 transition-colors group">
-        <Avatar user={user} size="sm" />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white truncate">
-            {user.name}
-          </p>
-          <p className="text-xs text-zinc-500 truncate">
-            @{emailToHandle(user.email)}
-          </p>
-        </div>
+        <Link
+          href={`/profile/${user.username || user.id}`}
+          className="flex flex-1 items-center gap-2.5 min-w-0"
+        >
+          <Avatar user={user} size="sm" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white truncate">
+              {user.name}
+            </p>
+            <p className="text-xs text-zinc-500 truncate">
+              @{emailToHandle(user.email)}
+            </p>
+          </div>
+        </Link>
         <button
-          onClick={onLogout}
-          className="text-zinc-500 hover:text-rose-400 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+          onClick={() => setShowLogoutConfirm(true)}
+          className="p-1.5 rounded-full hover:bg-rose-600/35 text-zinc-500 hover:text-rose-400 cursor-pointer transition-colors opacity-0 group-hover:opacity-100 shrink-0"
           title="Sign out"
           aria-label="Sign out"
         >
@@ -218,5 +257,46 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
         </button>
       </div>
     </nav>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setShowLogoutConfirm(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10 text-rose-500 mb-4">
+              <LogOutIcon className="h-6 w-6" />
+            </div>
+            <h3 className="text-lg font-bold text-white text-center mb-2">Sign Out</h3>
+            <p className="text-sm text-zinc-400 text-center mb-6">
+              Are you sure you want to sign out of your account?
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 rounded-xl bg-zinc-800 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLogoutConfirm(false);
+                  onLogout();
+                }}
+                className="flex-1 rounded-xl bg-rose-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-500"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
