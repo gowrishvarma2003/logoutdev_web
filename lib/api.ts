@@ -11,6 +11,7 @@ import type {
   User,
   UserSuggestion,
   PlatformEntity,
+  FollowListUser,
 } from "./types";
 import { API_BASE_URL } from "./apiBaseUrl";
 
@@ -269,21 +270,29 @@ export async function unfollowUser(
 }
 
 export async function getFollowers(
-  userId: string
-): Promise<{ followers: User[] }> {
-  const res = await fetch(`${API_BASE_URL}/api/users/${userId}/followers`, {
-    headers: { ...getAuthHeaders() },
-  });
-  return handleResponse<{ followers: User[] }>(res);
+  userId: string,
+  page = 1,
+  limit = 24
+): Promise<{ followers: FollowListUser[]; total: number; page: number; limit: number }> {
+  const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
+  const res = await fetch(
+    `${API_BASE_URL}/api/users/${userId}/followers?${qs}`,
+    { headers: { ...getAuthHeaders() } }
+  );
+  return handleResponse(res);
 }
 
 export async function getFollowing(
-  userId: string
-): Promise<{ following: User[] }> {
-  const res = await fetch(`${API_BASE_URL}/api/users/${userId}/following`, {
-    headers: { ...getAuthHeaders() },
-  });
-  return handleResponse<{ following: User[] }>(res);
+  userId: string,
+  page = 1,
+  limit = 24
+): Promise<{ following: FollowListUser[]; total: number; page: number; limit: number }> {
+  const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
+  const res = await fetch(
+    `${API_BASE_URL}/api/users/${userId}/following?${qs}`,
+    { headers: { ...getAuthHeaders() } }
+  );
+  return handleResponse(res);
 }
 
 export async function suggestUsers(

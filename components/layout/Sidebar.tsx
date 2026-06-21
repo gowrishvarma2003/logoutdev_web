@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { User } from "@/lib/types";
@@ -16,7 +17,6 @@ import {
   PencilSquareIcon,
   RocketIcon,
   CodeBracketIcon,
-  CogIcon,
   BoltIcon,
   SparklesIcon,
 } from "@/components/ui/Icons";
@@ -208,17 +208,6 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
         />
       </div>
 
-      {/* You section */}
-      <div className="my-1 mx-3 border-t border-zinc-800/60" />
-      <div className="flex flex-col gap-1">
-        <NavItem
-          href="/settings/profile"
-          icon={<CogIcon />}
-          label="Settings"
-          active={pathname.startsWith("/settings")}
-        />
-      </div>
-
       {/* Compose CTA */}
       <Link
         href="/feed"
@@ -258,14 +247,14 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
       </div>
     </nav>
 
-      {/* Logout Confirmation Modal */}
-      {showLogoutConfirm && (
+      {/* Logout Confirmation Modal — portaled to body so it's never clipped by sidebar overflow */}
+      {showLogoutConfirm && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
           onClick={() => setShowLogoutConfirm(false)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl animate-in zoom-in-95 duration-200"
+            className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10 text-rose-500 mb-4">
@@ -295,7 +284,8 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

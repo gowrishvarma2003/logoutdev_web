@@ -1,15 +1,13 @@
 "use client";
 
-/**
- * ProfileHeader — top section of any developer profile.
- * Shows avatar, name, @username, headline, bio, location, and external links.
- * Conditionally shows an "Edit Profile" button for the owner.
- */
-
 import Link from "next/link";
-import type { User } from "@/lib/types";
-import Avatar from "@/components/ui/Avatar";
+import type { User, ProofOfWorkBand } from "@/lib/types";
+import RichText from "@/components/ui/RichText";
 import FollowButton from "@/components/profile/FollowButton";
+import ProfileBanner from "@/components/profile/ProfileBanner";
+import ProfileAvatarOverlay from "@/components/profile/ProfileAvatarOverlay";
+import ProfileBandChip from "@/components/profile/ProfileBandChip";
+import ShareMenu from "@/components/profile/ShareMenu";
 import {
   MapPinIcon,
   GitHubIcon,
@@ -17,6 +15,7 @@ import {
   GlobeIcon,
   EditIcon,
   CalendarIcon,
+  BriefcaseIcon,
 } from "@/components/ui/Icons";
 
 interface ProfileHeaderProps {
@@ -24,7 +23,13 @@ interface ProfileHeaderProps {
   is_me: boolean;
   is_following?: boolean;
   followerCount?: number;
+  band?: ProofOfWorkBand | null;
+  score?: number | null;
+  openToCollaborate?: boolean;
   onFollowChange?: (next: { following: boolean; followerCount: number }) => void;
+  onAvatarUpload?: (file: File) => Promise<unknown>;
+  onBannerUpload?: (file: File) => Promise<unknown>;
+  onBannerRemove?: () => Promise<unknown>;
 }
 
 function ExternalLink({
@@ -53,110 +58,166 @@ function ExternalLink({
   );
 }
 
-export default function ProfileHeader({ profile, is_me, is_following = false, followerCount = 0, onFollowChange }: ProfileHeaderProps) {
+export default function ProfileHeader({
+  profile,
+  is_me,
+  is_following = false,
+  followerCount = 0,
+  band = null,
+  score = null,
+  openToCollaborate = false,
+  onFollowChange,
+  onAvatarUpload,
+  onBannerUpload,
+  onBannerRemove,
+}: ProfileHeaderProps) {
   const joinDate = profile.created_at;
-
-  // Format join date as "Joined Month YYYY"
   const formattedJoin = joinDate
     ? new Date(joinDate).toLocaleDateString("en-US", { month: "long", year: "numeric" })
     : null;
 
-  // Derive readable labels for links
   const websiteLabel = profile.website_url
-    ? new URL(profile.website_url).hostname.replace("www.", "")
+    ? safeHostname(profile.website_url)
     : null;
   const githubLabel = profile.github_url
-    ? profile.github_url.replace("https://github.com/", "@")
+    ? profile.github_url.replace(/https?:\/\/(www\.)?github\.com\//, "@")
     : null;
   const linkedinLabel = profile.linkedin_url ? "LinkedIn" : null;
 
+  const openToWork = Boolean(profile.open_to_work);
+  const shareHref = typeof profile.username === "string" && profile.username
+    ? `/profile/${profile.username}`
+    : `/profile/${profile.id}`;
+
   return (
-    <div className="px-5 pt-6 pb-5">
-      {/* ── Avatar row ── */}
-      <div className="flex items-start justify-between mb-4">
-        <Avatar user={profile} size="lg" className="ring-2 ring-zinc-800" />
+    <div className="border-b border-zinc-800">
+      <ProfileBanner
+        bannerUrl={profile.banner_url}
+        isMe={is_me}
+        onUpload={is_me ? onAvatarUpload ? undefined : onBannerUpload : undefined}
+        onRemove={is_me ? onBannerRemove : undefined}
+      />
 
-        {is_me ? (
-          <Link
-            href="/settings/profile"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-700 text-sm font-medium text-zinc-300 hover:border-zinc-500 hover:text-white transition-colors"
-          >
-            <EditIcon className="w-3.5 h-3.5" />
-            Edit profile
-          </Link>
-        ) : (
-          <FollowButton
-            userId={profile.id}
-            initialFollowing={is_following}
-            initialFollowerCount={followerCount}
+      <div className="px-5 pt-1 pb-5">
+        {/* ── Avatar + actions row ── */}
+        <div className="flex items-end justify-between gap-3">
+          <ProfileAvatarOverlay
+            user={profile}
             isMe={is_me}
-            onChange={onFollowChange}
+            onUpload={is_me ? onAvatarUpload : undefined}
           />
-        )}
-      </div>
 
-      {/* ── Name + handle ── */}
-      <h1 className="text-xl font-bold text-white leading-tight">{profile.name}</h1>
-      {profile.username && (
-        <p className="text-sm text-zinc-500 mt-0.5">@{profile.username}</p>
-      )}
-
-      {/* ── Headline ── */}
-      {profile.headline && (
-        <p className="mt-2 text-sm text-zinc-300 font-medium leading-snug">
-          {profile.headline}
-        </p>
-      )}
-
-      {/* ── Bio ── */}
-      {profile.bio && (
-        <p className="mt-3 text-sm text-zinc-400 leading-relaxed whitespace-pre-line">
-          {profile.bio}
-        </p>
-      )}
-
-      {/* ── Meta row: location + join date ── */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3">
-        {profile.location && (
-          <span className="flex items-center gap-1 text-sm text-zinc-500">
-            <MapPinIcon className="w-3.5 h-3.5 shrink-0" />
-            {profile.location}
-          </span>
-        )}
-        {formattedJoin && (
-          <span className="flex items-center gap-1 text-sm text-zinc-500">
-            <CalendarIcon className="w-3.5 h-3.5 shrink-0" />
-            Joined {formattedJoin}
-          </span>
-        )}
-      </div>
-
-      {/* ── External links ── */}
-      {(profile.website_url || profile.github_url || profile.linkedin_url) && (
-        <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3">
-          {profile.website_url && websiteLabel && (
-            <ExternalLink
-              href={profile.website_url}
-              icon={<GlobeIcon />}
-              label={websiteLabel}
-            />
-          )}
-          {profile.github_url && githubLabel && (
-            <ExternalLink
-              href={profile.github_url}
-              icon={<GitHubIcon />}
-              label={githubLabel}
-            />
-          )}
-          {profile.linkedin_url && linkedinLabel && (
-            <ExternalLink
-              href={profile.linkedin_url}
-              icon={<LinkedInIcon />}
-              label={linkedinLabel}
-            />
-          )}
+          <div className="flex items-center gap-2 pb-1">
+            <ShareMenu url={shareHref} title={`${profile.name} — LogoutDev`} />
+            {is_me ? (
+              <Link
+                href="/settings/profile"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-zinc-950 text-sm font-semibold hover:bg-zinc-100 transition-colors"
+              >
+                <EditIcon className="w-3.5 h-3.5" />
+                Edit profile
+              </Link>
+            ) : (
+              <FollowButton
+                userId={profile.id}
+                initialFollowing={is_following}
+                initialFollowerCount={followerCount}
+                isMe={is_me}
+                onChange={onFollowChange}
+              />
+            )}
+          </div>
         </div>
-      )}
+
+        {/* ── Name + handle + band ── */}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">
+            {profile.name}
+          </h1>
+          {band ? <ProfileBandChip band={band} score={score ?? undefined} /> : null}
+        </div>
+        {profile.username ? (
+          <p className="text-sm text-zinc-500 mt-0.5">@{profile.username}</p>
+        ) : null}
+
+        {/* ── Pronouns ── */}
+        {profile.pronouns ? (
+          <p className="text-xs text-zinc-500 mt-1">{profile.pronouns}</p>
+        ) : null}
+
+        {/* ── Headline ── */}
+        {profile.headline ? (
+          <p className="mt-2 text-sm text-zinc-300 font-medium leading-snug">
+            {profile.headline}
+          </p>
+        ) : null}
+
+        {/* ── Status chips ── */}
+        {(openToWork || openToCollaborate) ? (
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            {openToWork ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-300">
+                <BriefcaseIcon className="w-3 h-3" />
+                Open to work
+              </span>
+            ) : null}
+            {openToCollaborate ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-xs font-medium text-sky-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+                Open to collaborate
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+
+        {/* ── Bio (rich) ── */}
+        {profile.bio ? (
+          <RichText
+            text={profile.bio}
+            as="p"
+            className="mt-3 text-sm text-zinc-400 leading-relaxed whitespace-pre-line"
+          />
+        ) : null}
+
+        {/* ── Meta row ── */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3">
+          {profile.location ? (
+            <span className="flex items-center gap-1 text-sm text-zinc-500">
+              <MapPinIcon className="w-3.5 h-3.5 shrink-0" />
+              {profile.location}
+            </span>
+          ) : null}
+          {formattedJoin ? (
+            <span className="flex items-center gap-1 text-sm text-zinc-500">
+              <CalendarIcon className="w-3.5 h-3.5 shrink-0" />
+              Joined {formattedJoin}
+            </span>
+          ) : null}
+        </div>
+
+        {/* ── External links ── */}
+        {(profile.website_url || profile.github_url || profile.linkedin_url) ? (
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3">
+            {profile.website_url && websiteLabel ? (
+              <ExternalLink href={profile.website_url} icon={<GlobeIcon />} label={websiteLabel} />
+            ) : null}
+            {profile.github_url && githubLabel ? (
+              <ExternalLink href={profile.github_url} icon={<GitHubIcon />} label={githubLabel} />
+            ) : null}
+            {profile.linkedin_url && linkedinLabel ? (
+              <ExternalLink href={profile.linkedin_url} icon={<LinkedInIcon />} label={linkedinLabel} />
+            ) : null}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
+}
+
+function safeHostname(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
 }

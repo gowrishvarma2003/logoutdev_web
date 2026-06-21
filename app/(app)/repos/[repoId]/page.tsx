@@ -50,6 +50,15 @@ export default function RepoCodePage() {
   const activeRef = searchParams.get("ref") || defaultBranch;
 
   const { entries, loading: treeLoading } = useRepositoryTree(repo.id, activeRef, directoryPath);
+  const sortedEntries = useMemo(() => {
+    return [...entries].sort((a, b) => {
+      const aIsTree = a.type === "tree";
+      const bIsTree = b.type === "tree";
+      if (aIsTree && !bIsTree) return -1;
+      if (!aIsTree && bIsTree) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [entries]);
   const { blob, loading: blobLoading } = useRepositoryBlob(
     repo.id,
     activeRef,
@@ -161,30 +170,6 @@ export default function RepoCodePage() {
         </div>
       ) : null}
 
-      {repo.attached_space && repo.can_manage_general ? (
-        <div className="rounded-2xl border border-sky-500/20 bg-sky-500/10 p-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-300">Launch from this repo</p>
-          <h2 className="mt-2 text-lg font-semibold text-white">Turn the attached workspace into a launch page</h2>
-          <p className="mt-1 text-sm text-sky-100/90">
-            The launch will stay connected to {repo.attached_space.name}, so reviews, beta access, and public discovery stay tied to the build workspace.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link
-              href={`/launches/new?spaceId=${encodeURIComponent(repo.attached_space.id)}&spaceName=${encodeURIComponent(repo.attached_space.name)}&repoId=${encodeURIComponent(repo.id)}&repoName=${encodeURIComponent(repo.name)}&repoDescription=${encodeURIComponent(repo.description || "")}`}
-              className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-sky-950 transition-colors hover:bg-sky-50"
-            >
-              Launch from this repo
-            </Link>
-            <Link
-              href={`/spaces/${repo.attached_space.id}`}
-              className="rounded-lg border border-sky-300/30 px-4 py-2 text-sm font-medium text-sky-100 transition-colors hover:bg-sky-400/10"
-            >
-              Open space
-            </Link>
-          </div>
-        </div>
-      ) : null}
-
       {/* Branch selector & Actions */}
       <div className="relative flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
@@ -235,23 +220,14 @@ export default function RepoCodePage() {
                     );
                   })}
                 </div>
-                <div className="border-t border-zinc-800 px-3 py-2">
-                  <Link
-                    href={`/repos/${repo.id}/branches`}
-                    onClick={() => setShowBranchMenu(false)}
-                    className="text-xs font-medium text-blue-400 hover:text-blue-300"
-                  >
-                    View all branches
-                  </Link>
-                </div>
               </div>
             ) : null}
           </div>
           
           <div className="flex items-center gap-3 text-sm text-zinc-400 ml-2 border-l border-zinc-800 pl-4 hidden sm:flex">
-            <Link href={`/repos/${repo.id}/branches`} className="hover:text-blue-400 font-semibold flex items-center gap-1">
+            <span className="font-semibold flex items-center gap-1 text-zinc-400">
               <span className="text-zinc-200">{branches.length}</span> Branches
-            </Link>
+            </span>
             <span className="font-semibold flex items-center gap-1 text-zinc-400">
               <span className="text-zinc-200">{tags.length}</span> Tags
             </span>
@@ -436,7 +412,7 @@ export default function RepoCodePage() {
                       <span className="text-sm text-zinc-300"></span>
                     </Link>
                   )}
-                  {entries.map((entry) => {
+                  {sortedEntries.map((entry) => {
                     const isTree = entry.type === "tree";
                     const href = `/repos/${repo.id}?ref=${encodeURIComponent(activeRef)}&path=${encodeURIComponent(entry.path)}${isTree ? "" : "&view=blob"}`;
                     return (

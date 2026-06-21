@@ -8,9 +8,10 @@
 import { use, useState, useCallback } from "react";
 import { useProfilePosts } from "@/lib/hooks/useProfile";
 import { useAuth } from "@/lib/hooks/useAuth";
-import Spinner from "@/components/ui/Spinner";
 import PostCard from "@/components/feed/PostCard";
 import type { Post } from "@/lib/types";
+import { ProfileListSkeleton } from "@/components/profile/ProfileSkeleton";
+import { DocumentTextIcon } from "@/components/ui/Icons";
 
 interface ProfilePostsPageProps {
   params: Promise<{ id: string }>;
@@ -37,11 +38,7 @@ export default function ProfilePostsPage({ params }: ProfilePostsPageProps) {
   }, [initialPosts]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-16">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <ProfileListSkeleton rows={4} />;
   }
 
   if (error) {
@@ -55,6 +52,9 @@ export default function ProfilePostsPage({ params }: ProfilePostsPageProps) {
   if (posts.length === 0 || !currentUser) {
     return (
       <div className="px-5 py-16 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-3">
+          <DocumentTextIcon className="w-5 h-5 text-zinc-600" />
+        </div>
         <p className="text-zinc-600 text-sm">No posts yet.</p>
       </div>
     );

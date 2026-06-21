@@ -39,16 +39,6 @@ function humanize(value: string) {
   return value.replace(/-/g, " ");
 }
 
-function getInitials(name?: string | null) {
-  if (!name) return "LD";
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
-}
-
 // Simplified section component - just a heading and content
 function Section({ id, title, count, children }: { id: string; title: string; count?: number; children: ReactNode }) {
   return (
@@ -660,9 +650,11 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                 Created By
               </p>
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-500/20 to-emerald-500/20 text-sm font-bold text-sky-300 border border-sky-500/20">
-                  {getInitials(launch.builder.name)}
-                </div>
+                <Avatar
+                  user={launch.builder}
+                  size="md"
+                  className="ring-2 ring-zinc-800/80 shrink-0"
+                />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold text-white truncate">{launch.builder.name}</p>
                   <p className="text-xs text-zinc-500 truncate mt-0.5">

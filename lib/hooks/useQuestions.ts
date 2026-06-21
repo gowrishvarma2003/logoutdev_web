@@ -32,7 +32,7 @@ function useAsync<T>(fetcher: () => Promise<T>, deps: unknown[], enabled = true)
       const message = error instanceof Error ? error.message : "Unknown error";
       setState({ data: null, loading: false, error: message });
     }
-  }, deps);
+  }, [...deps, enabled]);
 
   useEffect(() => {
     load();

@@ -50,33 +50,43 @@ export default function McqAnswerForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
-      <div className="space-y-2">
-        {(question.options || []).map((option) => {
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-950/40 p-5">
+      <div className="space-y-2.5">
+        {(question.options || []).map((option, idx) => {
           const checked = selected.includes(option.id);
+          const letter = String.fromCharCode(65 + idx); // A, B, C, D...
           return (
-            <label
+            <button
               key={option.id}
-              className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-3 transition-colors ${
-                checked ? "border-white bg-zinc-800" : "border-zinc-800 bg-zinc-950 hover:border-zinc-700"
+              type="button"
+              onClick={() => toggleOption(option.id)}
+              className={`group flex w-full cursor-pointer items-center gap-3.5 rounded-xl border px-4 py-3.5 text-left transition-all duration-300 ${
+                checked
+                  ? "border-sky-500 bg-sky-500/5 shadow-[0_0_12px_rgba(56,189,248,0.03)]"
+                  : "border-zinc-900 bg-zinc-900/10 hover:border-zinc-800 hover:bg-zinc-900/20"
               }`}
             >
-              <input
-                type={question.mcq_mode === "single" ? "radio" : "checkbox"}
-                name={`question-${question.id}`}
-                checked={checked}
-                onChange={() => toggleOption(option.id)}
-                className="h-4 w-4 border-zinc-700 bg-zinc-900 text-white"
-              />
-              <span className="text-sm text-white">{option.text}</span>
-            </label>
+              {/* Custom Selector Bullet */}
+              <div
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-xs font-bold transition-all duration-300 ${
+                  checked
+                    ? "border-sky-500 bg-sky-500 text-zinc-950"
+                    : "border-zinc-800 bg-zinc-950 text-zinc-400 group-hover:border-zinc-700 group-hover:text-zinc-200"
+                }`}
+              >
+                {letter}
+              </div>
+              <span className={`text-sm font-medium transition-colors ${checked ? "text-white" : "text-zinc-300 group-hover:text-zinc-200"}`}>
+                {option.text}
+              </span>
+            </button>
           );
         })}
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between border-t border-zinc-900 pt-4 mt-2">
         <span className="text-xs text-zinc-500">
-          {question.mcq_mode === "single" ? "Pick one option" : "Pick one or more options"}
+          {question.mcq_mode === "single" ? "Choose one option" : "Choose one or more options"}
         </span>
         <button
           type="submit"
@@ -86,8 +96,8 @@ export default function McqAnswerForm({
           {submitting
             ? "Submitting…"
             : question.viewer_state?.has_answered
-            ? "Update response"
-            : "Submit response"}
+            ? "Update Response"
+            : "Submit Response"}
         </button>
       </div>
 
@@ -95,3 +105,4 @@ export default function McqAnswerForm({
     </form>
   );
 }
+

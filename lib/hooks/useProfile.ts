@@ -8,6 +8,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type {
   ProfileResponse,
+  ProfileQuestionsResponse,
+  ProfileReposResponse,
   ProofOfWorkSignals,
   UserFeaturedProject,
   Post,
@@ -188,6 +190,44 @@ export function useProfileFreelance(username: string) {
   };
 }
 
+/** Paginated questions authored by the user */
+export function useProfileQuestions(username: string, page = 1) {
+  const canFetch = username.trim().length > 0;
+  const result = useAsync<ProfileQuestionsResponse>(
+    () => api.getProfileQuestions(username, page),
+    [username, page],
+    canFetch
+  );
+  return {
+    questions: result.data?.questions ?? [],
+    total: result.data?.total ?? 0,
+    isMe: result.data?.is_me ?? false,
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+/** Owned repos + recent PR/review activity for the user */
+export function useProfileRepos(username: string, page = 1) {
+  const canFetch = username.trim().length > 0;
+  const result = useAsync<ProfileReposResponse>(
+    () => api.getProfileRepos(username, page),
+    [username, page],
+    canFetch
+  );
+  return {
+    repos: result.data?.repos ?? [],
+    recent_prs: result.data?.recent_prs ?? [],
+    recent_reviews: result.data?.recent_reviews ?? [],
+    total: result.data?.total ?? 0,
+    isMe: result.data?.is_me ?? false,
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
 // ─── Mutation hooks ───────────────────────────────────────────────────────────
 
 interface MutationState {
@@ -205,7 +245,10 @@ export function useUpdateProfile() {
   });
 
   const update = useCallback(
-    async (updates: Parameters<typeof api.patchMyProfile>[0]) => {
+    async (updates: Parameters<typeof api.patchMyProfile>[0] & {
+      pronouns?: string;
+      open_to_work?: boolean;
+    }) => {
       setState({ loading: true, error: null, success: false });
       try {
         const { profile } = await api.patchMyProfile(updates);
@@ -280,4 +323,118 @@ export function useUpdateFeaturedProjects() {
   }, []);
 
   return { ...state, updateFeatured };
+}
+
+/** PUT /me/avatar — upload avatar image */
+export function useUploadAvatar() {
+  const [state, setState] = useState<MutationState>({
+    loading: false,
+    error: null,
+    success: false,
+  });
+
+  const upload = useCallback(async (file: File) => {
+    setState({ loading: true, error: null, success: false });
+    try {
+      const { profile } = await api.uploadMyAvatar(file);
+      if (typeof window !== "undefined") {
+        const raw = localStorage.getItem("currentUser");
+        if (raw) {
+          const current = JSON.parse(raw);
+          localStorage.setItem(
+            "currentUser",
+            JSON.stringify({ ...current, ...profile })
+          );
+        }
+      }
+      setState({ loading: false, error: null, success: true });
+      return profile;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to upload avatar";
+      setState({ loading: false, error: msg, success: false });
+      return null;
+    }
+  }, []);
+
+  const remove = useCallback(async () => {
+    setState({ loading: true, error: null, success: false });
+    try {
+      const { profile } = await api.deleteMyAvatar();
+      if (typeof window !== "undefined") {
+        const raw = localStorage.getItem("currentUser");
+        if (raw) {
+          const current = JSON.parse(raw);
+          localStorage.setItem(
+            "currentUser",
+            JSON.stringify({ ...current, ...profile })
+          );
+        }
+      }
+      setState({ loading: false, error: null, success: true });
+      return profile;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to remove avatar";
+      setState({ loading: false, error: msg, success: false });
+      return null;
+    }
+  }, []);
+
+  return { ...state, upload, remove };
+}
+
+/** PUT /me/banner — upload banner image */
+export function useUploadBanner() {
+  const [state, setState] = useState<MutationState>({
+    loading: false,
+    error: null,
+    success: false,
+  });
+
+  const upload = useCallback(async (file: File) => {
+    setState({ loading: true, error: null, success: false });
+    try {
+      const { profile } = await api.uploadMyBanner(file);
+      if (typeof window !== "undefined") {
+        const raw = localStorage.getItem("currentUser");
+        if (raw) {
+          const current = JSON.parse(raw);
+          localStorage.setItem(
+            "currentUser",
+            JSON.stringify({ ...current, ...profile })
+          );
+        }
+      }
+      setState({ loading: false, error: null, success: true });
+      return profile;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to upload banner";
+      setState({ loading: false, error: msg, success: false });
+      return null;
+    }
+  }, []);
+
+  const remove = useCallback(async () => {
+    setState({ loading: true, error: null, success: false });
+    try {
+      const { profile } = await api.deleteMyBanner();
+      if (typeof window !== "undefined") {
+        const raw = localStorage.getItem("currentUser");
+        if (raw) {
+          const current = JSON.parse(raw);
+          localStorage.setItem(
+            "currentUser",
+            JSON.stringify({ ...current, ...profile })
+          );
+        }
+      }
+      setState({ loading: false, error: null, success: true });
+      return profile;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to remove banner";
+      setState({ loading: false, error: msg, success: false });
+      return null;
+    }
+  }, []);
+
+  return { ...state, upload, remove };
 }

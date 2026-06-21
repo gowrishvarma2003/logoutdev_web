@@ -1,14 +1,9 @@
 "use client";
 
-/**
- * ProfileEditForm — full profile editing form for /settings/profile.
- * Handles: name, username, headline, bio, location, website/github/linkedin,
- * skills list, and featured project selection.
- */
-
 import { useState, useEffect, useCallback } from "react";
 import type { User, UserProfileSkill, UserFeaturedProject, ProjectSpace } from "@/lib/types";
-import { useUpdateProfile, useUpdateSkills, useUpdateFeaturedProjects } from "@/lib/hooks/useProfile";
+import { useUpdateProfile, useUpdateSkills, useUpdateFeaturedProjects, useUploadAvatar, useUploadBanner } from "@/lib/hooks/useProfile";
+import { useAuth } from "@/lib/hooks/useAuth";
 import * as spacesApi from "@/lib/services/spacesApi";
 import {
   CheckIcon,
@@ -17,8 +12,22 @@ import {
   GitHubIcon,
   LinkedInIcon,
   GlobeIcon,
+  MapPinIcon,
+  LinkIcon,
+  CodeBracketIcon,
+  SparklesIcon,
+  RocketIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  UserIcon,
+  CameraIcon,
+  BriefcaseIcon,
+  EyeIcon,
 } from "@/components/ui/Icons";
 import Spinner from "@/components/ui/Spinner";
+import Avatar from "@/components/ui/Avatar";
+import { getInitials } from "@/lib/utils";
+import AvatarCropModal from "./AvatarCropModal";
 
 interface ProfileEditFormProps {
   profile: User;
@@ -27,38 +36,27 @@ interface ProfileEditFormProps {
   onSaved?: (updated: User) => void;
 }
 
-// ─── Field input ─────────────────────────────────────────────────────────────
-
-function Field({
-  label,
-  hint,
-  error,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-zinc-300 mb-1.5">
-        {label}
-      </label>
-      {children}
-      {hint && !error && <p className="text-xs text-zinc-600 mt-1">{hint}</p>}
-      {error && <p className="text-xs text-rose-400 mt-1">{error}</p>}
-    </div>
-  );
-}
-
 const INPUT_CLASS =
-  "w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors";
+  "w-full pl-3 pr-10 py-2.5 rounded-xl bg-zinc-800/60 border border-zinc-700/80 text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all";
+
+const INPUT_ICON_CLASS =
+  "w-full pl-9 pr-10 py-2.5 rounded-xl bg-zinc-800/60 border border-zinc-700/80 text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all";
 
 const TEXTAREA_CLASS =
-  "w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors resize-none";
+  "w-full px-3 py-2.5 rounded-xl bg-zinc-800/60 border border-zinc-700/80 text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all resize-none";
 
-// ─── Main component ───────────────────────────────────────────────────────────
+function CharBadge({ current, max }: { current: number; max: number }) {
+  const near = current > max * 0.8;
+  return (
+    <span
+      className={`absolute right-3 top-1/2 -translate-y-1/2 text-[10px] tabular-nums pointer-events-none ${
+        near ? "text-amber-400" : "text-zinc-500"
+      }`}
+    >
+      {current}/{max}
+    </span>
+  );
+}
 
 export default function ProfileEditForm({
   profile,
@@ -66,7 +64,7 @@ export default function ProfileEditForm({
   initialFeatured,
   onSaved,
 }: ProfileEditFormProps) {
-  // ── Profile fields state ──
+  const { user: currentUser, refreshUser } = useAuth();
   const [name, setName] = useState(profile.name ?? "");
   const [username, setUsername] = useState(profile.username ?? "");
   const [headline, setHeadline] = useState(profile.headline ?? "");
@@ -75,29 +73,29 @@ export default function ProfileEditForm({
   const [websiteUrl, setWebsiteUrl] = useState(profile.website_url ?? "");
   const [githubUrl, setGithubUrl] = useState(profile.github_url ?? "");
   const [linkedinUrl, setLinkedinUrl] = useState(profile.linkedin_url ?? "");
+  const [pronouns, setPronouns] = useState(profile.pronouns ?? "");
+  const [openToWork, setOpenToWork] = useState(Boolean(profile.open_to_work));
 
-  // ── Skills state ──
   const [skills, setSkills] = useState<string[]>(
     initialSkills.map((s) => s.skill)
   );
   const [skillInput, setSkillInput] = useState("");
 
-  // ── Featured projects state ──
   const [featuredIds, setFeaturedIds] = useState<string[]>(
     initialFeatured.map((f) => f.space.id)
   );
   const [mySpaces, setMySpaces] = useState<ProjectSpace[]>([]);
   const [spacesLoading, setSpacesLoading] = useState(true);
 
-  // ── Mutation hooks ──
   const { update, loading: profileLoading, error: profileError, success: profileSuccess } = useUpdateProfile();
   const { updateSkills, loading: skillsLoading, error: skillsError } = useUpdateSkills();
   const { updateFeatured, loading: featuredLoading, error: featuredError } = useUpdateFeaturedProjects();
+  const { upload: uploadAvatar, remove: removeAvatar, loading: avatarLoading, error: avatarError } = useUploadAvatar();
+  const { upload: uploadBanner, remove: removeBanner, loading: bannerLoading, error: bannerError } = useUploadBanner();
 
   const loading = profileLoading || skillsLoading || featuredLoading;
-  const anyError = profileError || skillsError || featuredError;
+  const anyError = profileError || skillsError || featuredError || avatarError || bannerError;
 
-  // ── Load user's spaces for featured project selector ──
   useEffect(() => {
     spacesApi
       .listSpaces({ page: 1 })
@@ -108,7 +106,6 @@ export default function ProfileEditForm({
       .finally(() => setSpacesLoading(false));
   }, []);
 
-  // ── Skill helpers ──
   const addSkill = useCallback(() => {
     const t = skillInput.trim();
     if (!t || skills.includes(t) || skills.length >= 10) return;
@@ -120,21 +117,19 @@ export default function ProfileEditForm({
     setSkills((prev) => prev.filter((s) => s !== skill));
   }, []);
 
-  // ── Featured project toggle ──
   const toggleFeatured = useCallback((spaceId: string) => {
     setFeaturedIds((prev) => {
       if (prev.includes(spaceId)) return prev.filter((id) => id !== spaceId);
-      if (prev.length >= 3) return prev; // max 3
+      if (prev.length >= 3) return prev;
       return [...prev, spaceId];
     });
   }, []);
 
-  // ── Submit ──
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const [updatedProfile] = await Promise.all([
-      update({ name, username, headline, bio, location, website_url: websiteUrl, github_url: githubUrl, linkedin_url: linkedinUrl }),
+      update({ name, username, headline, bio, location, website_url: websiteUrl, github_url: githubUrl, linkedin_url: linkedinUrl, pronouns, open_to_work: openToWork }),
       updateSkills(skills),
       updateFeatured(featuredIds),
     ]);
@@ -144,254 +139,393 @@ export default function ProfileEditForm({
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* ── Profile Basics ── */}
-      <section>
-        <h2 className="text-sm font-semibold text-zinc-200 mb-4 flex items-center gap-2">
-          <span className="w-1 h-3.5 rounded-full bg-violet-500 inline-block" />
-          Profile Basics
-        </h2>
-        <div className="space-y-4">
-          <Field label="Display Name" hint="Your full name shown on your profile.">
-            <input
-              className={INPUT_CLASS}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-              maxLength={255}
-            />
-          </Field>
+  const handleAvatarFile = async (file: File) => {
+    const updated = await uploadAvatar(file);
+    if (updated && currentUser) refreshUser(updated);
+  };
 
-          <Field
-            label="Username"
-            hint="3–50 lowercase letters, numbers, and underscores. Used in your profile URL."
-          >
+  const handleAvatarRemove = async () => {
+    const updated = await removeAvatar();
+    if (updated && currentUser) refreshUser(updated);
+  };
+
+  const handleBannerFile = async (file: File) => {
+    const updated = await uploadBanner(file);
+    if (updated && currentUser) refreshUser(updated);
+  };
+
+  const handleBannerRemove = async () => {
+    const updated = await removeBanner();
+    if (updated && currentUser) refreshUser(updated);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* ── Avatar & Banner ── */}
+      <ProfileImageUploader
+        profile={profile}
+        avatarLoading={avatarLoading}
+        bannerLoading={bannerLoading}
+        onAvatarFile={handleAvatarFile}
+        onAvatarRemove={handleAvatarRemove}
+        onBannerFile={handleBannerFile}
+        onBannerRemove={handleBannerRemove}
+      />
+
+      {/* ── Profile Basics ── */}
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
+        <div className="px-5 py-4 border-b border-zinc-800/60">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+              <UserIcon className="w-4 h-4 text-violet-400" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-white">Profile Basics</h2>
+              <p className="text-xs text-zinc-500">Your public identity on the platform</p>
+            </div>
+          </div>
+        </div>
+        <div className="px-5 py-5 space-y-5">
+          <div>
+            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Display Name</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm pointer-events-none">
+              <input
+                className={INPUT_CLASS}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                maxLength={255}
+              />
+              <CharBadge current={name.length} max={255} />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Username</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm pointer-events-none font-medium">
                 @
               </span>
               <input
-                className={`${INPUT_CLASS} pl-7`}
+                className="w-full pl-7 pr-10 py-2.5 rounded-xl bg-zinc-800/60 border border-zinc-700/80 text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all"
                 value={username}
                 onChange={(e) => setUsername(e.target.value.toLowerCase())}
                 placeholder="your_username"
                 maxLength={50}
                 pattern="[a-z0-9_]+"
               />
+              <CharBadge current={username.length} max={50} />
             </div>
-          </Field>
+            <p className="text-[11px] text-zinc-600 mt-1.5">
+              3–50 lowercase letters, numbers, underscores. URL: /profile/<span className="text-zinc-400">{username || "..."}</span>
+            </p>
+          </div>
 
-          <Field label="Headline" hint="Short tagline shown below your name (max 140 chars).">
+          <div>
+            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Headline</label>
+            <div className="relative">
+              <input
+                className={INPUT_CLASS}
+                value={headline}
+                onChange={(e) => setHeadline(e.target.value)}
+                placeholder="e.g. Full-stack engineer · building in public"
+                maxLength={140}
+              />
+              <CharBadge current={headline.length} max={140} />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Bio</label>
+            <div className="relative">
+              <textarea
+                className={TEXTAREA_CLASS}
+                rows={4}
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="What do you work on? What excites you technically?"
+                maxLength={2000}
+              />
+              <span className="absolute right-3 bottom-3 text-[10px] tabular-nums text-zinc-500 pointer-events-none">
+                {bio.length}/2000
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Location</label>
+            <div className="relative">
+              <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4 pointer-events-none" />
+              <input
+                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-zinc-800/60 border border-zinc-700/80 text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="San Francisco, CA"
+                maxLength={120}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Pronouns</label>
             <input
               className={INPUT_CLASS}
-              value={headline}
-              onChange={(e) => setHeadline(e.target.value)}
-              placeholder="e.g. Full-stack engineer · building in public"
-              maxLength={140}
+              value={pronouns}
+              onChange={(e) => setPronouns(e.target.value)}
+              placeholder="e.g. she/her, they/them"
+              maxLength={40}
             />
-            <p className="text-[11px] text-zinc-600 mt-1 text-right">
-              {headline.length}/140
-            </p>
-          </Field>
+            <p className="text-[11px] text-zinc-600 mt-1.5">Shown on your profile. Optional.</p>
+          </div>
 
-          <Field label="Bio" hint="Tell the world what you build and care about (max 2000 chars).">
-            <textarea
-              className={TEXTAREA_CLASS}
-              rows={4}
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="What do you work on? What excites you technically?"
-              maxLength={2000}
-            />
-            <p className="text-[11px] text-zinc-600 mt-1 text-right">
-              {bio.length}/2000
-            </p>
-          </Field>
-
-          <Field label="Location" hint="City, country, or timezone (optional).">
-            <input
-              className={INPUT_CLASS}
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="San Francisco, CA"
-              maxLength={120}
-            />
-          </Field>
+          <div className="flex items-start justify-between gap-3 pt-1">
+            <div className="flex items-start gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                <BriefcaseIcon className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-white">Open to work</p>
+                <p className="text-xs text-zinc-500 mt-0.5">Let others know you&apos;re available for opportunities.</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={openToWork}
+              onClick={() => setOpenToWork((v) => !v)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border transition-colors ${
+                openToWork ? "bg-emerald-500/30 border-emerald-500/50" : "bg-zinc-800 border-zinc-700"
+              }`}
+              aria-label="Toggle open to work"
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform mt-0.5 ${
+                  openToWork ? "translate-x-5" : "translate-x-0.5"
+                }`}
+              />
+            </button>
+          </div>
         </div>
-      </section>
+      </div>
 
       {/* ── Links ── */}
-      <section>
-        <h2 className="text-sm font-semibold text-zinc-200 mb-4 flex items-center gap-2">
-          <span className="w-1 h-3.5 rounded-full bg-sky-500 inline-block" />
-          Links
-        </h2>
-        <div className="space-y-4">
-          <Field label="Website">
+      <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
+        <div className="px-5 py-4 border-b border-zinc-800/60">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center">
+              <LinkIcon className="w-4 h-4 text-sky-400" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-white">Links</h2>
+              <p className="text-xs text-zinc-500">Connect your external presence</p>
+            </div>
+          </div>
+        </div>
+        <div className="px-5 py-5 space-y-5">
+          <div>
+            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Website</label>
             <div className="relative">
               <GlobeIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4 pointer-events-none" />
               <input
-                className={`${INPUT_CLASS} pl-9`}
+                className={INPUT_ICON_CLASS}
                 type="url"
                 value={websiteUrl}
                 onChange={(e) => setWebsiteUrl(e.target.value)}
                 placeholder="https://yoursite.com"
               />
             </div>
-          </Field>
+          </div>
 
-          <Field label="GitHub">
+          <div>
+            <label className="block text-xs font-medium text-zinc-400 mb-1.5">GitHub</label>
             <div className="relative">
               <GitHubIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4 pointer-events-none" />
               <input
-                className={`${INPUT_CLASS} pl-9`}
+                className={INPUT_ICON_CLASS}
                 type="url"
                 value={githubUrl}
                 onChange={(e) => setGithubUrl(e.target.value)}
                 placeholder="https://github.com/yourusername"
               />
             </div>
-          </Field>
+          </div>
 
-          <Field label="LinkedIn">
+          <div>
+            <label className="block text-xs font-medium text-zinc-400 mb-1.5">LinkedIn</label>
             <div className="relative">
               <LinkedInIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4 pointer-events-none" />
               <input
-                className={`${INPUT_CLASS} pl-9`}
+                className={INPUT_ICON_CLASS}
                 type="url"
                 value={linkedinUrl}
                 onChange={(e) => setLinkedinUrl(e.target.value)}
                 placeholder="https://linkedin.com/in/yourusername"
               />
             </div>
-          </Field>
-        </div>
-      </section>
-
-      {/* ── Skills ── */}
-      <section>
-        <h2 className="text-sm font-semibold text-zinc-200 mb-1 flex items-center gap-2">
-          <span className="w-1 h-3.5 rounded-full bg-amber-500 inline-block" />
-          Tech Stack
-        </h2>
-        <p className="text-xs text-zinc-500 mb-4">Add up to 10 skills. Press Enter or click + to add.</p>
-
-        <div className="flex gap-2 mb-3">
-          <input
-            className={`${INPUT_CLASS} flex-1`}
-            value={skillInput}
-            onChange={(e) => setSkillInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addSkill();
-              }
-            }}
-            placeholder="e.g. TypeScript"
-            maxLength={60}
-            disabled={skills.length >= 10}
-          />
-          <button
-            type="button"
-            onClick={addSkill}
-            disabled={!skillInput.trim() || skills.length >= 10}
-            className="px-3 py-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-white hover:bg-zinc-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            aria-label="Add skill"
-          >
-            <PlusIcon className="w-4 h-4" />
-          </button>
-        </div>
-
-        {skills.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {skills.map((skill) => (
-              <span
-                key={skill}
-                className="flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-sm text-zinc-300"
-              >
-                {skill}
-                <button
-                  type="button"
-                  onClick={() => removeSkill(skill)}
-                  className="text-zinc-500 hover:text-rose-400 transition-colors"
-                  aria-label={`Remove ${skill}`}
-                >
-                  <XIcon className="w-3.5 h-3.5" />
-                </button>
-              </span>
-            ))}
           </div>
-        )}
+        </div>
+      </div>
 
-        {skills.length >= 10 && (
-          <p className="text-xs text-amber-500 mt-2">Maximum 10 skills reached.</p>
-        )}
-      </section>
+      {/* ── Tech Stack ── */}
+      <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
+        <div className="px-5 py-4 border-b border-zinc-800/60">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+              <CodeBracketIcon className="w-4 h-4 text-amber-400" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-white">Tech Stack</h2>
+              <p className="text-xs text-zinc-500">Add up to 10 skills that represent your expertise</p>
+            </div>
+            <span className="ml-auto text-xs tabular-nums text-zinc-500">
+              {skills.length}/10
+            </span>
+          </div>
+        </div>
+        <div className="px-5 py-5 space-y-4">
+          <div className="flex gap-2">
+            <input
+              className={`${INPUT_CLASS} flex-1`}
+              value={skillInput}
+              onChange={(e) => setSkillInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addSkill();
+                }
+              }}
+              placeholder="e.g. TypeScript, Python, React"
+              maxLength={60}
+              disabled={skills.length >= 10}
+            />
+            <button
+              type="button"
+              onClick={addSkill}
+              disabled={!skillInput.trim() || skills.length >= 10}
+              className="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              aria-label="Add skill"
+            >
+              <PlusIcon className="w-4 h-4" />
+            </button>
+          </div>
+
+          {skills.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {skills.map((skill) => (
+                <span
+                  key={skill}
+                  className="inline-flex items-center gap-2 pl-3.5 pr-2.5 py-2 rounded-full bg-zinc-800 border border-zinc-700/80 text-sm text-zinc-200 hover:border-zinc-600 transition-colors group"
+                >
+                  {skill}
+                  <button
+                    type="button"
+                    onClick={() => removeSkill(skill)}
+                    className="text-zinc-500 hover:text-rose-400 hover:bg-rose-400/10 rounded-full p-0.5 transition-colors"
+                    aria-label={`Remove ${skill}`}
+                  >
+                    <XIcon className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-zinc-600 italic py-2">
+              No skills added yet. Add technologies, languages, and tools you work with.
+            </p>
+          )}
+
+          {skills.length >= 10 && (
+            <p className="text-xs text-amber-400 font-medium">Maximum 10 skills reached.</p>
+          )}
+        </div>
+      </div>
 
       {/* ── Featured Projects ── */}
-      <section>
-        <h2 className="text-sm font-semibold text-zinc-200 mb-1 flex items-center gap-2">
-          <span className="w-1 h-3.5 rounded-full bg-emerald-500 inline-block" />
-          Featured Projects
-        </h2>
-        <p className="text-xs text-zinc-500 mb-4">Pin up to 3 projects to your profile overview.</p>
-
-        {spacesLoading ? (
-          <div className="flex justify-center py-4">
-            <Spinner size="sm" />
+      <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
+        <div className="px-5 py-4 border-b border-zinc-800/60">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+              <SparklesIcon className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-white">Featured Projects</h2>
+              <p className="text-xs text-zinc-500">Pin up to 3 projects to your profile</p>
+            </div>
+            <span className="ml-auto text-xs tabular-nums text-zinc-500">
+              {featuredIds.length}/3
+            </span>
           </div>
-        ) : mySpaces.length === 0 ? (
-          <p className="text-sm text-zinc-600 italic">
-            You haven&apos;t joined or created any spaces yet.
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {mySpaces.slice(0, 20).map((space) => {
-              const selected = featuredIds.includes(space.id);
-              const disabled = !selected && featuredIds.length >= 3;
-              return (
-                <button
-                  key={space.id}
-                  type="button"
-                  onClick={() => toggleFeatured(space.id)}
-                  disabled={disabled}
-                  className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
-                    selected
-                      ? "border-emerald-500/50 bg-emerald-500/10"
-                      : disabled
-                      ? "border-zinc-800 bg-zinc-900/30 opacity-40 cursor-not-allowed"
-                      : "border-zinc-800 bg-zinc-900/50 hover:border-zinc-700"
-                  }`}
-                  aria-pressed={selected}
-                >
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-sky-500/20 to-violet-500/20 border border-zinc-700 flex items-center justify-center text-xs font-bold text-white shrink-0">
-                    {space.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{space.name}</p>
-                    <p className="text-xs text-zinc-500 truncate">{space.summary}</p>
-                  </div>
-                  {selected && (
-                    <CheckIcon className="w-4 h-4 text-emerald-400 shrink-0" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </section>
+        </div>
+        <div className="px-5 py-5">
+          {spacesLoading ? (
+            <div className="flex justify-center py-6">
+              <Spinner size="sm" />
+            </div>
+          ) : mySpaces.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-zinc-800 px-4 py-8 text-center">
+              <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                <RocketIcon className="w-5 h-5 text-zinc-500" />
+              </div>
+              <p className="text-sm text-zinc-500">
+                No spaces yet.{" "}
+                <span className="text-zinc-400">Create or join a space first.</span>
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {mySpaces.slice(0, 20).map((space) => {
+                const selected = featuredIds.includes(space.id);
+                const disabled = !selected && featuredIds.length >= 3;
+                return (
+                  <button
+                    key={space.id}
+                    type="button"
+                    onClick={() => toggleFeatured(space.id)}
+                    disabled={disabled}
+                    className={`w-full flex items-center gap-3.5 p-3.5 rounded-xl border text-left transition-all ${
+                      selected
+                        ? "border-emerald-500/40 bg-emerald-500/5"
+                        : disabled
+                        ? "border-zinc-800/50 bg-zinc-900/20 opacity-40 cursor-not-allowed"
+                        : "border-zinc-800 bg-zinc-900/30 hover:border-zinc-700 hover:bg-zinc-900/60"
+                    }`}
+                    aria-pressed={selected}
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500/20 to-violet-500/20 border border-zinc-700/60 flex items-center justify-center text-sm font-bold text-white shrink-0">
+                      {space.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">{space.name}</p>
+                      <p className="text-xs text-zinc-500 truncate mt-0.5">{space.summary || "No summary"}</p>
+                    </div>
+                    {selected ? (
+                      <span className="shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                        <CheckIcon className="w-3.5 h-3.5 text-emerald-400" />
+                      </span>
+                    ) : (
+                      <span className="shrink-0 w-6 h-6 rounded-full border border-zinc-700 flex items-center justify-center">
+                        <PlusIcon className="w-3 h-3 text-zinc-500" />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
 
-      {/* ── Error / Success ── */}
+      {/* ── Feedback ── */}
       {anyError && (
-        <div className="rounded-xl bg-rose-500/10 border border-rose-500/30 px-4 py-3">
-          <p className="text-sm text-rose-400">{anyError}</p>
+        <div className="mt-5 rounded-xl bg-rose-500/10 border border-rose-500/30 px-4 py-3 flex items-center gap-2.5">
+          <XCircleIcon className="w-4 h-4 text-rose-400 shrink-0" />
+          <p className="text-sm text-rose-300">{anyError}</p>
         </div>
       )}
-      {profileSuccess && !loading && (
-        <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-4 py-3 flex items-center gap-2">
-          <CheckIcon className="w-4 h-4 text-emerald-400" />
-          <p className="text-sm text-emerald-400">Profile saved successfully!</p>
+      {profileSuccess && !loading && !anyError && (
+        <div className="mt-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-4 py-3 flex items-center gap-2.5">
+          <CheckCircleIcon className="w-4 h-4 text-emerald-400 shrink-0" />
+          <p className="text-sm text-emerald-300">Profile saved successfully!</p>
         </div>
       )}
 
@@ -399,7 +533,7 @@ export default function ProfileEditForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-zinc-950 text-sm font-semibold hover:bg-zinc-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="mt-6 w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-zinc-950 text-sm font-semibold hover:bg-zinc-100 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
       >
         {loading ? (
           <>
@@ -414,5 +548,257 @@ export default function ProfileEditForm({
         )}
       </button>
     </form>
+  );
+}
+
+interface ProfileImageUploaderProps {
+  profile: User;
+  avatarLoading: boolean;
+  bannerLoading: boolean;
+  onAvatarFile: (file: File) => Promise<unknown>;
+  onAvatarRemove: () => Promise<unknown>;
+  onBannerFile: (file: File) => Promise<unknown>;
+  onBannerRemove: () => Promise<unknown>;
+}
+
+function ProfileImageUploader({
+  profile,
+  avatarLoading,
+  bannerLoading,
+  onAvatarFile,
+  onAvatarRemove,
+  onBannerFile,
+  onBannerRemove,
+}: ProfileImageUploaderProps) {
+  const [bannerError, setBannerError] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [showLightbox, setShowLightbox] = useState(false);
+
+  const handleAvatar = (file: File) => {
+    setAvatarError(null);
+    if (!file.type.startsWith("image/")) {
+      setAvatarError("Please choose an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setAvatarError("Avatar must be 5MB or smaller.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropSrc(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleBanner = async (file: File) => {
+    setBannerError(null);
+    if (!file.type.startsWith("image/")) {
+      setBannerError("Please choose an image file.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setBannerError("Banner must be 8MB or smaller.");
+      return;
+    }
+    try {
+      await onBannerFile(file);
+    } catch {
+      setBannerError("Upload failed.");
+    }
+  };
+
+  const triggerAvatar = () => {
+    const el = document.getElementById("profile-avatar-input") as HTMLInputElement | null;
+    el?.click();
+  };
+  const triggerBanner = () => {
+    const el = document.getElementById("profile-banner-input") as HTMLInputElement | null;
+    el?.click();
+  };
+
+  return (
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
+      <div className="px-5 py-4 border-b border-zinc-800/60">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+            <CameraIcon className="w-4 h-4 text-violet-400" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-white">Profile Images</h2>
+            <p className="text-xs text-zinc-500">Your avatar and banner appear at the top of your profile</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-5 py-5 space-y-5">
+        {/* Avatar */}
+        <div className="flex items-center gap-4">
+          <div
+            onClick={() => setShowLightbox(true)}
+            className="group relative cursor-pointer rounded-full overflow-hidden shrink-0"
+          >
+            <Avatar user={profile} size="xl" className="ring-2 ring-zinc-800" />
+            <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200">
+              <EyeIcon className="w-5 h-5 text-white/90" />
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={triggerAvatar}
+                disabled={avatarLoading}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-700 text-sm font-medium text-zinc-200 hover:border-zinc-500 hover:text-white transition-colors disabled:opacity-60 cursor-pointer"
+              >
+                {avatarLoading ? <Spinner size="sm" /> : <CameraIcon className="w-3.5 h-3.5" />}
+                {profile.avatar_url ? "Change" : "Upload"} avatar
+              </button>
+              {profile.avatar_url ? (
+                <button
+                  type="button"
+                  onClick={onAvatarRemove}
+                  disabled={avatarLoading}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-800 text-sm font-medium text-zinc-400 hover:text-rose-300 hover:border-rose-500/40 transition-colors disabled:opacity-60 cursor-pointer"
+                >
+                  <XIcon className="w-3.5 h-3.5" />
+                  Remove
+                </button>
+              ) : null}
+            </div>
+            <p className="text-[11px] text-zinc-600 mt-2">PNG, JPG, or WebP. Max 5MB.</p>
+            {avatarError ? <p className="text-[11px] text-rose-400 mt-1">{avatarError}</p> : null}
+            <input
+              id="profile-avatar-input"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleAvatar(file);
+                e.target.value = "";
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Banner */}
+        <div>
+          <div className="relative w-full h-24 sm:h-28 rounded-xl overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-zinc-800">
+            {profile.banner_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={profile.banner_url}
+                alt="Banner preview"
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "radial-gradient(600px 160px at 15% -20%, rgba(56,189,248,0.18), transparent 60%), radial-gradient(500px 160px at 95% 140%, rgba(139,92,246,0.18), transparent 65%)",
+                }}
+              />
+            )}
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={triggerBanner}
+              disabled={bannerLoading}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-700 text-sm font-medium text-zinc-200 hover:border-zinc-500 hover:text-white transition-colors disabled:opacity-60 cursor-pointer"
+            >
+              {bannerLoading ? <Spinner size="sm" /> : <CameraIcon className="w-3.5 h-3.5" />}
+              {profile.banner_url ? "Change" : "Upload"} banner
+            </button>
+            {profile.banner_url ? (
+              <button
+                type="button"
+                onClick={onBannerRemove}
+                disabled={bannerLoading}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-800 text-sm font-medium text-zinc-400 hover:text-rose-300 hover:border-rose-500/40 transition-colors disabled:opacity-60 cursor-pointer"
+              >
+                <XIcon className="w-3.5 h-3.5" />
+                Remove
+              </button>
+            ) : null}
+          </div>
+          <p className="text-[11px] text-zinc-600 mt-2">Recommended 1500×500. PNG, JPG, or WebP. Max 8MB.</p>
+          {bannerError ? <p className="text-[11px] text-rose-400 mt-1">{bannerError}</p> : null}
+          <input
+            id="profile-banner-input"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleBanner(file);
+              e.target.value = "";
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Lightbox Modal */}
+      {showLightbox && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 bg-zinc-950/95 backdrop-blur-md animate-fade-in animate-duration-200"
+          onClick={() => setShowLightbox(false)}
+        >
+          <div className="absolute top-4 right-4">
+            <button
+              type="button"
+              onClick={() => setShowLightbox(false)}
+              className="p-2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors cursor-pointer"
+              aria-label="Close photo view"
+            >
+              <XIcon className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div
+            className="relative max-w-md w-full flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full overflow-hidden border-4 border-zinc-800 shadow-2xl bg-zinc-900 flex items-center justify-center relative">
+              {profile.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="text-5xl font-bold text-zinc-500 select-none">
+                  {getInitials(profile.name)}
+                </div>
+              )}
+            </div>
+            <p className="mt-4 text-base font-bold text-white leading-tight">{profile.name}</p>
+            {profile.username && <p className="text-xs text-zinc-500 mt-1">@{profile.username}</p>}
+          </div>
+        </div>
+      )}
+
+      {/* Avatar Crop Modal */}
+      {cropSrc && (
+        <AvatarCropModal
+          src={cropSrc}
+          onCancel={() => setCropSrc(null)}
+          onConfirm={async (croppedFile) => {
+            setCropSrc(null);
+            try {
+              await onAvatarFile(croppedFile);
+            } catch {
+              setAvatarError("Upload failed.");
+            }
+          }}
+        />
+      )}
+    </div>
   );
 }

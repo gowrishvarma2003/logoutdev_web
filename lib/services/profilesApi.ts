@@ -6,6 +6,8 @@ import { API_BASE_URL } from "../apiBaseUrl";
 
 import type {
   ProfileResponse,
+  ProfileQuestionsResponse,
+  ProfileReposResponse,
   ProofOfWorkSignals,
   UserProfileSkill,
   UserFeaturedProject,
@@ -128,7 +130,7 @@ export async function getProfileFreelance(
 /** PATCH /api/profiles/me — update profile metadata */
 export async function patchMyProfile(
   updates: Partial<
-    Pick<User, "name" | "headline" | "bio" | "location" | "website_url" | "github_url" | "linkedin_url" | "username">
+    Pick<User, "name" | "headline" | "bio" | "location" | "website_url" | "github_url" | "linkedin_url" | "username" | "pronouns" | "open_to_work">
   >
 ): Promise<{ profile: User }> {
   const res = await fetch(`${API_BASE_URL}/api/profiles/me`, {
@@ -159,6 +161,80 @@ export async function replaceMyFeaturedProjects(
     method: "PUT",
     headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     body: JSON.stringify({ space_ids: spaceIds }),
+  });
+  return handleResponse(res);
+}
+
+/** GET /api/profiles/:username/questions — paginated authored questions */
+export async function getProfileQuestions(
+  username: string,
+  page = 1,
+  limit = 20
+): Promise<ProfileQuestionsResponse> {
+  const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
+  const res = await fetch(
+    `${API_BASE_URL}/api/profiles/${encodeURIComponent(username)}/questions?${qs}`,
+    { headers: { ...getAuthHeaders() } }
+  );
+  return handleResponse(res);
+}
+
+/** GET /api/profiles/:username/repos — owned repos + recent PR/review activity */
+export async function getProfileRepos(
+  username: string,
+  page = 1,
+  limit = 20
+): Promise<ProfileReposResponse> {
+  const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
+  const res = await fetch(
+    `${API_BASE_URL}/api/profiles/${encodeURIComponent(username)}/repos?${qs}`,
+    { headers: { ...getAuthHeaders() } }
+  );
+  return handleResponse(res);
+}
+
+/** PUT /api/profiles/me/avatar — upload avatar image (multipart/form-data) */
+export async function uploadMyAvatar(
+  file: File
+): Promise<{ profile: User }> {
+  const form = new FormData();
+  form.append("avatar", file);
+  const res = await fetch(`${API_BASE_URL}/api/profiles/me/avatar`, {
+    method: "PUT",
+    headers: { ...getAuthHeaders() },
+    body: form,
+  });
+  return handleResponse(res);
+}
+
+/** DELETE /api/profiles/me/avatar — remove avatar image */
+export async function deleteMyAvatar(): Promise<{ profile: User }> {
+  const res = await fetch(`${API_BASE_URL}/api/profiles/me/avatar`, {
+    method: "DELETE",
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse(res);
+}
+
+/** PUT /api/profiles/me/banner — upload banner image (multipart/form-data) */
+export async function uploadMyBanner(
+  file: File
+): Promise<{ profile: User }> {
+  const form = new FormData();
+  form.append("banner", file);
+  const res = await fetch(`${API_BASE_URL}/api/profiles/me/banner`, {
+    method: "PUT",
+    headers: { ...getAuthHeaders() },
+    body: form,
+  });
+  return handleResponse(res);
+}
+
+/** DELETE /api/profiles/me/banner — remove banner image */
+export async function deleteMyBanner(): Promise<{ profile: User }> {
+  const res = await fetch(`${API_BASE_URL}/api/profiles/me/banner`, {
+    method: "DELETE",
+    headers: { ...getAuthHeaders() },
   });
   return handleResponse(res);
 }

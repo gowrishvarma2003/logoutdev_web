@@ -14,7 +14,6 @@ import * as launchesApi from "@/lib/services/launchesApi";
 import * as spacesApi from "@/lib/services/spacesApi";
 import * as questionsApi from "@/lib/services/questionsApi";
 import * as freelanceApi from "@/lib/services/freelanceApi";
-import * as profilesApi from "@/lib/services/profilesApi";
 
 interface RightPanelProps {
   currentUser: User;
@@ -104,12 +103,9 @@ export default function RightPanel({ currentUser }: RightPanelProps) {
           return;
         }
 
-        if (segments[0] === "profile" && segments[1]) {
-          const res = await profilesApi.getProfile(segments[1]);
-          if (!cancelled) {
-            setRouteRelated(res.related_entities || []);
-          }
-        }
+        // Profile routes surface their own related entities in the overview
+        // page, so we intentionally do not populate the right rail here to
+        // avoid duplication.
       } catch {
         if (!cancelled) {
           setRouteNextSteps([]);

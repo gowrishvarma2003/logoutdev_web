@@ -325,7 +325,7 @@ function ProjectSettingsSection({
             <button
               onClick={handleSave}
               disabled={saving}
-              className="rounded-lg bg-white px-3.5 py-1.5 text-xs font-bold text-zinc-955 hover:bg-zinc-100 disabled:opacity-50 transition-colors cursor-pointer"
+              className="rounded-lg bg-white px-3.5 py-1.5 text-xs font-bold text-zinc-950 hover:bg-zinc-100 disabled:opacity-50 transition-colors cursor-pointer"
             >
               {saving ? "Saving..." : "Save Changes"}
             </button>
@@ -571,7 +571,7 @@ function JoinRequestsSection({
                 <button
                   onClick={() => handleAction(request.id, "accept")}
                   disabled={acting === request.id}
-                  className="flex-1 inline-flex items-center justify-center gap-1 rounded bg-emerald-500/10 border border-emerald-500/20 py-1 text-[10px] font-semibold text-emerald-400 hover:bg-emerald-500 hover:text-zinc-955 transition-all disabled:opacity-50 cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-1 rounded bg-emerald-500/10 border border-emerald-500/20 py-1 text-[10px] font-semibold text-emerald-400 hover:bg-emerald-500 hover:text-zinc-950 transition-all disabled:opacity-50 cursor-pointer"
                 >
                   <CheckCircleIcon className="h-3 w-3" />
                   Accept
@@ -580,7 +580,7 @@ function JoinRequestsSection({
                 <button
                   onClick={() => handleAction(request.id, "need-info")}
                   disabled={acting === request.id}
-                  className="flex-1 inline-flex items-center justify-center gap-1 rounded bg-amber-500/10 border border-amber-500/20 py-1 text-[10px] font-semibold text-amber-400 hover:bg-amber-500 hover:text-zinc-955 transition-all disabled:opacity-50 cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-1 rounded bg-amber-500/10 border border-amber-500/20 py-1 text-[10px] font-semibold text-amber-400 hover:bg-amber-500 hover:text-zinc-950 transition-all disabled:opacity-50 cursor-pointer"
                 >
                   <ChatBubbleIcon className="h-3 w-3" />
                   Info
@@ -753,7 +753,7 @@ function StackManagementSection({
             <button
               onClick={handleSave}
               disabled={saving}
-              className="rounded-lg bg-white px-3.5 py-1.5 text-xs font-bold text-zinc-955 hover:bg-zinc-100 disabled:opacity-50 transition-colors cursor-pointer"
+              className="rounded-lg bg-white px-3.5 py-1.5 text-xs font-bold text-zinc-950 hover:bg-zinc-100 disabled:opacity-50 transition-colors cursor-pointer"
             >
               {saving ? "Saving..." : "Save Stack"}
             </button>

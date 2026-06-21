@@ -398,3 +398,53 @@ export function ShareIcon({ className = "w-4 h-4" }: IconProps) {
     </svg>
   );
 }
+
+export function CameraIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.494 2.25 9.603v10.293c0 1.092.726 2.016 1.746 2.193 1.51.263 3.06.443 4.642.527a2.25 2.25 0 003.06.213l1.396-1.047a.75.75 0 01.91 0l1.396 1.047a2.25 2.25 0 003.06-.213c1.582-.084 3.132-.264 4.642-.527 1.02-.177 1.746-1.101 1.746-2.193V9.603c0-1.109-.751-2.023-1.802-2.198a27.59 27.59 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.823-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.823 1.316z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.25h.008v.008h-.008V10.25z" />
+    </svg>
+  );
+}
+
+export function BriefcaseIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.073a2.25 2.25 0 01-1.646 2.166l-.292.082a24.6 24.6 0 01-12.624 0l-.292-.082A2.25 2.25 0 013.75 18.223V14.15M20.25 7.96V5.85a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 5.85v2.11m16.5 0a33.75 33.75 0 00-16.5 0m16.5 0c.731 0 1.414.266 1.939.707M3.75 7.96c.731 0 1.414.266 1.939.707M3.75 7.96c0 .51.102 1.018.298 1.495m13.094-2.788a5.25 5.25 0 00-9.284 0M3.252 9.455a5.25 5.25 0 009.284 0" />
+    </svg>
+  );
+}
+
+export function EyeIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  );
+}
+
+export function StarIcon({ className = "w-4 h-4", filled = false }: IconProps & { filled?: boolean }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+    </svg>
+  );
+}
+
+export function GitBranchIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 12a3 3 0 100-6 3 3 0 000 6zm0 0v6m6-12a3 3 0 100 6 3 3 0 000-6zm6 3v6a3 3 0 01-3 3H9" />
+    </svg>
+  );
+}
+
+export function CheckBadgeIcon({ className = "w-4 h-4" }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path fillRule="evenodd" clipRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.49 4.49 0 011.307 3.498A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.491 4.491 0 0112 21.75a4.491 4.491 0 01-3.397-1.549 4.491 4.491 0 01-3.497-1.307 4.491 4.491 0 01-1.307-3.497A4.491 4.491 0 012.25 12a4.491 4.491 0 011.549-3.397 4.491 4.491 0 011.307-3.497 4.491 4.491 0 013.497-1.307zm7.007 8.836a.75.75 0 00-1.05-.073l-3.5 3a.75.75 0 01-1.05-.025l-1.5-1.65a.75.75 0 10-1.1 1.02l1.5 1.65a2.25 2.25 0 003.15.076l3.5-3a.75.75 0 00.073-1.05z" />
+    </svg>
+  );
+}

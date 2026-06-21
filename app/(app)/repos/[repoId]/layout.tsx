@@ -1,6 +1,6 @@
 "use client";
 
-import { use, createContext, useContext, ReactNode, useState } from "react";
+import { use, createContext, useContext, ReactNode, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useRepo } from "@/lib/hooks/useRepos";
@@ -9,9 +9,8 @@ import { Repository } from "@/lib/types";
 import { EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import { FolderIcon } from "@/components/ui/Icons";
-import RepoCollaborationBanner from "@/components/repos/RepoCollaborationBanner";
 import { ArrowUturnLeftIcon } from "@heroicons/react/24/outline";
-import { CodeBracketIcon, ClockIcon, Cog6ToothIcon, StarIcon, ArrowsRightLeftIcon, TagIcon, QueueListIcon, ChartBarIcon, ShieldCheckIcon, ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
+import { CodeBracketIcon, ClockIcon, Cog6ToothIcon, StarIcon, ArrowsRightLeftIcon, TagIcon, QueueListIcon, ChartBarIcon, ShieldCheckIcon, ChatBubbleLeftRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 
 interface RepoContextType {
   repo: Repository;
@@ -41,6 +40,32 @@ export default function RepoLayout({
   const [isStarring, setIsStarring] = useState(false);
   const [isForking, setIsForking] = useState(false);
   const [actionError, setActionError] = useState("");
+
+  const [showSpaceMenu, setShowSpaceMenu] = useState(false);
+  const spaceMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!showSpaceMenu) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (spaceMenuRef.current?.contains(event.target as Node)) return;
+      setShowSpaceMenu(false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowSpaceMenu(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showSpaceMenu]);
 
   const handleToggleStar = async () => {
     if (!repo || isStarring) return;
@@ -93,9 +118,7 @@ export default function RepoLayout({
   const tabs = [
     { name: "Code", href: `/repos/${repo.id}`, icon: CodeBracketIcon },
     { name: "Commits", href: `/repos/${repo.id}/commits`, icon: ClockIcon },
-    { name: "Branches", href: `/repos/${repo.id}/branches`, icon: ArrowsRightLeftIcon },
     { name: "Pull Requests", href: `/repos/${repo.id}/pulls`, icon: QueueListIcon },
-    { name: "Discussions", href: `/repos/${repo.id}/discussions`, icon: ChatBubbleLeftRightIcon },
     { name: "Releases", href: `/repos/${repo.id}/releases`, icon: TagIcon },
     { name: "Forks", href: `/repos/${repo.id}/forks`, icon: ArrowUturnLeftIcon },
     { name: "Insights", href: `/repos/${repo.id}/insights`, icon: ChartBarIcon },
@@ -139,11 +162,73 @@ export default function RepoLayout({
                   </Link>
                 ) : null}
                 {repo.attached_space ? (
+                  <div ref={spaceMenuRef} className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowSpaceMenu((curr) => !curr)}
+                      className="flex h-[28px] items-center gap-1.5 rounded-md border border-sky-400/20 px-3 text-xs font-medium text-sky-300 transition-colors hover:bg-sky-50/10"
+                      aria-expanded={showSpaceMenu}
+                      aria-haspopup="menu"
+                    >
+                      <span>Space: {repo.attached_space.name}</span>
+                      <ChevronDownIcon className={`h-3 w-3 shrink-0 text-sky-400 transition-transform ${showSpaceMenu ? "rotate-180" : ""}`} />
+                    </button>
+
+                    {showSpaceMenu ? (
+                      <div
+                        className="absolute right-0 top-full z-30 mt-2 w-56 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/60"
+                        role="menu"
+                      >
+                        <div className="border-b border-zinc-800 px-3 py-2">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Space Collaboration</p>
+                        </div>
+                        <div className="py-1">
+                          <Link
+                            href={`/spaces/${repo.attached_space.id}`}
+                            onClick={() => setShowSpaceMenu(false)}
+                            role="menuitem"
+                            className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
+                          >
+                            Open Space Home
+                          </Link>
+                          <Link
+                            href={`/spaces/${repo.attached_space.id}/work`}
+                            onClick={() => setShowSpaceMenu(false)}
+                            role="menuitem"
+                            className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
+                          >
+                            View Work Planning
+                          </Link>
+                          <Link
+                            href={`/spaces/${repo.attached_space.id}/discussions`}
+                            onClick={() => setShowSpaceMenu(false)}
+                            role="menuitem"
+                            className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
+                          >
+                            Space Discussions
+                          </Link>
+                          {repo.can_manage_general ? (
+                            <Link
+                              href={`/launches/new?spaceId=${encodeURIComponent(repo.attached_space.id)}&spaceName=${encodeURIComponent(repo.attached_space.name)}&repoId=${encodeURIComponent(repo.id)}&repoName=${encodeURIComponent(repo.name)}&repoDescription=${encodeURIComponent(repo.description || "")}`}
+                              onClick={() => setShowSpaceMenu(false)}
+                              role="menuitem"
+                              className="flex items-center gap-2 border-t border-zinc-900 px-3 py-2 text-xs font-semibold text-emerald-400 transition-colors hover:bg-zinc-900 hover:text-emerald-300"
+                            >
+                              Launch Product
+                            </Link>
+                          ) : null}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+                {repo.attached_space ? (
                   <Link
-                    href={`/spaces/${repo.attached_space.id}`}
-                    className="rounded-md border border-sky-400/20 px-3 py-1.5 text-xs font-medium text-sky-300 transition-colors hover:bg-sky-500/10"
+                    href={`/spaces/${repo.attached_space.id}/discussions`}
+                    className="flex h-[28px] items-center gap-1.5 rounded-md border border-zinc-700 bg-zinc-800 px-3 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
                   >
-                    Open Space
+                    <ChatBubbleLeftRightIcon className="h-4 w-4 text-zinc-400" />
+                    <span>Discussions</span>
                   </Link>
                 ) : null}
                 <div className="flex h-[28px] overflow-hidden rounded-md border border-zinc-700 bg-zinc-800 text-xs font-medium text-zinc-300">
@@ -208,9 +293,6 @@ export default function RepoLayout({
 
         {/* Action Content */}
         <main className="mx-auto max-w-[1280px] px-4 py-6 md:px-8">
-          <div className="mb-6">
-            <RepoCollaborationBanner repo={repo} />
-          </div>
           {children}
         </main>
       </div>

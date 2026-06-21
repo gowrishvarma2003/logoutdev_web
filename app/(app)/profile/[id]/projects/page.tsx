@@ -9,8 +9,8 @@ import { use, useState } from "react";
 import Link from "next/link";
 import { useProfileProjects } from "@/lib/hooks/useProfile";
 import { StatusBadge, VisibilityBadge } from "@/components/spaces/SpaceBadges";
-import Spinner from "@/components/ui/Spinner";
-import { UsersIcon, ChevronRightIcon } from "@/components/ui/Icons";
+import { ProfileListSkeleton } from "@/components/profile/ProfileSkeleton";
+import { UsersIcon, ChevronRightIcon, RocketIcon } from "@/components/ui/Icons";
 
 interface ProfileProjectsPageProps {
   params: Promise<{ id: string }>;
@@ -23,11 +23,7 @@ export default function ProfileProjectsPage({ params }: ProfileProjectsPageProps
   const { projects, total, loading, error } = useProfileProjects(username, page);
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-16">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <ProfileListSkeleton rows={5} />;
   }
 
   if (error) {
@@ -41,6 +37,9 @@ export default function ProfileProjectsPage({ params }: ProfileProjectsPageProps
   if (projects.length === 0) {
     return (
       <div className="px-5 py-16 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-3">
+          <RocketIcon className="w-5 h-5 text-zinc-600" />
+        </div>
         <p className="text-zinc-600 text-sm">No projects to show.</p>
       </div>
     );

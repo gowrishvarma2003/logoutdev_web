@@ -21,61 +21,94 @@ export default function AnswerList({
 }) {
   if (answers.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-zinc-800 px-4 py-10 text-center text-sm text-zinc-500">
-        No answers yet.
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/20 px-4 py-12 text-center">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900/50 text-zinc-500">
+          <CheckCircleIcon className="h-5 w-5" />
+        </div>
+        <h4 className="mt-4 text-sm font-semibold text-zinc-200">No solutions yet</h4>
+        <p className="mt-1 max-w-sm text-xs text-zinc-500 leading-relaxed">
+          Share the first answer and help move this question forward.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {answers.map((answer) => {
         const isOwn = currentUser?.id === answer.author_id;
+        const isAccepted = answer.is_accepted;
+
         return (
-          <article key={answer.id} className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
-            <div className="flex items-start gap-3">
-              <Avatar user={answer.author ?? null} size="sm" className="mt-0.5 shrink-0" />
+          <article
+            key={answer.id}
+            className={`rounded-2xl border p-5 transition-all duration-300 ${
+              isAccepted
+                ? "border-emerald-500/25 bg-emerald-500/[0.02] shadow-[0_0_16px_rgba(16,185,129,0.02)]"
+                : "border-zinc-800/80 bg-zinc-950/40 hover:border-zinc-700"
+            }`}
+          >
+            <div className="flex items-start gap-3.5">
+              <Avatar user={answer.author ?? null} size="sm" className="mt-0.5 ring-2 ring-zinc-900/50" />
               <div className="min-w-0 flex-1">
-                <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
-                  <span className="font-semibold text-white">{answer.author?.name ?? "Unknown"}</span>
-                  <span className="text-zinc-700">·</span>
-                  <span className="text-zinc-500">{formatRelativeTime(answer.created_at)}</span>
-                  {answer.is_accepted && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 font-semibold text-emerald-300">
-                      <CheckCircleIcon className="h-3.5 w-3.5" />
-                      Accepted
+                {/* Author & Header Metadata */}
+                <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="font-bold text-white hover:underline cursor-pointer">
+                      {answer.author?.name ?? "Unknown"}
                     </span>
-                  )}
-                  {isOwn && (
-                    <span className="rounded-full bg-zinc-800 px-2 py-0.5 font-semibold text-zinc-300">
-                      Your answer
+                    <span className="text-zinc-700">·</span>
+                    <span className="text-zinc-500">{formatRelativeTime(answer.created_at)}</span>
+                    {isOwn && (
+                      <span className="rounded bg-zinc-800/60 border border-zinc-700/50 px-1.5 py-0.2 text-[10px] font-semibold text-zinc-300">
+                        Your answer
+                      </span>
+                    )}
+                  </div>
+
+                  {isAccepted && (
+                    <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400 border border-emerald-500/20">
+                      <CheckCircleIcon className="h-3 w-3" />
+                      Accepted Solution
                     </span>
                   )}
                 </div>
 
-                <RichText text={answer.body} className="whitespace-pre-line text-sm leading-relaxed text-zinc-300" />
+                {/* Answer Content */}
+                <RichText
+                  text={answer.body}
+                  className="whitespace-pre-line text-sm leading-relaxed text-zinc-300"
+                />
 
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
-                  {!isOwn && currentUser && (
-                    <button
-                      onClick={() => onToggleVote(answer)}
-                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-semibold transition-colors ${
-                        answer.is_upvoted_by_me
-                          ? "bg-white text-zinc-950"
-                          : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
-                      }`}
-                    >
-                      <ArrowUpIcon className="h-3.5 w-3.5" />
-                      {answer.score}
-                    </button>
-                  )}
-                  {(isOwn || !currentUser) && <span className="text-zinc-500">{answer.score} upvotes</span>}
-                  {canAccept && !answer.is_accepted && (
+                {/* Actions / Votes */}
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-zinc-900 pt-3">
+                  <div className="flex items-center gap-3 text-xs">
+                    {!isOwn && currentUser ? (
+                      <button
+                        onClick={() => onToggleVote(answer)}
+                        className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-300 ${
+                          answer.is_upvoted_by_me
+                            ? "bg-sky-500 border-sky-500 text-zinc-950 font-bold shadow-[0_0_12px_rgba(56,189,248,0.1)]"
+                            : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:border-zinc-700 hover:text-white"
+                        }`}
+                      >
+                        <ArrowUpIcon className="h-3.5 w-3.5" />
+                        <span>Upvote</span>
+                        <span className="text-[11px] opacity-80">({answer.score})</span>
+                      </button>
+                    ) : (
+                      <span className="text-zinc-500 text-[11px] bg-zinc-900/20 border border-zinc-900 px-2 py-1 rounded-lg">
+                        {answer.score} upvotes
+                      </span>
+                    )}
+                  </div>
+
+                  {canAccept && !isAccepted && (
                     <button
                       onClick={() => onAccept(answer.id)}
-                      className="rounded-full bg-emerald-500/10 px-2.5 py-1 font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/20"
+                      className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 transition-colors hover:bg-emerald-500/20 hover:border-emerald-500/30"
                     >
-                      Mark accepted
+                      Accept Solution
                     </button>
                   )}
                 </div>
@@ -87,3 +120,4 @@ export default function AnswerList({
     </div>
   );
 }
+

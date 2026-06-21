@@ -1,7 +1,7 @@
 export interface User {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   username?: string;
   headline?: string;
   bio?: string;
@@ -9,7 +9,20 @@ export interface User {
   website_url?: string;
   github_url?: string;
   linkedin_url?: string;
+  avatar_url?: string | null;
+  banner_url?: string | null;
+  pronouns?: string | null;
+  open_to_work?: boolean;
   created_at?: string;
+}
+
+export interface FollowListUser {
+  id: string;
+  name: string;
+  username?: string;
+  headline?: string | null;
+  avatar_url?: string | null;
+  bio?: string | null;
 }
 
 export interface PostHashtagEntity {
@@ -207,6 +220,8 @@ export interface ProfileStats {
   freelance_wins_count: number;
   workspaces_from_freelance_count: number;
   accepted_collaborations_count: number;
+  questions_count?: number;
+  repos_count?: number;
 }
 
 export interface ProofOfWorkSignals {
@@ -246,6 +261,109 @@ export interface ProfileResponse {
   fit_clusters: string[];
   open_to_collaborate: boolean;
   related_entities: RelatedEntityRef[];
+}
+
+export interface ProfileQuestionListItem {
+  id: string;
+  author_id: string;
+  type: QuestionType;
+  title: string;
+  body: string;
+  status: QuestionStatus;
+  answer_count: number;
+  discussion_count: number;
+  participant_count: number;
+  latest_activity_at: string;
+  created_at: string;
+  updated_at: string;
+  author?: Pick<User, "id" | "name" | "username" | "headline"> | null;
+  tags: QuestionTag[];
+}
+
+export interface ProfileQuestionsResponse {
+  questions: ProfileQuestionListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  is_me: boolean;
+}
+
+export interface ProfileRepoListItem {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  visibility: RepositoryVisibility;
+  default_branch: string;
+  space?: {
+    id: string;
+    name: string;
+    slug: string;
+    visibility: SpaceVisibility;
+    status: SpaceStatus;
+  } | null;
+  created_at: string;
+  updated_at: string;
+  star_count: number;
+  fork_count: number;
+  open_pr_count: number;
+  href: string;
+}
+
+export interface ProfileRepoActivityItem {
+  id: string;
+  number: number;
+  title: string;
+  status: PullRequestStatus;
+  is_draft: boolean;
+  created_at: string;
+  updated_at: string;
+  repo?: {
+    id: string;
+    name: string;
+    slug: string;
+    visibility: RepositoryVisibility;
+  } | null;
+  href: string;
+}
+
+export interface ProfileRepoReviewItem {
+  id: string;
+  status: PullRequestReviewStatus;
+  submitted_at: string;
+  created_at: string;
+  pull_request?: {
+    id: string;
+    number: number;
+    title: string;
+    status: PullRequestStatus;
+    repo_id: string;
+    repo?: {
+      id: string;
+      name: string;
+      slug: string;
+      visibility: RepositoryVisibility;
+    } | null;
+  } | null;
+  href: string | null;
+}
+
+export interface ProfileReposResponse {
+  repos: ProfileRepoListItem[];
+  recent_prs: ProfileRepoActivityItem[];
+  recent_reviews: ProfileRepoReviewItem[];
+  total: number;
+  page: number;
+  limit: number;
+  is_me: boolean;
+}
+
+export interface FollowListResponse {
+  followers?: FollowListUser[];
+  following?: FollowListUser[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 export interface ActivityItem {

@@ -173,15 +173,6 @@ export default function RepoCommitsPage() {
                   );
                 })}
               </div>
-              <div className="border-t border-zinc-800 px-3 py-2">
-                <Link
-                  href={`/repos/${repo.id}/branches`}
-                  onClick={() => setShowBranchMenu(false)}
-                  className="text-xs font-medium text-blue-400 hover:text-blue-300"
-                >
-                  View all branches
-                </Link>
-              </div>
             </div>
           ) : null}
         </div>

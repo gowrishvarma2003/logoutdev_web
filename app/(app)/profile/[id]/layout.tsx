@@ -2,14 +2,15 @@
 
 /**
  * Profile layout — wraps all /profile/[id]/* pages.
- * Fetches the profile once, renders the header + stats + tab nav.
+ * Fetches the profile + signals once, renders the header + stats + tab nav.
  * Individual sub-pages render as {children}.
  */
 
-import { use, useMemo, useState } from "react";
+import { use, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useProfile } from "@/lib/hooks/useProfile";
+import { useProfile, useProfileSignals, useUploadAvatar, useUploadBanner } from "@/lib/hooks/useProfile";
+import { useAuth } from "@/lib/hooks/useAuth";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileStats from "@/components/profile/ProfileStats";
 import Spinner from "@/components/ui/Spinner";
@@ -24,20 +25,25 @@ interface TabProps {
   href: string;
   label: string;
   active: boolean;
+  count?: number;
 }
 
-function Tab({ href, label, active }: TabProps) {
+function Tab({ href, label, active, count }: TabProps) {
   return (
     <Link
       href={href}
-      className={`relative px-4 py-3.5 text-sm font-medium whitespace-nowrap transition-colors ${
+      className={`relative px-3.5 sm:px-4 py-3.5 text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
         active
           ? "text-white"
           : "text-zinc-500 hover:text-zinc-300"
       }`}
     >
       {label}
-      {/* Active underline */}
+      {typeof count === "number" && count > 0 ? (
+        <span className={`text-[11px] tabular-nums rounded-full px-1.5 py-0.5 ${active ? "bg-zinc-800 text-zinc-300" : "bg-zinc-900 text-zinc-600"}`}>
+          {count}
+        </span>
+      ) : null}
       {active && (
         <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-full" />
       )}
@@ -49,7 +55,12 @@ export default function ProfileLayout({ params, children }: ProfileLayoutProps) 
   const { id: username } = use(params);
   const pathname = usePathname();
 
-  const { profile, is_me, is_following, stats, loading, error } = useProfile(username);
+  const { profile, is_me, is_following, stats, loading, error, refetch, open_to_collaborate } = useProfile(username);
+  const { signals } = useProfileSignals(username);
+  const { upload: uploadAvatar } = useUploadAvatar();
+  const { upload: uploadBanner, remove: removeBanner } = useUploadBanner();
+  const { user: currentUser, refreshUser } = useAuth();
+
   const [followOverride, setFollowOverride] = useState<{
     profileId: string;
     following: boolean;
@@ -77,6 +88,24 @@ export default function ProfileLayout({ params, children }: ProfileLayoutProps) 
       followerCount: next.followerCount,
     });
   };
+
+  const handleAvatarUpload = useCallback(async (file: File) => {
+    const updated = await uploadAvatar(file);
+    if (updated && currentUser) refreshUser({ ...currentUser, ...updated });
+    refetch();
+  }, [uploadAvatar, refetch, currentUser, refreshUser]);
+
+  const handleBannerUpload = useCallback(async (file: File) => {
+    const updated = await uploadBanner(file);
+    if (updated && currentUser) refreshUser({ ...currentUser, ...updated });
+    refetch();
+  }, [uploadBanner, refetch, currentUser, refreshUser]);
+
+  const handleBannerRemove = useCallback(async () => {
+    const updated = await removeBanner();
+    if (updated && currentUser) refreshUser({ ...currentUser, ...updated });
+    refetch();
+  }, [removeBanner, refetch, currentUser, refreshUser]);
 
   if (loading) {
     return (
@@ -123,35 +152,50 @@ export default function ProfileLayout({ params, children }: ProfileLayoutProps) 
             <h1 className="text-[15px] font-bold text-white leading-tight truncate">
               {profile.name}
             </h1>
-            {profile.username && (
+            {profile.username ? (
               <p className="text-xs text-zinc-500">@{profile.username}</p>
-            )}
+            ) : null}
           </div>
         </div>
       </header>
 
-      {/* ── Profile header (avatar, bio, links) ── */}
+      {/* ── Profile header (banner, avatar, bio, links) ── */}
       <ProfileHeader
         profile={profile}
         is_me={is_me}
         is_following={displayFollowing}
         followerCount={displayStats?.followers ?? 0}
+        band={signals?.band ?? null}
+        score={signals?.score ?? null}
+        openToCollaborate={open_to_collaborate}
         onFollowChange={handleFollowChange}
+        onAvatarUpload={is_me ? handleAvatarUpload : undefined}
+        onBannerUpload={is_me ? handleBannerUpload : undefined}
+        onBannerRemove={is_me ? handleBannerRemove : undefined}
       />
 
       {/* ── Stats bar ── */}
-      {displayStats && <ProfileStats stats={displayStats} username={username} />}
+      {displayStats ? (
+        <ProfileStats
+          stats={displayStats}
+          username={username}
+          profileId={profile.id}
+          isMe={is_me}
+        />
+      ) : null}
 
-      {/* ── Tab navigation ── */}
+      {/* ── Tab navigation (sticky under top bar) ── */}
       <nav
-        className="flex border-b border-zinc-800 overflow-x-auto scrollbar-none"
+        className="sticky top-[52px] z-10 flex border-b border-zinc-800 overflow-x-auto scrollbar-none bg-zinc-950/90 backdrop-blur-md"
         aria-label="Profile tabs"
       >
         <Tab href={base} label="Overview" active={pathname === base} />
-        <Tab href={`${base}/launches`} label="Launches" active={pathname === `${base}/launches`} />
-        <Tab href={`${base}/freelance`} label="Freelance" active={pathname === `${base}/freelance`} />
-        <Tab href={`${base}/projects`} label="Projects" active={pathname === `${base}/projects`} />
-        <Tab href={`${base}/posts`} label="Posts" active={pathname === `${base}/posts`} />
+        <Tab href={`${base}/launches`} label="Launches" active={pathname === `${base}/launches`} count={displayStats?.launches_published_count} />
+        <Tab href={`${base}/freelance`} label="Freelance" active={pathname === `${base}/freelance`} count={(displayStats?.freelance_wins_count ?? 0) + (displayStats?.freelance_projects_posted_count ?? 0)} />
+        <Tab href={`${base}/projects`} label="Projects" active={pathname === `${base}/projects`} count={(displayStats?.projects_created_count ?? 0) + (displayStats?.projects_contributed_count ?? 0)} />
+        <Tab href={`${base}/repos`} label="Repos" active={pathname === `${base}/repos`} count={displayStats?.repos_count} />
+        <Tab href={`${base}/posts`} label="Posts" active={pathname === `${base}/posts`} count={displayStats?.posts_count} />
+        <Tab href={`${base}/questions`} label="Questions" active={pathname === `${base}/questions`} count={displayStats?.questions_count} />
         <Tab href={`${base}/activity`} label="Activity" active={pathname === `${base}/activity`} />
       </nav>
 

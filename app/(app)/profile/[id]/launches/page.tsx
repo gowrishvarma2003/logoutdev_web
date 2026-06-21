@@ -2,8 +2,9 @@
 
 import { use } from "react";
 import { useProfileLaunches } from "@/lib/hooks/useProfile";
-import Spinner from "@/components/ui/Spinner";
 import LaunchCard from "@/components/launches/LaunchCard";
+import { ProfileCardGridSkeleton } from "@/components/profile/ProfileSkeleton";
+import { SparklesIcon } from "@/components/ui/Icons";
 
 export default function ProfileLaunchesPage({
   params,
@@ -14,11 +15,7 @@ export default function ProfileLaunchesPage({
   const { launches, loading, error } = useProfileLaunches(id);
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-16">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <ProfileCardGridSkeleton cards={3} />;
   }
 
   if (error) {
@@ -26,7 +23,14 @@ export default function ProfileLaunchesPage({
   }
 
   if (launches.length === 0) {
-    return <p className="px-5 py-10 text-sm text-zinc-500">No launches yet.</p>;
+    return (
+      <div className="px-5 py-16 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-3">
+          <SparklesIcon className="w-5 h-5 text-zinc-600" />
+        </div>
+        <p className="text-zinc-600 text-sm">No launches yet.</p>
+      </div>
+    );
   }
 
   return (

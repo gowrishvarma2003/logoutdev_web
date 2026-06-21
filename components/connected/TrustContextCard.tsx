@@ -2,46 +2,121 @@
 
 import Link from "next/link";
 import type { TrustContext } from "@/lib/types";
+import Avatar from "@/components/ui/Avatar";
 
 export default function TrustContextCard({ trust }: { trust: TrustContext }) {
+  // Parse stat string (e.g. "4 spaces" -> value: "4", label: "spaces")
+  const parseStat = (statStr: string) => {
+    const match = statStr.trim().match(/^(\d+)\s+(.+)$/);
+    if (match) {
+      return { value: match[1], label: match[2] };
+    }
+    return { value: "", label: statStr };
+  };
+
+  const allStats = [...trust.primary_stats, ...trust.secondary_stats].map(parseStat);
+
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
-        {trust.label}
-      </p>
-      <div className="mt-2 flex items-start justify-between gap-3">
-        <div>
-          <Link href={trust.user.href} className="text-base font-semibold text-white hover:text-sky-300">
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-950/40 p-5 backdrop-blur-sm transition-all duration-300 hover:border-zinc-700">
+      {/* Header Label */}
+      <div className="mb-4 flex items-center justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+          {trust.label || "Asker Trust"}
+        </span>
+        {trust.open_to_collaborate && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Open to collab
+          </span>
+        )}
+      </div>
+
+      {/* Main Profile Info */}
+      <div className="flex items-start gap-3">
+        <Avatar user={trust.user as any} size="md" className="ring-2 ring-zinc-800/80" />
+        <div className="min-w-0 flex-1">
+          <Link
+            href={trust.user.href}
+            className="text-base font-bold text-white transition-colors hover:text-sky-400"
+          >
             {trust.user.name}
           </Link>
-          {trust.user.headline ? (
-            <p className="mt-1 text-sm leading-6 text-zinc-400">{trust.user.headline}</p>
-          ) : null}
-        </div>
-        <div className="rounded-2xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-right">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">Proof</p>
-          <p className="text-lg font-semibold text-white">{trust.proof_score}</p>
-          <p className="text-xs text-zinc-400">{trust.proof_band}</p>
+          {trust.user.username && (
+            <p className="text-xs text-zinc-500">@{trust.user.username}</p>
+          )}
+          {trust.user.headline && (
+            <p className="mt-1 text-xs leading-relaxed text-zinc-400 line-clamp-2">
+              {trust.user.headline}
+            </p>
+          )}
         </div>
       </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        {trust.strongest_stacks.map((stack) => (
-          <span
-            key={`${trust.user.id}:${stack}`}
-            className="rounded-full border border-sky-500/20 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300"
-          >
-            {stack}
-          </span>
-        ))}
+
+      {/* Proof Score Badge */}
+      <div className="mt-4 flex items-center justify-between rounded-xl border border-zinc-800/80 bg-zinc-900/20 px-4 py-3">
+        <div>
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500">Proof Band</p>
+          <p className="text-xs font-semibold text-white mt-0.5">{trust.proof_band}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500">Score</p>
+          <p className="text-lg font-bold text-sky-400 mt-0.5">{trust.proof_score}</p>
+        </div>
       </div>
-      <div className="mt-4 space-y-1 text-xs text-zinc-400">
-        {trust.primary_stats.map((item) => (
-          <p key={`${trust.user.id}:${item}`}>{item}</p>
-        ))}
-        {trust.secondary_stats.map((item) => (
-          <p key={`${trust.user.id}:secondary:${item}`}>{item}</p>
-        ))}
+
+      {/* Stacks / Skills */}
+      {trust.strongest_stacks.length > 0 && (
+        <div className="mt-4">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2 font-medium">Top Skills</p>
+          <div className="flex flex-wrap gap-1.5">
+            {trust.strongest_stacks.map((stack) => (
+              <span
+                key={`${trust.user.id}:${stack}`}
+                className="rounded-lg border border-zinc-800 bg-zinc-900/30 px-2 py-0.5 text-xs text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
+              >
+                {stack}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Accomplishments Stat Grid */}
+      {allStats.length > 0 && (
+        <div className="mt-5 border-t border-zinc-800/60 pt-4">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-3 font-medium">Platform Stats</p>
+          <div className="grid grid-cols-3 gap-2">
+            {allStats.map((stat, idx) => (
+              <div
+                key={`${trust.user.id}:stat:${idx}`}
+                className="rounded-lg border border-zinc-900 bg-zinc-900/10 p-2.5 text-center transition-all hover:bg-zinc-900/20"
+              >
+                {stat.value ? (
+                  <>
+                    <span className="block text-base font-bold text-white">{stat.value}</span>
+                    <span className="block text-[9px] uppercase tracking-wider text-zinc-500 mt-0.5 truncate">
+                      {stat.label}
+                    </span>
+                  </>
+                ) : (
+                  <span className="block text-xs font-medium text-zinc-300 truncate">{stat.label}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* View Profile CTA */}
+      <div className="mt-5">
+        <Link
+          href={trust.user.href}
+          className="flex w-full items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/40 py-2.5 text-xs font-semibold text-zinc-300 transition-all hover:bg-zinc-900 hover:text-white hover:border-zinc-700"
+        >
+          View Profile
+        </Link>
       </div>
     </div>
   );
 }
+
