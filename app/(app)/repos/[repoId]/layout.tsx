@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import { FolderIcon } from "@/components/ui/Icons";
 import { ArrowUturnLeftIcon } from "@heroicons/react/24/outline";
-import { CodeBracketIcon, ClockIcon, Cog6ToothIcon, StarIcon, ArrowsRightLeftIcon, TagIcon, QueueListIcon, ChartBarIcon, ShieldCheckIcon, ChatBubbleLeftRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { CodeBracketIcon, ClockIcon, Cog6ToothIcon, StarIcon, ArrowsRightLeftIcon, TagIcon, QueueListIcon, ChartBarIcon, ShieldCheckIcon, ChatBubbleLeftRightIcon, ChevronDownIcon, PlayCircleIcon } from "@heroicons/react/24/outline";
 
 interface RepoContextType {
   repo: Repository;
@@ -119,6 +119,7 @@ export default function RepoLayout({
     { name: "Code", href: `/repos/${repo.id}`, icon: CodeBracketIcon },
     { name: "Commits", href: `/repos/${repo.id}/commits`, icon: ClockIcon },
     { name: "Pull Requests", href: `/repos/${repo.id}/pulls`, icon: QueueListIcon },
+    { name: "Actions", href: `/repos/${repo.id}/actions`, icon: PlayCircleIcon },
     { name: "Releases", href: `/repos/${repo.id}/releases`, icon: TagIcon },
     { name: "Forks", href: `/repos/${repo.id}/forks`, icon: ArrowUturnLeftIcon },
     { name: "Insights", href: `/repos/${repo.id}/insights`, icon: ChartBarIcon },
