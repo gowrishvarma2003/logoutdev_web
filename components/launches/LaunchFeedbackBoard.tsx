@@ -4,6 +4,8 @@ import { useState } from "react";
 import type { Launch, LaunchFeedbackItem, User } from "@/lib/types";
 import RichComposer from "@/components/ui/RichComposer";
 import RichText from "@/components/ui/RichText";
+import Avatar from "@/components/ui/Avatar";
+import { ChatBubbleIcon, TrashIcon, SparklesIcon, CheckIcon } from "@/components/ui/Icons";
 
 interface LaunchFeedbackBoardProps {
   launch: Launch;
@@ -38,12 +40,58 @@ const STATUS_ACCENT: Record<string, string> = {
 };
 
 const STATUS_BADGE: Record<string, string> = {
-  open: "bg-sky-500/10 text-sky-300",
-  acknowledged: "bg-amber-500/10 text-amber-300",
-  planned: "bg-purple-500/10 text-purple-300",
-  resolved: "bg-emerald-500/10 text-emerald-300",
-  closed: "bg-zinc-800 text-zinc-400",
+  open: "bg-sky-500/10 text-sky-400 border-sky-500/20",
+  acknowledged: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  planned: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  resolved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  closed: "bg-zinc-800 text-zinc-400 border-zinc-700",
 };
+
+const COMPOSER_DETAILS: Record<string, { title: string; desc: string; titlePlaceholder: string; bodyPlaceholder: string }> = {
+  bug: {
+    title: "Report a Bug",
+    desc: "Help us make LogoutDev stable by reporting issues with steps to reproduce.",
+    titlePlaceholder: "Brief summary of the issue (e.g. Cannot upload screenshot on profile edit)",
+    bodyPlaceholder: `### What happened?
+[Describe the bug here]
+
+### Steps to reproduce
+1. Go to...
+2. Click on...
+3. See error...
+
+### Expected behavior
+[What should have happened]`,
+  },
+  idea: {
+    title: "Suggest an Idea",
+    desc: "Share your vision for new features and capability additions.",
+    titlePlaceholder: "What is your idea? (e.g. Add dark mode toggle in navbar)",
+    bodyPlaceholder: `### Desired outcome
+[What feature would you like to see?]
+
+### Why it matters
+[How will this help developer workflows?]`,
+  },
+  suggestion: {
+    title: "Share a Suggestion",
+    desc: "Recommend improvements to existing features, styling, or documentation.",
+    titlePlaceholder: "What can we improve? (e.g. Make sidebar scroll behavior smoother)",
+    bodyPlaceholder: `### Desired improvement
+[Describe the suggestion here]
+
+### Additional context
+[Any references or reasoning]`,
+  },
+};
+
+function formatDate(dateStr: string) {
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(dateStr));
+}
 
 export default function LaunchFeedbackBoard({
   launch,
@@ -64,17 +112,27 @@ export default function LaunchFeedbackBoard({
   const [body, setBody] = useState("");
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
 
+  const details = COMPOSER_DETAILS[activeType] || COMPOSER_DETAILS.suggestion;
+
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-1 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-1">
+    <div className="space-y-6">
+      {/* Header and navigation tabs */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-zinc-800/80 pb-4">
+        <div className="flex gap-1.5 rounded-xl border border-zinc-800 bg-zinc-950/60 p-1">
           {TABS.map(({ value, label }) => (
             <button
               key={value}
               type="button"
-              onClick={() => onActiveTypeChange(value)}
-              className={`rounded-xl px-3 py-1.5 text-xs font-medium transition-colors ${
-                activeType === value ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-zinc-200"
+              onClick={() => {
+                onActiveTypeChange(value);
+                // Reset form with type-specific defaults when switching tabs
+                setTitle("");
+                setBody("");
+              }}
+              className={`rounded-lg px-4 py-2 text-xs font-semibold tracking-wide transition-all ${
+                activeType === value
+                  ? "bg-zinc-800 text-white shadow-sm ring-1 ring-zinc-700"
+                  : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               {label}
@@ -82,162 +140,217 @@ export default function LaunchFeedbackBoard({
           ))}
         </div>
 
-        <p className="text-sm leading-6 text-zinc-500">
+        <p className="text-xs text-zinc-500 font-light max-w-xs md:text-right">
           Track what the community wants next and keep each thread easy to scan.
         </p>
       </div>
 
+      {/* Composer form */}
       {currentUser && !launch.viewer_state?.is_owner && canPostFeedback && (
         <form
           onSubmit={async (e) => {
             e.preventDefault();
+            if (!title.trim() || !body.trim()) return;
             await onCreateFeedback({ type: activeType, title: title.trim(), body: body.trim() });
             setTitle("");
             setBody("");
           }}
-          className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4 sm:p-5"
+          className="rounded-2xl border border-zinc-800/80 bg-zinc-950/40 p-5 space-y-4"
         >
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-semibold text-white">Post a {activeType}</p>
-              <p className="mt-1 text-sm leading-6 text-zinc-500">
-                Give enough detail for the builder to understand the outcome you want.
-              </p>
-            </div>
+          <div>
+            <h3 className="text-sm font-semibold text-white flex items-center gap-1.5">
+              <SparklesIcon className="h-4 w-4 text-sky-400" />
+              {details.title}
+            </h3>
+            <p className="mt-1 text-xs text-zinc-500 leading-relaxed font-light">
+              {details.desc}
+            </p>
+          </div>
 
-            <div className="space-y-3">
-              <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder={`Title your ${activeType}`}
-                className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
-              />
+          <div className="space-y-3">
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={details.titlePlaceholder}
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-800 transition-all"
+            />
 
-              <RichComposer
-                value={body}
-                onChange={(value) => setBody(value)}
-                rows={3}
-                placeholder="Give enough detail for the builder to act on this"
-                previewClassName="w-full rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-7 text-white"
-                className="w-full resize-y rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-7 text-transparent caret-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none selection:bg-[#1d9bf0]/30"
-              />
-            </div>
+            <RichComposer
+              value={body}
+              onChange={(value) => setBody(value)}
+              rows={4}
+              placeholder={details.bodyPlaceholder}
+              previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-relaxed text-white prose prose-invert max-w-none"
+              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-relaxed text-transparent caret-white placeholder:text-zinc-600 focus:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-800 selection:bg-[#1d9bf0]/30"
+            />
+          </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              {error ? <p className="text-xs text-rose-400">{error}</p> : <div />}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-zinc-900 pt-3">
+            {error ? <p className="text-xs text-rose-400">{error}</p> : <div />}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="rounded-2xl bg-white px-4 py-2 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-60 sm:ml-auto"
-              >
-                {loading ? "Posting…" : `Post ${activeType}`}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={loading || !title.trim() || !body.trim()}
+              className="rounded-xl bg-white px-5 py-2.5 text-xs font-semibold text-zinc-950 transition-all hover:bg-zinc-100 disabled:opacity-50 sm:ml-auto cursor-pointer"
+            >
+              {loading ? "Posting…" : `Post ${activeType}`}
+            </button>
           </div>
         </form>
       )}
 
       {currentUser && !launch.viewer_state?.is_owner && !canPostFeedback ? (
-        <p className="rounded-2xl border border-zinc-800 bg-zinc-950/50 px-4 py-3 text-sm text-zinc-500">
-          {disabledMessage || "Feedback is not available right now."}
-        </p>
+        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/20 px-5 py-4 text-sm text-zinc-500 font-light leading-relaxed">
+          {disabledMessage || "Feedback submission is not open right now."}
+        </div>
       ) : null}
 
+      {/* Feedback list */}
       {feedback.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/40 px-4 py-6 text-center text-sm text-zinc-500">
-          No {activeType} items yet.
+        <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/20 px-4 py-12 text-center">
+          <p className="text-sm text-zinc-400 font-medium mb-1">
+            No {activeType} items yet.
+          </p>
+          <p className="text-xs text-zinc-600 font-light">
+            Be the first to suggest what LogoutDev should build or fix next.
+          </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {feedback.map((item) => {
             const accentClass = STATUS_ACCENT[item.status] ?? "border-l-zinc-600";
-            const badgeClass = STATUS_BADGE[item.status] ?? "bg-zinc-800 text-zinc-400";
+            const badgeClass = STATUS_BADGE[item.status] ?? "bg-zinc-800 text-zinc-400 border-zinc-700";
+            const builderReplied = item.comments?.some((c) => c.author_id === launch.builder_id);
 
             return (
               <article
                 key={item.id}
-                className={`rounded-2xl border border-zinc-800 border-l-4 bg-zinc-950/55 p-4 sm:p-5 ${accentClass}`}
+                className={`rounded-2xl border border-zinc-850 border-l-4 bg-zinc-900/10 p-5 shadow-sm space-y-4 transition-all hover:bg-zinc-900/20 ${accentClass}`}
               >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ${badgeClass}`}>
-                        {item.status.replace(/_/g, " ")}
-                      </span>
-                      <p className="text-xs text-zinc-500 [overflow-wrap:anywhere]">
+                {/* User details and status row */}
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar user={item.author} size="sm" />
+                    <div>
+                      <p className="text-xs font-semibold text-zinc-300">
                         {item.author?.name ?? "Community member"}
                       </p>
+                      <p className="text-[10px] text-zinc-500 font-light mt-0.5">
+                        Posted on {formatDate(item.created_at)}
+                      </p>
                     </div>
-
-                    <h4 className="mt-3 text-base font-semibold text-white [overflow-wrap:anywhere]">{item.title}</h4>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
-                    {launch.viewer_state?.is_owner && (
-                      <select
-                        value={item.status}
-                        onChange={(e) => onUpdateFeedbackStatus(item.id, e.target.value)}
-                        className="min-w-[148px] rounded-2xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs text-white focus:border-zinc-600 focus:outline-none"
+                  <div className="flex items-center gap-2">
+                    <span className={`rounded-lg border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider capitalize ${badgeClass}`}>
+                      {item.status.replace(/_/g, " ")}
+                    </span>
+                    {builderReplied && (
+                      <span className="rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 text-[9px] font-medium tracking-wide">
+                        Builder Replied
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="space-y-2">
+                  <h4 className="text-base font-bold text-white tracking-tight">
+                    {item.title}
+                  </h4>
+                  <div className="pl-0.5">
+                    <RichText text={item.body} className="text-sm leading-relaxed text-zinc-300 prose prose-invert prose-sm max-w-none font-light" />
+                  </div>
+                </div>
+
+                {/* Comments / Nested threads list */}
+                {(item.comments ?? []).length > 0 && (
+                  <div className="mt-4 space-y-3 rounded-xl border border-zinc-850/80 bg-zinc-950/40 p-4">
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 border-b border-zinc-900 pb-2 mb-2">Replies</p>
+                    {item.comments?.map((comment) => {
+                      const isBuilderComment = comment.author_id === launch.builder_id;
+                      return (
+                        <div key={comment.id} className="flex gap-3 text-sm leading-relaxed items-start">
+                          <Avatar user={comment.author} size="xs" className="mt-0.5" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-semibold text-zinc-300 text-xs">{comment.author?.name ?? "Member"}</span>
+                              {isBuilderComment && (
+                                <span className="rounded bg-sky-500/10 text-sky-400 px-1.5 py-0.25 text-[8px] font-bold uppercase tracking-wider border border-sky-500/20">
+                                  Builder
+                                </span>
+                              )}
+                              <span className="text-[9px] text-zinc-500 font-light">{formatDate(comment.created_at)}</span>
+                            </div>
+                            <div className="mt-1 text-xs text-zinc-400 font-light pl-0.5">
+                              <RichText text={comment.body} as="span" className="inline" />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Actions row: admin controls and reply form */}
+                <div className="flex flex-col gap-3 pt-3 border-t border-zinc-900/60 sm:flex-row sm:items-center sm:justify-between">
+                  {currentUser && (
+                    <div className="flex-1 flex gap-2">
+                      <input
+                        value={commentDrafts[item.id] ?? ""}
+                        onChange={(e) =>
+                          setCommentDrafts((prev) => ({ ...prev, [item.id]: e.target.value }))
+                        }
+                        placeholder={launch.viewer_state?.is_owner ? "Reply as builder…" : "Reply to thread…"}
+                        className="flex-1 rounded-xl border border-zinc-800 bg-zinc-950/80 px-4 py-2.5 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-700 focus:outline-none"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const val = commentDrafts[item.id] ?? "";
+                          if (!val.trim()) return;
+                          await onAddComment(item.id, val);
+                          setCommentDrafts((prev) => ({ ...prev, [item.id]: "" }));
+                        }}
+                        className="rounded-xl bg-zinc-850 hover:bg-zinc-800 px-4 py-2 text-xs font-semibold text-zinc-200 border border-zinc-800/80 transition-all cursor-pointer"
                       >
-                        {STATUSES.map((status) => (
-                          <option key={status} value={status}>
-                            {status}
-                          </option>
-                        ))}
-                      </select>
+                        Reply
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2.5 sm:ml-auto">
+                    {launch.viewer_state?.is_owner && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-medium text-zinc-500">Status:</span>
+                        <select
+                          value={item.status}
+                          onChange={(e) => onUpdateFeedbackStatus(item.id, e.target.value)}
+                          className="rounded-xl border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-xs text-white focus:border-zinc-700 focus:outline-none"
+                        >
+                          {STATUSES.map((status) => (
+                            <option key={status} value={status}>
+                              {status.replace(/_/g, " ")}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     )}
 
                     {currentUser?.id === item.author_id && (
                       <button
                         type="button"
                         onClick={() => onDeleteFeedback(item.id)}
-                        className="rounded-2xl border border-rose-500/20 px-3 py-2 text-[11px] font-medium text-rose-400 transition-colors hover:bg-rose-500/10"
+                        className="rounded-xl border border-rose-500/10 bg-rose-500/5 hover:bg-rose-500/10 px-3 py-1.5 text-[10px] font-semibold text-rose-400 transition-all flex items-center gap-1 cursor-pointer"
+                        title="Delete feedback"
                       >
+                        <TrashIcon className="h-3 w-3" />
                         Delete
                       </button>
                     )}
                   </div>
                 </div>
-
-                <RichText text={item.body} className="mt-4 text-sm leading-7 text-zinc-300 [overflow-wrap:anywhere]" />
-
-                {(item.comments ?? []).length > 0 && (
-                  <div className="mt-4 space-y-3 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4">
-                    {item.comments?.map((comment) => (
-                      <div key={comment.id} className="text-sm leading-6 text-zinc-300 [overflow-wrap:anywhere]">
-                        <span className="font-medium text-white">{comment.author?.name ?? "Member"}: </span>
-                        <RichText text={comment.body} as="span" className="inline" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {currentUser && (
-                  <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                    <input
-                      value={commentDrafts[item.id] ?? ""}
-                      onChange={(e) =>
-                        setCommentDrafts((prev) => ({ ...prev, [item.id]: e.target.value }))
-                      }
-                      placeholder="Reply…"
-                      className="flex-1 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        const val = commentDrafts[item.id] ?? "";
-                        if (!val.trim()) return;
-                        await onAddComment(item.id, val);
-                        setCommentDrafts((prev) => ({ ...prev, [item.id]: "" }));
-                      }}
-                      className="rounded-2xl border border-zinc-700 px-4 py-3 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-800"
-                    >
-                      Reply
-                    </button>
-                  </div>
-                )}
               </article>
             );
           })}

@@ -87,7 +87,7 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
   }
 
   return (
-    <div className="border-b border-zinc-800">
+    <div className={`sticky ${user ? "top-0" : "top-16"} z-30 border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-sm`}>
       <div className="px-4 pb-5 pt-4">
         <Link
           href="/spaces"

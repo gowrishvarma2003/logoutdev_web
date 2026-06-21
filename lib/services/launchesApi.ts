@@ -91,15 +91,22 @@ export async function createLaunch(body: {
   collaboration_note?: string;
   collaboration_roles: string[];
   linked_space_id?: string | null;
+  is_open_source?: boolean;
+  repo_ids?: string[];
   screenshots: string[];
+  image_files?: File[];
   tech_stack: string[];
   status?: "draft" | "published";
   publish_now?: boolean;
 }): Promise<{ launch: Launch }> {
+  const { image_files: imageFiles = [], ...payload } = body;
+  const formData = new FormData();
+  formData.append("payload", JSON.stringify(payload));
+  imageFiles.forEach((file) => formData.append("images", file));
   const res = await fetch(`${API}/api/launches`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...authHeaders() },
-    body: JSON.stringify(body),
+    headers: { ...authHeaders() },
+    body: formData,
   });
   return handleRes(res);
 }
@@ -124,14 +131,21 @@ export async function updateLaunch(
     collaboration_note: string;
     collaboration_roles: string[];
     linked_space_id: string | null;
+    is_open_source: boolean;
+    repo_ids: string[];
     screenshots: string[];
+    image_files: File[];
     tech_stack: string[];
   }>
 ): Promise<{ launch: Launch }> {
+  const { image_files: imageFiles = [], ...payload } = body;
+  const formData = new FormData();
+  formData.append("payload", JSON.stringify(payload));
+  imageFiles.forEach((file) => formData.append("images", file));
   const res = await fetch(`${API}/api/launches/${launchId}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json", ...authHeaders() },
-    body: JSON.stringify(body),
+    headers: { ...authHeaders() },
+    body: formData,
   });
   return handleRes(res);
 }

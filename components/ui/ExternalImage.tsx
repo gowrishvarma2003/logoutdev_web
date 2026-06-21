@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { SparklesIcon } from "./Icons";
 
 interface ExternalImageProps {
@@ -131,7 +131,7 @@ function isValidImageUrl(url: string): boolean {
  * ExternalImage component that handles various image URL sources
  * including Google Drive, Dropbox, GitHub, and other cloud storage services
  */
-export default function ExternalImage({
+function ExternalImageContent({
   src,
   alt,
   className = "",
@@ -146,14 +146,6 @@ export default function ExternalImage({
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
-
-  useEffect(() => {
-    // Reset state and update URL when src changes
-    setHasError(false);
-    setIsLoading(true);
-    setRetryCount(0);
-    setImageSrc(transformImageUrl(src));
-  }, [src]);
 
   const handleError = () => {
     // Try alternative transformations on error
@@ -204,7 +196,7 @@ export default function ExternalImage({
       <img
         src={imageSrc}
         alt={alt}
-        className={`h-full w-full ${isLoading ? "opacity-0" : "opacity-100"} transition-opacity duration-200`}
+        className="relative z-10 h-full w-full"
         style={{ objectFit: "inherit" }}
         onLoad={handleLoad}
         onError={handleError}
@@ -213,6 +205,15 @@ export default function ExternalImage({
       />
     </div>
   );
+}
+
+/**
+ * Keying the renderer by source resets retry/error state when a gallery changes
+ * images. The image itself stays visible while loading, which also handles the
+ * browser-cache case where an image finishes before React hydrates `onLoad`.
+ */
+export default function ExternalImage(props: ExternalImageProps) {
+  return <ExternalImageContent key={props.src} {...props} />;
 }
 
 /**

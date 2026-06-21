@@ -80,7 +80,7 @@ export default function AppShell({ children }: AppShellProps) {
   if (!user && allowsGuest) {
     return (
       <div className="min-h-screen bg-zinc-950">
-        <header className="sticky top-0 z-20 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-md">
+        <header className="sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-md">
           <div className="mx-auto flex max-w-[1520px] items-center justify-between px-4 py-4">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">

@@ -14,31 +14,36 @@ export default function LaunchCollaboratorCTA({
   if (launch.viewer_state?.is_owner) return null;
   if (launch.collaboration_mode !== "looking" || !launch.linked_space_id) return null;
 
+  const roles = launch.collaboration_roles ?? [];
+
   return (
-    <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5">
-      <div className="mb-3 flex items-start gap-3">
-        <div className="shrink-0 rounded-xl bg-emerald-500/10 p-2 text-emerald-400">
+    <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-950/20 to-zinc-950/80 p-5 backdrop-blur-sm">
+      <div className="mb-4 flex items-start gap-3">
+        <div className="shrink-0 rounded-xl bg-emerald-500/10 p-2 text-emerald-400 ring-1 ring-emerald-500/20">
           <UsersIcon className="h-5 w-5" />
         </div>
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-white">Builder is looking for collaborators</h3>
-          <p className="mt-1 text-xs leading-relaxed text-zinc-400 [overflow-wrap:anywhere]">
+          <h3 className="text-sm font-semibold text-white">Looking for Collaborators</h3>
+          <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">
             {launch.collaboration_note ||
-              "This launch is connected to a project space and open to collaboration requests."}
+              "This launch is open to new developers. Apply to build next features together."}
           </p>
         </div>
       </div>
 
-      {(launch.collaboration_roles ?? []).length > 0 && (
-        <div className="mb-4 flex flex-wrap gap-1.5">
-          {launch.collaboration_roles.map((role) => (
-            <span
-              key={role}
-              className="rounded-full border border-emerald-500/20 bg-zinc-900 px-2.5 py-0.5 text-[11px] font-medium text-emerald-300 [overflow-wrap:anywhere]"
-            >
-              {role}
-            </span>
-          ))}
+      {roles.length > 0 && (
+        <div className="mb-4">
+          <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 mb-2">Target Roles</p>
+          <div className="flex flex-wrap gap-1.5">
+            {roles.map((role) => (
+              <span
+                key={role}
+                className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 text-xs text-emerald-300 font-medium"
+              >
+                {role}
+              </span>
+            ))}
+          </div>
         </div>
       )}
 
@@ -46,19 +51,27 @@ export default function LaunchCollaboratorCTA({
         launch.viewer_state?.can_request_collaboration ? (
           <Link
             href={`/launches/${launch.id}/collaborate`}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-400 sm:w-auto"
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors shadow-lg shadow-emerald-500/10"
           >
-            Request to collaborate
+            Request to Collaborate
           </Link>
+        ) : launch.viewer_state?.is_space_member ? (
+          <p className="text-xs text-emerald-400 bg-emerald-500/10 rounded-lg p-3 border border-emerald-500/20 text-center font-medium">
+            ✓ You are already a collaborator in this project space.
+          </p>
+        ) : launch.viewer_state?.has_pending_collaboration_request ? (
+          <p className="text-xs text-amber-400 bg-amber-500/10 rounded-lg p-3 border border-amber-500/20 text-center font-medium">
+            ⏳ Your request to collaborate is currently under review by the builder.
+          </p>
         ) : (
-          <p className="text-xs text-zinc-500">
-            Collaboration is already handled for your account or not available right now.
+          <p className="text-xs text-zinc-500 bg-zinc-900/50 rounded-lg p-3 border border-zinc-800 text-center">
+            Collaboration applications are currently closed or already handled.
           </p>
         )
       ) : (
         <Link
           href="/login"
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:bg-zinc-800 sm:w-auto"
+          className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-zinc-800 hover:border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors"
         >
           Sign in to collaborate
         </Link>

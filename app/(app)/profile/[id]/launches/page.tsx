@@ -1,9 +1,9 @@
 "use client";
 
 import { use } from "react";
-import Link from "next/link";
 import { useProfileLaunches } from "@/lib/hooks/useProfile";
 import Spinner from "@/components/ui/Spinner";
+import LaunchCard from "@/components/launches/LaunchCard";
 
 export default function ProfileLaunchesPage({
   params,
@@ -30,19 +30,9 @@ export default function ProfileLaunchesPage({
   }
 
   return (
-    <div className="space-y-4 px-5 py-6">
+    <div className="grid gap-4 px-5 py-6 sm:grid-cols-2 xl:grid-cols-3">
       {launches.map((launch) => (
-        <Link
-          key={launch.id}
-          href={`/launches/${launch.id}`}
-          className="block rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 transition-colors hover:bg-zinc-900"
-        >
-          <p className="text-base font-semibold text-white">{launch.name}</p>
-          <p className="mt-1 text-sm text-zinc-400">{launch.tagline}</p>
-          <p className="mt-3 text-xs text-zinc-500">
-            {launch.upvote_count} upvotes • {launch.review_count} reviews
-          </p>
-        </Link>
+        <LaunchCard key={launch.id} launch={launch} />
       ))}
     </div>
   );

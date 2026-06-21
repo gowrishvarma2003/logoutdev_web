@@ -1367,6 +1367,19 @@ export interface LaunchTechStackItem {
   created_at: string;
 }
 
+export interface LaunchLinkedRepo {
+  id: string;
+  repo_id: string;
+  rank: number;
+  repo?: {
+    id: string;
+    name: string;
+    slug: string;
+    visibility: RepositoryVisibility;
+    archived_at?: string | null;
+  } | null;
+}
+
 export interface LaunchViewerState {
   is_owner: boolean;
   is_upvoted_by_me: boolean;
@@ -1381,6 +1394,8 @@ export interface LaunchViewerState {
   is_early_supporter: boolean;
   can_submit_feedback: boolean;
   can_submit_review: boolean;
+  is_space_member?: boolean;
+  has_pending_collaboration_request?: boolean;
 }
 
 export interface LaunchBetaSummary {
@@ -1454,6 +1469,7 @@ export interface Launch {
   id: string;
   builder_id: string;
   linked_space_id?: string | null;
+  is_open_source: boolean;
   name: string;
   slug: string;
   tagline: string;
@@ -1483,6 +1499,7 @@ export interface Launch {
   builder?: User;
   screenshots?: LaunchScreenshot[];
   tech_stack?: LaunchTechStackItem[];
+  linked_repos?: LaunchLinkedRepo[];
   linked_space?: {
     id: string;
     name?: string | null;

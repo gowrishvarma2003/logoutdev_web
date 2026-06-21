@@ -13,16 +13,19 @@ export default function NewLaunchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const linkedSpaceId = searchParams.get("spaceId") || "";
+  const repoId = searchParams.get("repoId") || "";
   const repoName = searchParams.get("repoName") || "";
   const repoDescription = searchParams.get("repoDescription") || "";
   const spaceName = searchParams.get("spaceName") || "";
 
   const initialLaunch = useMemo(() => ({
     linked_space_id: linkedSpaceId || undefined,
+    is_open_source: Boolean(repoId),
+    linked_repos: repoId ? [{ id: "", repo_id: repoId, rank: 0 }] : undefined,
     name: repoName || "",
     tagline: repoDescription && repoDescription.length >= 20 ? repoDescription : "",
     launch_phase: "beta" as const,
-  }), [linkedSpaceId, repoDescription, repoName]);
+  }), [linkedSpaceId, repoDescription, repoName, repoId]);
 
   const sourceHint = repoName
     ? `Starting from repo ${repoName}${spaceName ? ` in ${spaceName}` : ""}. The linked space is preselected for this launch.`

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSpaceList } from "@/lib/hooks/useSpaces";
+import { useRepositoryList } from "@/lib/hooks/useRepos";
 import type {
   Launch,
   LaunchDevelopmentStage,
@@ -34,7 +35,10 @@ interface LaunchFormProps {
     collaboration_note?: string;
     collaboration_roles: string[];
     linked_space_id?: string | null;
+    is_open_source: boolean;
+    repo_ids: string[];
     screenshots: string[];
+    image_files: File[];
     tech_stack: string[];
   }) => Promise<void> | void;
 }
@@ -43,12 +47,12 @@ function joinTechStack(launch?: Partial<Launch> | null) {
   return (launch?.tech_stack ?? []).map((item) => item.technology).join(", ");
 }
 
-function joinScreenshots(launch?: Partial<Launch> | null) {
-  return (launch?.screenshots ?? []).map((item) => item.image_url).join("\n");
-}
-
 function joinRoles(launch?: Partial<Launch> | null) {
   return (launch?.collaboration_roles ?? []).join(", ");
+}
+
+function initialRepoIds(launch?: Partial<Launch> | null) {
+  return (launch?.linked_repos ?? []).map((entry) => entry.repo_id).filter(Boolean);
 }
 
 const inputClass =
@@ -56,6 +60,10 @@ const inputClass =
 
 const selectClass =
   "w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none transition-colors";
+
+const MIN_LAUNCH_IMAGES = 4;
+const MAX_LAUNCH_IMAGES = 6;
+const MAX_LAUNCH_REPOS = 6;
 
 function SectionHeader({ title, description }: { title: string; description?: string }) {
   return (
@@ -76,6 +84,9 @@ export default function LaunchForm({
   onSubmit,
 }: LaunchFormProps) {
   const { data: mySpacesData, loading: spacesLoading } = useSpaceList({ mine: true, limit: 100 });
+  const { repos: myRepos, loading: reposLoading } = useRepositoryList({ scope: "mine", limit: 100 });
+  const [isOpenSource, setIsOpenSource] = useState(initialLaunch?.is_open_source ?? false);
+  const [selectedRepoIds, setSelectedRepoIds] = useState<string[]>(initialRepoIds(initialLaunch));
   const [name, setName] = useState(initialLaunch?.name ?? "");
   const [tagline, setTagline] = useState(initialLaunch?.tagline ?? "");
   const [description, setDescription] = useState(initialLaunch?.description ?? "");
@@ -100,20 +111,82 @@ export default function LaunchForm({
   const [linkedSpaceId, setLinkedSpaceId] = useState(
     initialLaunch?.linked_space?.id ?? initialLaunch?.linked_space_id ?? ""
   );
-  const [screenshots, setScreenshots] = useState(joinScreenshots(initialLaunch));
+  const [existingScreenshots, setExistingScreenshots] = useState(
+    (initialLaunch?.screenshots ?? []).map((item) => item.image_url)
+  );
+  const [pendingImages, setPendingImages] = useState<Array<{ file: File; previewUrl: string }>>([]);
   const [techStack, setTechStack] = useState(joinTechStack(initialLaunch));
   const [localError, setLocalError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlsRef = useRef(new Set<string>());
 
   const linkedSpaceOptions = mySpacesData?.spaces ?? [];
+
+  useEffect(() => {
+    const previewUrls = previewUrlsRef.current;
+    return () => previewUrls.forEach((url) => URL.revokeObjectURL(url));
+  }, []);
+
+  function handleImageSelection(event: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = "";
+    if (!files.length) return;
+
+    setLocalError(null);
+    const currentCount = existingScreenshots.length + pendingImages.length;
+    if (currentCount + files.length > MAX_LAUNCH_IMAGES) {
+      const remaining = Math.max(0, MAX_LAUNCH_IMAGES - currentCount);
+      setLocalError(`You can add ${remaining} more image${remaining === 1 ? "" : "s"}.`);
+      return;
+    }
+    const invalidFile = files.find((file) => !["image/png", "image/jpeg", "image/webp", "image/gif"].includes(file.type));
+    if (invalidFile) {
+      setLocalError("Only PNG, JPG, WebP, or GIF images can be uploaded.");
+      return;
+    }
+    if (files.some((file) => file.size > 10 * 1024 * 1024)) {
+      setLocalError("Each image must be 10MB or smaller.");
+      return;
+    }
+
+    const selected = files.map((file) => {
+      const previewUrl = URL.createObjectURL(file);
+      previewUrlsRef.current.add(previewUrl);
+      return { file, previewUrl };
+    });
+    setPendingImages((current) => [...current, ...selected]);
+  }
+
+  function removeScreenshot(index: number) {
+    if (index < existingScreenshots.length) {
+      setExistingScreenshots((current) => current.filter((_, itemIndex) => itemIndex !== index));
+      return;
+    }
+
+    const pendingIndex = index - existingScreenshots.length;
+    setPendingImages((current) => current.filter((image, itemIndex) => {
+      if (itemIndex !== pendingIndex) return true;
+      URL.revokeObjectURL(image.previewUrl);
+      previewUrlsRef.current.delete(image.previewUrl);
+      return false;
+    }));
+  }
+
+  function toggleRepo(repoId: string) {
+    setSelectedRepoIds((current) => {
+      if (current.includes(repoId)) {
+        return current.filter((id) => id !== repoId);
+      }
+      if (current.length >= MAX_LAUNCH_REPOS) return current;
+      return [...current, repoId];
+    });
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLocalError(null);
 
-    const screenshotList = screenshots
-      .split("\n")
-      .map((value) => value.trim())
-      .filter(Boolean);
+    const imageCount = existingScreenshots.length + pendingImages.length;
     const techStackList = techStack
       .split(",")
       .map((value) => value.trim())
@@ -123,13 +196,23 @@ export default function LaunchForm({
       .map((value) => value.trim())
       .filter(Boolean);
 
-    if (screenshotList.length > 6) {
-      setLocalError("You can add at most 6 screenshot URLs.");
+    if (imageCount > MAX_LAUNCH_IMAGES) {
+      setLocalError(`You can add at most ${MAX_LAUNCH_IMAGES} screenshots.`);
       return;
     }
-    if (publishOnSubmit && screenshotList.length < 1) {
-      setLocalError("Add at least one screenshot before launching.");
+    if (publishOnSubmit && imageCount < MIN_LAUNCH_IMAGES) {
+      setLocalError(`Add at least ${MIN_LAUNCH_IMAGES} product images before launching.`);
       return;
+    }
+    if (isOpenSource) {
+      if (selectedRepoIds.length < 1) {
+        setLocalError("Open source launches must link at least one repo.");
+        return;
+      }
+      if (!linkedSpaceId.trim()) {
+        setLocalError("Open source launches must be linked to a space.");
+        return;
+      }
     }
     if (techStackList.length > 12) {
       setLocalError("You can add at most 12 tech stack items.");
@@ -169,13 +252,122 @@ export default function LaunchForm({
       collaboration_note: collaborationNote.trim() || undefined,
       collaboration_roles: roles,
       linked_space_id: linkedSpaceId.trim() || null,
-      screenshots: screenshotList,
+      is_open_source: isOpenSource,
+      repo_ids: isOpenSource ? selectedRepoIds : [],
+      screenshots: existingScreenshots,
+      image_files: pendingImages.map((image) => image.file),
       tech_stack: techStackList,
     });
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
+        <SectionHeader
+          title="Source & workspace"
+          description="Open source launches connect your repos and a workspace so contributors can jump in."
+        />
+
+        <div className="space-y-5">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {([
+              { value: true, label: "Open source", hint: "Link repos and a workspace for contributors." },
+              { value: false, label: "Closed source", hint: "Private project. A workspace is optional." },
+            ] as const).map((option) => {
+              const active = isOpenSource === option.value;
+              return (
+                <button
+                  key={option.label}
+                  type="button"
+                  onClick={() => setIsOpenSource(option.value)}
+                  className={`rounded-2xl border p-4 text-left transition-colors ${
+                    active
+                      ? "border-sky-500/40 bg-sky-500/10"
+                      : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
+                  }`}
+                >
+                  <p className="text-sm font-semibold text-white">{option.label}</p>
+                  <p className="mt-1 text-xs leading-6 text-zinc-400">{option.hint}</p>
+                </button>
+              );
+            })}
+          </div>
+
+          {isOpenSource ? (
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-zinc-400">
+                Repos <span className="text-zinc-600">(required · up to {MAX_LAUNCH_REPOS})</span>
+              </label>
+              {reposLoading ? (
+                <p className="rounded-xl border border-zinc-800 bg-zinc-950/70 px-3 py-3 text-xs text-zinc-500">
+                  Loading your repos…
+                </p>
+              ) : myRepos.length === 0 ? (
+                <p className="rounded-xl border border-zinc-800 bg-zinc-950/70 px-3 py-3 text-xs text-zinc-500">
+                  You don&apos;t have any repos yet. Create a repo first, then link it here.
+                </p>
+              ) : (
+                <div className="grid max-h-64 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+                  {myRepos.map((repo) => {
+                    const selected = selectedRepoIds.includes(repo.id);
+                    const disabled = !selected && selectedRepoIds.length >= MAX_LAUNCH_REPOS;
+                    return (
+                      <button
+                        key={repo.id}
+                        type="button"
+                        onClick={() => toggleRepo(repo.id)}
+                        disabled={disabled}
+                        className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                          selected
+                            ? "border-sky-500/40 bg-sky-500/10 text-white"
+                            : "border-zinc-800 bg-zinc-950/60 text-zinc-300 hover:border-zinc-700"
+                        }`}
+                      >
+                        <span className="truncate">{repo.name}</span>
+                        <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] uppercase ${repo.visibility === "public" ? "bg-emerald-500/10 text-emerald-400" : "bg-zinc-800 text-zinc-400"}`}>
+                          {repo.visibility}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {selectedRepoIds.length > 0 ? (
+                <p className="mt-1.5 text-[11px] text-zinc-500">
+                  {selectedRepoIds.length} repo{selectedRepoIds.length === 1 ? "" : "s"} selected.
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-zinc-400">
+              Linked space {isOpenSource ? <span className="text-zinc-600">(required)</span> : null}
+            </label>
+            <select
+              value={linkedSpaceId}
+              onChange={(e) => setLinkedSpaceId(e.target.value)}
+              className={selectClass}
+              disabled={spacesLoading}
+            >
+              <option value="">No linked space</option>
+              {linkedSpaceOptions.map((space) => (
+                <option key={space.id} value={space.id}>
+                  {space.name}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-[11px] text-zinc-600">
+              {spacesLoading
+                ? "Loading your spaces…"
+                : isOpenSource
+                  ? "Open source launches must connect to one of your owner or maintainer spaces."
+                  : "Optional. Connect to one of your owner or maintainer spaces."}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
         <SectionHeader
           title="Launch mode"
@@ -313,14 +505,47 @@ export default function LaunchForm({
         />
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-400">Screenshot URLs</label>
-            <textarea
-              value={screenshots}
-              onChange={(e) => setScreenshots(e.target.value)}
-              rows={4}
-              placeholder={"https://example.com/screenshot-1.png\nhttps://example.com/screenshot-2.png"}
-              className={inputClass}
+            <label className="mb-1.5 block text-xs font-medium text-zinc-400">Product images</label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              multiple
+              className="sr-only"
+              onChange={handleImageSelection}
             />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={existingScreenshots.length + pendingImages.length >= MAX_LAUNCH_IMAGES}
+              className="flex w-full items-center justify-center rounded-xl border border-dashed border-zinc-700 bg-zinc-950/70 px-4 py-6 text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Choose images from your device
+            </button>
+            <p className="mt-1.5 text-[11px] text-zinc-500">PNG, JPG, WebP, or GIF. {MIN_LAUNCH_IMAGES}–{MAX_LAUNCH_IMAGES} images, 10MB each.</p>
+
+            {existingScreenshots.length + pendingImages.length > 0 ? (
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {[
+                  ...existingScreenshots,
+                  ...pendingImages.map((image) => image.previewUrl),
+                ].map((url, index) => (
+                  <div key={`${url}-${index}`} className="group relative aspect-video overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt={`Launch image ${index + 1}`} className="h-full w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeScreenshot(index)}
+                      aria-label={`Remove launch image ${index + 1}`}
+                      className="absolute right-1.5 top-1.5 rounded-lg bg-zinc-950/85 px-2 py-1 text-xs text-zinc-200 opacity-100 transition-opacity hover:bg-rose-600 sm:opacity-0 sm:group-hover:opacity-100"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
           </div>
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-400">Tech stack</label>
@@ -338,26 +563,6 @@ export default function LaunchForm({
         <summary className="cursor-pointer list-none text-sm font-semibold text-zinc-200">Advanced details</summary>
 
         <div className="mt-5 space-y-8">
-          <div>
-            <SectionHeader title="Workspace connection" description="Link the launch to the space where the product is being built." />
-            <select
-              value={linkedSpaceId}
-              onChange={(e) => setLinkedSpaceId(e.target.value)}
-              className={selectClass}
-              disabled={spacesLoading}
-            >
-              <option value="">No linked space</option>
-              {linkedSpaceOptions.map((space) => (
-                <option key={space.id} value={space.id}>
-                  {space.name}
-                </option>
-              ))}
-            </select>
-            <p className="mt-1 text-[11px] text-zinc-600">
-              {spacesLoading ? "Loading your spaces…" : "Connect to one of your owner or maintainer spaces."}
-            </p>
-          </div>
-
           <div>
             <SectionHeader title="Extra links" description="Add supporting links without crowding the first screen." />
             <div className="grid gap-4 sm:grid-cols-2">
