@@ -11,6 +11,7 @@ import { SectionHeader, EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import { ClockIcon, PlusIcon } from "@/components/ui/Icons";
 import * as api from "@/lib/services/spacesApi";
+import * as cache from "@/lib/services/requestCache";
 import type { UpdateType } from "@/lib/types";
 import RichComposer from "@/components/ui/RichComposer";
 
@@ -107,6 +108,7 @@ export default function UpdatesPage({
         blockers: blockers.trim() || undefined,
         evidence_links: links.length ? links : undefined,
       });
+      cache.invalidateSpace(spaceId, "updates");
 
       // Reset
       setTitle("");

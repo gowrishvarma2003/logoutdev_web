@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useBranches, useRepo, useRepoAccess, useBranchProtectionRules } from "@/lib/hooks/useRepos";
 import { useSpaceList } from "@/lib/hooks/useSpaces";
 import * as reposApi from "@/lib/services/reposApi";
+import * as cache from "@/lib/services/requestCache";
 import type { RepoCollaboratorCandidate, RepoRole } from "@/lib/types";
 import { EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
@@ -207,6 +208,8 @@ export default function RepoSettingsPage({
         default_branch: defaultBranch.trim(),
         visibility,
       });
+      cache.invalidateRepo(repo.id);
+      cache.invalidateRepoListings();
       refetch();
       setSaveSuccess("Repository settings saved successfully.");
     } catch (err: unknown) {
@@ -223,6 +226,8 @@ export default function RepoSettingsPage({
     setDeleteError(null);
     try {
       await reposApi.deleteRepository(repo.id);
+      cache.invalidateRepo(repo.id);
+      cache.invalidateRepoListings();
       router.push("/repos");
     } catch (err: unknown) {
       setDeleteError(err instanceof Error ? err.message : "Failed to delete repository.");
@@ -241,6 +246,11 @@ export default function RepoSettingsPage({
       } else {
         await reposApi.removeRepositoryAttachment(repo.id);
       }
+      // Binding lives on the repo overview; bust it + the affected space's
+      // attachments cache if the repo is (or was) attached.
+      cache.invalidateRepo(repo.id, "overview");
+      if (repo.attached_space) cache.invalidateSpace(repo.attached_space.id, "attachments");
+      cache.invalidateRepoListings();
       refetch();
       setAttachmentSuccess("Space binding updated successfully.");
     } catch (err: unknown) {
@@ -262,6 +272,8 @@ export default function RepoSettingsPage({
       setSelectedUser(null);
       setCandidateRole("read");
       setMemberSuccess("Collaborator invited successfully.");
+      cache.invalidateRepo(repo.id, "access");
+      cache.invalidateRepo(repo.id, "members");
       refetchAccess();
       refetch();
     } catch (err: unknown) {
@@ -275,6 +287,8 @@ export default function RepoSettingsPage({
     if (!repo) return;
     try {
       await reposApi.upsertRepositoryMember(repo.id, userId, role);
+      cache.invalidateRepo(repo.id, "access");
+      cache.invalidateRepo(repo.id, "members");
       refetchAccess();
       refetch();
     } catch (err: unknown) {
@@ -286,6 +300,8 @@ export default function RepoSettingsPage({
     if (!repo) return;
     try {
       await reposApi.removeRepositoryMember(repo.id, userId);
+      cache.invalidateRepo(repo.id, "access");
+      cache.invalidateRepo(repo.id, "members");
       refetchAccess();
       refetch();
     } catch (err: unknown) {

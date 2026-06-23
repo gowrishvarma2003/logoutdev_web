@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRepoContext } from "../layout";
 import { useRepoReleases, useTags } from "@/lib/hooks/useRepos";
 import * as reposApi from "@/lib/services/reposApi";
+import * as cache from "@/lib/services/requestCache";
 import type { RepoRelease } from "@/lib/types";
 import Spinner from "@/components/ui/Spinner";
 import { formatRelativeTime } from "@/lib/utils";
@@ -42,6 +43,7 @@ export default function RepoReleasesPage() {
           ref: targetBranch,
           message: title,
         });
+        cache.invalidateRepo(repo.id, "tags");
       }
 
       await reposApi.createRelease(repo.id, {
@@ -51,6 +53,8 @@ export default function RepoReleasesPage() {
         is_prerelease: isPrerelease,
         is_draft: false,
       });
+      cache.invalidateRepo(repo.id, "releases");
+      cache.invalidateRepo(repo.id, "tags");
 
       setIsCreating(false);
       setTagName("");

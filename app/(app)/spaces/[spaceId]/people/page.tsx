@@ -7,6 +7,7 @@ import Avatar from "@/components/ui/Avatar";
 import { SectionHeader, EmptyState } from "@/components/spaces/SpaceBadges";
 import { UsersIcon, BoltIcon } from "@/components/ui/Icons";
 import * as api from "@/lib/services/spacesApi";
+import * as cache from "@/lib/services/requestCache";
 import type { MemberRole } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils";
 
@@ -33,6 +34,8 @@ export default function PeoplePage({
     setUpdating(userId);
     try {
       await api.updateContributorRole(spaceId, userId, newRole);
+      cache.invalidateSpace(spaceId, "people");
+      cache.invalidateSpace(spaceId, "overview");
       refetch();
     } finally {
       setUpdating(null);
@@ -44,6 +47,8 @@ export default function PeoplePage({
     setUpdating(userId);
     try {
       await api.removeContributor(spaceId, userId);
+      cache.invalidateSpace(spaceId, "people");
+      cache.invalidateSpace(spaceId, "overview");
       refetch();
     } finally {
       setUpdating(null);

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { resetPassword } from "@/lib/api";
+import { resetPassword, sendEmailOtp, verifyEmailOtp } from "@/lib/api";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -15,6 +15,8 @@ export default function ResetPasswordPage() {
 
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [challengeToken, setChallengeToken] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +28,14 @@ export default function ResetPasswordPage() {
     setIsLoading(true);
 
     try {
-      const data = await resetPassword(email, newPassword);
+      if (!challengeToken) {
+        const challenge = await sendEmailOtp(email, "password_reset");
+        setChallengeToken(challenge.challenge_token);
+        setSuccessMessage(challenge.message);
+        return;
+      }
+      const { verification_token } = await verifyEmailOtp(email, "password_reset", otp, challengeToken);
+      const data = await resetPassword(email, newPassword, verification_token);
       setSuccessMessage(data.message);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unable to connect to server.");
@@ -76,6 +85,15 @@ export default function ResetPasswordPage() {
               />
             </div>
 
+            {challengeToken ? (
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="otp" className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Verification code</label>
+                <input id="otp" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={otp}
+                  onChange={(event) => setOtp(event.target.value.replace(/\D/g, ""))} required placeholder="6-digit code"
+                  className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500" />
+              </div>
+            ) : null}
+
             <div className="flex flex-col gap-1.5">
               <label htmlFor="newPassword" className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                 New password
@@ -109,7 +127,7 @@ export default function ResetPasswordPage() {
               disabled={isLoading}
               className="w-full rounded-xl bg-white px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Resetting..." : "Reset password"}
+              {isLoading ? "Please wait..." : challengeToken ? "Verify and reset password" : "Send verification code"}
             </button>
           </form>
 

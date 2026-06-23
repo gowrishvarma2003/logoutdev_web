@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeftIcon, PlusIcon, RocketIcon } from "@/components/ui/Icons";
 import Link from "next/link";
 import * as api from "@/lib/services/spacesApi";
+import * as cache from "@/lib/services/requestCache";
 import type { SpaceStatus, SpaceVisibility, StackCategory, StackMaturity } from "@/lib/types";
 
 const STATUS_OPTIONS: Array<{ value: SpaceStatus; label: string; desc: string }> = [
@@ -100,6 +101,8 @@ export default function CreateSpacePage() {
         });
       }
 
+      // A new space changes the listings; bust them so /spaces is fresh.
+      cache.invalidateSpaceListings();
       router.push(`/spaces/${space.id}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to create space");

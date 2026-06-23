@@ -16,6 +16,146 @@ export interface User {
   created_at?: string;
 }
 
+export interface ChatUser {
+  id: string;
+  name: string;
+  username?: string | null;
+  headline?: string | null;
+  avatar_url?: string | null;
+}
+
+export interface ChatEnvelope {
+  id?: string;
+  message_id?: string;
+  target_user_id: string;
+  target_device_id: string;
+  encrypted_payload: string;
+  encryption_version: string;
+  session_id?: string | null;
+  key_id?: string | null;
+  nonce_or_iv?: string | null;
+  created_at?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  client_message_id: string;
+  conversation_id: string;
+  sender_id: string;
+  message_type: "text" | "attachment" | "mixed" | "system";
+  attachment_count: number;
+  reply_to_message_id?: string | null;
+  encryption_version: string;
+  group_epoch_id?: string | null;
+  created_at: string;
+  deleted_for_everyone_at?: string | null;
+  envelopes: ChatEnvelope[];
+  group_payload?: {
+    group_epoch_id: string;
+    encrypted_payload: string;
+    nonce_or_iv: string | null;
+    encryption_version: string;
+  } | null;
+  decrypted_body?: string;
+  decrypt_failed?: boolean;
+  missing_envelope?: boolean;
+  pending?: boolean;
+  failed?: boolean;
+}
+
+export type ChatGroupRole = "owner" | "admin" | "member";
+
+export interface ChatGroupSettings {
+  group_type: string;
+  who_can_add_members: "owner_admins" | "all_members";
+  who_can_edit_group_info: "owner_admins" | "all_members";
+  who_can_send_messages: "all_members" | "owner_admins";
+  join_approval_required: boolean;
+  current_epoch_number: number;
+}
+
+export interface ChatGroupInfo {
+  title: string;
+  description?: string | null;
+  avatar_storage_key?: string | null;
+  owner_id: string;
+  created_by: string;
+  created_at: string;
+  deleted_at?: string | null;
+  [key: string]: unknown;
+}
+
+export interface ChatConversation {
+  id: string;
+  type: "direct" | "group";
+  status: string;
+  last_message_id?: string | null;
+  last_message_at?: string | null;
+  updated_at: string;
+  unread_count: number;
+  muted_until?: string | null;
+  archived_at?: string | null;
+  pinned_at?: string | null;
+  last_read_at?: string | null;
+  other_user?: ChatUser | null;
+  group?: ChatGroupInfo & Partial<ChatGroupSettings> | null;
+  last_message?: ChatMessage | null;
+}
+
+export interface ChatGroupMember {
+  user_id: string;
+  role: ChatGroupRole;
+  joined_at: string;
+  user?: ChatUser | null;
+}
+
+export interface ChatGroupKeyEpoch {
+  id: string;
+  epoch_number: number;
+  created_by: string;
+  reason: string;
+  created_at: string;
+}
+
+export interface ChatGroupKeyEnvelope {
+  id: string;
+  epoch_id: string;
+  epoch_number: number;
+  target_device_id?: string;
+  encrypted_key_payload: string;
+  encryption_version: string;
+  created_at: string;
+  consumed_at?: string | null;
+}
+
+export interface ChatGroupInvite {
+  id: string;
+  conversation_id: string;
+  invited_user_id: string;
+  invited_by: string;
+  status: "pending" | "accepted" | "rejected" | "expired";
+  created_at: string;
+  responded_at?: string | null;
+  expires_at?: string | null;
+  group?: { title: string; avatar_storage_key?: string | null } | null;
+}
+
+export interface ChatMessageRequest {
+  id: string;
+  from_user: ChatUser;
+  to_user_id: string;
+  encrypted_intro_message?: string | null;
+  status: "pending" | "accepted" | "rejected";
+  created_at: string;
+  responded_at?: string | null;
+}
+
+export interface ChatSettings {
+  chat_privacy_setting: "anyone" | "followers" | "following" | "mutuals" | "nobody";
+  last_seen_visibility: "anyone" | "mutuals" | "nobody";
+  chat_enabled: boolean;
+}
+
 export interface FollowListUser {
   id: string;
   name: string;
@@ -225,15 +365,19 @@ export interface ProfileStats {
 }
 
 export interface ProofOfWorkSignals {
+  version?: string;
+  window_days?: number;
   score: number;
   band: ProofOfWorkBand;
   factors: {
-    shipping_behavior: number;
-    review_quality: number;
-    collaboration_conversion: number;
-    freelance_outcomes: number;
-    platform_consistency: number;
+    code_delivery: number;
+    project_execution: number;
+    collaboration: number;
+    knowledge_sharing: number;
+    reliability_outcomes: number;
+    community_contribution: number;
   };
+  contributions?: Record<string, number>;
 }
 
 export interface CareerTimelineItem {
@@ -510,6 +654,7 @@ export interface HashtagFeedResponse {
 export interface AuthResponse {
   token: string;
   user: User;
+  firebase_custom_token?: string;
   error?: string;
 }
 

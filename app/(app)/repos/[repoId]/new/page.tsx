@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useRepoContext } from "../layout";
 import * as reposApi from "@/lib/services/reposApi";
+import * as cache from "@/lib/services/requestCache";
 import Spinner from "@/components/ui/Spinner";
 
 export default function NewFilePage() {
@@ -64,6 +65,8 @@ export default function NewFilePage() {
         content,
         message: trimmedCommitMessage,
       });
+      cache.invalidateRepo(repo.id, "code");
+      cache.invalidateRepo(repo.id, "overview");
 
       router.push(`/repos/${repo.id}?ref=${encodeURIComponent(ref)}&path=${encodeURIComponent(fullPath)}&view=blob`);
     } catch (err: unknown) {

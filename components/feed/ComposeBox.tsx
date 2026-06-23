@@ -301,18 +301,32 @@ export default function ComposeBox({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`flex gap-3 ${compact ? "px-4 py-3" : "px-4 py-4 border-b border-zinc-800"}`}
+      className={`flex gap-3 ${compact ? "px-4 py-3" : "px-4 py-4 border-b border-zinc-800/60 bg-zinc-950/20"}`}
     >
       <Avatar user={currentUser} size={compact ? "sm" : "md"} className="mt-0.5 shrink-0" />
 
       <div className="flex-1 min-w-0">
         <div className="relative">
-          {selectedEntities.length > 0 && <div className="mb-3 space-y-2">{selectedEntities.map((entity) => (
-            <div key={`${entity.type}:${entity.id}`} className="relative">
-              <LinkedEntityCard entity={entity} compact />
-              <button type="button" aria-label={`Remove ${entity.title}`} onClick={() => { setSelectedEntities((items) => items.filter((item) => item !== entity)); if (initialLinkedEntity?.id === entity.id) onClearLinkedEntity?.(); }} className="absolute right-2 top-2 rounded-full bg-zinc-950/90 px-2 py-1 text-xs text-zinc-300 hover:text-white">×</button>
+          {selectedEntities.length > 0 && (
+            <div className="mb-3 space-y-2">
+              {selectedEntities.map((entity) => (
+                <div key={`${entity.type}:${entity.id}`} className="relative">
+                  <LinkedEntityCard entity={entity} compact />
+                  <button
+                    type="button"
+                    aria-label={`Remove ${entity.title}`}
+                    onClick={() => {
+                      setSelectedEntities((items) => items.filter((item) => item !== entity));
+                      if (initialLinkedEntity?.id === entity.id) onClearLinkedEntity?.();
+                    }}
+                    className="absolute right-2 top-2 rounded-full bg-zinc-955/90 px-2 py-0.5 text-xs text-zinc-300 hover:text-white border border-zinc-800"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}</div>}
+          )}
 
           <RichComposer
             ref={composerRef}
@@ -330,26 +344,26 @@ export default function ComposeBox({
           />
 
           {isSuggestionOpen && (
-            <div className="absolute left-0 top-full z-20 mt-2 w-full overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-900 shadow-2xl">
-              <div className="border-b border-zinc-800 px-3 py-2 text-[11px] uppercase tracking-[0.14em] text-zinc-500">
+            <div className="absolute left-0 top-full z-20 mt-2 w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-955/95 backdrop-blur-xl shadow-2xl p-1">
+              <div className="border-b border-zinc-900/65 px-3 py-2 text-[10px] uppercase tracking-wider text-zinc-500 font-bold">
                 {activeToken?.type === "hashtag" ? "Hashtag suggestions" : "Mention people"}
               </div>
-              <ul>
+              <ul className="space-y-0.5 mt-1">
                 {suggestions.map((item, index) => (
                   <li key={item.key}>
                     <button
                       type="button"
                       onMouseDown={(event) => event.preventDefault()}
                       onClick={() => applySuggestion(item)}
-                      className={`flex w-full items-center justify-between gap-4 px-3 py-2.5 text-left transition-colors ${
-                        highlightedIndex === index ? "bg-zinc-800" : "hover:bg-zinc-800/70"
+                      className={`flex w-full items-center justify-between gap-4 px-3 py-2 rounded-xl text-left transition-all ${
+                        highlightedIndex === index ? "bg-zinc-900 text-white" : "hover:bg-zinc-900/40 text-zinc-400 hover:text-zinc-200"
                       }`}
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-white">{item.title}</p>
-                        <p className="truncate text-xs text-zinc-500">{item.subtitle}</p>
+                        <p className="truncate text-sm font-semibold">{item.title}</p>
+                        <p className="truncate text-xs text-zinc-500 font-mono mt-0.5">{item.subtitle}</p>
                       </div>
-                      <span className="text-[11px] uppercase tracking-wide text-zinc-600">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-600">
                         {item.kind}
                       </span>
                     </button>
@@ -358,11 +372,11 @@ export default function ComposeBox({
               </ul>
 
               {activeToken?.type === "hashtag" && relatedTags.length > 0 && (
-                <div className="border-t border-zinc-800 px-3 py-2">
-                  <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-zinc-500">
+                <div className="border-t border-zinc-900/65 px-3 py-2 mt-1">
+                  <p className="mb-2 text-[10px] uppercase tracking-wider text-zinc-500 font-bold">
                     Related tags
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {relatedTags.map((tag) => (
                       <button
                         key={tag.normalized_tag}
@@ -377,7 +391,7 @@ export default function ComposeBox({
                             insert_text: `#${tag.normalized_tag}`,
                           })
                         }
-                        className="rounded-full border border-zinc-700 px-2.5 py-1 text-xs text-sky-300 hover:bg-zinc-800"
+                        className="rounded-full border border-zinc-800 bg-zinc-900/20 px-2.5 py-0.5 text-xs text-sky-400 hover:bg-zinc-800 transition-colors"
                       >
                         #{tag.tag}
                       </button>
@@ -389,16 +403,30 @@ export default function ComposeBox({
           )}
         </div>
 
-        {selectedImages.length > 0 && <div className="mt-3 grid grid-cols-2 gap-2">{selectedImages.map((image, index) => (
-          <div key={image.url} className="relative overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900">
-            <img src={image.url} alt={`Selected image ${index + 1}`} className="h-32 w-full object-cover" />
-            <button type="button" aria-label={`Remove image ${index + 1}`} onClick={() => { URL.revokeObjectURL(image.url); setSelectedImages((items) => items.filter((item) => item !== image)); }} className="absolute right-2 top-2 rounded-full bg-black/75 px-2 py-1 text-sm text-white">×</button>
+        {selectedImages.length > 0 && (
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {selectedImages.map((image, index) => (
+              <div key={image.url} className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+                <img src={image.url} alt={`Selected image ${index + 1}`} className="h-32 w-full object-cover" />
+                <button
+                  type="button"
+                  aria-label={`Remove image ${index + 1}`}
+                  onClick={() => {
+                    URL.revokeObjectURL(image.url);
+                    setSelectedImages((items) => items.filter((item) => item !== image));
+                  }}
+                  className="absolute right-2 top-2 rounded-full bg-black/75 px-2 py-0.5 text-xs text-white hover:bg-black/90 transition-colors"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
           </div>
-        ))}</div>}
+        )}
 
         {entityPickerOpen && (
-          <div className="mt-3 overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-900">
-            <div className="flex items-center justify-between border-b border-zinc-800 p-2">
+          <div className="mt-3 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-1.5 shadow-xl">
+            <div className="flex items-center justify-between border-b border-zinc-900/60 pb-2 px-2.5 pt-1.5">
               <div className="flex flex-wrap gap-1">
                 {[
                   ["", "All"],
@@ -412,8 +440,8 @@ export default function ComposeBox({
                     type="button"
                     key={value}
                     onClick={() => setEntityType(value)}
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors cursor-pointer ${
-                      entityType === value ? "bg-white text-zinc-950" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-750"
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold transition-all cursor-pointer ${
+                      entityType === value ? "bg-white text-black shadow-sm" : "bg-zinc-900/60 text-zinc-450 hover:bg-zinc-850"
                     }`}
                   >
                     {label}
@@ -423,7 +451,7 @@ export default function ComposeBox({
               <button
                 type="button"
                 onClick={() => setEntityPickerOpen(false)}
-                className="rounded-lg px-2 py-1 text-xs text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all font-semibold cursor-pointer shrink-0 ml-2"
+                className="rounded-lg px-2 py-0.5 text-xs text-zinc-450 hover:text-white hover:bg-zinc-900 transition-all font-semibold cursor-pointer shrink-0 ml-2"
                 aria-label="Close tagging component"
               >
                 Close
@@ -448,35 +476,35 @@ export default function ComposeBox({
                 }
                 if (event.key === "Escape") setEntityPickerOpen(false);
               }}
-              placeholder="Search platform items"
-              className="w-full border-b border-zinc-800 bg-transparent px-3 py-2 text-sm text-white outline-none"
+              placeholder="Search platform items..."
+              className="w-full border-b border-zinc-900 bg-transparent px-3 py-2 text-xs text-white outline-none focus:border-zinc-850"
             />
             {entityLoading ? (
-              <div className="flex items-center justify-center py-8">
+              <div className="flex items-center justify-center py-6">
                 <Spinner size="sm" />
               </div>
             ) : (
-              <div className="max-h-64 overflow-y-auto">
+              <div className="max-h-64 overflow-y-auto mt-1 space-y-0.5">
                 {entityResults.map((entity, index) => (
                   <button
                     type="button"
                     key={`${entity.type}:${entity.id}`}
                     onClick={() => setSelectedEntities((items) => [...items, entity].slice(0, 5))}
-                    className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left cursor-pointer ${
-                      index === entityHighlight ? "bg-zinc-800" : "hover:bg-zinc-800/70"
+                    className={`flex w-full items-center justify-between gap-3 px-3 py-2 rounded-xl text-left cursor-pointer transition-all ${
+                      index === entityHighlight ? "bg-zinc-900" : "hover:bg-zinc-900/40"
                     }`}
                   >
                     <span className="min-w-0">
-                      <span className="block truncate text-sm text-white">{entity.title}</span>
-                      <span className="block truncate text-xs text-zinc-500">
+                      <span className="block truncate text-xs font-semibold text-white">{entity.title}</span>
+                      <span className="block truncate text-[10px] text-zinc-500 mt-0.5">
                         {entity.owner?.name || entity.type.replace("_", " ")}
                       </span>
                     </span>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] uppercase ${
+                      className={`rounded-full px-2 py-0.5 text-[9px] uppercase font-bold border ${
                         entity.visibility === "private"
-                          ? "bg-amber-500/15 text-amber-300"
-                          : "bg-emerald-500/15 text-emerald-300"
+                          ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                          : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                       }`}
                     >
                       {entity.visibility}
@@ -491,12 +519,56 @@ export default function ComposeBox({
           </div>
         )}
 
-        {error && <p className="mt-1 text-xs text-rose-500">{error}</p>}
+        {error && <p className="mt-1 text-xs text-rose-505">{error}</p>}
 
-        {selectedEntities.some((entity) => entity.visibility === "private") && <p className="mt-2 text-xs text-amber-300">Restricted: only people who can access every private tagged item can view this post.</p>}
+        {selectedEntities.some((entity) => entity.visibility === "private") && (
+          <p className="mt-2 text-xs text-amber-300 font-medium">Restricted: only people who can access every private tagged item can view this post.</p>
+        )}
 
-        <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-800">
-          <div className="flex items-center gap-2"><button type="button" disabled={selectedEntities.length >= 5} onClick={() => setEntityPickerOpen((open) => !open)} className="rounded-full border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800 disabled:opacity-40">Tag item {selectedEntities.length}/5</button><button type="button" disabled={selectedImages.length >= 4} onClick={() => fileInputRef.current?.click()} className="rounded-full border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800 disabled:opacity-40">Add images {selectedImages.length}/4</button><input ref={fileInputRef} hidden type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => { const picked = Array.from(event.target.files || []); const files = picked.filter((file) => !selectedImages.some((image) => image.file.name === file.name && image.file.size === file.size && image.file.lastModified === file.lastModified)); if (files.length !== picked.length) setError("That image is already selected."); if (selectedImages.length + files.length > 4) { setError("You can attach at most 4 images."); event.target.value = ""; return; } const invalid = files.find((file) => file.size > 10 * 1024 * 1024); if (invalid) { setError("Each image must be 10MB or smaller."); event.target.value = ""; return; } setSelectedImages((items) => [...items, ...files.map((file) => ({ file, url: URL.createObjectURL(file) }))]); event.target.value = ""; }} /></div>
+        <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-800/60">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={selectedEntities.length >= 5}
+              onClick={() => setEntityPickerOpen((open) => !open)}
+              className="rounded-full border border-zinc-850 bg-zinc-900/30 px-3 py-1.5 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-40 cursor-pointer"
+            >
+              Tag item {selectedEntities.length}/5
+            </button>
+            <button
+              type="button"
+              disabled={selectedImages.length >= 4}
+              onClick={() => fileInputRef.current?.click()}
+              className="rounded-full border border-zinc-850 bg-zinc-900/30 px-3 py-1.5 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-40 cursor-pointer"
+            >
+              Add images {selectedImages.length}/4
+            </button>
+            <input
+              ref={fileInputRef}
+              hidden
+              type="file"
+              multiple
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              onChange={(event) => {
+                const picked = Array.from(event.target.files || []);
+                const files = picked.filter((file) => !selectedImages.some((image) => image.file.name === file.name && image.file.size === file.size && image.file.lastModified === file.lastModified));
+                if (files.length !== picked.length) setError("That image is already selected.");
+                if (selectedImages.length + files.length > 4) {
+                  setError("You can attach at most 4 images.");
+                  event.target.value = "";
+                  return;
+                }
+                const invalid = files.find((file) => file.size > 10 * 1024 * 1024);
+                if (invalid) {
+                  setError("Each image must be 10MB or smaller.");
+                  event.target.value = "";
+                  return;
+                }
+                setSelectedImages((items) => [...items, ...files.map((file) => ({ file, url: URL.createObjectURL(file) }))]);
+                event.target.value = "";
+              }}
+            />
+          </div>
           <span
             className={`text-xs tabular-nums ${
               isOverLimit
@@ -512,9 +584,9 @@ export default function ComposeBox({
           <button
             type="submit"
             disabled={isEmpty || isOverLimit || isLoading}
-            className="px-5 py-1.5 rounded-full bg-white text-zinc-950 text-sm font-semibold
+            className="px-5 py-1.5 rounded-full bg-white text-black text-sm font-semibold
               disabled:opacity-30 disabled:cursor-not-allowed
-              hover:bg-zinc-100 active:scale-95 transition-all"
+              hover:bg-zinc-100 active:scale-95 transition-all cursor-pointer"
           >
             {isLoading ? "Posting..." : "Post"}
           </button>

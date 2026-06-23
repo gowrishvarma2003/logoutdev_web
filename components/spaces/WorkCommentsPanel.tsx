@@ -6,6 +6,7 @@ import { ChatIcon } from "@/components/ui/Icons";
 import type { SpaceWorkComment, User } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils";
 import * as api from "@/lib/services/spacesApi";
+import * as cache from "@/lib/services/requestCache";
 import RichComposer from "@/components/ui/RichComposer";
 import RichText from "@/components/ui/RichText";
 
@@ -47,6 +48,7 @@ function Composer({
     setError("");
     try {
       await api.createWorkComment(spaceId, issueId, body.trim(), parentCommentId);
+      cache.invalidateSpace(spaceId, "work");
       setBody("");
       onPosted();
     } catch (err) {

@@ -19,6 +19,7 @@ import {
   CodeBracketIcon,
   BoltIcon,
   SparklesIcon,
+  ChatBubbleIcon,
 } from "@/components/ui/Icons";
 
 interface SidebarProps {
@@ -170,6 +171,12 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
           label="Inbox"
           active={pathname.startsWith("/notifications")}
           badge={unreadCount}
+        />
+        <NavItem
+          href="/chat"
+          icon={<ChatBubbleIcon />}
+          label="Chat"
+          active={pathname.startsWith("/chat")}
         />
       </div>
 

@@ -18,7 +18,9 @@ export default function RepoCodePage() {
   const [showCodePanel, setShowCodePanel] = useState(false);
   const [showBranchMenu, setShowBranchMenu] = useState(false);
   const [copiedField, setCopiedField] = useState<"url" | "commands" | null>(null);
+  const [downloadingZip, setDownloadingZip] = useState(false);
   const branchMenuRef = useRef<HTMLDivElement | null>(null);
+  const codePanelRef = useRef<HTMLDivElement | null>(null);
   const searchParams = useSearchParams();
   const currentPath = searchParams.get("path") || "";
   const currentView = searchParams.get("view") || "tree";
@@ -123,6 +125,61 @@ export default function RepoCodePage() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [showBranchMenu]);
+
+  useEffect(() => {
+    if (!showCodePanel) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (codePanelRef.current?.contains(event.target as Node)) return;
+      const trigger = document.getElementById("code-button-trigger");
+      if (trigger?.contains(event.target as Node)) return;
+      setShowCodePanel(false);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowCodePanel(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showCodePanel]);
+
+  const handleDownloadZip = async () => {
+    if (downloadingZip) return;
+    setDownloadingZip(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(`${API_BASE_URL}/api/repos/${repo.id}/zip?ref=${encodeURIComponent(activeRef)}`, {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to download ZIP");
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${repo.slug || "repository"}-${activeRef}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("ZIP download error:", error);
+      alert("Failed to download repository ZIP archive.");
+    } finally {
+      setDownloadingZip(false);
+    }
+  };
 
   const branchHref = (branchName: string) => {
     const params = new URLSearchParams();
@@ -251,66 +308,83 @@ export default function RepoCodePage() {
                 )}
                 <button
                   type="button"
+                  id="code-button-trigger"
                   onClick={() => setShowCodePanel((current) => !current)}
-                  className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
+                  className="inline-flex items-center rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 shadow-sm transition-colors"
                 >
-                  Code {showCodePanel ? "^" : "v"}
+                  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="mr-1.5 fill-current">
+                    <path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L13.94 8l-3.72-3.72a.75.75 0 0 1 1.06-1.06ZM4.72 3.22 0.47 7.47a.75.75 0 0 0 0 1.06l4.25 4.25a.75.75 0 1 0 1.06-1.06L2.06 8l3.72-3.72a.75.75 0 0 0-1.06-1.06Z"></path>
+                  </svg>
+                  Code
+                  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="ml-1.5 fill-current opacity-80">
+                    <path d="m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z"></path>
+                  </svg>
                 </button>
                 {showCodePanel ? (
-                  <div className="absolute right-0 top-full z-20 mt-2 w-full max-w-xl rounded-2xl border border-zinc-800 bg-zinc-950 p-4 shadow-2xl shadow-black/40">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className="text-sm font-semibold text-white">Clone and push</h3>
-                        <p className="mt-1 text-xs text-zinc-500">
-                          {repo.can_push
-                            ? "Use this remote URL from your local Git repo."
-                            : "You can clone this repo, but you need write access before you can push."}
-                        </p>
+                  <div
+                    ref={codePanelRef}
+                    className="absolute right-0 top-full z-20 mt-2 w-80 sm:w-[360px] rounded-xl border border-zinc-800 bg-zinc-950 p-4 shadow-2xl shadow-black/40"
+                  >
+                    <div className="flex border-b border-zinc-800/80 mb-3 text-xs font-semibold text-zinc-400">
+                      <div className="relative pb-2 px-1 text-zinc-100 font-medium">
+                        Local
+                        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500 rounded-full" />
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setShowCodePanel(false)}
-                        className="rounded-md px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
-                      >
-                        Close
-                      </button>
                     </div>
 
-                    <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-900/60 p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">Remote URL</p>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/50 p-2 text-xs">
+                        <code className="flex-1 overflow-x-auto whitespace-nowrap scrollbar-none font-mono text-zinc-300">
+                          {gitRemoteUrl}
+                        </code>
                         <button
                           type="button"
                           onClick={() => handleCopy(gitRemoteUrl, "url")}
-                          className="rounded-md border border-zinc-700 px-2 py-1 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
+                          className="text-zinc-400 hover:text-zinc-200 active:text-white shrink-0"
+                          title="Copy to clipboard"
                         >
-                          {copiedField === "url" ? "Copied" : "Copy"}
+                          {copiedField === "url" ? (
+                            <CheckIcon className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="fill-current">
+                              <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path>
+                              <path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+                            </svg>
+                          )}
                         </button>
                       </div>
-                      <code className="mt-2 block overflow-x-auto text-xs text-zinc-200">{gitRemoteUrl}</code>
+
+                      <p className="text-[11px] text-zinc-500 leading-normal">
+                        {repo.can_push
+                          ? "Use this remote URL from your local Git repo."
+                          : "You can clone this repo, but you need write access before you can push."}
+                      </p>
                     </div>
 
-                    <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-900/60 p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">Suggested commands</p>
-                        <button
-                          type="button"
-                          onClick={() => handleCopy(pushCommands, "commands")}
-                          className="rounded-md border border-zinc-700 px-2 py-1 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
-                        >
-                          {copiedField === "commands" ? "Copied" : "Copy"}
-                        </button>
-                      </div>
-                      <pre className="mt-2 overflow-x-auto text-xs text-zinc-200">
-                        <code>{pushCommands}</code>
-                      </pre>
-                    </div>
+                    <div className="mt-4 border-t border-zinc-800/80 pt-3 space-y-1">
+                      <a
+                        href={`x-github-client://openRepo/${encodeURIComponent(gitRemoteUrl)}`}
+                        className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm text-zinc-300 hover:bg-zinc-900/60 hover:text-white transition-colors"
+                      >
+                        <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="fill-current text-zinc-400">
+                          <path d="M4 11.25a.75.75 0 0 1 .75-.75h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1-.75-.75Z"></path>
+                          <path d="M10.125 1.5a1.875 1.875 0 1 1 0 3.75h-4.25a1.875 1.875 0 0 1 0-3.75h4.25ZM5.875 3a.375 0 1 0 0 .75h4.25a.375 0 1 0 0-.75h-4.25ZM1.5 6.75C1.5 5.784 2.284 5 3.25 5h9.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 12.75 14H3.25A1.75 1.75 0 0 1 1.5 12.25v-5.5Zm1.75-.25a.25 0 0 0-.25.25v5.5c0 .138.112.25.25.25h9.5a.25 0 0 0 .25-.25v-5.5a.25 0 0 0-.25-.25H3.25Z"></path>
+                        </svg>
+                        <span>Open with GitHub Desktop</span>
+                      </a>
 
-                    <p className="mt-4 text-xs text-zinc-500">
-                      {repo.can_push
-                        ? "When Git prompts for credentials, use your LogoutDev username and a personal access token as the password."
-                        : "If you should be able to contribute here, ask a maintainer to grant you write access or work from your fork."}
-                    </p>
+                      <button
+                        type="button"
+                        onClick={handleDownloadZip}
+                        disabled={downloadingZip}
+                        className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-zinc-300 hover:bg-zinc-900/60 hover:text-white transition-colors text-left disabled:opacity-50"
+                      >
+                        <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="fill-current text-zinc-400">
+                          <path d="M3.5 1.75a.25.25 0 0 1 .25-.25h3v2.25a.75.75 0 0 0 .75.75h2.25v2.75H3.75a.25.25 0 0 1-.25-.25V1.75Zm4.75 0v1.5h1.5a.25.25 0 0 0-.25-.25h-1.25ZM2 1.75C2 .784 2.784 0 3.75 0h4.5c.464 0 .91.184 1.237.513l3 3c.329.328.513.773.513 1.237v7.5A1.75 1.75 0 0 1 11.25 14h-7.5A1.75 1.75 0 0 1 2 12.25V1.75Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5H9.5a1.75 1.75 0 0 1-1.75-1.75V1.5H3.75Z"></path>
+                        </svg>
+                        <span>{downloadingZip ? "Downloading ZIP..." : "Download ZIP"}</span>
+                      </button>
+                    </div>
                   </div>
                 ) : null}
               </>

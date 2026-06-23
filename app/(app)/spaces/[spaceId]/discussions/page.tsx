@@ -10,6 +10,7 @@ import Spinner from "@/components/ui/Spinner";
 import Avatar from "@/components/ui/Avatar";
 import { ChatBubbleIcon, LockIcon } from "@/components/ui/Icons";
 import * as api from "@/lib/services/spacesApi";
+import * as cache from "@/lib/services/requestCache";
 import type { DiscussionCategory } from "@/lib/types";
 import RichComposer from "@/components/ui/RichComposer";
 
@@ -56,6 +57,7 @@ export default function DiscussionsPage({
         body: body.trim(),
         category,
       });
+      cache.invalidateSpace(spaceId, "discussions");
       setTitle("");
       setBody("");
       setCategory(allowedCategories[0] ?? "idea");

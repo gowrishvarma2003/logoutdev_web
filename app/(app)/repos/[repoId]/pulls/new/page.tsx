@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useRepoContext } from "../../layout";
 import { useBranches, usePullRequestCompare, usePullRequestHeadOptions } from "@/lib/hooks/useRepos";
 import { createPullRequest } from "@/lib/services/reposApi";
+import * as cache from "@/lib/services/requestCache";
 import Spinner from "@/components/ui/Spinner";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 
@@ -101,6 +102,7 @@ export default function NewPullRequestPage() {
         target_branch: selectedBaseBranch,
         is_draft: isDraft,
       });
+      cache.invalidateRepo(repo.id, "pulls");
       router.push(`/repos/${repo.id}/pulls/${pullRequest.number}`);
     } catch (error: unknown) {
       setSubmitError(error instanceof Error ? error.message : "Failed to create pull request");

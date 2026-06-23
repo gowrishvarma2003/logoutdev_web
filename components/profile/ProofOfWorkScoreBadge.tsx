@@ -41,20 +41,22 @@ const BAND_CONFIG: Record<
 };
 
 const FACTOR_LABELS: Record<string, string> = {
-  shipping_behavior: "Shipping Behavior",
-  review_quality: "Review Quality",
-  collaboration_conversion: "Collaboration Conversion",
-  freelance_outcomes: "Freelance Outcomes",
-  platform_consistency: "Platform Consistency",
+  code_delivery: "Code Delivery",
+  project_execution: "Project Execution",
+  collaboration: "Collaboration",
+  knowledge_sharing: "Knowledge Sharing",
+  reliability_outcomes: "Reliability & Outcomes",
+  community_contribution: "Community Contribution",
 };
 
 // Maximum score per factor for the progress bar
 const FACTOR_MAX: Record<string, number> = {
-  shipping_behavior: 25,
-  review_quality: 20,
-  collaboration_conversion: 20,
-  freelance_outcomes: 20,
-  platform_consistency: 15,
+  code_delivery: 30,
+  project_execution: 20,
+  collaboration: 20,
+  knowledge_sharing: 15,
+  reliability_outcomes: 10,
+  community_contribution: 5,
 };
 
 export default function ProofOfWorkScoreBadge({ signals }: ProofOfWorkScoreBadgeProps) {
@@ -120,7 +122,7 @@ export default function ProofOfWorkScoreBadge({ signals }: ProofOfWorkScoreBadge
             );
           })}
           <p className="text-[11px] text-zinc-600 mt-1">
-            Score computed from last 30 days of activity.
+            Durable outcomes plus a 30-day activity boost.
           </p>
         </div>
       )}

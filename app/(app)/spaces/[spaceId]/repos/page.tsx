@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { useSpace, useContributors } from "@/lib/hooks/useSpaces";
 import { useAttachments, useRepositoryList } from "@/lib/hooks/useRepos";
 import * as spacesApi from "@/lib/services/spacesApi";
+import * as cache from "@/lib/services/requestCache";
 import * as reposApi from "@/lib/services/reposApi";
 import { EmptyState, SectionHeader } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
@@ -96,6 +97,8 @@ export default function ReposPage({
     setFormError("");
     try {
       await spacesApi.createAttachment(spaceId, { repo_id: selectedRepoId });
+      cache.invalidateSpace(spaceId, "attachments");
+      cache.invalidateSpace(spaceId, "overview");
       setSelectedRepoId("");
       setShowAttachExisting(false);
       refetch();
@@ -117,6 +120,8 @@ export default function ReposPage({
         external_url: externalUrl.trim(),
         label: externalLabel.trim() || undefined,
       });
+      cache.invalidateSpace(spaceId, "attachments");
+      cache.invalidateSpace(spaceId, "overview");
       setExternalUrl("");
       setExternalLabel("");
       setShowAttachExternal(false);
@@ -135,6 +140,7 @@ export default function ReposPage({
     setActioningAttachment(attachmentId);
     try {
       await spacesApi.updateAttachment(spaceId, attachmentId, body);
+      cache.invalidateSpace(spaceId, "attachments");
       refetch();
     } finally {
       setActioningAttachment(null);
@@ -146,6 +152,8 @@ export default function ReposPage({
     setActioningAttachment(attachmentId);
     try {
       await spacesApi.deleteAttachment(spaceId, attachmentId);
+      cache.invalidateSpace(spaceId, "attachments");
+      cache.invalidateSpace(spaceId, "overview");
       refetch();
     } finally {
       setActioningAttachment(null);

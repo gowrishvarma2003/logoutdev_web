@@ -3,6 +3,7 @@
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSpace } from "@/lib/hooks/useSpaces";
+import Spinner from "@/components/ui/Spinner";
 import { ArrowLeftIcon, RocketIcon } from "@/components/ui/Icons";
 import * as api from "@/lib/services/spacesApi";
 import Link from "next/link";
@@ -18,7 +19,7 @@ export default function JoinRequestPage({
 }) {
   const { spaceId } = use(params);
   const router = useRouter();
-  const { space } = useSpace(spaceId);
+  const { space, loading: spaceLoading } = useSpace(spaceId);
 
   const [message, setMessage] = useState("");
   const [skills, setSkills] = useState("");
@@ -59,6 +60,14 @@ export default function JoinRequestPage({
     } finally {
       setLoading(false);
     }
+  }
+
+  if (spaceLoading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Spinner size="lg" />
+      </div>
+    );
   }
 
   if (success) {

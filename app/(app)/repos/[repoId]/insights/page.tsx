@@ -8,7 +8,7 @@ import { ChartBarIcon } from "@heroicons/react/24/outline";
 
 export default function RepoInsightsPage() {
   const { repo } = useRepoContext();
-  const { insights, loading, error } = useRepoInsights(repo.id);
+  const { insights, loading, error, refetch } = useRepoInsights(repo.id);
 
   if (loading) {
     return (
@@ -24,6 +24,14 @@ export default function RepoInsightsPage() {
         icon={<ChartBarIcon className="h-10 w-10 text-zinc-500" />}
         title="Insights unavailable"
         description={error || "We couldn't load repository insights right now."}
+        action={
+          <button
+            onClick={refetch}
+            className="rounded-xl bg-zinc-800 px-4 py-2 text-sm text-white hover:bg-zinc-700 transition-colors"
+          >
+            Try again
+          </button>
+        }
       />
     );
   }

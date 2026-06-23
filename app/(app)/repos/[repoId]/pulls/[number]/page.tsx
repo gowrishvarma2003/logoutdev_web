@@ -15,6 +15,7 @@ import {
   reopenPullRequest,
   submitPullRequestReview,
 } from "@/lib/services/reposApi";
+import * as cache from "@/lib/services/requestCache";
 import type { PullRequestComment, PullRequestReview } from "@/lib/types";
 import Spinner from "@/components/ui/Spinner";
 import { formatRelativeTime } from "@/lib/utils";
@@ -80,6 +81,7 @@ export default function PRConversationPage({
     setError(null);
     try {
       await addPullRequestComment(repo.id, number, { body: commentBody.trim() });
+      cache.invalidateRepo(repo.id, "pulls");
       setCommentBody("");
       refetchComments();
     } catch (err: unknown) {
@@ -97,6 +99,7 @@ export default function PRConversationPage({
         status,
         body: reviewBody.trim() || undefined,
       });
+      cache.invalidateRepo(repo.id, "pulls");
       setReviewBody("");
       refetchReviews();
       refetchPR();
@@ -112,6 +115,10 @@ export default function PRConversationPage({
     setError(null);
     try {
       await mergePullRequest(repo.id, number);
+      // Merging advances the default branch — bust code cache too.
+      cache.invalidateRepo(repo.id, "pulls");
+      cache.invalidateRepo(repo.id, "code");
+      cache.invalidateRepo(repo.id, "overview");
       refetchPR();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to merge pull request");
@@ -129,6 +136,7 @@ export default function PRConversationPage({
       } else {
         await reopenPullRequest(repo.id, number);
       }
+      cache.invalidateRepo(repo.id, "pulls");
       refetchPR();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : `Failed to ${action} pull request`);

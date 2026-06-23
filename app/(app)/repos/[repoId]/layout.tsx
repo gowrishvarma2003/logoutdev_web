@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useRepo } from "@/lib/hooks/useRepos";
 import * as reposApi from "@/lib/services/reposApi";
+import * as cache from "@/lib/services/requestCache";
 import { Repository } from "@/lib/types";
 import { EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
@@ -72,6 +73,10 @@ export default function RepoLayout({
     setIsStarring(true);
     try {
       await reposApi.toggleStar(repo.id);
+      // Star state lives on the repo overview AND the /repos listings (star
+      // counts). Bust both so other tabs/pages stay in sync.
+      cache.invalidateRepo(repo.id, "overview");
+      cache.invalidateRepoListings();
       refetch();
     } catch (err: unknown) {
       setActionError(err instanceof Error ? err.message : "Failed to toggle star");
@@ -85,6 +90,9 @@ export default function RepoLayout({
     setIsForking(true);
     try {
       const res = await reposApi.forkRepository(repo.id);
+      cache.invalidateRepo(repo.id, "forks");
+      cache.invalidateRepo(repo.id, "overview");
+      cache.invalidateRepoListings();
       router.push(`/repos/${res.repo.id}`);
     } catch (err: unknown) {
       setActionError(err instanceof Error ? err.message : "Failed to fork repository");

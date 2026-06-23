@@ -304,7 +304,12 @@ export default function SpacesDiscoverPage() {
         ) : null}
 
         {!error && spaces.length > 0 ? (
-          <div className="grid gap-2.5">
+          <div className={`grid gap-2.5 ${loading ? "opacity-60 pointer-events-none" : ""}`}>
+            {loading && (
+              <div className="flex justify-center py-4">
+                <Spinner />
+              </div>
+            )}
             {spaces.map((space: ProjectSpace) => (
               <SpaceOverviewCard key={space.id} space={space} />
             ))}
@@ -317,7 +322,7 @@ export default function SpacesDiscoverPage() {
               <button
                 type="button"
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
-                disabled={page <= 1}
+                disabled={page <= 1 || loading}
                 className="px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-zinc-800 disabled:text-zinc-600 disabled:hover:bg-transparent"
               >
                 Previous
@@ -325,7 +330,7 @@ export default function SpacesDiscoverPage() {
               <button
                 type="button"
                 onClick={() => setPage((current) => current + 1)}
-                disabled={spaces.length < PAGE_LIMIT}
+                disabled={spaces.length < PAGE_LIMIT || loading}
                 className="border-l border-zinc-800 px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-zinc-800 disabled:text-zinc-600 disabled:hover:bg-transparent"
               >
                 Next

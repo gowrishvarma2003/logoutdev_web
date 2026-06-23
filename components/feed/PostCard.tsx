@@ -127,8 +127,8 @@ export default function PostCard({
   return (
     <article
       onClick={clickable ? handleCardClick : undefined}
-      className={`relative border-b border-zinc-800 px-4 py-4 transition-colors ${
-        clickable ? "hover:bg-zinc-900/70 cursor-pointer" : ""
+      className={`relative border-b border-zinc-900/60 px-5 py-4.5 transition-all duration-200 ${
+        clickable ? "hover:bg-zinc-900/25 cursor-pointer" : ""
       }`}
     >
       {post.is_repost && (
@@ -142,15 +142,15 @@ export default function PostCard({
         <Avatar user={post.author ?? null} size="md" className="mt-0.5 shrink-0" />
 
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-1.5">
-            <span className="text-sm font-semibold leading-snug text-white">
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-semibold leading-snug text-zinc-100 hover:text-white transition-colors">
               {post.author?.name ?? "Unknown"}
             </span>
-            <span className="truncate text-sm leading-snug text-zinc-500">
+            <span className="truncate text-xs leading-snug text-zinc-400">
               @{getAuthorHandle(post.author)}
             </span>
-            <span className="text-sm text-zinc-700">·</span>
-            <span className="shrink-0 text-xs text-zinc-500">
+            <span className="text-zinc-600 text-xs font-bold">·</span>
+            <span className="shrink-0 text-xs text-zinc-500 font-medium" title={new Date(post.created_at).toLocaleString()}>
               {formatRelativeTime(post.created_at)}
             </span>
           </div>
@@ -164,9 +164,35 @@ export default function PostCard({
 
           {(post.entity_tags?.length ? post.entity_tags : post.linked_entity ? [post.linked_entity] : []).map((entity) => <div className="mt-3" key={`${entity.type}:${entity.id}`} onClick={(event) => event.stopPropagation()}><LinkedEntityCard entity={entity} compact /></div>)}
 
-          {post.images && post.images.length > 0 && <div className={`mt-3 grid gap-1 overflow-hidden rounded-2xl border border-zinc-800 ${post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`} onClick={(event) => event.stopPropagation()}>{post.images.map((image, index) => <button key={image.id} type="button" onClick={() => setLightboxImage(image.url)} className={`${post.images?.length === 3 && index === 0 ? "col-span-2" : ""} overflow-hidden bg-zinc-900`} aria-label={`Open image ${index + 1}`}>
-            <img src={image.url} alt={`Post image ${index + 1}`} className={`w-full object-cover ${post.images?.length === 1 ? "max-h-[520px]" : "h-48"}`} />
-          </button>)}</div>}
+          {post.images && post.images.length > 0 && (
+            <div 
+              className={`mt-3.5 grid gap-2 overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950/40 p-1 ${
+                post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"
+              }`}
+              onClick={(event) => event.stopPropagation()}
+            >
+              {post.images.map((image, index) => (
+                <button 
+                  key={image.id} 
+                  type="button" 
+                  onClick={() => setLightboxImage(image.url)} 
+                  className={`group relative ${
+                    post.images?.length === 3 && index === 0 ? "col-span-2" : ""
+                  } overflow-hidden rounded-xl bg-zinc-900/60 border border-zinc-800/40`} 
+                  aria-label={`Open image ${index + 1}`}
+                >
+                  <img 
+                    src={image.url} 
+                    alt={`Post image ${index + 1}`} 
+                    className={`w-full object-cover transition-transform duration-300 group-hover:scale-[1.015] ${
+                      post.images?.length === 1 ? "max-h-[520px]" : "h-48"
+                    }`} 
+                  />
+                  <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                </button>
+              ))}
+            </div>
+          )}
 
           {post.audience === "restricted" && <div className="mt-2 text-xs text-amber-300">Restricted audience</div>}
 
@@ -184,10 +210,10 @@ export default function PostCard({
                 e.stopPropagation();
                 setMenuOpen((open) => !open);
               }}
-              className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+              className="rounded-full p-2 text-zinc-500 transition-all hover:bg-zinc-900/80 hover:text-zinc-300 active:scale-90 cursor-pointer"
               aria-label="Post options"
             >
-              <DotsIcon />
+              <DotsIcon className="h-4 w-4" />
             </button>
 
             {menuOpen && (
@@ -199,13 +225,13 @@ export default function PostCard({
                     setMenuOpen(false);
                   }}
                 />
-                <div className="absolute right-0 top-8 z-20 w-44 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
+                <div className="absolute right-0 top-9 z-20 w-44 overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/95 backdrop-blur-xl shadow-2xl p-1 animate-in fade-in slide-in-from-top-1 duration-150">
                   <button
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-rose-400 transition-colors hover:bg-rose-500/10 disabled:opacity-50"
+                    className="flex w-full items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-rose-400 transition-all hover:bg-rose-500/10 disabled:opacity-50 cursor-pointer"
                   >
-                    <TrashIcon />
+                    <TrashIcon className="h-4 w-4 shrink-0" />
                     {isDeleting ? "Deleting..." : "Delete post"}
                   </button>
                 </div>
@@ -233,10 +259,28 @@ export default function PostCard({
           />
         </div>
       )}
-      {lightboxImage && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4" role="dialog" aria-modal="true" aria-label="Post image preview" onClick={(event) => { event.stopPropagation(); setLightboxImage(null); }}>
-        <img src={lightboxImage} alt="Expanded post image" className="max-h-full max-w-full object-contain" />
-        <button type="button" className="absolute right-5 top-5 rounded-full bg-zinc-900 px-3 py-2 text-white" aria-label="Close image preview" onClick={() => setLightboxImage(null)}>×</button>
-      </div>}
+      {lightboxImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 cursor-zoom-out" 
+          role="dialog" 
+          aria-modal="true" 
+          aria-label="Post image preview" 
+          onClick={(event) => { 
+            event.stopPropagation(); 
+            setLightboxImage(null); 
+          }}
+        >
+          <img src={lightboxImage} alt="Expanded post image" className="max-h-full max-w-full object-contain rounded-lg shadow-2xl" />
+          <button 
+            type="button" 
+            className="absolute right-5 top-5 rounded-full bg-zinc-900/80 backdrop-blur-md border border-zinc-800 px-4 py-2 text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-800 transition-all cursor-pointer shadow-lg" 
+            aria-label="Close image preview" 
+            onClick={() => setLightboxImage(null)}
+          >
+            Close
+          </button>
+        </div>
+      )}
 
       {showDeleteConfirm && (
         <div 
@@ -247,7 +291,7 @@ export default function PostCard({
           }}
         >
           <div 
-            className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl transition-all duration-200"
+            className="w-full max-w-sm rounded-2xl border border-rose-500/20 bg-zinc-950 p-6 shadow-2xl shadow-rose-950/10 transition-all duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-base font-bold text-white mb-2">Delete Post?</h3>
@@ -258,7 +302,7 @@ export default function PostCard({
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
-                className="rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 px-4 py-2 text-xs font-semibold text-zinc-300 transition-colors cursor-pointer"
+                className="rounded-xl bg-zinc-900/80 border border-zinc-800 hover:bg-zinc-850 px-4.5 py-2 text-xs font-semibold text-zinc-400 hover:text-zinc-350 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -279,9 +323,9 @@ export default function PostCard({
                   }
                 }}
                 disabled={isDeleting}
-                className="rounded-xl bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500 hover:text-zinc-950 px-4 py-2 text-xs font-bold text-rose-400 transition-all cursor-pointer disabled:opacity-50"
+                className="rounded-xl bg-rose-600 hover:bg-rose-700 border border-rose-600/30 px-4.5 py-2 text-xs font-bold text-white hover:scale-[1.01] active:scale-95 transition-all cursor-pointer disabled:opacity-50"
               >
-                {isDeleting ? "Deleting..." : "Delete"}
+                {isDeleting ? "Deleting..." : "Delete Post"}
               </button>
             </div>
           </div>

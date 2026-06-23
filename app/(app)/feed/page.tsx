@@ -58,14 +58,14 @@ export default function FeedPage() {
 
   return (
     <div>
-      {/* ── Page header ── */}
-      <header className="sticky top-0 z-10 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800">
-        <div className="px-4 pt-4 pb-0">
-          <h1 className="text-[17px] font-bold text-white">Home</h1>
+      {/* ── Page Header with Pill segmented control ── */}
+      <header className="sticky top-0 z-20 bg-zinc-950/70 backdrop-blur-xl border-b border-zinc-800/50 px-4 py-3 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <h1 className="text-base font-extrabold tracking-tight text-white">Developer Feed</h1>
         </div>
 
-        {/* Tab bar */}
-        <div className="flex mt-3">
+        {/* Tab Buttons (Pill Control) */}
+        <div className="flex items-center gap-1 bg-zinc-900/60 border border-zinc-800/80 p-1 rounded-full shadow-inner">
           <TabButton
             label="For You"
             active={activeTab === "foryou"}
@@ -79,7 +79,7 @@ export default function FeedPage() {
         </div>
       </header>
 
-      {/* ── Compose box ── */}
+      {/* ── Compose Box ── */}
       <ComposeBox
         currentUser={user}
         onPostCreated={handlePostCreated}
@@ -89,19 +89,21 @@ export default function FeedPage() {
         onClearLinkedEntity={() => router.replace("/feed")}
       />
 
-      {/* ── Post list ── */}
-      <PostList
-        posts={activeFeed.posts}
-        currentUser={user}
-        isLoading={activeFeed.isLoading}
-        isLoadingMore={activeFeed.isLoadingMore}
-        nextCursor={activeFeed.nextCursor}
-        error={activeFeed.error}
-        onUpdate={handlePostUpdated}
-        onDelete={handlePostDeleted}
-        onLoadMore={activeFeed.loadMore}
-        emptyMessage={emptyMessage}
-      />
+      {/* ── Post List ── */}
+      <div className="divide-y divide-zinc-800/60">
+        <PostList
+          posts={activeFeed.posts}
+          currentUser={user}
+          isLoading={activeFeed.isLoading}
+          isLoadingMore={activeFeed.isLoadingMore}
+          nextCursor={activeFeed.nextCursor}
+          error={activeFeed.error}
+          onUpdate={handlePostUpdated}
+          onDelete={handlePostDeleted}
+          onLoadMore={activeFeed.loadMore}
+          emptyMessage={emptyMessage}
+        />
+      </div>
     </div>
   );
 }
@@ -118,14 +120,13 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className={`flex-1 py-3 text-sm font-medium relative transition-colors ${
-        active ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+      className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wide transition-all cursor-pointer select-none ${
+        active
+          ? "bg-zinc-800 text-white shadow-sm"
+          : "text-zinc-500 hover:text-zinc-300"
       }`}
     >
       {label}
-      {active && (
-        <span className="absolute bottom-0 inset-x-[30%] h-[2px] rounded-full bg-white" />
-      )}
     </button>
   );
 }

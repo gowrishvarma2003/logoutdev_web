@@ -4,6 +4,7 @@ import { use, useMemo, useState } from "react";
 import { useRepoContext } from "../../../layout";
 import { usePullRequestComments, usePullRequestDiff } from "@/lib/hooks/useRepos";
 import { addPullRequestComment, resolvePullRequestThread } from "@/lib/services/reposApi";
+import * as cache from "@/lib/services/requestCache";
 import type { PullRequestComment } from "@/lib/types";
 import Spinner from "@/components/ui/Spinner";
 import { DocumentIcon } from "@heroicons/react/24/outline";
@@ -157,6 +158,7 @@ export default function PRFilesPage({
         position: position || undefined,
         parent_comment_id: parentCommentId,
       });
+      cache.invalidateRepo(repo.id, "pulls");
       setDrafts((current) => ({ ...current, [key]: "" }));
       setActiveLine((current) => ({ ...current, [path]: null }));
       refetchComments();
@@ -167,6 +169,7 @@ export default function PRFilesPage({
 
   async function resolveThread(commentId: string) {
     await resolvePullRequestThread(repo.id, number, commentId);
+    cache.invalidateRepo(repo.id, "pulls");
     refetchComments();
   }
 

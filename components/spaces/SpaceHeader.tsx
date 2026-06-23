@@ -19,6 +19,7 @@ import CollaborationHealthBadge from "./CollaborationHealthBadge";
 import { useHealth } from "@/lib/hooks/useSpaces";
 import { useAuth } from "@/lib/hooks/useAuth";
 import * as api from "@/lib/services/spacesApi";
+import * as cache from "@/lib/services/requestCache";
 
 interface SpaceHeaderProps {
   space: ProjectSpace;
@@ -81,6 +82,10 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
         setIsFollowing(true);
         setFollowerCount((count) => count + 1);
       }
+      // Bust cached overview (follower_count) + followers list so other tabs
+      // (Overview, People) reflect the change on next visit.
+      cache.invalidateSpace(space.id, "followers");
+      cache.invalidateSpace(space.id, "overview");
     } finally {
       setFollowLoading(false);
     }

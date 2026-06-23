@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRepoContext } from "../../layout";
 import { useBranches, useBranchProtectionRules } from "@/lib/hooks/useRepos";
 import { createBranchProtectionRule, deleteBranchProtectionRule } from "@/lib/services/reposApi";
+import * as cache from "@/lib/services/requestCache";
 import Spinner from "@/components/ui/Spinner";
 import type { BranchProtectionRule } from "@/lib/types";
 import { CheckIcon, ShieldCheckIcon, TrashIcon } from "@heroicons/react/24/outline";
@@ -85,6 +86,7 @@ export default function BranchProtectionSettingsPage() {
         allow_deletions: form.allowDeletions,
         require_linear_history: form.requireLinearHistory,
       });
+      cache.invalidateRepo(repo.id, "branch-protection");
 
       setForm(initialFormState);
       setFormSuccess(`Protection rule saved for ${branchPattern}.`);
@@ -101,6 +103,7 @@ export default function BranchProtectionSettingsPage() {
 
     try {
       await deleteBranchProtectionRule(repo.id, ruleId);
+      cache.invalidateRepo(repo.id, "branch-protection");
       refetch();
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Failed to delete rule.");

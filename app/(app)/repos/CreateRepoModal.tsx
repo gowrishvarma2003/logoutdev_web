@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Repository, RepositoryVisibility } from "@/lib/types";
 import * as reposApi from "@/lib/services/reposApi";
+import * as cache from "@/lib/services/requestCache";
 import Spinner from "@/components/ui/Spinner";
 
 export default function CreateRepoModal({
@@ -38,6 +39,7 @@ export default function CreateRepoModal({
         visibility,
         default_branch: "main",
       });
+      cache.invalidateRepoListings();
       onSuccess(res.repo);
       onClose();
       router.push(`/repos/${res.repo.id}`);

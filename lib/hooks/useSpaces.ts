@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import type {
   ProjectSpace,
   SpaceMember,
@@ -26,55 +25,18 @@ import type {
   WorkReadiness,
 } from "../types";
 import * as api from "../services/spacesApi";
+import { useCachedAsync } from "./useCachedAsync";
+import * as cache from "../services/requestCache";
 
-interface AsyncState<T> {
-  data: T | null;
-  loading: boolean;
-  error: string | null;
-}
-
-function useAsync<T>(
-  fetcher: () => Promise<T>,
-  deps: unknown[] = []
-): AsyncState<T> & { refetch: () => void } {
-  const [state, setState] = useState<AsyncState<T>>({
-    data: null,
-    loading: true,
-    error: null,
-  });
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setState((current) => ({ ...current, loading: true, error: null }));
-      try {
-        const data = await fetcher();
-        if (!cancelled) {
-          setState({ data, loading: false, error: null });
-        }
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Unknown error";
-        if (!cancelled) {
-          setState({ data: null, loading: false, error: msg });
-        }
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshKey, ...deps]);
-
-  const refetch = useCallback(() => {
-    setRefreshKey((current) => current + 1);
-  }, []);
-
-  return { ...state, refetch };
-}
+// ─── TTL constants (ms) ──────────────────────────────────────────────────────
+// Stable overview-ish data: long TTL with SWR for instant tab re-entry.
+const TTL_STABLE = 10 * 60 * 1000; // 10 min
+const TTL_MID = 5 * 60 * 1000; // 5 min
+// Volatile activity feeds / work lists: short TTL with SWR.
+const TTL_VOLATILE = 60 * 1000; // 1 min
+const TTL_WORK = 45 * 1000; // 45 s
+const TTL_SHORT = 30 * 1000; // 30 s
+const TTL_LIST = 60 * 1000; // 1 min for listing pages
 
 export function useSpaceList(filters?: {
   status?: string;
@@ -91,7 +53,7 @@ export function useSpaceList(filters?: {
   page?: number;
   limit?: number;
 }) {
-  return useAsync(
+  return useCachedAsync(
     () => api.listSpaces(filters),
     [
       filters?.status,
@@ -107,12 +69,17 @@ export function useSpaceList(filters?: {
       filters?.working,
       filters?.page,
       filters?.limit,
-    ]
+    ],
+    { cacheKey: cache.buildKey("spaces:list", filters), ttl: TTL_LIST, tags: ["spaces:list"] }
   );
 }
 
 export function useSpace(spaceId: string) {
-  const result = useAsync(() => api.getSpace(spaceId), [spaceId]);
+  const result = useCachedAsync(() => api.getSpace(spaceId), [spaceId], {
+    cacheKey: cache.buildKey(`space:${spaceId}`, "overview"),
+    ttl: TTL_STABLE,
+    tags: [`space:${spaceId}`, `space:${spaceId}:overview`],
+  });
   return {
     space: (result.data as { space: ProjectSpace } | null)?.space ?? null,
     loading: result.loading,
@@ -122,7 +89,11 @@ export function useSpace(spaceId: string) {
 }
 
 export function useStack(spaceId: string) {
-  const result = useAsync(() => api.getStack(spaceId), [spaceId]);
+  const result = useCachedAsync(() => api.getStack(spaceId), [spaceId], {
+    cacheKey: cache.buildKey(`space:${spaceId}`, "stack"),
+    ttl: TTL_STABLE,
+    tags: [`space:${spaceId}`],
+  });
   return {
     stack: (result.data as { stack: StackEntry[] } | null)?.stack ?? [],
     loading: result.loading,
@@ -132,7 +103,11 @@ export function useStack(spaceId: string) {
 }
 
 export function useContributors(spaceId: string) {
-  const result = useAsync(() => api.getContributors(spaceId), [spaceId]);
+  const result = useCachedAsync(() => api.getContributors(spaceId), [spaceId], {
+    cacheKey: cache.buildKey(`space:${spaceId}`, "contributors"),
+    ttl: TTL_MID,
+    tags: [`space:${spaceId}`, `space:${spaceId}:people`],
+  });
   return {
     contributors: (result.data as { contributors: SpaceMember[] } | null)?.contributors ?? [],
     loading: result.loading,
@@ -142,7 +117,11 @@ export function useContributors(spaceId: string) {
 }
 
 export function useFollowers(spaceId: string) {
-  const result = useAsync(() => api.listFollowers(spaceId), [spaceId]);
+  const result = useCachedAsync(() => api.listFollowers(spaceId), [spaceId], {
+    cacheKey: cache.buildKey(`space:${spaceId}`, "followers"),
+    ttl: 2 * 60 * 1000,
+    tags: [`space:${spaceId}`, `space:${spaceId}:followers`],
+  });
   return {
     followers: (result.data as { followers: SpaceFollower[] } | null)?.followers ?? [],
     loading: result.loading,
@@ -152,7 +131,11 @@ export function useFollowers(spaceId: string) {
 }
 
 export function useAttachments(spaceId: string) {
-  const result = useAsync(() => api.listAttachments(spaceId), [spaceId]);
+  const result = useCachedAsync(() => api.listAttachments(spaceId), [spaceId], {
+    cacheKey: cache.buildKey(`space:${spaceId}`, "attachments"),
+    ttl: TTL_MID,
+    tags: [`space:${spaceId}`, `space:${spaceId}:attachments`],
+  });
   return {
     attachments: (result.data as { attachments: SpaceRepoAttachment[] } | null)?.attachments ?? [],
     loading: result.loading,
@@ -162,7 +145,11 @@ export function useAttachments(spaceId: string) {
 }
 
 export function useJoinRequests(spaceId: string, status?: string) {
-  const result = useAsync(() => api.listJoinRequests(spaceId, { status }), [spaceId, status]);
+  const result = useCachedAsync(() => api.listJoinRequests(spaceId, { status }), [spaceId, status], {
+    cacheKey: cache.buildKey(`space:${spaceId}:join-requests`, { status }),
+    ttl: TTL_SHORT,
+    tags: [`space:${spaceId}`, `space:${spaceId}:join-requests`],
+  });
   return {
     requests: (result.data as { requests: JoinRequest[]; total?: number } | null)?.requests ?? [],
     total: (result.data as { requests: JoinRequest[]; total?: number } | null)?.total ?? 0,
@@ -173,7 +160,11 @@ export function useJoinRequests(spaceId: string, status?: string) {
 }
 
 export function useDiscussions(spaceId: string, page = 1) {
-  const result = useAsync(() => api.listDiscussions(spaceId, { page }), [spaceId, page]);
+  const result = useCachedAsync(() => api.listDiscussions(spaceId, { page }), [spaceId, page], {
+    cacheKey: cache.buildKey(`space:${spaceId}:discussions`, { page }),
+    ttl: TTL_VOLATILE,
+    tags: [`space:${spaceId}`, `space:${spaceId}:discussions`],
+  });
   return {
     discussions: (result.data as { threads: Discussion[]; total?: number } | null)?.threads ?? [],
     total: (result.data as { threads: Discussion[]; total?: number } | null)?.total ?? 0,
@@ -184,7 +175,11 @@ export function useDiscussions(spaceId: string, page = 1) {
 }
 
 export function useDiscussion(spaceId: string, threadId: string) {
-  const result = useAsync(() => api.getDiscussion(spaceId, threadId), [spaceId, threadId]);
+  const result = useCachedAsync(() => api.getDiscussion(spaceId, threadId), [spaceId, threadId], {
+    cacheKey: cache.buildKey(`space:${spaceId}:discussion`, threadId),
+    ttl: TTL_VOLATILE,
+    tags: [`space:${spaceId}`, `space:${spaceId}:discussions`],
+  });
   return {
     discussion: (result.data as { thread: Discussion } | null)?.thread ?? null,
     loading: result.loading,
@@ -194,9 +189,14 @@ export function useDiscussion(spaceId: string, threadId: string) {
 }
 
 export function useUpdates(spaceId: string, page = 1, filters?: { work_item_id?: string; limit?: number }) {
-  const result = useAsync(
+  const result = useCachedAsync(
     () => api.listUpdates(spaceId, { page, limit: filters?.limit, work_item_id: filters?.work_item_id }),
-    [spaceId, page, filters?.work_item_id, filters?.limit]
+    [spaceId, page, filters?.work_item_id, filters?.limit],
+    {
+      cacheKey: cache.buildKey(`space:${spaceId}:updates`, { page, work_item_id: filters?.work_item_id, limit: filters?.limit }),
+      ttl: TTL_VOLATILE,
+      tags: [`space:${spaceId}`, `space:${spaceId}:updates`],
+    }
   );
   return {
     updates: (result.data as { updates: SpaceUpdate[]; total?: number } | null)?.updates ?? [],
@@ -228,7 +228,7 @@ export function useWork(
     limit?: number;
   }
 ) {
-  const result = useAsync(
+  const result = useCachedAsync(
     () => api.listWork(spaceId, filters),
     [
       spaceId,
@@ -248,7 +248,12 @@ export function useWork(
       filters?.readiness,
       filters?.page,
       filters?.limit,
-    ]
+    ],
+    {
+      cacheKey: cache.buildKey(`space:${spaceId}:work`, filters),
+      ttl: TTL_WORK,
+      tags: [`space:${spaceId}`, `space:${spaceId}:work`],
+    }
   );
   return {
     issues: (result.data as { issues: SpaceWorkItem[]; total?: number } | null)?.issues ?? [],
@@ -260,7 +265,11 @@ export function useWork(
 }
 
 export function useWorkItem(spaceId: string, issueId: string) {
-  const result = useAsync(() => api.getWork(spaceId, issueId), [spaceId, issueId]);
+  const result = useCachedAsync(() => api.getWork(spaceId, issueId), [spaceId, issueId], {
+    cacheKey: cache.buildKey(`space:${spaceId}:work-item`, issueId),
+    ttl: TTL_WORK,
+    tags: [`space:${spaceId}`, `space:${spaceId}:work`],
+  });
   return {
     issue: (result.data as { issue: SpaceWorkItem } | null)?.issue ?? null,
     loading: result.loading,
@@ -288,7 +297,7 @@ export function useWorkSummary(
     readiness?: WorkReadiness;
   }
 ) {
-  const result = useAsync(
+  const result = useCachedAsync(
     () => api.getWorkSummary(spaceId, filters),
     [
       spaceId,
@@ -306,7 +315,12 @@ export function useWorkSummary(
       filters?.due_state,
       filters?.stale,
       filters?.readiness,
-    ]
+    ],
+    {
+      cacheKey: cache.buildKey(`space:${spaceId}:work-summary`, filters),
+      ttl: TTL_WORK,
+      tags: [`space:${spaceId}`, `space:${spaceId}:work`],
+    }
   );
 
   return {
@@ -318,7 +332,11 @@ export function useWorkSummary(
 }
 
 export function useWorkComments(spaceId: string, issueId: string) {
-  const result = useAsync(() => api.listWorkComments(spaceId, issueId), [spaceId, issueId]);
+  const result = useCachedAsync(() => api.listWorkComments(spaceId, issueId), [spaceId, issueId], {
+    cacheKey: cache.buildKey(`space:${spaceId}:work-comments`, issueId),
+    ttl: TTL_WORK,
+    tags: [`space:${spaceId}`, `space:${spaceId}:work`],
+  });
   return {
     comments: (result.data as { comments: SpaceWorkComment[] } | null)?.comments ?? [],
     loading: result.loading,
@@ -328,7 +346,11 @@ export function useWorkComments(spaceId: string, issueId: string) {
 }
 
 export function useWorkActivity(spaceId: string, issueId: string, page = 1, limit = 20) {
-  const result = useAsync(() => api.getWorkActivity(spaceId, issueId, { page, limit }), [spaceId, issueId, page, limit]);
+  const result = useCachedAsync(() => api.getWorkActivity(spaceId, issueId, { page, limit }), [spaceId, issueId, page, limit], {
+    cacheKey: cache.buildKey(`space:${spaceId}:work-activity`, { issueId, page, limit }),
+    ttl: TTL_WORK,
+    tags: [`space:${spaceId}`, `space:${spaceId}:work`],
+  });
   return {
     activity: (result.data as { activity: SpaceWorkActivity[] } | null)?.activity ?? [],
     total: (result.data as { activity: SpaceWorkActivity[]; total?: number } | null)?.total ?? 0,
@@ -339,7 +361,11 @@ export function useWorkActivity(spaceId: string, issueId: string, page = 1, limi
 }
 
 export function useMilestones(spaceId: string) {
-  const result = useAsync(() => api.listMilestones(spaceId), [spaceId]);
+  const result = useCachedAsync(() => api.listMilestones(spaceId), [spaceId], {
+    cacheKey: cache.buildKey(`space:${spaceId}`, "milestones"),
+    ttl: TTL_MID,
+    tags: [`space:${spaceId}`, `space:${spaceId}:milestones`],
+  });
   return {
     milestones: (result.data as { milestones: SpaceMilestone[] } | null)?.milestones ?? [],
     loading: result.loading,
@@ -390,7 +416,11 @@ export function useIssue(spaceId: string, issueId: string) {
 }
 
 export function useHealth(spaceId: string) {
-  const result = useAsync(() => api.getHealth(spaceId), [spaceId]);
+  const result = useCachedAsync(() => api.getHealth(spaceId), [spaceId], {
+    cacheKey: cache.buildKey(`space:${spaceId}`, "health"),
+    ttl: TTL_MID,
+    tags: [`space:${spaceId}`],
+  });
   return {
     health: (result.data as { health: HealthScore } | null)?.health ?? null,
     loading: result.loading,
@@ -400,7 +430,11 @@ export function useHealth(spaceId: string) {
 }
 
 export function useDecisions(spaceId: string) {
-  const result = useAsync(() => api.getDecisions(spaceId), [spaceId]);
+  const result = useCachedAsync(() => api.getDecisions(spaceId), [spaceId], {
+    cacheKey: cache.buildKey(`space:${spaceId}`, "decisions"),
+    ttl: TTL_MID,
+    tags: [`space:${spaceId}`],
+  });
   return {
     decisions: (result.data as { decisions: DecisionEntry[] } | null)?.decisions ?? [],
     loading: result.loading,

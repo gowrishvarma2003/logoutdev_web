@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import type {
   RepoBlobResponse,
   RepoCommit,
@@ -13,55 +12,19 @@ import type {
 } from "../types";
 import * as spacesApi from "../services/spacesApi";
 import * as reposApi from "../services/reposApi";
+import { useCachedAsync } from "./useCachedAsync";
+import * as cache from "../services/requestCache";
 
-interface AsyncState<T> {
-  data: T | null;
-  loading: boolean;
-  error: string | null;
-}
-
-function useAsync<T>(
-  fetcher: () => Promise<T>,
-  deps: unknown[] = []
-): AsyncState<T> & { refetch: () => void } {
-  const [state, setState] = useState<AsyncState<T>>({
-    data: null,
-    loading: true,
-    error: null,
-  });
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setState((current) => ({ ...current, loading: true, error: null }));
-      try {
-        const data = await fetcher();
-        if (!cancelled) {
-          setState({ data, loading: false, error: null });
-        }
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "Unknown error";
-        if (!cancelled) {
-          setState({ data: null, loading: false, error: message });
-        }
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshKey, ...deps]);
-
-  const refetch = useCallback(() => {
-    setRefreshKey((current) => current + 1);
-  }, []);
-
-  return { ...state, refetch };
-}
+// ─── TTL constants (ms) ──────────────────────────────────────────────────────
+const TTL_STABLE = 10 * 60 * 1000; // 10 min — repo metadata, branches, tags
+const TTL_MID = 5 * 60 * 1000; // 5 min — members, access, insights, releases
+const TTL_VOLATILE = 60 * 1000; // 1 min — tree, readme, discussions
+const TTL_CODE = 60 * 1000; // 1 min — tree/blob/commits (busted on edit)
+const TTL_WORK = 45 * 1000; // 45 s — pulls + PR detail
+const TTL_SHORT = 30 * 1000; // 30 s — invitations
+const TTL_LIST = 60 * 1000; // 1 min — listing pages
+// Commits are immutable per oid — safe to cache for the whole session.
+const TTL_IMMUTABLE = 24 * 60 * 60 * 1000;
 
 function normalizeRepoArgs(arg1: string, arg2?: string) {
   return arg2 ? { spaceId: arg1, repoId: arg2 } : { spaceId: undefined, repoId: arg1 };
@@ -84,7 +47,7 @@ export function useRepositoryList(filters?: {
   page?: number;
   limit?: number;
 }) {
-  const result = useAsync(
+  const result = useCachedAsync(
     () => reposApi.listRepositories(filters),
     [
       filters?.scope,
@@ -96,7 +59,8 @@ export function useRepositoryList(filters?: {
       filters?.sort,
       filters?.page,
       filters?.limit,
-    ]
+    ],
+    { cacheKey: cache.buildKey("repos:list", filters), ttl: TTL_LIST, tags: ["repos:list"] }
   );
 
   return {
@@ -111,7 +75,11 @@ export function useRepositoryList(filters?: {
 }
 
 export function useRepositoryInvitations() {
-  const result = useAsync(() => reposApi.listRepositoryInvitations(), []);
+  const result = useCachedAsync(() => reposApi.listRepositoryInvitations(), [], {
+    cacheKey: "repo:invitations",
+    ttl: TTL_SHORT,
+    tags: ["repo:invitations"],
+  });
   return {
     invitations: (result.data as { invitations: RepoInvitation[] } | null)?.invitations ?? [],
     loading: result.loading,
@@ -121,7 +89,11 @@ export function useRepositoryInvitations() {
 }
 
 export function useAttachments(spaceId: string) {
-  const result = useAsync(() => spacesApi.listAttachments(spaceId), [spaceId]);
+  const result = useCachedAsync(() => spacesApi.listAttachments(spaceId), [spaceId], {
+    cacheKey: cache.buildKey(`space:${spaceId}`, "attachments"),
+    ttl: 5 * 60 * 1000,
+    tags: [`space:${spaceId}`, `space:${spaceId}:attachments`],
+  });
   const attachments = (result.data as { attachments: SpaceRepoAttachment[] } | null)?.attachments ?? [];
 
   return {
@@ -139,7 +111,11 @@ export function useRepos(spaceId: string) {
 }
 
 export function useRepository(repoId: string) {
-  const result = useAsync(() => reposApi.getRepository(repoId), [repoId]);
+  const result = useCachedAsync(() => reposApi.getRepository(repoId), [repoId], {
+    cacheKey: cache.buildKey(`repo:${repoId}`, "overview"),
+    ttl: TTL_STABLE,
+    tags: [`repo:${repoId}`, `repo:${repoId}:overview`],
+  });
   return {
     repo: (result.data as { repo: Repository } | null)?.repo ?? null,
     loading: result.loading,
@@ -154,7 +130,11 @@ export function useRepo(arg1: string, arg2?: string) {
 }
 
 export function useRepositoryMembers(repoId: string) {
-  const result = useAsync(() => reposApi.listRepositoryMembers(repoId), [repoId]);
+  const result = useCachedAsync(() => reposApi.listRepositoryMembers(repoId), [repoId], {
+    cacheKey: cache.buildKey(`repo:${repoId}`, "members"),
+    ttl: TTL_MID,
+    tags: [`repo:${repoId}`, `repo:${repoId}:members`],
+  });
   return {
     members: (result.data as { members: RepoMember[] } | null)?.members ?? [],
     loading: result.loading,
@@ -169,7 +149,11 @@ export function useRepoMembers(arg1: string, arg2?: string) {
 }
 
 export function useRepoAccess(repoId: string) {
-  const result = useAsync(() => reposApi.getRepositoryAccessOverview(repoId), [repoId]);
+  const result = useCachedAsync(() => reposApi.getRepositoryAccessOverview(repoId), [repoId], {
+    cacheKey: cache.buildKey(`repo:${repoId}`, "access"),
+    ttl: TTL_MID,
+    tags: [`repo:${repoId}`, `repo:${repoId}:access`],
+  });
   return {
     access: (result.data as import("../types").RepoAccessOverview | null)?.access ?? null,
     collaborators: (result.data as import("../types").RepoAccessOverview | null)?.collaborators ?? [],
@@ -180,7 +164,11 @@ export function useRepoAccess(repoId: string) {
 }
 
 export function useRepoInsights(repoId: string) {
-  const result = useAsync(() => reposApi.getRepositoryInsights(repoId), [repoId]);
+  const result = useCachedAsync(() => reposApi.getRepositoryInsights(repoId), [repoId], {
+    cacheKey: cache.buildKey(`repo:${repoId}`, "insights"),
+    ttl: TTL_MID,
+    tags: [`repo:${repoId}`],
+  });
   return {
     insights: (result.data as import("../types").RepoInsights | null) ?? null,
     loading: result.loading,
@@ -190,7 +178,11 @@ export function useRepoInsights(repoId: string) {
 }
 
 export function useRepositoryTree(repoId: string, ref?: string, path?: string) {
-  const result = useAsync(() => reposApi.getRepositoryTree(repoId, { ref, path }), [repoId, ref, path]);
+  const result = useCachedAsync(() => reposApi.getRepositoryTree(repoId, { ref, path }), [repoId, ref, path], {
+    cacheKey: cache.buildKey(`repo:${repoId}:tree`, { ref, path }),
+    ttl: TTL_CODE,
+    tags: [`repo:${repoId}`, `repo:${repoId}:code`],
+  });
   return {
     entries: (result.data as { entries: RepoTreeEntry[] } | null)?.entries ?? [],
     loading: result.loading,
@@ -207,9 +199,16 @@ export function useRepoTree(arg1: string, arg2: string, arg3?: string, arg4?: st
 }
 
 export function useRepositoryBlob(repoId: string, ref: string | undefined, path: string | undefined) {
-  const result = useAsync(
+  const result = useCachedAsync(
     () => (path ? reposApi.getRepositoryBlob(repoId, { ref, path }) : Promise.resolve(null as RepoBlobResponse | null)),
-    [repoId, ref, path]
+    [repoId, ref, path],
+    {
+      // Only cache when we actually fetch (path present); a null placeholder
+      // must not poison the cache for future real fetches.
+      cacheKey: path ? cache.buildKey(`repo:${repoId}:blob`, { ref, path }) : undefined,
+      ttl: TTL_CODE,
+      tags: [`repo:${repoId}`, `repo:${repoId}:code`],
+    }
   );
   return {
     blob: result.data as RepoBlobResponse | null,
@@ -227,7 +226,11 @@ export function useRepoBlob(arg1: string, arg2: string, arg3?: string, arg4?: st
 }
 
 export function useRepositoryReadme(repoId: string, ref?: string) {
-  const result = useAsync(() => reposApi.getRepositoryReadme(repoId, { ref }), [repoId, ref]);
+  const result = useCachedAsync(() => reposApi.getRepositoryReadme(repoId, { ref }), [repoId, ref], {
+    cacheKey: cache.buildKey(`repo:${repoId}:readme`, { ref }),
+    ttl: TTL_CODE,
+    tags: [`repo:${repoId}`, `repo:${repoId}:code`],
+  });
   return {
     readme: (result.data as { readme: RepoBlobResponse | null } | null)?.readme ?? null,
     loading: result.loading,
@@ -243,9 +246,14 @@ export function useRepoReadme(arg1: string, arg2: string, arg3?: string) {
 }
 
 export function useRepositoryCommits(repoId: string, ref?: string, path?: string, page = 1) {
-  const result = useAsync(
+  const result = useCachedAsync(
     () => reposApi.getRepositoryCommits(repoId, { ref, path, page }),
-    [repoId, ref, path, page]
+    [repoId, ref, path, page],
+    {
+      cacheKey: cache.buildKey(`repo:${repoId}:commits`, { ref, path, page }),
+      ttl: TTL_CODE,
+      tags: [`repo:${repoId}`, `repo:${repoId}:code`],
+    }
   );
   return {
     commits: (result.data as { commits: RepoCommit[] } | null)?.commits ?? [],
@@ -266,7 +274,11 @@ export function useRepoCommits(arg1: string, arg2: string, arg3?: string, arg4?:
 // ─── Branch, Tag, Commit Detail, Release, Fork Hooks ─────────────────
 
 export function useBranches(repoId: string) {
-  const result = useAsync(() => reposApi.listBranches(repoId), [repoId]);
+  const result = useCachedAsync(() => reposApi.listBranches(repoId), [repoId], {
+    cacheKey: cache.buildKey(`repo:${repoId}`, "branches"),
+    ttl: TTL_MID,
+    tags: [`repo:${repoId}`, `repo:${repoId}:branches`],
+  });
   return {
     branches: (result.data as { branches: import("../types").RepoBranch[] } | null)?.branches ?? [],
     default_branch: (result.data as { default_branch?: string } | null)?.default_branch ?? "main",
@@ -277,7 +289,11 @@ export function useBranches(repoId: string) {
 }
 
 export function useTags(repoId: string) {
-  const result = useAsync(() => reposApi.listTags(repoId), [repoId]);
+  const result = useCachedAsync(() => reposApi.listTags(repoId), [repoId], {
+    cacheKey: cache.buildKey(`repo:${repoId}`, "tags"),
+    ttl: TTL_MID,
+    tags: [`repo:${repoId}`, `repo:${repoId}:tags`],
+  });
   return {
     tags: (result.data as { tags: import("../types").RepoTag[] } | null)?.tags ?? [],
     loading: result.loading,
@@ -287,9 +303,16 @@ export function useTags(repoId: string) {
 }
 
 export function useCommitDetail(repoId: string, oid: string | undefined) {
-  const result = useAsync(
+  const result = useCachedAsync(
     () => (oid ? reposApi.getCommitDetail(repoId, oid) : Promise.resolve(null)),
-    [repoId, oid]
+    [repoId, oid],
+    {
+      // Commits are immutable per oid — safe to cache long. Skip caching the
+      // null placeholder when oid is absent.
+      cacheKey: oid ? cache.buildKey(`repo:${repoId}:commit`, oid) : undefined,
+      ttl: TTL_IMMUTABLE,
+      tags: [`repo:${repoId}`],
+    }
   );
   return {
     commit: (result.data as { commit: import("../types").CommitDetail } | null)?.commit ?? null,
@@ -300,7 +323,11 @@ export function useCommitDetail(repoId: string, oid: string | undefined) {
 }
 
 export function useRepoReleases(repoId: string) {
-  const result = useAsync(() => reposApi.listReleases(repoId), [repoId]);
+  const result = useCachedAsync(() => reposApi.listReleases(repoId), [repoId], {
+    cacheKey: cache.buildKey(`repo:${repoId}`, "releases"),
+    ttl: TTL_MID,
+    tags: [`repo:${repoId}`, `repo:${repoId}:releases`],
+  });
   return {
     releases: (result.data as { releases: import("../types").RepoRelease[] } | null)?.releases ?? [],
     loading: result.loading,
@@ -312,7 +339,11 @@ export function useRepoReleases(repoId: string) {
 // ─── Pull Requests ───────────────────────────────────────────────────
 
 export function usePullRequests(repoId: string, state?: "open" | "closed" | "all") {
-  const result = useAsync(() => reposApi.listPullRequests(repoId, { state }), [repoId, state]);
+  const result = useCachedAsync(() => reposApi.listPullRequests(repoId, { state }), [repoId, state], {
+    cacheKey: cache.buildKey(`repo:${repoId}:pulls`, { state }),
+    ttl: TTL_WORK,
+    tags: [`repo:${repoId}`, `repo:${repoId}:pulls`],
+  });
   return {
     pullRequests: (result.data as import("../types").PullRequest[] | null) ?? [],
     loading: result.loading,
@@ -322,7 +353,11 @@ export function usePullRequests(repoId: string, state?: "open" | "closed" | "all
 }
 
 export function usePullRequestHeadOptions(repoId: string) {
-  const result = useAsync(() => reposApi.getPullRequestHeadOptions(repoId), [repoId]);
+  const result = useCachedAsync(() => reposApi.getPullRequestHeadOptions(repoId), [repoId], {
+    cacheKey: cache.buildKey(`repo:${repoId}`, "pull-head-options"),
+    ttl: TTL_MID,
+    tags: [`repo:${repoId}`, `repo:${repoId}:pulls`],
+  });
   return {
     options: (result.data as { options: import("../types").PullRequestHeadOption[] } | null)?.options ?? [],
     loading: result.loading,
@@ -336,7 +371,7 @@ export function usePullRequestCompare(
   params?: { base_branch?: string; head_branch?: string; head_repo_id?: string }
 ) {
   const enabled = Boolean(params?.base_branch && params?.head_branch);
-  const result = useAsync(
+  const result = useCachedAsync(
     () => (
       enabled
         ? reposApi.getPullRequestCompare(repoId, {
@@ -346,7 +381,12 @@ export function usePullRequestCompare(
           })
         : Promise.resolve(null)
     ),
-    [repoId, params?.base_branch, params?.head_branch, params?.head_repo_id, enabled]
+    [repoId, params?.base_branch, params?.head_branch, params?.head_repo_id, enabled],
+    {
+      cacheKey: enabled ? cache.buildKey(`repo:${repoId}:pull-compare`, params) : undefined,
+      ttl: TTL_WORK,
+      tags: [`repo:${repoId}`, `repo:${repoId}:pulls`],
+    }
   );
   return {
     comparison: (result.data as import("../types").PullRequestCompare | null) ?? null,
@@ -357,7 +397,11 @@ export function usePullRequestCompare(
 }
 
 export function usePullRequest(repoId: string, number: number | string) {
-  const result = useAsync(() => reposApi.getPullRequest(repoId, number), [repoId, number]);
+  const result = useCachedAsync(() => reposApi.getPullRequest(repoId, number), [repoId, number], {
+    cacheKey: cache.buildKey(`repo:${repoId}:pull`, number),
+    ttl: TTL_WORK,
+    tags: [`repo:${repoId}`, `repo:${repoId}:pulls`],
+  });
   return {
     pullRequest: (result.data as import("../types").PullRequest | null) ?? null,
     loading: result.loading,
@@ -367,7 +411,11 @@ export function usePullRequest(repoId: string, number: number | string) {
 }
 
 export function usePullRequestDiff(repoId: string, number: number | string) {
-  const result = useAsync(() => reposApi.getPullRequestDiff(repoId, number), [repoId, number]);
+  const result = useCachedAsync(() => reposApi.getPullRequestDiff(repoId, number), [repoId, number], {
+    cacheKey: cache.buildKey(`repo:${repoId}:pull-diff`, number),
+    ttl: TTL_WORK,
+    tags: [`repo:${repoId}`, `repo:${repoId}:pulls`],
+  });
   return {
     diff: (result.data as {
       stats: { additions: number; deletions: number; files_changed: number };
@@ -380,7 +428,11 @@ export function usePullRequestDiff(repoId: string, number: number | string) {
 }
 
 export function usePullRequestCommits(repoId: string, number: number | string) {
-  const result = useAsync(() => reposApi.listPullRequestCommits(repoId, number), [repoId, number]);
+  const result = useCachedAsync(() => reposApi.listPullRequestCommits(repoId, number), [repoId, number], {
+    cacheKey: cache.buildKey(`repo:${repoId}:pull-commits`, number),
+    ttl: TTL_WORK,
+    tags: [`repo:${repoId}`, `repo:${repoId}:pulls`],
+  });
   return {
     commits: (result.data as import("../types").RepoCommit[] | null) ?? [],
     loading: result.loading,
@@ -392,7 +444,11 @@ export function usePullRequestCommits(repoId: string, number: number | string) {
 // ─── Pull Request Reviews ────────────────────────────────────────────
 
 export function usePullRequestReviews(repoId: string, number: number | string) {
-  const result = useAsync(() => reposApi.listPullRequestReviews(repoId, number), [repoId, number]);
+  const result = useCachedAsync(() => reposApi.listPullRequestReviews(repoId, number), [repoId, number], {
+    cacheKey: cache.buildKey(`repo:${repoId}:pull-reviews`, number),
+    ttl: TTL_WORK,
+    tags: [`repo:${repoId}`, `repo:${repoId}:pulls`],
+  });
   return {
     reviews: (result.data as import("../types").PullRequestReview[] | null) ?? [],
     loading: result.loading,
@@ -404,7 +460,11 @@ export function usePullRequestReviews(repoId: string, number: number | string) {
 // ─── Pull Request Comments ───────────────────────────────────────────
 
 export function usePullRequestComments(repoId: string, number: number | string) {
-  const result = useAsync(() => reposApi.listPullRequestComments(repoId, number), [repoId, number]);
+  const result = useCachedAsync(() => reposApi.listPullRequestComments(repoId, number), [repoId, number], {
+    cacheKey: cache.buildKey(`repo:${repoId}:pull-comments`, number),
+    ttl: TTL_WORK,
+    tags: [`repo:${repoId}`, `repo:${repoId}:pulls`],
+  });
   return {
     comments: (result.data as import("../types").PullRequestComment[] | null) ?? [],
     loading: result.loading,
@@ -414,7 +474,11 @@ export function usePullRequestComments(repoId: string, number: number | string) 
 }
 
 export function useRepoForks(repoId: string) {
-  const result = useAsync(() => reposApi.listForks(repoId), [repoId]);
+  const result = useCachedAsync(() => reposApi.listForks(repoId), [repoId], {
+    cacheKey: cache.buildKey(`repo:${repoId}`, "forks"),
+    ttl: TTL_MID,
+    tags: [`repo:${repoId}`, `repo:${repoId}:forks`],
+  });
   return {
     forks: (result.data as { forks: import("../types").RepoForkEntry[] } | null)?.forks ?? [],
     fork_count: (result.data as { fork_count?: number } | null)?.fork_count ?? 0,
@@ -427,7 +491,11 @@ export function useRepoForks(repoId: string) {
 // ─── Governance & Community (Phase 3) ────────────────────────────────
 
 export function useBranchProtectionRules(repoId: string) {
-  const result = useAsync(() => reposApi.listBranchProtectionRules(repoId), [repoId]);
+  const result = useCachedAsync(() => reposApi.listBranchProtectionRules(repoId), [repoId], {
+    cacheKey: cache.buildKey(`repo:${repoId}`, "branch-protection"),
+    ttl: TTL_MID,
+    tags: [`repo:${repoId}`, `repo:${repoId}:branch-protection`],
+  });
   return {
     rules: (result.data as import("../types").BranchProtectionRule[] | null) ?? [],
     loading: result.loading,
@@ -437,7 +505,11 @@ export function useBranchProtectionRules(repoId: string) {
 }
 
 export function useRepoDiscussions(repoId: string, category?: string) {
-  const result = useAsync(() => reposApi.listRepoDiscussions(repoId, category), [repoId, category]);
+  const result = useCachedAsync(() => reposApi.listRepoDiscussions(repoId, category), [repoId, category], {
+    cacheKey: cache.buildKey(`repo:${repoId}:discussions`, { category }),
+    ttl: TTL_VOLATILE,
+    tags: [`repo:${repoId}`, `repo:${repoId}:discussions`],
+  });
   return {
     state: (result.data as import("../types").RepoDiscussionState | null) ?? null,
     loading: result.loading,
@@ -447,7 +519,11 @@ export function useRepoDiscussions(repoId: string, category?: string) {
 }
 
 export function useRepoDiscussion(repoId: string, discussionId: string) {
-  const result = useAsync(() => reposApi.getRepoDiscussion(repoId, discussionId), [repoId, discussionId]);
+  const result = useCachedAsync(() => reposApi.getRepoDiscussion(repoId, discussionId), [repoId, discussionId], {
+    cacheKey: cache.buildKey(`repo:${repoId}:discussion`, discussionId),
+    ttl: TTL_VOLATILE,
+    tags: [`repo:${repoId}`, `repo:${repoId}:discussions`],
+  });
   return {
     state: (result.data as import("../types").RepoDiscussionState | null) ?? null,
     loading: result.loading,

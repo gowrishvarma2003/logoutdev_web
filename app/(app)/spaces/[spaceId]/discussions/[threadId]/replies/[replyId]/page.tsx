@@ -8,6 +8,7 @@ import Spinner from "@/components/ui/Spinner";
 import { ArrowLeftIcon, ChatIcon, ChevronRightIcon } from "@/components/ui/Icons";
 import { formatRelativeTime } from "@/lib/utils";
 import * as api from "@/lib/services/spacesApi";
+import * as cache from "@/lib/services/requestCache";
 import type { DiscussionReply } from "@/lib/types";
 import Link from "next/link";
 import RichComposer, { type RichComposerHandle } from "@/components/ui/RichComposer";
@@ -83,6 +84,7 @@ export default function DiscussionReplyThreadPage({
     setReplyError("");
     try {
       await api.addReply(spaceId, threadId, replyBody.trim(), replyId);
+      cache.invalidateSpace(spaceId, "discussions");
       setReplyBody("");
       setComposerFocused(false);
       refetch();

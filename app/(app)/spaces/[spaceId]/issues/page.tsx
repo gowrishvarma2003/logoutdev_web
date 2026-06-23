@@ -24,6 +24,7 @@ import {
   UsersIcon,
 } from "@/components/ui/Icons";
 import * as api from "@/lib/services/spacesApi";
+import * as cache from "@/lib/services/requestCache";
 import type {
   MilestoneStatus,
   SpaceIssuePriority,
@@ -163,7 +164,7 @@ export default function WorkPage({
   const searchParams = useSearchParams();
   const { repos } = useRepos(spaceId);
   const { contributors } = useContributors(spaceId);
-  const { milestones, refetch: refetchMilestones } = useMilestones(spaceId);
+  const { milestones, loading: milestonesLoading, refetch: refetchMilestones } = useMilestones(spaceId);
 
   const filters = useMemo(() => parseWorkSearchParams(new URLSearchParams(searchParams.toString())), [searchParams]);
   const pageLimit = filters.view === "list" ? 20 : 100;
@@ -191,7 +192,7 @@ export default function WorkPage({
     limit: pageLimit,
   });
 
-  const { summary, refetch: refetchSummary } = useWorkSummary(spaceId, {
+  const { summary, loading: summaryLoading, refetch: refetchSummary } = useWorkSummary(spaceId, {
     status: filters.status,
     priority: filters.priority,
     assignee: filters.assignee,
@@ -414,6 +415,7 @@ export default function WorkPage({
       }
       resetMilestoneForm();
       setShowMilestoneManager(false);
+      cache.invalidateSpace(spaceId, "milestones");
       refetchMilestones();
     } catch (err) {
       setMilestoneError(err instanceof Error ? err.message : "Failed to save milestone.");
@@ -461,6 +463,7 @@ export default function WorkPage({
       setComposerTargetDate("");
       setShowComposer(false);
       updateFilters({ page: 1 });
+      cache.invalidateSpace(spaceId, "work");
       await refreshWork();
     } catch (err) {
       setPostError(err instanceof Error ? err.message : "Failed to create work item");
@@ -474,6 +477,7 @@ export default function WorkPage({
     setBusyAction(action);
     try {
       await api.updateWork(spaceId, issueId, patch);
+      cache.invalidateSpace(spaceId, "work");
       await refreshWork();
     } finally {
       setBusyIssueId(null);
@@ -515,6 +519,7 @@ export default function WorkPage({
       setBulkBlockedReason("");
       setBulkGoodFirst("");
       setBulkHelpWanted("");
+      cache.invalidateSpace(spaceId, "work");
       await refreshWork();
     } catch (err) {
       setBulkError(err instanceof Error ? err.message : "Failed to apply bulk action.");
@@ -690,7 +695,7 @@ export default function WorkPage({
         {/* Collapsible toggle buttons row */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Metrics toggle */}
-          {summary ? (
+          {summary || summaryLoading ? (
             <button
               onClick={() => setShowMetrics((current) => !current)}
               className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-700 hover:bg-zinc-900"
@@ -732,7 +737,7 @@ export default function WorkPage({
         </div>
 
         {/* Collapsible Metrics section */}
-        {summary ? (
+        {summary || summaryLoading ? (
           <div
             className={`grid transition-all duration-200 ease-in-out ${
               showMetrics ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
@@ -740,38 +745,46 @@ export default function WorkPage({
           >
             <div className="overflow-hidden">
               <div className="space-y-3 pt-1">
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-                  {[
-                    { label: "Open", value: summary.open, patch: { status: "open", page: 1, view: "list" } },
-                    { label: "Unassigned", value: summary.unassigned, patch: { assignee: "unassigned", page: 1, view: "list" } },
-                    { label: "Blocked", value: summary.blocked, patch: { blocked: true, page: 1, view: "list" } },
-                    { label: "Overdue", value: summary.overdue, patch: { due_state: "overdue", page: 1, view: "list" } },
-                    { label: "Stale", value: summary.stale, patch: { stale: true, page: 1, view: "list" } },
-                    { label: "Ready", value: summary.ready_for_contributor, patch: { readiness: "ready", page: 1, view: "list" } },
-                  ].map((item) => (
-                    <button
-                      key={item.label}
-                      onClick={() => updateFilters(item.patch)}
-                      className="rounded-2xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-left transition-colors hover:border-zinc-700 hover:bg-zinc-900"
-                    >
-                      <p className="text-[11px] uppercase tracking-wide text-zinc-500">{item.label}</p>
-                      <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/30 px-4 py-3">
-                  <div>
-                    <p className="text-sm font-medium text-white">Triage inbox</p>
-                    <p className="text-xs text-zinc-500">{summary.needs_triage} open item(s) still need first-pass triage.</p>
+                {summaryLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Spinner />
                   </div>
-                  <button
-                    onClick={() => updateFilters({ status: "open", assignee: "unassigned", readiness: "needs_triage", sort: "created", page: 1, view: "list" })}
-                    className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300 transition-colors hover:bg-amber-500/20"
-                  >
-                    Open triage inbox
-                  </button>
-                </div>
+                ) : summary ? (
+                  <>
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+                      {[
+                        { label: "Open", value: summary.open, patch: { status: "open", page: 1, view: "list" } },
+                        { label: "Unassigned", value: summary.unassigned, patch: { assignee: "unassigned", page: 1, view: "list" } },
+                        { label: "Blocked", value: summary.blocked, patch: { blocked: true, page: 1, view: "list" } },
+                        { label: "Overdue", value: summary.overdue, patch: { due_state: "overdue", page: 1, view: "list" } },
+                        { label: "Stale", value: summary.stale, patch: { stale: true, page: 1, view: "list" } },
+                        { label: "Ready", value: summary.ready_for_contributor, patch: { readiness: "ready", page: 1, view: "list" } },
+                      ].map((item) => (
+                        <button
+                          key={item.label}
+                          onClick={() => updateFilters(item.patch)}
+                          className="rounded-2xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-left transition-colors hover:border-zinc-700 hover:bg-zinc-900"
+                        >
+                          <p className="text-[11px] uppercase tracking-wide text-zinc-500">{item.label}</p>
+                          <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/30 px-4 py-3">
+                      <div>
+                        <p className="text-sm font-medium text-white">Triage inbox</p>
+                        <p className="text-xs text-zinc-500">{summary.needs_triage} open item(s) still need first-pass triage.</p>
+                      </div>
+                      <button
+                        onClick={() => updateFilters({ status: "open", assignee: "unassigned", readiness: "needs_triage", sort: "created", page: 1, view: "list" })}
+                        className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300 transition-colors hover:bg-amber-500/20"
+                      >
+                        Open triage inbox
+                      </button>
+                    </div>
+                  </>
+                ) : null}
               </div>
             </div>
           </div>
@@ -1131,7 +1144,7 @@ export default function WorkPage({
         </form>
       ) : null}
 
-      {(milestones.length > 0 || canBulkManage) ? (
+      {(milestones.length > 0 || milestonesLoading || canBulkManage) ? (
         <div className="space-y-4 border-b border-zinc-800 bg-zinc-950/20 px-4 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -1157,7 +1170,11 @@ export default function WorkPage({
             ) : null}
           </div>
 
-          {milestones.length > 0 ? (
+          {milestonesLoading ? (
+            <div className="flex justify-center py-6">
+              <Spinner />
+            </div>
+          ) : milestones.length > 0 ? (
             <div className="grid gap-3 xl:grid-cols-3">
               {milestones.map((milestone) => (
                 <div key={milestone.id} className="rounded-2xl border border-zinc-800 bg-zinc-900/40 px-4 py-3">
@@ -1415,7 +1432,7 @@ export default function WorkPage({
         </div>
       ) : null}
 
-      {loading ? (
+      {loading && !issues.length ? (
         <div className="flex justify-center py-16">
           <Spinner />
         </div>
@@ -1432,8 +1449,14 @@ export default function WorkPage({
         />
       ) : null}
 
-      {!loading && !error && issues.length > 0 ? (
-        <>
+      {issues.length > 0 ? (
+        <div className={loading ? "opacity-60 pointer-events-none" : ""}>
+          {loading && (
+            <div className="flex justify-center py-3">
+              <Spinner />
+            </div>
+          )}
+        
           {filters.view === "list" ? (
             <div>
               {canBulkManage ? (
@@ -1561,14 +1584,14 @@ export default function WorkPage({
               ))}
             </div>
           ) : null}
-        </>
+        </div>
       ) : null}
 
       {filters.view === "list" && (filters.page > 1 || issues.length >= pageLimit) ? (
         <div className="flex items-center justify-center gap-3 py-4">
           <button
             onClick={() => updateFilters({ page: Math.max(1, filters.page - 1) })}
-            disabled={filters.page <= 1}
+            disabled={filters.page <= 1 || loading}
             className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40"
           >
             Previous
@@ -1576,7 +1599,7 @@ export default function WorkPage({
           <span className="text-xs text-zinc-500">Page {filters.page}</span>
           <button
             onClick={() => updateFilters({ page: filters.page + 1 })}
-            disabled={issues.length < pageLimit}
+            disabled={issues.length < pageLimit || loading}
             className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40"
           >
             Next

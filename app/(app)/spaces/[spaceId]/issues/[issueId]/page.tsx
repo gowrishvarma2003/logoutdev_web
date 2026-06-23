@@ -22,6 +22,7 @@ import Spinner from "@/components/ui/Spinner";
 import { ArrowLeftIcon } from "@/components/ui/Icons";
 import { formatRelativeTime } from "@/lib/utils";
 import * as api from "@/lib/services/spacesApi";
+import * as cache from "@/lib/services/requestCache";
 import type { SpaceIssuePriority, SpaceIssueStatus, SpaceWorkItem, WorkItemType } from "@/lib/types";
 import { parseWorkSearchParams, serializeWorkQuery } from "@/lib/workFilters";
 import RichComposer from "@/components/ui/RichComposer";
@@ -217,6 +218,7 @@ export default function WorkDetailPage({
           : {}),
       });
       setEditing(false);
+      cache.invalidateSpace(spaceId, "work");
       await refreshEverything();
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Failed to update work item");
@@ -230,6 +232,7 @@ export default function WorkDetailPage({
     setQuickAction(action);
     try {
       await api.updateWork(spaceId, issue.id, patch);
+      cache.invalidateSpace(spaceId, "work");
       await refreshEverything();
     } finally {
       setQuickAction(null);
@@ -251,6 +254,7 @@ export default function WorkDetailPage({
         status: quickStatus,
         close_reason: quickStatus === "closed" ? quickCloseReason.trim() : null,
       });
+      cache.invalidateSpace(spaceId, "work");
       await refreshEverything();
     } catch (err) {
       setStatusUpdateError(err instanceof Error ? err.message : "Failed to update status");

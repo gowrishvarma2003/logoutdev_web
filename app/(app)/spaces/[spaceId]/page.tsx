@@ -46,11 +46,11 @@ export default function SpaceOverviewPage({
   const { space } = useSpace(spaceId);
   const { stack, loading: stackLoading } = useStack(spaceId);
   const { contributors } = useContributors(spaceId);
-  const { health } = useHealth(spaceId);
-  const { decisions } = useDecisions(spaceId);
-  const { updates } = useUpdates(spaceId);
-  const { issues } = useWork(spaceId, { page: 1, limit: 20, sort: "updated" });
-  const { summary } = useWorkSummary(spaceId);
+  const { health, loading: healthLoading } = useHealth(spaceId);
+  const { decisions, loading: decisionsLoading } = useDecisions(spaceId);
+  const { updates, loading: updatesLoading } = useUpdates(spaceId);
+  const { issues, loading: workLoading } = useWork(spaceId, { page: 1, limit: 20, sort: "updated" });
+  const { summary, loading: summaryLoading } = useWorkSummary(spaceId);
 
   if (!space) return null;
 
@@ -201,7 +201,11 @@ export default function SpaceOverviewPage({
         {/* Work Pipeline + Launch + SLA in a compact row below stats */}
         <div className="flex flex-col sm:flex-row sm:items-start gap-4 mt-4">
           {/* Pipeline */}
-          {summary ? (() => {
+          {summaryLoading ? (
+            <div className="flex-1 flex justify-center py-3">
+              <Spinner />
+            </div>
+          ) : summary ? (() => {
             const total = (summary.blocked || 0) + (summary.needs_triage || 0) + (summary.ready_for_contributor || 0);
             const bPct = total > 0 ? ((summary.blocked || 0) / total) * 100 : 0;
             const tPct = total > 0 ? ((summary.needs_triage || 0) / total) * 100 : 0;
@@ -262,7 +266,13 @@ export default function SpaceOverviewPage({
       {/* ══ Collaboration Health + Contributors — side by side ══ */}
       <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-4">
         {/* Health */}
-        <CollaborationHealthBadge health={health} />
+        {healthLoading ? (
+          <div className="flex justify-center py-6">
+            <Spinner />
+          </div>
+        ) : (
+          <CollaborationHealthBadge health={health} />
+        )}
 
         {/* Contributors */}
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/10 p-4 transition-all duration-300 hover:border-zinc-700/80">
@@ -325,7 +335,11 @@ export default function SpaceOverviewPage({
             </Link>
           )}
         </div>
-        {recentUpdates.length === 0 ? (
+        {updatesLoading ? (
+          <div className="flex justify-center py-6">
+            <Spinner />
+          </div>
+        ) : recentUpdates.length === 0 ? (
           <p className="text-xs text-zinc-500 py-6 text-center">No progress updates yet.</p>
         ) : (
           <div className="space-y-1">
@@ -352,7 +366,11 @@ export default function SpaceOverviewPage({
             </Link>
           )}
         </div>
-        {decisions.length === 0 ? (
+        {decisionsLoading ? (
+          <div className="flex justify-center py-6">
+            <Spinner />
+          </div>
+        ) : decisions.length === 0 ? (
           <p className="text-xs text-zinc-500 py-6 text-center">No key decisions recorded.</p>
         ) : (
           <div className="divide-y divide-zinc-800/40">
@@ -448,7 +466,11 @@ export default function SpaceOverviewPage({
             View all →
           </Link>
         </div>
-        {openWork.length === 0 ? (
+        {workLoading ? (
+          <div className="flex justify-center py-6">
+            <Spinner />
+          </div>
+        ) : openWork.length === 0 ? (
           <p className="text-xs text-zinc-500 py-6 text-center">No active work items at the moment.</p>
         ) : (
           <div className="divide-y divide-zinc-800/40">

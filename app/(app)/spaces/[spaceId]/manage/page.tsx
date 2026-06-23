@@ -24,6 +24,7 @@ import {
   ExternalLinkIcon,
 } from "@/components/ui/Icons";
 import * as api from "@/lib/services/spacesApi";
+import * as cache from "@/lib/services/requestCache";
 import { formatRelativeTime } from "@/lib/utils";
 import type { SpaceStatus, SpaceVisibility, StackCategory, StackMaturity } from "@/lib/types";
 import RichText from "@/components/ui/RichText";
@@ -36,10 +37,18 @@ export default function ManagePage({
   const { spaceId } = use(params);
   const router = useRouter();
   const { user } = useAuth();
-  const { space, refetch: refetchSpace } = useSpace(spaceId);
+  const { space, loading: spaceLoading, refetch: refetchSpace } = useSpace(spaceId);
   const { requests, loading: reqLoading, refetch: refetchReqs } = useJoinRequests(spaceId, "pending");
-  const { stack, refetch: refetchStack } = useStack(spaceId);
+  const { stack, loading: stackLoading, refetch: refetchStack } = useStack(spaceId);
   const { repos } = useRepos(spaceId);
+
+  if (spaceLoading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   if (space && space.owner_id !== user?.id) {
     return (
@@ -66,7 +75,7 @@ export default function ManagePage({
         {/* Sidebar section (Right Column) */}
         <div className="space-y-6">
           <ProjectSettingsSection space={space} refetch={refetchSpace} />
-          <StackManagementSection spaceId={spaceId} stack={stack} refetch={refetchStack} />
+          <StackManagementSection spaceId={spaceId} stack={stack} stackLoading={stackLoading} refetch={refetchStack} />
           <DangerZoneSection space={space} onDelete={() => router.push("/spaces")} />
         </div>
       </div>
@@ -165,6 +174,8 @@ function ProjectSettingsSection({
         contribution_guide: contributionGuide.trim() || undefined,
         response_sla: responseSla.trim() || undefined,
       });
+      cache.invalidateSpace(space.id);
+      cache.invalidateSpaceListings();
       refetch();
       setEditing(false);
     } finally {
@@ -440,6 +451,8 @@ function JoinRequestsSection({
     setActing(requestId);
     try {
       await api.reviewJoinRequest(spaceId, requestId, action);
+      cache.invalidateSpace(spaceId, "join-requests");
+      cache.invalidateSpace(spaceId, "people");
       refetch();
     } finally {
       setActing(null);
@@ -606,10 +619,12 @@ function JoinRequestsSection({
 function StackManagementSection({
   spaceId,
   stack,
+  stackLoading,
   refetch,
 }: {
   spaceId: string;
   stack: ReturnType<typeof useStack>["stack"];
+  stackLoading: boolean;
   refetch: () => void;
 }) {
   const [editing, setEditing] = useState(false);
@@ -631,6 +646,7 @@ function StackManagementSection({
     setSaving(true);
     try {
       await api.replaceStack(spaceId, items);
+      cache.invalidateSpace(spaceId);
       refetch();
       setEditing(false);
     } finally {
@@ -758,6 +774,10 @@ function StackManagementSection({
               {saving ? "Saving..." : "Save Stack"}
             </button>
           </div>
+        </div>
+      ) : stackLoading ? (
+        <div className="flex justify-center py-6">
+          <Spinner />
         </div>
       ) : (
         <TechStackPanel stack={stack} />
@@ -928,6 +948,8 @@ function DangerZoneSection({
     setDeleting(true);
     try {
       await api.deleteSpace(space.id);
+      cache.invalidateSpace(space.id);
+      cache.invalidateSpaceListings();
       onDelete();
     } catch {
       setDeleting(false);

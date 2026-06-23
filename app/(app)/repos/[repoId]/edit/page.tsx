@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRepoContext } from "../layout";
 import { useRepositoryBlob } from "@/lib/hooks/useRepos";
 import * as reposApi from "@/lib/services/reposApi";
+import * as cache from "@/lib/services/requestCache";
 import Spinner from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/spaces/SpaceBadges";
 import { DocumentIcon } from "@heroicons/react/24/outline";
@@ -107,6 +108,9 @@ export default function EditFilePage({
         content,
         message: finalMessage,
       });
+      // A new commit invalidates tree/blob/readme/commits for this repo.
+      cache.invalidateRepo(repo.id, "code");
+      cache.invalidateRepo(repo.id, "overview");
 
       router.push(`/repos/${repo.id}?ref=${encodeURIComponent(ref)}&path=${encodeURIComponent(filePath)}&view=blob`);
     } catch (err: unknown) {

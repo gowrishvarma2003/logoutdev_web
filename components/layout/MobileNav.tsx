@@ -15,6 +15,7 @@ import {
   CodeBracketIcon,
   DotsIcon,
   XIcon,
+  ChatBubbleIcon,
 } from "@/components/ui/Icons";
 
 interface MobileNavProps {
@@ -40,6 +41,7 @@ export default function MobileNav({ userId, username, unreadCount = 0 }: MobileN
   /* Secondary items shown in overflow "More" menu */
   const moreItems = [
     { href: "/launches", icon: <SparklesIcon className="w-5 h-5" />, label: "Launches" },
+    { href: "/chat", icon: <ChatBubbleIcon className="w-5 h-5" />, label: "Chat" },
     { href: "/freelance", icon: <BoltIcon className="w-5 h-5" />, label: "Freelance" },
     { href: "/questions", icon: <QuestionMarkCircleIcon className="w-5 h-5" />, label: "Questions" },
     { href: "/repos", icon: <CodeBracketIcon className="w-5 h-5" />, label: "Repos" },

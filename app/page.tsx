@@ -1,76 +1,73 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLaunches } from "@/lib/hooks/useLaunches";
+import Avatar from "@/components/ui/Avatar";
+import Spinner from "@/components/ui/Spinner";
+import {
+  CheckIcon,
+  PlusIcon,
+  ArrowRightIcon,
+  FolderIcon,
+  ChatBubbleLeftRightIcon,
+  EnvelopeIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  CommandLineIcon
+} from "@heroicons/react/24/outline";
 
-// Icon components for features
-function CodeIcon() {
+// Standard Inline SVGs for specialized features
+function CodeIcon({ className = "w-6 h-6" }) {
   return (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
     </svg>
   );
 }
 
-function UsersIcon() {
+function UsersIcon({ className = "w-6 h-6" }) {
   return (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
     </svg>
   );
 }
 
-function RocketIcon() {
+function RocketIcon({ className = "w-6 h-6" }) {
   return (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.63 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.841m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
     </svg>
   );
 }
 
-function BriefcaseIcon() {
+function BriefcaseIcon({ className = "w-6 h-6" }) {
   return (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.25c0 .966-.784 1.75-1.75 1.75H5.5a1.75 1.75 0 01-1.75-1.75v-4.25m16.5 0a2.25 2.25 0 00-2.25-2.25H5.5A2.25 2.25 0 003.25 14.15m17 0V10.5A2.25 2.25 0 0018 8.25h-2.25a2.25 2.25 0 00-2.25-2.25h-3a2.25 2.25 0 00-2.25 2.25H5.5A2.25 2.25 0 003.25 10.5v3.65m17 0V14.15m-17 0v.05" />
     </svg>
   );
 }
 
-function MessageIcon() {
+function GitBranchIcon({ className = "w-6 h-6" }) {
   return (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
     </svg>
   );
 }
 
-function ChartIcon() {
+function StarIcon({ className = "w-6 h-6" }) {
   return (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+    <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499c.173-.439.743-.439.916 0l1.862 4.721a.25.25 0 00.224.168l5.105.354c.48.033.672.63.308.948l-3.87 3.398a.25.25 0 00-.077.237l1.162 4.965c.109.467-.394.832-.803.575L12.3 16.52a.25.25 0 00-.26 0l-4.526 2.74c-.41.248-.912-.117-.803-.575l1.162-4.965a.25.25 0 00-.077-.237l-3.87-3.398a.25.25 0 00.308-.948l5.105-.354a.25.25 0 00.224-.168l1.862-4.721z" />
     </svg>
   );
 }
 
-function GitBranchIcon() {
-  return (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 6a3 3 0 100 6 3 3 0 000-6zm12 0a3 3 0 100 6 3 3 0 000-6zM6 18a3 3 0 100-6 3 3 0 000 6zm0-6v-6m12 0v6m-6 6a3 3 0 100-6 3 3 0 000 6zm0-6v6" />
-    </svg>
-  );
-}
-
-function StarIcon() {
-  return (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-    </svg>
-  );
-}
-
-// Feature data
+// Feature List
 const features = [
   {
     icon: <CodeIcon />,
@@ -93,18 +90,18 @@ const features = [
     description: "Find work or hire developers based on real proof-of-work, not just resumes."
   },
   {
-    icon: <GitBranchIcon />,
+    icon: <CodeIcon className="w-6 h-6 rotate-90" />,
     title: "Private Git Repos",
     description: "Host your code with built-in version control. Collaborate on private repos within your project spaces."
   },
   {
-    icon: <MessageIcon />,
+    icon: <ChatBubbleLeftRightIcon className="w-6 h-6" />,
     title: "Developer Q&A",
     description: "Ask technical questions and share knowledge. Build your reputation by helping others solve problems."
   }
 ];
 
-// How it works steps
+// Onboarding Steps
 const steps = [
   {
     step: "01",
@@ -128,7 +125,7 @@ const steps = [
   }
 ];
 
-// Testimonials/Stats
+// Dashboard statistics
 const stats = [
   { value: "Proof-of-Work", label: "Based Profiles" },
   { value: "Real-Time", label: "Collaboration" },
@@ -141,38 +138,115 @@ export default function Home() {
   const { launches: betaLaunches } = useLaunches({ launch_phase: "beta", limit: 3, sort: "newest" });
   const { launches: liveLaunches } = useLaunches({ launch_phase: "live", limit: 3, sort: "newest" });
 
+  const [email, setEmail] = useState("");
+  const [newsSuccess, setNewsSuccess] = useState(false);
+  const [newsError, setNewsError] = useState("");
+
+  // Simulated Workspace Playground State
+  const [playTab, setPlayTab] = useState<"feed" | "repos" | "launches">("feed");
+  const [contributionCount, setContributionCount] = useState(127);
+  const [isSimulatingPush, setIsSimulatingPush] = useState(false);
+  const [terminalLog, setTerminalLog] = useState("initialized dev_workspace v0.8.2. listening for git events...");
+  const [feedLogs, setFeedLogs] = useState([
+    { id: "1", name: "Jane Developer", username: "jane_dev", time: "2m ago", message: "Refactored Next.js app/page layouts to match modern dark designs.", commitLink: "d412e87" },
+    { id: "2", name: "Gowrish", username: "gowrish", time: "10m ago", message: "Approved workspace invitation request for team space binding.", commitLink: "a89bc21" }
+  ]);
+
+  // Contribution grid blocks
+  const [contributionBlocks, setContributionBlocks] = useState(
+    Array.from({ length: 63 }, (_, i) => {
+      const densities = [0, 1, 0, 2, 0, 3, 4, 0, 1, 2, 0, 0, 3, 1, 0, 2, 0, 4, 0, 1, 2, 0, 3, 0, 0, 1, 2, 4, 0, 1, 0, 2, 3, 0, 0, 2, 1, 0, 4, 0, 1, 3, 0, 0, 2, 1, 0, 4, 0, 1, 2, 0, 3, 0, 0, 1, 2, 4, 0, 1, 0, 2, 3];
+      return densities[i % densities.length];
+    })
+  );
+
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token) router.replace("/feed");
   }, [router]);
 
+  // Handle Newsletter Submit
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setNewsError("");
+    setNewsSuccess(false);
+    if (!email.trim() || !email.includes("@")) {
+      setNewsError("Please enter a valid email address.");
+      return;
+    }
+    setNewsSuccess(true);
+    setEmail("");
+  };
+
+  // Simulating Commit Push Action
+  const triggerSimulatePush = () => {
+    if (isSimulatingPush) return;
+    setIsSimulatingPush(true);
+    setTerminalLog("analyzing codebase... checking files... formatting layout...");
+    
+    setTimeout(() => {
+      setTerminalLog("building production bundle... running typescript checks...");
+    }, 1200);
+
+    setTimeout(() => {
+      setTerminalLog("pushing objects... writing 8 objects... git commit pushed successfully!");
+      setContributionCount(prev => prev + 1);
+      
+      // Increment random element in the grid to show updates
+      setContributionBlocks(prev => {
+        const next = [...prev];
+        const randomIdx = Math.floor(Math.random() * next.length);
+        next[randomIdx] = Math.min(4, next[randomIdx] + 1);
+        return next;
+      });
+
+      // Add a feed item
+      const commitHash = Math.random().toString(16).substring(2, 9);
+      setFeedLogs(prev => [
+        {
+          id: String(Date.now()),
+          name: "Jane Developer",
+          username: "jane_dev",
+          time: "Just now",
+          message: "Pushed updates to repository settings workspace.",
+          commitLink: commitHash
+        },
+        ...prev.slice(0, 2)
+      ]);
+      
+      setIsSimulatingPush(false);
+    }, 2500);
+  };
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-zinc-950 text-white selection:bg-white/10 overflow-x-hidden">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/50">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/70 backdrop-blur-xl border-b border-zinc-900/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center">
-                <span className="text-zinc-950 font-bold text-sm">LD</span>
+            <div className="flex items-center gap-2.5 cursor-pointer">
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-white/5 relative overflow-hidden group">
+                <span className="text-zinc-950 font-extrabold text-sm relative z-10 transition-colors">LD</span>
               </div>
-              <span className="text-xl font-bold text-white tracking-tight">LogoutDev</span>
+              <span className="text-lg font-bold text-white tracking-tight">LogoutDev</span>
             </div>
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm text-zinc-400 hover:text-white transition-colors">Features</a>
-              <a href="#how-it-works" className="text-sm text-zinc-400 hover:text-white transition-colors">How it works</a>
-              <a href="#why" className="text-sm text-zinc-400 hover:text-white transition-colors">Why LogoutDev</a>
+            
+            <div className="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              <a href="#features" className="hover:text-white transition-colors">Features</a>
+              <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
+              <a href="#why" className="hover:text-white transition-colors">Why LogoutDev</a>
             </div>
-            <div className="flex items-center gap-3">
+
+            <div className="flex items-center gap-4">
               <Link
                 href="/login"
-                className="text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+                className="text-xs font-bold uppercase tracking-wider text-zinc-450 hover:text-white transition-colors"
               >
                 Sign in
               </Link>
               <Link
                 href="/signup"
-                className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-zinc-100 transition-colors"
+                className="rounded-xl bg-white px-4 py-2 text-xs font-bold text-black hover:bg-zinc-150 transition-all shadow-md shadow-white/5 hover:scale-[1.03] cursor-pointer"
               >
                 Get started
               </Link>
@@ -182,159 +256,365 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Background gradient effects */}
+      <section className="relative pt-36 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Background Grid & Glowing Orbs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-1/2 -right-1/4 w-[800px] h-[800px] bg-gradient-to-br from-violet-600/20 to-transparent rounded-full blur-3xl" />
-          <div className="absolute -bottom-1/2 -left-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-blue-600/20 to-transparent rounded-full blur-3xl" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+          <div className="absolute top-[-10%] left-[20%] w-[550px] h-[550px] bg-indigo-600/10 rounded-full blur-[120px]" />
+          <div className="absolute top-[-15%] right-[20%] w-[550px] h-[550px] bg-violet-600/10 rounded-full blur-[140px]" />
         </div>
-        
-        <div className="relative max-w-5xl mx-auto text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-800/60 border border-zinc-700/50 mb-8">
+
+        <div className="relative max-w-5xl mx-auto text-center space-y-6">
+          {/* Pulsing Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/60 border border-zinc-800/80 mb-4 shadow-sm">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-450 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span className="text-xs text-zinc-400">The proof-of-work network for developers</span>
+            <span className="text-[11px] font-semibold text-zinc-400 font-sans tracking-wide">The proof-of-work network for builders</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-white">
             Where developers
             <br />
-            <span className="bg-gradient-to-r from-violet-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">
               build in public
             </span>
           </h1>
-          
-          <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            A proof-of-work platform where developers share projects, collaborate on spaces, 
-            launch products, and get hired based on <span className="text-white font-medium">real contributions</span>.
+
+          <p className="mt-6 text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+            LogoutDev is a collaborative workspace where developers showcase actual contributions, host Git repos, launch products, and connect based on verified code.
           </p>
 
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/signup"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-semibold text-zinc-950 hover:bg-zinc-100 transition-all hover:scale-105"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-xs font-bold text-black hover:bg-zinc-150 transition-all hover:scale-[1.03] shadow-md shadow-white/5 cursor-pointer"
             >
-              Start building today
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
+              <span>Start building today</span>
+              <ArrowRightIcon className="w-4 h-4 stroke-[2.5]" />
             </Link>
-            <Link
+            <a
               href="#features"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900/50 px-8 py-4 text-base font-semibold text-zinc-300 hover:bg-zinc-800 transition-all"
+              className="inline-flex items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/30 px-7 py-3.5 text-xs font-bold text-zinc-300 hover:bg-zinc-850 hover:text-white transition-all cursor-pointer"
             >
               Explore features
-            </Link>
+            </a>
           </div>
 
-          {/* Social proof */}
-          <div className="mt-16 pt-8 border-t border-zinc-800/50">
-            <p className="text-sm text-zinc-500 mb-6">Combining the best of</p>
-            <div className="flex flex-wrap justify-center items-center gap-8 text-zinc-500">
-              <span className="flex items-center gap-2 text-sm font-medium">
-                <span className="text-lg">𝕏</span>-style conversations
-              </span>
-              <span className="hidden sm:block w-px h-4 bg-zinc-700" />
-              <span className="flex items-center gap-2 text-sm font-medium">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                GitHub-style projects
-              </span>
-              <span className="hidden sm:block w-px h-4 bg-zinc-700" />
-              <span className="flex items-center gap-2 text-sm font-medium">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                LinkedIn-style discovery
-              </span>
+          {/* INTERACTIVE MOCK DASHBOARD PLAYGROUND */}
+          <div className="mt-16 relative rounded-2xl border border-zinc-800 bg-zinc-900/20 p-1.5 backdrop-blur-md shadow-2xl max-w-4xl mx-auto overflow-hidden">
+            {/* Top window bar */}
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-850/80 bg-zinc-950/40">
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-rose-500/80 block"></span>
+                <span className="w-3 h-3 rounded-full bg-amber-500/80 block"></span>
+                <span className="w-3 h-3 rounded-full bg-emerald-500/80 block"></span>
+              </div>
+              <div className="text-[10px] text-zinc-550 font-mono flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
+                <span>dev_workspace@logoutdev:~</span>
+              </div>
+              <div className="w-12"></div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 min-h-[380px] bg-zinc-950/70 text-left">
+              {/* Mock Sidebar */}
+              <div className="md:col-span-3 border-r border-zinc-850/60 p-4 space-y-4 bg-zinc-950/20 flex flex-col justify-between">
+                <div className="space-y-1">
+                  <p className="text-[9px] uppercase tracking-wider font-bold text-zinc-500 px-2.5 mb-2">Workspace</p>
+                  
+                  <button
+                    onClick={() => setPlayTab("feed")}
+                    className={`w-full text-left text-xs px-3 py-2 rounded-xl flex items-center gap-2.5 transition-all ${
+                      playTab === "feed" ? "bg-zinc-900 text-white font-semibold border border-zinc-850" : "text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    <ChatBubbleLeftRightIcon className="w-4 h-4 shrink-0" />
+                    <span>Developer Feed</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => setPlayTab("repos")}
+                    className={`w-full text-left text-xs px-3 py-2 rounded-xl flex items-center gap-2.5 transition-all ${
+                      playTab === "repos" ? "bg-zinc-900 text-white font-semibold border border-zinc-850" : "text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    <FolderIcon className="w-4 h-4 shrink-0" />
+                    <span>Git Repositories</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => setPlayTab("launches")}
+                    className={`w-full text-left text-xs px-3 py-2 rounded-xl flex items-center gap-2.5 transition-all ${
+                      playTab === "launches" ? "bg-zinc-900 text-white font-semibold border border-zinc-850" : "text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    <RocketIcon className="w-4 h-4 shrink-0" />
+                    <span>Launches Hub</span>
+                  </button>
+                </div>
+
+                {/* Simulated Push Commits Action Widget */}
+                <div className="p-3 border border-zinc-850/60 rounded-xl bg-zinc-900/10 space-y-2">
+                  <span className="block text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Commit Simulator</span>
+                  <button
+                    onClick={triggerSimulatePush}
+                    disabled={isSimulatingPush}
+                    className="w-full bg-white text-black font-bold text-xs py-2 rounded-lg hover:bg-zinc-150 transition-all flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    {isSimulatingPush ? (
+                      <>
+                        <Spinner size="sm" className="text-black border-black" />
+                        <span>Pushing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <PlusIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+                        <span>Push Commit</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Mock Main Panel */}
+              <div className="md:col-span-9 p-5 flex flex-col justify-between min-h-[340px]">
+                <div>
+                  {/* Tab Content: Feed */}
+                  {playTab === "feed" && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-450">Global Activity</h4>
+                        <span className="text-[9px] text-zinc-550 font-mono">Live updates</span>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {feedLogs.map((log) => (
+                          <div key={log.id} className="flex gap-3 text-xs border border-zinc-850/30 bg-zinc-900/10 p-3 rounded-xl hover:border-zinc-800 transition-all">
+                            <Avatar user={{ id: log.id, name: log.name }} size="sm" />
+                            <div className="space-y-0.5 min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-semibold text-white">{log.name}</span>
+                                <span className="text-zinc-500 truncate text-[10px]">@{log.username}</span>
+                                <span className="text-[9px] text-zinc-600 shrink-0">• {log.time}</span>
+                              </div>
+                              <p className="text-zinc-400 text-xs leading-normal">{log.message}</p>
+                              {log.commitLink && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-[9px] font-mono text-zinc-500 mt-1">
+                                  commit: {log.commitLink}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tab Content: Repos */}
+                  {playTab === "repos" && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-450">Connected Repositories</h4>
+                        <span className="text-[9px] text-zinc-550 font-mono">2 Active</span>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="border border-zinc-850 bg-zinc-900/20 p-3.5 rounded-xl hover:border-zinc-750 transition-all space-y-2 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-white">logoutdev-web</span>
+                              <span className="text-[9px] border border-sky-500/20 bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded-full">Public</span>
+                            </div>
+                            <p className="text-[11px] text-zinc-500 leading-normal mt-1.5">Web frontend platform for proof-of-work dashboard and launches.</p>
+                          </div>
+                          <div className="flex items-center justify-between text-[9px] text-zinc-500 pt-3 border-t border-zinc-900 font-mono">
+                            <span>TypeScript</span>
+                            <span>Updated 2m ago</span>
+                          </div>
+                        </div>
+
+                        <div className="border border-zinc-850 bg-zinc-900/20 p-3.5 rounded-xl hover:border-zinc-750 transition-all space-y-2 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-white">dev-ops-configs</span>
+                              <span className="text-[9px] border border-amber-500/20 bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-full">Private</span>
+                            </div>
+                            <p className="text-[11px] text-zinc-500 leading-normal mt-1.5">Kubernetes deployments, Terraform variables, and secrets binding setup.</p>
+                          </div>
+                          <div className="flex items-center justify-between text-[9px] text-zinc-500 pt-3 border-t border-zinc-900 font-mono">
+                            <span>Terraform</span>
+                            <span>Updated 1h ago</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tab Content: Launches */}
+                  {playTab === "launches" && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-450">Products Showcased</h4>
+                        <span className="text-[9px] text-zinc-550 font-mono">Launches</span>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="border border-zinc-850 bg-zinc-900/20 p-3 rounded-xl flex items-center justify-between gap-4">
+                          <div className="space-y-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-white">DevTools Pro v1.2</span>
+                              <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">Live</span>
+                            </div>
+                            <p className="text-[11px] text-zinc-500 truncate">Advanced browser tools for React debugging and profiling.</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-xs font-bold text-white block">18 reviews</span>
+                            <span className="text-[9px] text-zinc-500 font-mono">4.9 Rating</span>
+                          </div>
+                        </div>
+
+                        <div className="border border-zinc-850 bg-zinc-900/20 p-3 rounded-xl flex items-center justify-between gap-4">
+                          <div className="space-y-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-white">DeployFlow AI</span>
+                              <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-400 border border-sky-500/20">Beta</span>
+                            </div>
+                            <p className="text-[11px] text-zinc-500 truncate">Self-healing server deployment agent integrated with Git pushes.</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-xs font-bold text-sky-350 block">12 / 50</span>
+                            <span className="text-[9px] text-zinc-550 font-mono">Approved</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Simulated Terminal logs */}
+                <div className="mt-4 border-t border-zinc-850/60 pt-3.5">
+                  <div className="bg-zinc-950 rounded-xl p-2.5 border border-zinc-850/80 font-mono text-[10px] text-zinc-500 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <CommandLineIcon className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                      <span className="text-emerald-400 font-bold shrink-0">git_events:</span>
+                      <span className="truncate text-zinc-400">{terminalLog}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 font-sans text-zinc-400 text-[10px] shrink-0 font-semibold pl-3 border-t sm:border-t-0 sm:border-l border-zinc-850 pt-2 sm:pt-0">
+                      <span>Jane's Score:</span>
+                      <span className="text-white font-bold font-mono bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">{contributionCount} commits</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 border-y border-zinc-800/50 bg-zinc-900/30">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 border-y border-zinc-800/40 bg-zinc-900/10">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
           {stats.map((stat, i) => (
-            <div key={i} className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</div>
-              <div className="text-sm text-zinc-500 mt-1">{stat.label}</div>
+            <div key={i} className="text-center border border-zinc-805 bg-zinc-950/40 p-6 rounded-2xl shadow-sm hover:border-zinc-700 transition-all">
+              <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">{stat.value}</div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 mt-2">{stat.label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      {/* Launches Section */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto space-y-12">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b border-zinc-800/60 pb-6">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500">Launches</p>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight text-white">Beta first, then live</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-                Builders can gather real beta users first or ship the public product link when they are ready.
+              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Community Releases</p>
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">Beta first, then live</h2>
+              <p className="mt-2 max-w-2xl text-xs text-zinc-400 leading-normal">
+                Builders gather direct feedback from beta users before transitioning to public releases.
               </p>
             </div>
             <Link
               href="/launches"
-              className="inline-flex items-center justify-center rounded-xl border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:bg-zinc-800"
+              className="inline-flex items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-2 text-xs font-bold text-zinc-350 transition-colors hover:bg-zinc-800 hover:text-white"
             >
-              Explore launches
+              Explore Launches
             </Link>
           </div>
 
-          <div className="mt-8 grid gap-6 lg:grid-cols-2">
-            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-5">
-              <div className="flex items-center justify-between gap-3">
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Beta Card */}
+            <div className="rounded-3xl border border-zinc-850 bg-zinc-900/10 p-6 space-y-4 shadow-sm">
+              <div className="flex items-center justify-between gap-3 border-b border-zinc-850/60 pb-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">Beta</p>
-                  <p className="mt-1 text-sm text-zinc-500">Request access before the public launch.</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-sky-400">Beta Releases</p>
+                  <p className="mt-0.5 text-[11px] text-zinc-500">Early access request queues.</p>
                 </div>
-                <Link href="/launches" className="text-xs text-zinc-500 hover:text-zinc-300">View all</Link>
+                <Link href="/launches" className="text-xs text-zinc-500 hover:text-zinc-300 font-semibold">View all &rarr;</Link>
               </div>
-              <div className="mt-4 space-y-3">
-                {betaLaunches.slice(0, 3).map((launch) => (
-                  <Link
-                    key={launch.id}
-                    href={`/launches/${launch.id}`}
-                    className="block rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 transition-colors hover:border-zinc-700"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-white">{launch.name}</p>
-                      <span className="rounded-full bg-sky-500/10 px-2.5 py-1 text-[11px] font-medium text-sky-300">
-                        {launch.beta_summary?.approved_count ?? 0}
-                        {launch.beta_summary?.capacity ? ` / ${launch.beta_summary.capacity}` : ""} approved
-                      </span>
-                    </div>
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-zinc-400">{launch.tagline}</p>
-                  </Link>
-                ))}
+              <div className="space-y-3">
+                {betaLaunches.length === 0 ? (
+                  <div className="py-8 text-center text-zinc-650 text-xs font-mono">No active beta releases</div>
+                ) : (
+                  betaLaunches.slice(0, 3).map((launch) => {
+                    const approved = launch.beta_summary?.approved_count ?? 0;
+                    const capacity = launch.beta_summary?.capacity ?? 100;
+                    const percent = Math.min(100, Math.round((approved / capacity) * 100));
+                    return (
+                      <Link
+                        key={launch.id}
+                        href={`/launches/${launch.id}`}
+                        className="block rounded-2xl border border-zinc-800/80 bg-zinc-950/70 p-4 transition-all hover:border-zinc-700 hover:bg-zinc-900/20"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-xs font-bold text-white">{launch.name}</span>
+                          <span className="rounded-full bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 text-[9px] font-bold text-sky-300 font-mono">
+                            {approved} / {capacity} approved
+                          </span>
+                        </div>
+                        <p className="mt-2 text-xs text-zinc-400 line-clamp-2 leading-relaxed">{launch.tagline}</p>
+                        <div className="mt-3.5 w-full bg-zinc-900 border border-zinc-850 h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-sky-500 h-full transition-all duration-500" style={{ width: `${percent}%` }}></div>
+                        </div>
+                      </Link>
+                    );
+                  })
+                )}
               </div>
             </div>
 
-            <div className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-5">
-              <div className="flex items-center justify-between gap-3">
+            {/* Live Card */}
+            <div className="rounded-3xl border border-zinc-850 bg-zinc-900/10 p-6 space-y-4 shadow-sm">
+              <div className="flex items-center justify-between gap-3 border-b border-zinc-850/60 pb-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">Live</p>
-                  <p className="mt-1 text-sm text-zinc-500">Public products with reviews and feedback.</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-emerald-400">Live Showcases</p>
+                  <p className="mt-0.5 text-[11px] text-zinc-500">Public products with code feedback.</p>
                 </div>
-                <Link href="/launches" className="text-xs text-zinc-500 hover:text-zinc-300">View all</Link>
+                <Link href="/launches" className="text-xs text-zinc-500 hover:text-zinc-300 font-semibold">View all &rarr;</Link>
               </div>
-              <div className="mt-4 space-y-3">
-                {liveLaunches.slice(0, 3).map((launch) => (
-                  <Link
-                    key={launch.id}
-                    href={`/launches/${launch.id}`}
-                    className="block rounded-2xl border border-zinc-800 bg-zinc-950/70 p-4 transition-colors hover:border-zinc-700"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-white">{launch.name}</p>
-                      <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
-                        {launch.review_count} reviews
-                      </span>
-                    </div>
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-zinc-400">{launch.tagline}</p>
-                  </Link>
-                ))}
+              <div className="space-y-3">
+                {liveLaunches.length === 0 ? (
+                  <div className="py-8 text-center text-zinc-650 text-xs font-mono">No active public releases</div>
+                ) : (
+                  liveLaunches.slice(0, 3).map((launch) => (
+                    <Link
+                      key={launch.id}
+                      href={`/launches/${launch.id}`}
+                      className="block rounded-2xl border border-zinc-800/80 bg-zinc-950/70 p-4 transition-all hover:border-zinc-700 hover:bg-zinc-900/20"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs font-bold text-white">{launch.name}</span>
+                        <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[9px] font-bold text-emerald-300 font-mono flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping"></span>
+                          <span>{launch.review_count} reviews</span>
+                        </span>
+                      </div>
+                      <p className="mt-2 text-xs text-zinc-400 line-clamp-2 leading-relaxed">{launch.tagline}</p>
+                    </Link>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -342,13 +622,12 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold">Everything you need to build & ship</h2>
-            <p className="mt-4 text-lg text-zinc-400 max-w-2xl mx-auto">
-              A complete platform designed for developers who want to build in public, 
-              collaborate effectively, and get discovered for their real work.
+      <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 border-t border-zinc-900/40 bg-zinc-950">
+        <div className="max-w-5xl mx-auto space-y-16">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Everything you need to ship</h2>
+            <p className="max-w-2xl text-xs sm:text-sm text-zinc-400 mx-auto leading-relaxed">
+              LogoutDev integrates code updates, spaces, and profile metrics to map real developer capabilities.
             </p>
           </div>
 
@@ -356,127 +635,143 @@ export default function Home() {
             {features.map((feature, i) => (
               <div
                 key={i}
-                className="group p-6 rounded-2xl bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-all hover:bg-zinc-900"
+                className="group p-6 rounded-2xl bg-zinc-900/20 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/40 transition-all shadow-sm flex flex-col justify-between min-h-[160px]"
               >
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500/20 to-blue-500/20 flex items-center justify-center text-violet-400 mb-4 group-hover:scale-110 transition-transform">
-                  {feature.icon}
+                <div>
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500/10 to-blue-500/10 flex items-center justify-center text-violet-400 mb-4 border border-violet-500/10 group-hover:scale-105 transition-all">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-sm font-bold text-white mb-1.5">{feature.title}</h3>
+                  <p className="text-xs text-zinc-400 leading-normal">{feature.description}</p>
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-sm text-zinc-400 leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 px-4 sm:px-6 lg:px-8 bg-zinc-900/30 border-y border-zinc-800/50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold">How it works</h2>
-            <p className="mt-4 text-lg text-zinc-400 max-w-2xl mx-auto">
-              Get started in minutes and start building your developer identity
+      {/* Onboarding Timeline Section */}
+      <section id="how-it-works" className="py-24 px-4 sm:px-6 lg:px-8 bg-zinc-900/10 border-y border-zinc-800/40">
+        <div className="max-w-5xl mx-auto space-y-16">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">How it works</h2>
+            <p className="max-w-2xl text-xs sm:text-sm text-zinc-400 mx-auto leading-relaxed">
+              Register, code, ship, and get verified in four simple steps.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {steps.map((step, i) => (
-              <div key={i} className="relative">
-                {i < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-8 left-[60%] w-full h-px bg-gradient-to-r from-zinc-700 to-transparent" />
-                )}
-                <div className="text-5xl font-bold text-zinc-800 mb-4">{step.step}</div>
-                <h3 className="text-lg font-semibold text-white mb-2">{step.title}</h3>
-                <p className="text-sm text-zinc-400 leading-relaxed">{step.description}</p>
+              <div key={i} className="relative p-5 rounded-2xl border border-zinc-850 bg-zinc-950/40 hover:border-zinc-750 transition-all shadow-sm">
+                <div className="text-3xl font-extrabold text-zinc-800 font-mono mb-3">{step.step}</div>
+                <h3 className="text-sm font-bold text-white mb-2">{step.title}</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">{step.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Why LogoutDev Section */}
+      {/* Why LogoutDev & Mock Activity Grid */}
       <section id="why" className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-                Why <span className="bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">LogoutDev</span>?
+        <div className="max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-12 gap-12 items-center">
+            {/* Left Copy Column */}
+            <div className="lg:col-span-6 space-y-6">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+                Why <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">LogoutDev</span>?
               </h2>
-              <p className="text-lg text-zinc-400 mb-8 leading-relaxed">
-                Current developer activity is fragmented. Ideas and discussions happen on social platforms, 
-                code lives on GitHub, and hiring happens on resume-based platforms. This creates weak hiring 
-                signals and poor collaboration discovery.
+              
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                Developer verification is fragmented. Code lives on Github, discussions on social threads, and resumes on recruitment platforms. LogoutDev unites them all in one proof-of-work container.
               </p>
-              <ul className="space-y-4">
+              
+              <ul className="space-y-3.5">
                 {[
-                  "Companies evaluate developers by what they build, not what they claim",
-                  "Get discovered without relying on resumes or job applications",
-                  "Find collaborators who share your tech stack and interests",
-                  "Build trust through consistent public contributions"
+                  "Companies evaluate developers based on verified git contributions",
+                  "Direct recruiter discovery without keyword-optimized resume filters",
+                  "Find project maintainers matching specific tech stacks",
+                  "Build reputation points automatically as you push code changes"
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-zinc-300">{item}</span>
+                  <li key={i} className="flex items-start gap-3 text-xs">
+                    <div className="rounded-full bg-emerald-500/10 p-0.5 border border-emerald-500/20 mt-0.5">
+                      <CheckIcon className="w-3.5 h-3.5 text-emerald-400 stroke-[2.5]" />
+                    </div>
+                    <span className="text-zinc-350 leading-relaxed">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-blue-500/10 rounded-3xl blur-3xl" />
-              <div className="relative rounded-2xl border border-zinc-800 bg-zinc-900 p-8">
-                <div className="space-y-6">
-                  {/* Mock profile card */}
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white font-bold text-lg">
-                      JD
-                    </div>
-                    <div>
-                      <div className="font-semibold text-white">Jane Developer</div>
-                      <div className="text-sm text-zinc-400">Full-stack builder · 127 contributions</div>
-                    </div>
-                  </div>
-                  
-                  {/* Mock stats */}
-                  <div className="grid grid-cols-3 gap-4 py-4 border-y border-zinc-800">
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-white">12</div>
-                      <div className="text-xs text-zinc-500">Projects</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-white">3</div>
-                      <div className="text-xs text-zinc-500">Launches</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-white">89</div>
-                      <div className="text-xs text-zinc-500">Followers</div>
-                    </div>
-                  </div>
 
-                  {/* Mock tech stack */}
-                  <div>
-                    <div className="text-xs text-zinc-500 mb-2">Tech Stack</div>
-                    <div className="flex flex-wrap gap-2">
-                      {["React", "TypeScript", "Node.js", "PostgreSQL", "AWS"].map((tech) => (
-                        <span key={tech} className="px-2 py-1 text-xs rounded-md bg-zinc-800 text-zinc-300">{tech}</span>
-                      ))}
-                    </div>
+            {/* Right Mock Profile Playground Column */}
+            <div className="lg:col-span-6 relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-indigo-500/10 rounded-3xl blur-3xl pointer-events-none" />
+              
+              <div className="relative rounded-2xl border border-zinc-800 bg-zinc-900/20 p-6 space-y-6 shadow-2xl backdrop-blur-sm">
+                {/* Profile header */}
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white font-extrabold text-sm shadow-md shadow-violet-500/25">
+                    JD
                   </div>
-
-                  {/* Mock activity */}
                   <div>
-                    <div className="text-xs text-zinc-500 mb-2">Recent Activity</div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="w-2 h-2 rounded-full bg-green-500" />
-                        <span className="text-zinc-400">Launched <span className="text-white">DevTools Pro</span></span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="w-2 h-2 rounded-full bg-blue-500" />
-                        <span className="text-zinc-400">Joined <span className="text-white">Open API Project</span></span>
-                      </div>
+                    <h3 className="text-sm font-bold text-white">Jane Developer</h3>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">Full-Stack Architect · dev_lead</p>
+                  </div>
+                </div>
+
+                {/* Github-style Green Contribution Grid built in CSS */}
+                <div>
+                  <div className="text-[10px] text-zinc-500 mb-2 font-mono uppercase tracking-wider">Proof of Work Activity Grid</div>
+                  <div className="grid grid-flow-col grid-rows-7 gap-1 bg-zinc-950 p-3 rounded-xl border border-zinc-850">
+                    {contributionBlocks.map((density, idx) => {
+                      const colors = [
+                        "bg-zinc-900 hover:bg-zinc-800",
+                        "bg-emerald-950 hover:bg-emerald-900",
+                        "bg-emerald-800 hover:bg-emerald-700",
+                        "bg-emerald-600 hover:bg-emerald-500",
+                        "bg-emerald-400 hover:bg-emerald-300",
+                      ];
+                      return (
+                        <div
+                          key={idx}
+                          className={`w-3.5 h-3.5 rounded-sm transition-colors cursor-pointer ${colors[density]}`}
+                          title={`${density === 0 ? "No" : density * 3} commits on this day`}
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className="flex justify-between items-center text-[9px] text-zinc-550 mt-2 font-mono px-1">
+                    <span>Less</span>
+                    <div className="flex gap-1">
+                      <div className="w-2.5 h-2.5 rounded-sm bg-zinc-900" />
+                      <div className="w-2.5 h-2.5 rounded-sm bg-emerald-950" />
+                      <div className="w-2.5 h-2.5 rounded-sm bg-emerald-800" />
+                      <div className="w-2.5 h-2.5 rounded-sm bg-emerald-600" />
+                      <div className="w-2.5 h-2.5 rounded-sm bg-emerald-400" />
                     </div>
+                    <span>More</span>
+                  </div>
+                </div>
+
+                {/* Tech stack badge row */}
+                <div className="space-y-2">
+                  <span className="text-[10px] text-zinc-550 font-mono uppercase tracking-wider block">Tech Stack Capabilities</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {["Next.js", "TypeScript", "Tailwind", "Kubernetes", "PostgreSQL"].map((tech) => (
+                      <span key={tech} className="px-2.5 py-0.5 rounded bg-zinc-950 border border-zinc-850 text-[10px] font-semibold text-zinc-400">{tech}</span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Proposal states */}
+                <div className="grid grid-cols-2 gap-3 border-t border-zinc-850/60 pt-4 text-center">
+                  <div className="bg-zinc-950/40 border border-zinc-850 p-2.5 rounded-xl">
+                    <span className="block text-sm font-extrabold text-white font-mono">14</span>
+                    <span className="text-[9px] text-zinc-550 uppercase tracking-wider font-bold">Shipped Repos</span>
+                  </div>
+                  <div className="bg-zinc-950/40 border border-zinc-850 p-2.5 rounded-xl">
+                    <span className="block text-sm font-extrabold text-emerald-400 font-mono">128</span>
+                    <span className="text-[9px] text-zinc-550 uppercase tracking-wider font-bold">Rep Points</span>
                   </div>
                 </div>
               </div>
@@ -485,58 +780,95 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Email Section */}
       <section className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-violet-600/20 via-blue-600/20 to-cyan-600/20 rounded-3xl blur-3xl" />
-            <div className="relative rounded-3xl border border-zinc-800 bg-zinc-900/80 p-12 sm:p-16">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                Ready to build in public?
-              </h2>
-              <p className="text-lg text-zinc-400 mb-8 max-w-xl mx-auto">
-                Join developers who are shipping products, finding collaborators, 
-                and getting discovered for their real work.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-semibold text-zinc-950 hover:bg-zinc-100 transition-all hover:scale-105"
+        <div className="max-w-4xl mx-auto text-center relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-600/10 via-indigo-600/10 to-cyan-600/10 rounded-3xl blur-3xl pointer-events-none" />
+          
+          <div className="relative rounded-3xl border border-zinc-800 bg-zinc-900/40 p-12 sm:p-16 space-y-6">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Ready to build in public?</h2>
+            
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-lg mx-auto leading-relaxed">
+              Create your profile today, host code repos, launch products, and discover developer collaboration networks.
+            </p>
+
+            <form onSubmit={handleNewsletterSubmit} className="max-w-md mx-auto space-y-3">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <EnvelopeIcon className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    placeholder="Enter email to get updates"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setNewsError("");
+                      setNewsSuccess(false);
+                    }}
+                    className="w-full rounded-xl border border-zinc-800 bg-zinc-950 pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-750 focus:outline-none focus:ring-1 focus:ring-zinc-750"
+                  />
+                </div>
+                
+                <button
+                  type="submit"
+                  className="rounded-xl bg-white px-5 py-2.5 text-xs font-bold text-black hover:bg-zinc-150 transition-all cursor-pointer whitespace-nowrap"
                 >
-                  Create your profile
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Link>
-                <Link
-                  href="/explore"
-                  className="inline-flex items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/50 px-8 py-4 text-base font-semibold text-zinc-300 hover:bg-zinc-800 transition-all"
-                >
-                  Explore the community
-                </Link>
+                  Join Newsletter
+                </button>
               </div>
+
+              {newsError && (
+                <div className="text-rose-455 text-[11px] font-mono flex items-center justify-center gap-1.5">
+                  <ExclamationTriangleIcon className="w-3.5 h-3.5" />
+                  <span>{newsError}</span>
+                </div>
+              )}
+              {newsSuccess && (
+                <div className="text-emerald-450 text-[11px] font-semibold flex items-center justify-center gap-1.5">
+                  <CheckCircleIcon className="w-3.5 h-3.5" />
+                  <span>Subscribed successfully! Welcome to LogoutDev updates.</span>
+                </div>
+              )}
+            </form>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+              <Link
+                href="/signup"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-6 py-3 text-xs font-bold text-black hover:bg-zinc-150 transition-all cursor-pointer"
+              >
+                <span>Create profile</span>
+                <ArrowRightIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+              </Link>
+              <Link
+                href="/explore"
+                className="inline-flex items-center justify-center rounded-xl border border-zinc-800 bg-zinc-950 px-6 py-3 text-xs font-bold text-zinc-300 hover:bg-zinc-850 hover:text-white transition-all cursor-pointer"
+              >
+                Explore community
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-zinc-800/50">
+      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-zinc-900/40">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 text-zinc-500">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-                <span className="text-zinc-950 font-bold text-xs">LD</span>
+              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-md">
+                <span className="text-zinc-950 font-extrabold text-xs">LD</span>
               </div>
-              <span className="text-lg font-bold text-white tracking-tight">LogoutDev</span>
+              <span className="text-base font-bold text-white tracking-tight">LogoutDev</span>
             </div>
-            <nav className="flex items-center gap-6">
-              <Link href="#features" className="text-sm text-zinc-500 hover:text-white transition-colors">Features</Link>
-              <Link href="#how-it-works" className="text-sm text-zinc-500 hover:text-white transition-colors">How it works</Link>
-              <Link href="/explore" className="text-sm text-zinc-500 hover:text-white transition-colors">Explore</Link>
-              <Link href="/login" className="text-sm text-zinc-500 hover:text-white transition-colors">Sign in</Link>
+            
+            <nav className="flex items-center gap-6 text-xs font-bold uppercase tracking-wider">
+              <a href="#features" className="hover:text-white transition-colors">Features</a>
+              <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
+              <Link href="/explore" className="hover:text-white transition-colors">Explore</Link>
+              <Link href="/login" className="hover:text-white transition-colors">Sign in</Link>
             </nav>
-            <p className="text-sm text-zinc-600">
+            
+            <p className="text-[11px] font-mono text-zinc-650">
               © {new Date().getFullYear()} LogoutDev. Built for developers.
             </p>
           </div>

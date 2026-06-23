@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/Icons";
 import { formatRelativeTime } from "@/lib/utils";
 import * as api from "@/lib/services/spacesApi";
+import * as cache from "@/lib/services/requestCache";
 import Link from "next/link";
 import RichComposer, { type RichComposerHandle } from "@/components/ui/RichComposer";
 import RichText from "@/components/ui/RichText";
@@ -107,6 +108,7 @@ export default function DiscussionThreadPage({
     setReplyError("");
     try {
       await api.addReply(spaceId, threadId, replyBody.trim());
+      cache.invalidateSpace(spaceId, "discussions");
       setReplyBody("");
       setComposerFocused(false);
       refetch();

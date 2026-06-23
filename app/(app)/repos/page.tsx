@@ -7,6 +7,7 @@ import { StarIcon } from "@primer/octicons-react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useRepositoryList } from "@/lib/hooks/useRepos";
 import * as reposApi from "@/lib/services/reposApi";
+import * as cache from "@/lib/services/requestCache";
 import Spinner from "@/components/ui/Spinner";
 import {
   CodeBracketIcon,
@@ -348,6 +349,10 @@ export default function RepositoriesPage() {
         ...current,
         [repoId]: { is_starred: result.starred, star_count: result.star_count },
       }));
+      // Keep cached listings + repo overview in sync so a tab switch back
+      // doesn't show the pre-star counts.
+      cache.invalidateRepo(repoId, "overview");
+      cache.invalidateRepoListings();
     } catch {
       // Keep the repo list stable if the star request fails.
     } finally {

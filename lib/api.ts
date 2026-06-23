@@ -14,6 +14,7 @@ import type {
   FollowListUser,
 } from "./types";
 import { API_BASE_URL } from "./apiBaseUrl";
+import * as requestCache from "./services/requestCache";
 
 export { API_BASE_URL };
 
@@ -26,17 +27,22 @@ function getAuthHeaders(): Record<string, string> {
 }
 
 async function handleResponse<T>(res: Response): Promise<T> {
+  const data = await res.json().catch(() => ({}));
+
   // Auto-logout on 401
   if (res.status === 401) {
-    if (typeof window !== "undefined") {
+    // A Firebase exchange has no LogoutDev session yet. Do not turn its useful
+    // server error into a redirect plus a generic "Unauthorized" message.
+    const hasSession = typeof window !== "undefined" && Boolean(localStorage.getItem("authToken"));
+    if (hasSession) {
+      // Drop any cached user-scoped data so a different account can't read it.
+      requestCache.clear();
       localStorage.removeItem("authToken");
       localStorage.removeItem("currentUser");
-      window.location.href = "/login";
+      if (window.location.pathname !== "/login") window.location.href = "/login";
     }
-    throw new Error("Unauthorized");
   }
 
-  const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Request failed");
   return data as T;
 }
@@ -68,6 +74,28 @@ export async function registerUser(
   return handleResponse<AuthResponse>(res);
 }
 
+export async function firebaseLogin(
+  idToken: string,
+  name?: string,
+  username?: string,
+  verificationToken?: string
+): Promise<AuthResponse> {
+  const body: Record<string, string> = {};
+  if (name) body.name = name;
+  if (username) body.username = username;
+  if (verificationToken) body.verification_token = verificationToken;
+
+  const res = await fetch(`${API_BASE_URL}/api/auth/firebase-login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
+  });
+  return handleResponse<AuthResponse>(res);
+}
+
 export async function getCurrentUser(): Promise<{ user: User }> {
   const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
     headers: { ...getAuthHeaders() },
@@ -77,14 +105,35 @@ export async function getCurrentUser(): Promise<{ user: User }> {
 
 export async function resetPassword(
   email: string,
-  newPassword: string
+  newPassword: string,
+  verificationToken: string
 ): Promise<{ message: string }> {
   const res = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, newPassword }),
+    body: JSON.stringify({ email, newPassword, verification_token: verificationToken }),
   });
   return handleResponse<{ message: string }>(res);
+}
+
+export async function checkUsernameAvailability(username: string): Promise<{ available: boolean }> {
+  const res = await fetch(`${API_BASE_URL}/api/auth/username-availability?username=${encodeURIComponent(username)}`);
+  return handleResponse(res);
+}
+
+export async function sendEmailOtp(email: string, purpose: "signup" | "password_reset"): Promise<{ challenge_token: string | null; message: string }> {
+  const res = await fetch(`${API_BASE_URL}/api/auth/email-otp/send`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, purpose }),
+  });
+  return handleResponse(res);
+}
+
+export async function verifyEmailOtp(email: string, purpose: "signup" | "password_reset", otp: string, challengeToken: string): Promise<{ verification_token: string }> {
+  const res = await fetch(`${API_BASE_URL}/api/auth/email-otp/verify`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, purpose, otp, challenge_token: challengeToken }),
+  });
+  return handleResponse(res);
 }
 
 // ─── Posts ────────────────────────────────────────────────────────────────────
