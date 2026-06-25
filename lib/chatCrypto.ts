@@ -1,33 +1,46 @@
-import type { ChatEnvelope, ChatGroupKeyEnvelope, ChatMessage } from "@/lib/types";
-import { fetchChatKeyBundle, registerChatDevice, uploadChatOneTimePrekeys } from "@/lib/services/chatApi";
 import {
-  listUnconsumedGroupKeyEnvelopes,
-  consumeGroupKeyEnvelopes,
-  listGroupKeyEpochs,
-} from "@/lib/services/groupApi";
+  setupChatCrypto,
+  getChatCryptoBackup,
+  updateChatCryptoBackup,
+  fetchUserCryptoProfile,
+  resetChatCrypto,
+  createConversationKeyShares,
+  fetchConversationKeyShares,
+} from "./services/chatApi";
+import type { ChatMessage } from "./types";
 
-const DEVICE_KEY = "logoutdev.chat.device.v1";
-const ENCRYPTION_VERSION = "webcrypto-v1";
-const PREKEY_BATCH_SIZE = 20;
+const VAULT_KEY = "logoutdev.chat.vault.v2";
+const SESSION_RECOVERY_KEY = "logoutdev.chat.recovery-key";
 
-interface StoredDevice {
-  device_id: string;
-  identity_private_jwk: JsonWebKey;
-  identity_public_jwk: JsonWebKey;
-  prekey_private_jwk: JsonWebKey;
-  prekey_public_jwk: JsonWebKey;
-  signing_private_jwk: JsonWebKey;
-  signing_public_jwk: JsonWebKey;
-  signed_prekey_signature: string;
+export interface KeyVault {
+  account_master_key: string;
+  account_public_wrapping_key: string; // stringified JWK
+  account_private_wrapping_key: JsonWebKey;
+  conversation_keys: Record<string, Record<number, { key_jwk: JsonWebKey; epoch_id: string }>>;
+  created_at: string;
+  updated_at: string;
+  backup_salt?: string;
 }
 
-interface PlainMessage {
-  body?: string;
-  attachments?: unknown[];
-  created_at?: string;
-  conversation_id?: string;
-  epoch_number?: number;
-  group_key?: JsonWebKey;
+// Memory cache of decrypted vault
+let cachedVault: KeyVault | null = null;
+
+// ─── Performance Caches ────────────────────────────────────────────────────────
+// Cache crypto profiles so repeated sends to the same user don't re-fetch
+const _cryptoProfileCache = new Map<string, { data: any; ts: number }>();
+const PROFILE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+// Track when we last synced key-shares per conversation to avoid re-fetching
+// on every message send. We still always fetch if the vault has no key yet.
+const _keyShareSyncTs = new Map<string, number>();
+const KEY_SHARE_SYNC_TTL_MS = 2 * 60 * 1000; // 2 minutes
+
+async function fetchUserCryptoProfileCached(userId: string): Promise<any> {
+  const hit = _cryptoProfileCache.get(userId);
+  if (hit && Date.now() - hit.ts < PROFILE_CACHE_TTL_MS) return hit.data;
+  const data = await fetchUserCryptoProfile(userId);
+  _cryptoProfileCache.set(userId, { data, ts: Date.now() });
+  return data;
 }
 
 function bytesToBase64(bytes: ArrayBuffer | Uint8Array): string {
@@ -50,185 +63,356 @@ function encodeText(value: string): Uint8Array {
   return new TextEncoder().encode(value);
 }
 
+function decodeText(value: ArrayBuffer | Uint8Array): string {
+  return new TextDecoder().decode(value);
+}
+
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
   return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
 }
 
-function decodeText(value: ArrayBuffer): string {
-  return new TextDecoder().decode(value);
-}
-
-function getStoredDevice(): StoredDevice | null {
+export function getStoredVault(): KeyVault | null {
+  if (cachedVault) return cachedVault;
   if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem(DEVICE_KEY);
+  const raw = localStorage.getItem(VAULT_KEY);
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as StoredDevice;
+    cachedVault = JSON.parse(raw) as KeyVault;
+    return cachedVault;
   } catch {
     return null;
   }
 }
 
-async function registerStoredDevice(device: StoredDevice) {
-  await registerChatDevice({
-    device_id: device.device_id,
-    device_name: navigator.userAgent.slice(0, 120),
-    identity_public_key: JSON.stringify(device.identity_public_jwk),
-    signed_prekey_public: JSON.stringify(device.prekey_public_jwk),
-    signed_prekey_signature: device.signed_prekey_signature,
-    signed_prekey_id: `spk-${device.device_id}`,
-  });
+export function setStoredVault(vault: KeyVault) {
+  cachedVault = vault;
+  if (typeof window === "undefined") return;
+  localStorage.setItem(VAULT_KEY, JSON.stringify(vault));
 }
 
-async function importEcdhPrivate(jwk: JsonWebKey) {
-  return crypto.subtle.importKey("jwk", jwk, { name: "ECDH", namedCurve: "P-256" }, true, ["deriveKey"]);
+export function clearStoredVault() {
+  cachedVault = null;
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(VAULT_KEY);
+  sessionStorage.removeItem(SESSION_RECOVERY_KEY);
 }
 
-async function importEcdhPublic(jwk: JsonWebKey) {
-  return crypto.subtle.importKey("jwk", jwk, { name: "ECDH", namedCurve: "P-256" }, true, []);
+export function getSessionRecoveryKey(): string | null {
+  if (typeof window === "undefined") return null;
+  return sessionStorage.getItem(SESSION_RECOVERY_KEY);
 }
 
-async function importSigningPrivate(jwk: JsonWebKey) {
-  return crypto.subtle.importKey("jwk", jwk, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]);
+export function setSessionRecoveryKey(key: string) {
+  if (typeof window === "undefined") return;
+  sessionStorage.setItem(SESSION_RECOVERY_KEY, key);
 }
 
-async function signPrekey(signingPrivate: CryptoKey, prekeyPublicJwk: JsonWebKey) {
-  const data = encodeText(JSON.stringify(prekeyPublicJwk));
-  const signature = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, signingPrivate, toArrayBuffer(data));
-  return bytesToBase64(signature);
-}
-
-async function generateEcdhPair() {
-  return crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveKey"]);
-}
-
-async function generateSigningPair() {
-  return crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
-}
-
-export async function ensureChatDeviceRegistered() {
-  const existing = getStoredDevice();
-  if (existing) {
-    await registerStoredDevice(existing);
-    return existing;
+// ─── KDF & Vault Cryptography ────────────────────────────────────────────────
+export function generateRecoveryKey(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  const hex = Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+  const parts = [];
+  for (let i = 0; i < hex.length; i += 4) {
+    parts.push(hex.substring(i, i + 4));
   }
-
-  const identity = await generateEcdhPair();
-  const prekey = await generateEcdhPair();
-  const signing = await generateSigningPair();
-  const signingPrivateJwk = await crypto.subtle.exportKey("jwk", signing.privateKey);
-  const signingPublicJwk = await crypto.subtle.exportKey("jwk", signing.publicKey);
-  const prekeyPublicJwk = await crypto.subtle.exportKey("jwk", prekey.publicKey);
-  const signingPrivate = await importSigningPrivate(signingPrivateJwk);
-
-  const device: StoredDevice = {
-    device_id: crypto.randomUUID(),
-    identity_private_jwk: await crypto.subtle.exportKey("jwk", identity.privateKey),
-    identity_public_jwk: await crypto.subtle.exportKey("jwk", identity.publicKey),
-    prekey_private_jwk: await crypto.subtle.exportKey("jwk", prekey.privateKey),
-    prekey_public_jwk: prekeyPublicJwk,
-    signing_private_jwk: signingPrivateJwk,
-    signing_public_jwk: signingPublicJwk,
-    signed_prekey_signature: await signPrekey(signingPrivate, prekeyPublicJwk),
-  };
-
-  localStorage.setItem(DEVICE_KEY, JSON.stringify(device));
-  await registerStoredDevice(device);
-
-  const prekeys = [];
-  for (let index = 0; index < PREKEY_BATCH_SIZE; index += 1) {
-    const key = await generateEcdhPair();
-    prekeys.push({
-      key_id: `otk-${Date.now()}-${index}`,
-      public_key: JSON.stringify(await crypto.subtle.exportKey("jwk", key.publicKey)),
-    });
-  }
-  await uploadChatOneTimePrekeys(device.device_id, prekeys).catch(() => undefined);
-  return device;
+  return parts.join("-");
 }
 
-async function deriveAesKey(privateKey: CryptoKey, publicKey: CryptoKey) {
-  return crypto.subtle.deriveKey(
-    { name: "ECDH", public: publicKey },
-    privateKey,
+export async function deriveE2EEKeys(pin: string, saltBase64: string): Promise<{ backupKey: CryptoKey; authKeyHash: string }> {
+  const salt = base64ToBytes(saltBase64);
+  const cleanPin = pin.replace(/\D/g, "");
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    toArrayBuffer(encodeText(cleanPin)),
+    "PBKDF2",
+    false,
+    ["deriveBits"]
+  );
+  const pbkdf2Bits = await crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      salt: toArrayBuffer(salt),
+      iterations: 100000,
+      hash: "SHA-256",
+    },
+    keyMaterial,
+    256
+  );
+  const hkdfInputKey = await crypto.subtle.importKey(
+    "raw",
+    pbkdf2Bits,
+    "HKDF",
+    false,
+    ["deriveKey", "deriveBits"]
+  );
+  const backupKey = await crypto.subtle.deriveKey(
+    {
+      name: "HKDF",
+      hash: "SHA-256",
+      salt: new ArrayBuffer(0),
+      info: toArrayBuffer(encodeText("backup-key")),
+    },
+    hkdfInputKey,
     { name: "AES-GCM", length: 256 },
     false,
     ["encrypt", "decrypt"]
   );
+  const authKeyBits = await crypto.subtle.deriveBits(
+    {
+      name: "HKDF",
+      hash: "SHA-256",
+      salt: new ArrayBuffer(0),
+      info: toArrayBuffer(encodeText("auth-key")),
+    },
+    hkdfInputKey,
+    256
+  );
+  const hashBuffer = await crypto.subtle.digest("SHA-256", authKeyBits);
+  const authKeyHash = Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return { backupKey, authKeyHash };
 }
 
-async function encryptForDevice(targetPublicKey: JsonWebKey, payload: PlainMessage): Promise<string> {
-  const ephemeral = await generateEcdhPair();
-  const publicKey = await importEcdhPublic(targetPublicKey);
-  const aesKey = await deriveAesKey(ephemeral.privateKey, publicKey);
+export async function encryptKeyVault(vault: KeyVault, backupKey: CryptoKey) {
+  const plainText = encodeText(JSON.stringify(vault));
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv: toArrayBuffer(iv) }, aesKey, toArrayBuffer(encodeText(JSON.stringify(payload))));
-  return JSON.stringify({
-    ephemeral_public_key: await crypto.subtle.exportKey("jwk", ephemeral.publicKey),
+  const cipherBuffer = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: toArrayBuffer(iv) },
+    backupKey,
+    toArrayBuffer(plainText)
+  );
+  return {
+    ciphertext: bytesToBase64(cipherBuffer),
+    nonceOrIv: bytesToBase64(iv),
+  };
+}
+
+export async function decryptKeyVault(ciphertextBase64: string, backupKey: CryptoKey, nonceOrIvBase64: string): Promise<KeyVault> {
+  const cipherText = base64ToBytes(ciphertextBase64);
+  const iv = base64ToBytes(nonceOrIvBase64);
+  const plainBuffer = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: toArrayBuffer(iv) },
+    backupKey,
+    toArrayBuffer(cipherText)
+  );
+  return JSON.parse(decodeText(plainBuffer)) as KeyVault;
+}
+
+export async function createKeyVault(): Promise<KeyVault> {
+  const wrappingKeyPair = await crypto.subtle.generateKey(
+    { name: "ECDH", namedCurve: "P-256" },
+    true,
+    ["deriveKey"]
+  );
+  const publicJwk = await crypto.subtle.exportKey("jwk", wrappingKeyPair.publicKey);
+  const privateJwk = await crypto.subtle.exportKey("jwk", wrappingKeyPair.privateKey);
+
+  const masterKeyBytes = crypto.getRandomValues(new Uint8Array(32));
+  const masterKeyHex = Array.from(masterKeyBytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+
+  return {
+    account_master_key: masterKeyHex,
+    account_public_wrapping_key: JSON.stringify(publicJwk),
+    account_private_wrapping_key: privateJwk,
+    conversation_keys: {},
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+}
+
+// ─── Public-Key Key Wrapping ───────────────────────────────────────────────
+export async function encryptConversationKeyForUser(
+  conversationKeyJwk: JsonWebKey,
+  recipientPublicWrappingKeyJwkString: string
+) {
+  const recipientPublicJwk = JSON.parse(recipientPublicWrappingKeyJwkString) as JsonWebKey;
+  const recipientKey = await crypto.subtle.importKey(
+    "jwk",
+    recipientPublicJwk,
+    { name: "ECDH", namedCurve: "P-256" },
+    true,
+    []
+  );
+
+  const ephemeralKeyPair = await crypto.subtle.generateKey(
+    { name: "ECDH", namedCurve: "P-256" },
+    true,
+    ["deriveKey"]
+  );
+
+  const aesKey = await crypto.subtle.deriveKey(
+    { name: "ECDH", public: recipientKey },
+    ephemeralKeyPair.privateKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt"]
+  );
+
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const plaintext = encodeText(JSON.stringify(conversationKeyJwk));
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: toArrayBuffer(iv) },
+    aesKey,
+    toArrayBuffer(plaintext)
+  );
+
+  const ephemeralPublicJwk = await crypto.subtle.exportKey("jwk", ephemeralKeyPair.publicKey);
+
+  const envelope = {
+    ephemeral_public_key: ephemeralPublicJwk,
     iv: bytesToBase64(iv),
     ciphertext: bytesToBase64(ciphertext),
-  });
+  };
+
+  return {
+    encrypted_conversation_key: bytesToBase64(encodeText(JSON.stringify(envelope))),
+    nonce_or_iv: bytesToBase64(iv),
+  };
 }
 
-async function decryptEnvelopePayload(encryptedPayload: string, device: StoredDevice): Promise<PlainMessage> {
-  const parsed = JSON.parse(encryptedPayload);
-  const privateKey = await importEcdhPrivate(device.prekey_private_jwk);
-  const publicKey = await importEcdhPublic(parsed.ephemeral_public_key);
-  const aesKey = await deriveAesKey(privateKey, publicKey);
-  const plaintext = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: toArrayBuffer(base64ToBytes(parsed.iv)) },
-    aesKey,
-    toArrayBuffer(base64ToBytes(parsed.ciphertext))
+export async function decryptConversationKeyShare(
+  encryptedShareBase64: string,
+  myPrivateWrappingKeyJwk: JsonWebKey
+): Promise<JsonWebKey> {
+  const envelopeString = decodeText(base64ToBytes(encryptedShareBase64));
+  const envelope = JSON.parse(envelopeString);
+
+  const ephemeralKey = await crypto.subtle.importKey(
+    "jwk",
+    envelope.ephemeral_public_key,
+    { name: "ECDH", namedCurve: "P-256" },
+    true,
+    []
   );
-  return JSON.parse(decodeText(plaintext)) as PlainMessage;
+
+  const myPrivateKey = await crypto.subtle.importKey(
+    "jwk",
+    myPrivateWrappingKeyJwk,
+    { name: "ECDH", namedCurve: "P-256" },
+    true,
+    ["deriveKey"]
+  );
+
+  const aesKey = await crypto.subtle.deriveKey(
+    { name: "ECDH", public: ephemeralKey },
+    myPrivateKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt"]
+  );
+
+  const iv = base64ToBytes(envelope.iv);
+  const ciphertext = base64ToBytes(envelope.ciphertext);
+  const decrypted = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: toArrayBuffer(iv) },
+    aesKey,
+    toArrayBuffer(ciphertext)
+  );
+
+  return JSON.parse(decodeText(decrypted)) as JsonWebKey;
 }
 
-export async function buildEncryptedMessageEnvelopes({
-  conversationUserIds,
+// ─── E2EE Message Cryptography ──────────────────────────────────────────────
+export async function generateConversationKey() {
+  const key = await crypto.subtle.generateKey(
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["encrypt", "decrypt"]
+  );
+  const jwk = await crypto.subtle.exportKey("jwk", key);
+  return { key, jwk };
+}
+
+export async function encryptChatMessage({
+  conversationId,
+  epochNumber,
   body,
 }: {
-  conversationUserIds: string[];
+  conversationId: string;
+  epochNumber: number;
   body: string;
-}): Promise<ChatEnvelope[]> {
-  await ensureChatDeviceRegistered();
-  const payload: PlainMessage = { body, created_at: new Date().toISOString() };
-  const envelopes: ChatEnvelope[] = [];
+}) {
+  const vault = getStoredVault();
+  if (!vault) throw new Error("Key vault not unlocked.");
+  const stored = vault.conversation_keys[conversationId]?.[epochNumber];
+  if (!stored) throw new Error("No conversation key found for this epoch.");
 
-  for (const userId of conversationUserIds) {
-    const bundle = await fetchChatKeyBundle(userId);
-    if (!bundle.devices.length) {
-      throw new Error("This user does not have an active chat device yet.");
-    }
-    for (const item of bundle.devices) {
-      const publicKey = JSON.parse(item.device.signed_prekey_public) as JsonWebKey;
-      envelopes.push({
-        target_user_id: userId,
-        target_device_id: item.device.device_id,
-        encrypted_payload: await encryptForDevice(publicKey, payload),
-        encryption_version: ENCRYPTION_VERSION,
-        key_id: item.device.signed_prekey_id,
-        session_id: `${userId}:${item.device.device_id}`,
-      });
-    }
-  }
+  const key = await crypto.subtle.importKey(
+    "jwk",
+    stored.key_jwk,
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["encrypt"]
+  );
 
-  return envelopes;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const plaintext = encodeText(JSON.stringify({ body, created_at: new Date().toISOString() }));
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: toArrayBuffer(iv) },
+    key,
+    toArrayBuffer(plaintext)
+  );
+
+  return {
+    ciphertext: bytesToBase64(ciphertext),
+    nonce_or_iv: bytesToBase64(iv),
+    encryption_version: "webcrypto-v2",
+    key_epoch_id: stored.epoch_id,
+  };
 }
 
 export async function decryptChatMessage(message: ChatMessage): Promise<ChatMessage> {
-  const device = getStoredDevice();
-  if (!device) return { ...message, decrypt_failed: true };
-  const envelope = message.envelopes.find((item) => item.target_device_id === device.device_id);
-  if (!envelope && message.envelopes.length > 0) return { ...message, missing_envelope: true };
-  if (!envelope || message.deleted_for_everyone_at) return message;
+  if (!message.ciphertext || message.deleted_for_everyone_at) return message;
+  const vault = getStoredVault();
+  if (!vault) return { ...message, decrypt_failed: true };
+
+  const epochId = message.key_epoch_id || message.group_epoch_id;
+  let matchingKeyJwk: JsonWebKey | null = null;
+  const epochs = vault.conversation_keys[message.conversation_id] || {};
+  for (const stored of Object.values(epochs)) {
+    if (stored.epoch_id === epochId) {
+      matchingKeyJwk = stored.key_jwk;
+      break;
+    }
+  }
+
+  if (!matchingKeyJwk) {
+    return { ...message, decrypt_failed: false, missing_envelope: true };
+  }
+
   try {
-    const payload = await decryptEnvelopePayload(envelope.encrypted_payload, device);
-    return { ...message, decrypted_body: payload.body, decrypt_failed: false, missing_envelope: false };
+    const key = await crypto.subtle.importKey(
+      "jwk",
+      matchingKeyJwk,
+      { name: "AES-GCM", length: 256 },
+      true,
+      ["decrypt"]
+    );
+    const iv = base64ToBytes(message.nonce_or_iv || "");
+    const ciphertext = base64ToBytes(message.ciphertext);
+    const plaintext = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: toArrayBuffer(iv) },
+      key,
+      toArrayBuffer(ciphertext)
+    );
+    const parsed = JSON.parse(decodeText(plaintext)) as { body: string };
+    return {
+      ...message,
+      decrypted_body: parsed.body,
+      decrypt_failed: false,
+      missing_envelope: false,
+    };
   } catch {
     return { ...message, decrypt_failed: true };
   }
 }
 
+export async function decryptGroupMessage(message: ChatMessage): Promise<ChatMessage> {
+  return decryptChatMessage(message);
+}
+
+// ─── Attachments ──────────────────────────────────────────────────────────
 export async function encryptAttachment(file: File) {
   const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -246,303 +430,301 @@ export async function encryptAttachment(file: File) {
   };
 }
 
+export async function encryptGroupAttachment(file: File) {
+  return encryptAttachment(file);
+}
+
+// ─── Backup Setup, Unlock & Reset ──────────────────────────────────────────
+export async function setupEncryptedChat(pin: string): Promise<string> {
+  const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+  const saltBase64 = bytesToBase64(saltBytes);
+
+  const { backupKey, authKeyHash } = await deriveE2EEKeys(pin, saltBase64);
+  const vault = await createKeyVault();
+  vault.backup_salt = saltBase64;
+
+  const encrypted = await encryptKeyVault(vault, backupKey);
+  await setupChatCrypto({
+    cryptoVersion: 2,
+    accountPublicWrappingKey: vault.account_public_wrapping_key,
+    kdfAlgorithm: "pbkdf2",
+    kdfParams: { iterations: 100000 },
+    backupSalt: saltBase64,
+    encryptedVault: encrypted.ciphertext,
+    nonceOrIv: encrypted.nonceOrIv,
+    authKeyHash,
+  });
+
+  setStoredVault(vault);
+  setSessionRecoveryKey(pin);
+  return pin;
+}
+
+export async function restoreEncryptedChat(pin: string, userId: string): Promise<boolean> {
+  try {
+    const profile = await fetchUserCryptoProfile(userId);
+    const salt = profile.backup_salt;
+
+    const { backupKey, authKeyHash } = await deriveE2EEKeys(pin, salt);
+    const backup = await getChatCryptoBackup(authKeyHash);
+    const vault = await decryptKeyVault(backup.encrypted_vault_blob, backupKey, backup.nonce_or_iv);
+
+    vault.backup_salt = salt;
+
+    setStoredVault(vault);
+    setSessionRecoveryKey(pin);
+    return true;
+  } catch (error) {
+    console.error("Failed to restore E2EE chat", error);
+    throw error;
+  }
+}
+
+export async function resetEncryptedChat(pin: string): Promise<string> {
+  const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+  const saltBase64 = bytesToBase64(saltBytes);
+
+  const { backupKey, authKeyHash } = await deriveE2EEKeys(pin, saltBase64);
+  const vault = await createKeyVault();
+  vault.backup_salt = saltBase64;
+
+  const encrypted = await encryptKeyVault(vault, backupKey);
+  await resetChatCrypto({
+    cryptoVersion: 2,
+    accountPublicWrappingKey: vault.account_public_wrapping_key,
+    kdfAlgorithm: "pbkdf2",
+    kdfParams: { iterations: 100000 },
+    backupSalt: saltBase64,
+    encryptedVault: encrypted.ciphertext,
+    nonceOrIv: encrypted.nonceOrIv,
+    authKeyHash,
+  });
+
+  setStoredVault(vault);
+  setSessionRecoveryKey(pin);
+  return pin;
+}
+
+export async function backupVaultIfSessionActive() {
+  const vault = getStoredVault();
+  const pin = getSessionRecoveryKey();
+  if (!vault || !pin) return;
+
+  try {
+    let salt = vault.backup_salt;
+    if (!salt) {
+      const backup = await getChatCryptoBackup();
+      salt = backup.salt;
+      vault.backup_salt = salt;
+      setStoredVault(vault);
+    }
+    if (!salt) return;
+
+    const { backupKey, authKeyHash } = await deriveE2EEKeys(pin, salt);
+    const backup = await getChatCryptoBackup(authKeyHash);
+    const encrypted = await encryptKeyVault(vault, backupKey);
+    await updateChatCryptoBackup({
+      encryptedVault: encrypted.ciphertext,
+      nonceOrIv: encrypted.nonceOrIv,
+      backupVersion: backup.backup_version,
+    });
+  } catch (err) {
+    console.warn("Background backup update failed", err);
+  }
+}
+
+// ─── Key Sharing & Sync ───────────────────────────────────────────────────
+export async function shareConversationKey(conversationId: string, epochNumber: number, participantUserIds: string[]) {
+  const vault = getStoredVault();
+  if (!vault) throw new Error("Vault is locked.");
+
+  let stored = vault.conversation_keys[conversationId]?.[epochNumber];
+  if (!stored) {
+    const { jwk } = await generateConversationKey();
+    const epochId = crypto.randomUUID();
+    if (!vault.conversation_keys[conversationId]) vault.conversation_keys[conversationId] = {};
+    vault.conversation_keys[conversationId][epochNumber] = {
+      key_jwk: jwk,
+      epoch_id: epochId,
+    };
+    stored = vault.conversation_keys[conversationId][epochNumber];
+    vault.updated_at = new Date().toISOString();
+    setStoredVault(vault);
+  }
+
+  // Fetch and encrypt for all participants in parallel (no sequential HTTP calls)
+  const shareResults = await Promise.all(
+    participantUserIds.map(async (userId) => {
+      try {
+        const profile = await fetchUserCryptoProfileCached(userId);
+        const wrapped = await encryptConversationKeyForUser(stored.key_jwk, profile.account_public_wrapping_key);
+        return {
+          recipient_user_id: userId,
+          encrypted_conversation_key: wrapped.encrypted_conversation_key,
+          nonce_or_iv: wrapped.nonce_or_iv,
+          epoch_number: epochNumber,
+          reason: epochNumber === 1 ? "conversation_created" : "member_added",
+        };
+      } catch {
+        // User hasn't set up E2EE yet — skip
+        return null;
+      }
+    })
+  );
+  const shares = shareResults.filter(Boolean) as NonNullable<(typeof shareResults)[number]>[];
+
+  if (shares.length > 0) {
+    const result = await createConversationKeyShares(conversationId, shares);
+    // CRITICAL: Backend assigns its own UUID to the epoch. We must update the vault
+    // with the backend's epoch_id so that messages use the correct UUID.
+    // Without this, the sender uses a frontend-generated UUID that the recipient
+    // never sees (they get the backend UUID from key share records) → missing_envelope.
+    const backendEpochId = result?.keyShares?.[0]?.epoch_id;
+    const freshVault = getStoredVault();
+    if (backendEpochId && freshVault?.conversation_keys[conversationId]?.[epochNumber]) {
+      freshVault.conversation_keys[conversationId][epochNumber].epoch_id = backendEpochId;
+      freshVault.updated_at = new Date().toISOString();
+      setStoredVault(freshVault);
+      stored = freshVault.conversation_keys[conversationId][epochNumber];
+    }
+  }
+
+  // Fire-and-forget: vault backup is important but should NEVER block a message send.
+  // PBKDF2 with 100k iterations takes 400-800ms — unacceptable in the hot path.
+  void backupVaultIfSessionActive();
+  return stored;
+}
+
+export async function syncConversationKeys(conversationId: string, participantUserIds: string[] = []): Promise<number> {
+  const vault = getStoredVault();
+  if (!vault) return 0;
+
+  // Skip server round-trip if we already have a key and synced recently.
+  // Always fetch when the vault has no key at all for this conversation.
+  const hasLocalKey =
+    vault.conversation_keys[conversationId] &&
+    Object.keys(vault.conversation_keys[conversationId]).length > 0;
+  const lastSync = _keyShareSyncTs.get(conversationId) ?? 0;
+  const syncStale = Date.now() - lastSync > KEY_SHARE_SYNC_TTL_MS;
+  const shouldFetch = !hasLocalKey || syncStale;
+
+  let shares: any[] = [];
+  if (shouldFetch) {
+    try {
+      const data = await fetchConversationKeyShares(conversationId);
+      shares = data.keyShares || [];
+      _keyShareSyncTs.set(conversationId, Date.now());
+    } catch {
+      // non-fatal
+    }
+  }
+
+  let vaultChanged = false;
+  if (!vault.conversation_keys[conversationId]) {
+    vault.conversation_keys[conversationId] = {};
+  }
+
+  for (const share of shares) {
+    const epochId = share.epoch_id;
+    const existing = Object.values(vault.conversation_keys[conversationId]).find((k) => k.epoch_id === epochId);
+    if (!existing) {
+      try {
+        const decryptedKeyJwk = await decryptConversationKeyShare(
+          share.encrypted_conversation_key,
+          vault.account_private_wrapping_key
+        );
+        // Backend now returns epoch_number directly on the share object
+        const epochNumber = share.epoch_number || 1;
+        vault.conversation_keys[conversationId][epochNumber] = {
+          key_jwk: decryptedKeyJwk,
+          epoch_id: epochId,
+        };
+        vaultChanged = true;
+      } catch (err) {
+        console.error("Failed to decrypt share", err);
+      }
+    }
+  }
+
+  const hasEpoch1 = Boolean(vault.conversation_keys[conversationId][1]);
+  if (!hasEpoch1 && participantUserIds.length > 0) {
+    await shareConversationKey(conversationId, 1, participantUserIds);
+    vaultChanged = true;
+  }
+
+  if (vaultChanged) {
+    vault.updated_at = new Date().toISOString();
+    setStoredVault(vault);
+    // Fire-and-forget: don't block the message decrypt path on a slow backup
+    void backupVaultIfSessionActive();
+  }
+
+  const epochs = Object.keys(vault.conversation_keys[conversationId]).map(Number);
+  return epochs.length > 0 ? Math.max(...epochs) : 1;
+}
+
+// ─── Legacy Device Stubs to prevent build errors ─────────────────────────────
+export async function ensureChatDeviceRegistered() {
+  const vault = getStoredVault();
+  if (!vault) {
+    throw new Error("Vault is locked. Enter your recovery key to unlock.");
+  }
+  return vault;
+}
+
 export function getCurrentChatDeviceId() {
-  return getStoredDevice()?.device_id || null;
+  return "matrix-recovery-device";
 }
 
-// ─── Group sender-key E2EE ───────────────────────────────────────────────────
-// Each group epoch has a symmetric AES-GCM "group session key" generated client-side.
-// The key is wrapped (per-device ECDH+AES-GCM) for each active member device and stored
-// server-side in chat_group_key_envelopes. Group messages are encrypted ONCE with the
-// current epoch key (store-once sender-key design). On membership change the epoch
-// rotates and the old key never reaches removed/left devices, so they cannot decrypt
-// future messages. New members only get the new epoch key, so they cannot decrypt old
-// history unless keys are explicitly re-wrapped for them.
-
-const GROUP_KEY_STORAGE = "logoutdev.chat.group-keys.v1";
-const GROUP_ENCRYPTION_VERSION = "group-senderkey-v1";
-
-interface StoredGroupEpochKey {
-  conversation_id: string;
-  epoch_number: number;
-  epoch_id: string;
-  key_jwk: JsonWebKey;
-  created_at: string;
+export async function buildEncryptedMessageEnvelopes({
+  conversationUserIds,
+  body,
+}: {
+  conversationUserIds: string[];
+  body: string;
+}) {
+  throw new Error("buildEncryptedMessageEnvelopes is deprecated.");
 }
 
-interface GroupKeyStore {
-  [conversationId: string]: {
-    [epochNumber: number]: StoredGroupEpochKey;
-  };
-}
-
-function readGroupKeyStore(): GroupKeyStore {
-  if (typeof window === "undefined") return {};
-  const raw = localStorage.getItem(GROUP_KEY_STORAGE);
-  if (!raw) return {};
-  try {
-    return JSON.parse(raw) as GroupKeyStore;
-  } catch {
-    return {};
-  }
-}
-
-function writeGroupKeyStore(store: GroupKeyStore) {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(GROUP_KEY_STORAGE, JSON.stringify(store));
-  } catch {
-    // storage may be full; fall back to in-memory only
-  }
-}
-
-function getGroupEpochKey(conversationId: string, epochNumber: number): StoredGroupEpochKey | null {
-  const store = readGroupKeyStore();
-  return store[conversationId]?.[epochNumber] || null;
-}
-
-function setGroupEpochKey(conversationId: string, epochNumber: number, epochId: string, key: CryptoKey, jwk: JsonWebKey) {
-  const store = readGroupKeyStore();
-  if (!store[conversationId]) store[conversationId] = {};
-  store[conversationId][epochNumber] = {
-    conversation_id: conversationId,
-    epoch_number: epochNumber,
-    epoch_id: epochId,
-    key_jwk: jwk,
-    created_at: new Date().toISOString(),
-  };
-  writeGroupKeyStore(store);
-}
-
-async function importGroupKey(jwk: JsonWebKey): Promise<CryptoKey> {
-  return crypto.subtle.importKey("jwk", jwk, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
-}
-
-export async function generateGroupSessionKey(): Promise<{ key: CryptoKey; jwk: JsonWebKey }> {
-  const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
-  const jwk = await crypto.subtle.exportKey("jwk", key);
-  return { key, jwk };
-}
-
-export async function storeGroupEpochKeyFromJwk(
-  conversationId: string,
-  epochNumber: number,
-  epochId: string,
-  jwk: JsonWebKey
-) {
-  const key = await importGroupKey(jwk);
-  setGroupEpochKey(conversationId, epochNumber, epochId, key, jwk);
-  return key;
-}
-
-export interface WrappedGroupKey {
-  target_user_id: string;
-  target_device_id: string;
-  encrypted_key_payload: string;
-  encryption_version: string;
-}
-
-/**
- * Wraps a group session key for a list of member devices using the existing
- * per-device ECDH (signed prekey) envelope flow. The server stores only the
- * opaque wrapped payloads and never sees the group key.
- */
 export async function wrapGroupKeyForMembers(
   conversationId: string,
   epochNumber: number,
   memberUserIds: string[]
-): Promise<{ envelopes: WrappedGroupKey[]; epochKeyJwk: JsonWebKey }> {
-  const device = getStoredDevice();
-  if (!device) throw new Error("Chat device not initialized.");
-  const { jwk } = await generateGroupSessionKey();
-  const envelopes: WrappedGroupKey[] = [];
-
-  for (const userId of memberUserIds) {
-    const bundle = await fetchChatKeyBundle(userId);
-    if (!bundle.devices.length) {
-      throw new Error(`User ${userId} has no active chat device yet.`);
-    }
-    for (const item of bundle.devices) {
-      const publicKey = JSON.parse(item.device.signed_prekey_public) as JsonWebKey;
-      const wrapped = await encryptForDevice(publicKey, {
-        conversation_id: conversationId,
-        epoch_number: epochNumber,
-        group_key: jwk,
-        created_at: new Date().toISOString(),
-      });
-      envelopes.push({
-        target_user_id: userId,
-        target_device_id: item.device.device_id,
-        encrypted_key_payload: wrapped,
-        encryption_version: "webcrypto-v1",
-      });
-    }
-  }
-
-  return { envelopes, epochKeyJwk: jwk };
-}
-
-async function decryptGroupKeyEnvelope(envelope: ChatGroupKeyEnvelope): Promise<{ conversation_id: string; epoch_number: number; group_key: JsonWebKey; epoch_id: string }> {
-  const device = getStoredDevice();
-  if (!device) throw new Error("Chat device not initialized.");
-  const payload = await decryptEnvelopePayload(envelope.encrypted_key_payload, device);
+): Promise<any> {
+  const realEpoch = epochNumber === 0 ? 1 : epochNumber;
+  const stored = await shareConversationKey(conversationId, realEpoch, memberUserIds);
   return {
-    conversation_id: payload.conversation_id as string,
-    epoch_number: payload.epoch_number as number,
-    group_key: payload.group_key as JsonWebKey,
-    epoch_id: envelope.epoch_id,
+    envelopes: [],
+    epochKeyJwk: stored.key_jwk,
   };
 }
 
-/**
- * Fetches and consumes unconsumed group key envelopes for this device, importing
- * each decrypted group session key into local storage. Returns the latest epoch
- * number known locally for this conversation.
- */
 export async function syncGroupKeys(conversationId: string): Promise<number> {
-  const device = getStoredDevice();
-  if (!device) return 0;
-
-  const { envelopes } = await listUnconsumedGroupKeyEnvelopes(conversationId, [device.device_id]);
-  let latestEpoch = 0;
-  const consumedIds: string[] = [];
-
-  for (const envelope of envelopes) {
-    try {
-      const decrypted = await decryptGroupKeyEnvelope(envelope);
-      const key = await importGroupKey(decrypted.group_key);
-      setGroupEpochKey(conversationId, decrypted.epoch_number, decrypted.epoch_id, key, decrypted.group_key);
-      if (decrypted.epoch_number > latestEpoch) latestEpoch = decrypted.epoch_number;
-      consumedIds.push(envelope.id);
-    } catch {
-      // skip undecryptable envelope rather than blocking sync
-    }
-  }
-
-  if (consumedIds.length) {
-    await consumeGroupKeyEnvelopes(consumedIds).catch(() => undefined);
-  }
-
-  // Refresh canonical epoch list so client knows the server's current epoch even
-  // when the latest envelope hasn't arrived for this device.
-  try {
-    const { epochs } = await listGroupKeyEpochs(conversationId);
-    if (epochs.length) {
-      const maxServerEpoch = Math.max(...epochs.map((epoch) => epoch.epoch_number));
-      if (maxServerEpoch > latestEpoch) latestEpoch = maxServerEpoch;
-    }
-  } catch {
-    // non-fatal
-  }
-
-  return latestEpoch;
+  return syncConversationKeys(conversationId, []);
 }
 
-export function getStoredGroupEpochKey(conversationId: string, epochNumber: number): StoredGroupEpochKey | null {
-  return getGroupEpochKey(conversationId, epochNumber);
+export function getStoredGroupEpochKey(conversationId: string, epochNumber: number) {
+  const vault = getStoredVault();
+  if (!vault) return null;
+  const stored = vault.conversation_keys[conversationId]?.[epochNumber];
+  return stored ? { conversation_id: conversationId, epoch_number: epochNumber, epoch_id: stored.epoch_id, key_jwk: stored.key_jwk } : null;
 }
 
-export async function loadGroupEpochKey(conversationId: string, epochNumber: number): Promise<CryptoKey | null> {
-  const stored = getGroupEpochKey(conversationId, epochNumber);
+export async function loadGroupEpochKey(conversationId: string, epochNumber: number) {
+  const vault = getStoredVault();
+  if (!vault) return null;
+  const stored = vault.conversation_keys[conversationId]?.[epochNumber];
   if (!stored) return null;
-  try {
-    return await importGroupKey(stored.key_jwk);
-  } catch {
-    return null;
-  }
+  return crypto.subtle.importKey("jwk", stored.key_jwk, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
 }
 
-export async function encryptGroupMessage(
-  conversationId: string,
-  epochId: string,
-  epochNumber: number,
-  body: string
-): Promise<{ ciphertext: string; iv: string; encryption_version: string } | null> {
-  const key = await loadGroupEpochKey(conversationId, epochNumber);
-  if (!key) return null;
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encoded = encodeText(JSON.stringify({ body, created_at: new Date().toISOString() }));
-  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv: toArrayBuffer(iv) }, key, toArrayBuffer(encoded));
-  return {
-    ciphertext: bytesToBase64(ciphertext),
-    iv: bytesToBase64(iv),
-    encryption_version: GROUP_ENCRYPTION_VERSION,
-  };
-}
-
-async function decryptGroupPayload(payload: { encrypted_payload: string; nonce_or_iv: string | null }, conversationId: string, epochNumber: number): Promise<string | null> {
-  const key = await loadGroupEpochKey(conversationId, epochNumber);
-  if (!key) return null;
-  try {
-    const iv = base64ToBytes(payload.nonce_or_iv || "");
-    const ciphertext = base64ToBytes(payload.encrypted_payload);
-    const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv: toArrayBuffer(iv) }, key, toArrayBuffer(ciphertext));
-    const parsed = JSON.parse(decodeText(plaintext)) as { body: string };
-    return parsed.body;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Decrypts a group message. Returns the message with decrypted_body set, or with
- * decrypt_failed / key_missing flags when the local epoch key is unavailable
- * (e.g. message belongs to an epoch before the user joined).
- */
-export async function decryptGroupMessage(message: ChatMessage): Promise<ChatMessage> {
-  if (!message.group_payload || message.deleted_for_everyone_at) return message;
-  const stored = readGroupKeyStore();
-  const conversationEpochs = stored[message.conversation_id] || {};
-  let matchingEpoch: StoredGroupEpochKey | null = null;
-  for (const candidate of Object.values(conversationEpochs)) {
-    if (candidate.epoch_id === message.group_payload?.group_epoch_id) {
-      matchingEpoch = candidate;
-      break;
-    }
-  }
-  if (!matchingEpoch) {
-    return { ...message, decrypt_failed: false, missing_envelope: true };
-  }
-  const body = await decryptGroupPayload(message.group_payload, message.conversation_id, matchingEpoch.epoch_number);
-  if (body === null) {
-    return { ...message, decrypt_failed: true };
-  }
-  return { ...message, decrypted_body: body, decrypt_failed: false, missing_envelope: false };
-}
-
-export async function buildGroupMessagePayload(input: {
-  conversationId: string;
-  epochId: string;
-  epochNumber: number;
-  body: string;
-}): Promise<{
-  group_encrypted_payload: string;
-  group_nonce_or_iv: string;
-  encryption_version: string;
-  group_epoch_id: string;
-  group_epoch_number: number;
-} | null> {
-  const encrypted = await encryptGroupMessage(input.conversationId, input.epochId, input.epochNumber, input.body);
-  if (!encrypted) return null;
-  return {
-    group_encrypted_payload: encrypted.ciphertext,
-    group_nonce_or_iv: encrypted.iv,
-    encryption_version: encrypted.encryption_version,
-    group_epoch_id: input.epochId,
-    group_epoch_number: input.epochNumber,
-  };
-}
-
-export async function encryptGroupAttachment(file: File) {
-  // Group attachments reuse the per-file AES-GCM encryption used by direct chat.
-  // The file key travels inside the group-encrypted message body, so only members
-  // with the current epoch key can decrypt attachment metadata. New members cannot
-  // decrypt old attachments unless old epoch keys are explicitly re-wrapped for them.
-  return encryptAttachment(file);
+export async function buildGroupMessagePayload() {
+  throw new Error("buildGroupMessagePayload is deprecated.");
 }
 
 export function forgetGroupKeys(conversationId: string) {
-  const store = readGroupKeyStore();
-  delete store[conversationId];
-  writeGroupKeyStore(store);
+  const vault = getStoredVault();
+  if (!vault) return;
+  delete vault.conversation_keys[conversationId];
+  setStoredVault(vault);
 }

@@ -25,7 +25,7 @@ const TABS: Array<{ key: NotificationTab; label: string }> = [
 
 export default function NotificationsPage() {
   const [activeTab, setActiveTab] = useState<NotificationTab>("needs-action");
-  const { summary } = useNotificationSummary(true);
+  const { summary } = useNotificationSummary();
   const {
     items,
     suggestedActions,

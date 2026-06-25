@@ -55,7 +55,19 @@ export async function updateChatSettings(settings: Partial<ChatSettings>): Promi
 }
 
 export async function registerChatDevice(payload: Record<string, unknown>) {
-  const res = await fetch(`${API_BASE_URL}/api/chat/devices/register`, {
+  throw new Error("registerChatDevice is deprecated.");
+}
+
+export async function uploadChatOneTimePrekeys(deviceId: string, prekeys: Array<{ key_id: string; public_key: string }>) {
+  throw new Error("uploadChatOneTimePrekeys is deprecated.");
+}
+
+export async function fetchChatKeyBundle(userId: string) {
+  throw new Error("fetchChatKeyBundle is deprecated.");
+}
+
+export async function setupChatCrypto(payload: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/api/chat/crypto/setup`, {
     method: "POST",
     headers: jsonHeaders(),
     body: JSON.stringify(payload),
@@ -63,32 +75,53 @@ export async function registerChatDevice(payload: Record<string, unknown>) {
   return handleResponse(res);
 }
 
-export async function uploadChatOneTimePrekeys(deviceId: string, prekeys: Array<{ key_id: string; public_key: string }>) {
-  const res = await fetch(`${API_BASE_URL}/api/chat/devices/${encodeURIComponent(deviceId)}/one-time-prekeys`, {
-    method: "POST",
-    headers: jsonHeaders(),
-    body: JSON.stringify({ prekeys }),
+export async function getChatCryptoBackup(authKeyHash?: string): Promise<any> {
+  const qs = authKeyHash ? `?auth_key_hash=${encodeURIComponent(authKeyHash)}` : "";
+  const res = await fetch(`${API_BASE_URL}/api/chat/crypto/backup${qs}`, {
+    headers: getAuthHeaders(),
   });
   return handleResponse(res);
 }
 
-export async function fetchChatKeyBundle(userId: string) {
-  const res = await fetch(`${API_BASE_URL}/api/chat/users/${encodeURIComponent(userId)}/key-bundle`, {
+export async function updateChatCryptoBackup(payload: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/api/chat/crypto/backup`, {
+    method: "PUT",
+    headers: jsonHeaders(),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}
+
+export async function fetchUserCryptoProfile(userId: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/api/chat/crypto/users/${encodeURIComponent(userId)}/profile`, {
     headers: getAuthHeaders(),
   });
-  return handleResponse<{
-    user_id: string;
-    devices: Array<{
-      device: {
-        device_id: string;
-        identity_public_key: string;
-        signed_prekey_public: string;
-        signed_prekey_signature: string;
-        signed_prekey_id: string;
-      };
-      one_time_prekey: { key_id: string; public_key: string } | null;
-    }>;
-  }>(res);
+  return handleResponse(res);
+}
+
+export async function resetChatCrypto(payload: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/api/chat/crypto/reset`, {
+    method: "POST",
+    headers: jsonHeaders(),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+}
+
+export async function createConversationKeyShares(conversationId: string, keyShares: Array<Record<string, unknown>>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/api/chat/conversations/${encodeURIComponent(conversationId)}/key-shares`, {
+    method: "POST",
+    headers: jsonHeaders(),
+    body: JSON.stringify({ keyShares }),
+  });
+  return handleResponse(res);
+}
+
+export async function fetchConversationKeyShares(conversationId: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/api/chat/conversations/${encodeURIComponent(conversationId)}/key-shares`, {
+    headers: getAuthHeaders(),
+  });
+  return handleResponse(res);
 }
 
 export async function createDirectConversation(userId: string): Promise<{ conversation: ChatConversation }> {

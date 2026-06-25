@@ -3,9 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   syncGroupKeys,
-  wrapGroupKeyForMembers,
-  storeGroupEpochKeyFromJwk,
-  buildGroupMessagePayload,
+  shareConversationKey,
+  encryptChatMessage,
   decryptGroupMessage,
   getStoredGroupEpochKey,
 } from "@/lib/chatCrypto";
@@ -102,33 +101,30 @@ export function useGroupChat(conversationId: string | null) {
   const rotateAndAdd = useCallback(
     async (newUserIds: string[]) => {
       if (!conversationId) throw new Error("No group selected.");
-      // Existing active members plus new members = full target set.
       const existingIds = members.map((member) => member.user_id);
       const allTargets = Array.from(new Set([...existingIds, ...newUserIds]));
-      // We don't know the server-assigned epoch_number yet; wrapping the payload
-      // uses 0 as placeholder. The client later syncs the real envelope with the
-      // DB-assigned epoch_id/epoch_number and matches by epoch_id during decrypt.
-      const { envelopes, epochKeyJwk } = await wrapGroupKeyForMembers(conversationId, 0, allTargets);
-      void epochKeyJwk; // fetched back via sync, no local storage needed pre-epoch-id
-      const result = await addGroupMembers(conversationId, { member_user_ids: newUserIds, epoch_envelopes: envelopes });
+      const nextEpoch = (currentEpoch?.epoch_number || 1) + 1;
+      await shareConversationKey(conversationId, nextEpoch, allTargets);
+      const result = await addGroupMembers(conversationId, { member_user_ids: newUserIds, epoch_envelopes: [] });
       await sync(conversationId);
       await reloadMembers();
       return result;
     },
-    [conversationId, members, sync, reloadMembers]
+    [conversationId, members, currentEpoch, sync, reloadMembers]
   );
 
   const rotateAndRemove = useCallback(
     async (userId: string) => {
       if (!conversationId) throw new Error("No group selected.");
       const remaining = members.filter((member) => member.user_id !== userId).map((member) => member.user_id);
-      const { envelopes } = await wrapGroupKeyForMembers(conversationId, 0, remaining);
-      const result = await removeGroupMember(conversationId, userId, envelopes);
+      const nextEpoch = (currentEpoch?.epoch_number || 1) + 1;
+      await shareConversationKey(conversationId, nextEpoch, remaining);
+      const result = await removeGroupMember(conversationId, userId, []);
       await sync(conversationId);
       await reloadMembers();
       return result;
     },
-    [conversationId, members, sync, reloadMembers]
+    [conversationId, members, currentEpoch, sync, reloadMembers]
   );
 
   const rotateAndLeave = useCallback(
@@ -137,32 +133,30 @@ export function useGroupChat(conversationId: string | null) {
       const remaining = members
         .filter((member) => member.user_id !== currentUserId)
         .map((member) => member.user_id);
-      const { envelopes } = await wrapGroupKeyForMembers(conversationId, 0, remaining);
-      const result = await leaveGroup(conversationId, envelopes);
+      const nextEpoch = (currentEpoch?.epoch_number || 1) + 1;
+      await shareConversationKey(conversationId, nextEpoch, remaining);
+      const result = await leaveGroup(conversationId, []);
       return result;
     },
-    [conversationId, members]
+    [conversationId, members, currentEpoch]
   );
 
   const sendGroupMessage = useCallback(
     async (body: string, clientMessageId: string) => {
       if (!conversationId || !currentEpoch) throw new Error("Group key not synced. Try again.");
       try {
-        const payload = await buildGroupMessagePayload({
+        const encrypted = await encryptChatMessage({
           conversationId,
-          epochId: currentEpoch.epoch_id,
           epochNumber: currentEpoch.epoch_number,
           body,
         });
-        if (!payload) throw new Error("Could not encrypt group message. Sync the latest group key.");
         const res = await sendGroupMessageApi(conversationId, {
           client_message_id: clientMessageId,
           message_type: "text",
-          encryption_version: payload.encryption_version,
-          group_epoch_id: payload.group_epoch_id,
-          group_epoch_number: payload.group_epoch_number,
-          group_encrypted_payload: payload.group_encrypted_payload,
-          group_nonce_or_iv: payload.group_nonce_or_iv,
+          encryption_version: encrypted.encryption_version,
+          ciphertext: encrypted.ciphertext,
+          nonce_or_iv: encrypted.nonce_or_iv,
+          key_epoch_id: encrypted.key_epoch_id,
         });
         return res.message;
       } catch (error) {
@@ -186,6 +180,5 @@ export function useGroupChat(conversationId: string | null) {
     rotateAndLeave,
     sendGroupMessage,
     decryptGroupMessage,
-    storeLocalEpochKey: storeGroupEpochKeyFromJwk,
   };
 }

@@ -155,21 +155,11 @@ export async function listUnconsumedGroupKeyEnvelopes(
   conversationId: string,
   deviceIds: string[]
 ): Promise<{ envelopes: ChatGroupKeyEnvelope[] }> {
-  const res = await fetch(`${API_BASE_URL}/api/chat/groups/${encodeURIComponent(conversationId)}/key-envelopes/unconsumed`, {
-    method: "POST",
-    headers: jsonHeaders(),
-    body: JSON.stringify({ device_ids: deviceIds }),
-  });
-  return handleResponse(res);
+  throw new Error("listUnconsumedGroupKeyEnvelopes is deprecated.");
 }
 
 export async function consumeGroupKeyEnvelopes(envelopeIds: string[]) {
-  const res = await fetch(`${API_BASE_URL}/api/chat/groups/key-envelopes/consume`, {
-    method: "POST",
-    headers: jsonHeaders(),
-    body: JSON.stringify({ envelope_ids: envelopeIds }),
-  });
-  return handleResponse(res);
+  throw new Error("consumeGroupKeyEnvelopes is deprecated.");
 }
 
 export async function createGroupInvites(conversationId: string, userIds: string[]): Promise<{ invites: ChatGroupInvite[] }> {

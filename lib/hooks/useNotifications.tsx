@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import type {
   NotificationItem,
@@ -13,6 +13,7 @@ import {
   readAllNotifications,
   readNotification,
 } from "../api";
+import { useAuth } from "./useAuth";
 
 export type NotificationTab = "needs-action" | "unread" | "all";
 
@@ -24,17 +25,26 @@ export function broadcastNotificationChange() {
   }
 }
 
-export function useNotificationSummary(enabled = true) {
+interface NotificationContextValue {
+  summary: NotificationSummary;
+  loading: boolean;
+  refresh: () => Promise<void>;
+}
+
+const NotificationContext = createContext<NotificationContextValue | null>(null);
+
+export function NotificationProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   const pathname = usePathname();
   const [summary, setSummary] = useState<NotificationSummary>({
     unread_count: 0,
     needs_action_count: 0,
     recent: [],
   });
-  const [loading, setLoading] = useState(Boolean(enabled));
+  const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    if (!enabled) {
+    if (!user) {
       setSummary({ unread_count: 0, needs_action_count: 0, recent: [] });
       setLoading(false);
       return;
@@ -49,29 +59,35 @@ export function useNotificationSummary(enabled = true) {
     } finally {
       setLoading(false);
     }
-  }, [enabled]);
+  }, [user]);
 
+  // Initial load and on pathname change
   useEffect(() => {
-    refresh();
-  }, [pathname, refresh]);
+    if (user) {
+      void refresh();
+    }
+  }, [pathname, user, refresh]);
 
+  // Document focus, visibility change, background polling interval
   useEffect(() => {
-    if (!enabled) return;
+    if (!user) return;
 
     const handleFocus = () => {
-      refresh();
+      void refresh();
     };
 
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
-        refresh();
+        void refresh();
       }
     };
 
     window.addEventListener("focus", handleFocus);
     window.addEventListener(REFRESH_EVENT, handleFocus);
     document.addEventListener("visibilitychange", handleVisibility);
-    const interval = window.setInterval(refresh, 60000);
+    const interval = window.setInterval(() => {
+      void refresh();
+    }, 60000);
 
     return () => {
       window.removeEventListener("focus", handleFocus);
@@ -79,9 +95,21 @@ export function useNotificationSummary(enabled = true) {
       document.removeEventListener("visibilitychange", handleVisibility);
       window.clearInterval(interval);
     };
-  }, [enabled, refresh]);
+  }, [user, refresh]);
 
-  return { summary, loading, refresh };
+  return (
+    <NotificationContext.Provider value={{ summary, loading, refresh }}>
+      {children}
+    </NotificationContext.Provider>
+  );
+}
+
+export function useNotificationSummary() {
+  const context = useContext(NotificationContext);
+  if (!context) {
+    throw new Error("useNotificationSummary must be used within a NotificationProvider");
+  }
+  return context;
 }
 
 export function useNotificationsInbox(tab: NotificationTab) {

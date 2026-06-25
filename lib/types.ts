@@ -14,6 +14,9 @@ export interface User {
   pronouns?: string | null;
   open_to_work?: boolean;
   created_at?: string;
+  chat_encryption_enabled?: boolean;
+  chat_crypto_version?: number;
+  chat_recovery_enabled?: boolean;
 }
 
 export interface ChatUser {
@@ -61,6 +64,10 @@ export interface ChatMessage {
   missing_envelope?: boolean;
   pending?: boolean;
   failed?: boolean;
+  ciphertext?: string | null;
+  nonce_or_iv?: string | null;
+  auth_tag?: string | null;
+  key_epoch_id?: string | null;
 }
 
 export type ChatGroupRole = "owner" | "admin" | "member";
@@ -154,6 +161,71 @@ export interface ChatSettings {
   chat_privacy_setting: "anyone" | "followers" | "following" | "mutuals" | "nobody";
   last_seen_visibility: "anyone" | "mutuals" | "nobody";
   chat_enabled: boolean;
+}
+
+export type CallType = "direct_audio" | "direct_video" | "group_audio" | "group_video";
+export type CallMode = "direct" | "group";
+export type CallStatus = "created" | "ringing" | "accepted" | "ongoing" | "rejected" | "missed" | "busy" | "ended" | "failed" | "cancelled";
+export type CallParticipantStatus = "invited" | "ringing" | "accepted" | "joined" | "rejected" | "missed" | "left" | "removed" | "failed" | "busy";
+
+export interface CallParticipant {
+  id: string;
+  call_id: string;
+  user_id: string;
+  device_id?: string | null;
+  status: CallParticipantStatus;
+  joined_at?: string | null;
+  left_at?: string | null;
+  last_seen_at?: string | null;
+  is_muted: boolean;
+  is_camera_off: boolean;
+  is_screen_sharing: boolean;
+  created_at: string;
+  updated_at: string;
+  user?: ChatUser | null;
+}
+
+export interface CallRecord {
+  id: string;
+  conversation_id: string;
+  call_type: CallType;
+  call_mode: CallMode;
+  status: CallStatus;
+  created_by: string;
+  started_at?: string | null;
+  ended_at?: string | null;
+  duration_seconds?: number | null;
+  end_reason?: string | null;
+  sfu_room_id?: string | null;
+  created_at: string;
+  updated_at: string;
+  created_by_user?: ChatUser | null;
+  participants: CallParticipant[];
+  current_user_participant?: CallParticipant | null;
+}
+
+export interface CallConfig {
+  calls_enabled: boolean;
+  direct_enabled: boolean;
+  group_enabled: boolean;
+  screen_share_enabled: boolean;
+  ring_timeout_seconds: number;
+  connect_timeout_seconds: number;
+  stale_cleanup_seconds: number;
+  reconnect_grace_seconds: number;
+  max_group_participants: number;
+  direct_per_minute: number;
+  direct_per_hour: number;
+  group_create_per_hour: number;
+  rtc: { iceServers: RTCIceServer[] };
+  sfu: { provider: "livekit" | string; configured: boolean; url: string | null };
+}
+
+export interface SfuJoinDetails {
+  provider: "livekit";
+  url: string;
+  room: string;
+  token: string;
 }
 
 export interface FollowListUser {

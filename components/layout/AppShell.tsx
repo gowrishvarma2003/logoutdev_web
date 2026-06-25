@@ -23,7 +23,7 @@ export default function AppShell({ children }: AppShellProps) {
   const { user, isLoaded, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const { summary } = useNotificationSummary(Boolean(user));
+  const { summary } = useNotificationSummary();
   const hideRightPanel = false;
   const isPublicSpaceRoute =
     pathname === "/spaces"

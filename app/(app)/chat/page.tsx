@@ -27,14 +27,19 @@ import {
   respondGroupInvite,
 } from "@/lib/services/groupApi";
 import {
-  buildEncryptedMessageEnvelopes,
   decryptChatMessage,
   decryptGroupMessage,
-  ensureChatDeviceRegistered,
-  wrapGroupKeyForMembers,
+  encryptChatMessage,
+  getStoredVault,
+  setupEncryptedChat,
+  restoreEncryptedChat,
+  resetEncryptedChat,
+  syncConversationKeys,
+  shareConversationKey,
 } from "@/lib/chatCrypto";
 import CreateGroupModal from "@/components/chat/CreateGroupModal";
 import GroupInfoPanel from "@/components/chat/GroupInfoPanel";
+import { CallErrorBoundary, CallProvider, ConversationCallControls, OngoingGroupCallBanner } from "@/components/calls/CallProvider";
 
 type ViewMode = "inbox" | "requests" | "group-invites" | "settings";
 
@@ -115,15 +120,17 @@ function MessageBubble({
   currentUserId,
   senderLabel,
   showSender,
+  onRetry,
 }: {
   message: ChatMessage;
   currentUserId: string;
   senderLabel?: string;
   showSender?: boolean;
+  onRetry?: (message: ChatMessage) => void;
 }) {
   const own = message.sender_id === currentUserId;
   return (
-    <div className={`flex ${own ? "justify-end" : "justify-start"}`}>
+    <div className={`flex ${own ? "justify-end" : "justify-start"} animate-chat-fade-in`}>
       <div className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm shadow-sm ${own ? "bg-white text-zinc-950" : "bg-zinc-900 text-zinc-100"}`}>
         {showSender && !own ? (
           <span className="mb-0.5 block text-[11px] font-semibold text-emerald-300">{senderLabel || "Member"}</span>
@@ -137,7 +144,21 @@ function MessageBubble({
         ) : (
           <span className="whitespace-pre-wrap break-words">{message.decrypted_body || "Encrypted message"}</span>
         )}
-        <span className={`mt-1 block text-[10px] ${own ? "text-zinc-500" : "text-zinc-600"}`}>{formatTime(message.created_at)}</span>
+        <span className={`mt-1 flex items-center justify-end gap-2 text-[10px] ${own ? "text-zinc-500" : "text-zinc-600"}`}>
+          {message.failed ? (
+            <>
+              <span className={own ? "text-rose-700" : "text-rose-400"}>Not sent</span>
+              {onRetry ? (
+                <button type="button" onClick={() => onRetry(message)} className="font-semibold underline underline-offset-2">
+                  Retry
+                </button>
+              ) : null}
+            </>
+          ) : message.pending ? (
+            <span>Sending...</span>
+          ) : null}
+          <span>{formatTime(message.created_at)}</span>
+        </span>
       </div>
     </div>
   );
@@ -237,7 +258,9 @@ function SearchStartPanel({ onStarted }: { onStarted: (conversation: ChatConvers
   async function start(user: ChatUser) {
     try {
       setError("");
-      await ensureChatDeviceRegistered();
+      if (!getStoredVault()) {
+        throw new Error("Vault is locked. Enter your recovery key to unlock.");
+      }
       const created = await createDirectConversation(user.id);
       const full = await getChatConversation(created.conversation.id);
       onStarted(full.conversation);
@@ -329,7 +352,19 @@ function RequestsPanel() {
   );
 }
 
-function SettingsPanel({ userId, currentUsername, onUsernameUpdated }: { userId: string; currentUsername?: string | null; onUsernameUpdated: (username: string) => void }) {
+function SettingsPanel({
+  userId,
+  currentUsername,
+  onUsernameUpdated,
+  onResetCrypto,
+  processing,
+}: {
+  userId: string;
+  currentUsername?: string | null;
+  onUsernameUpdated: (username: string) => void;
+  onResetCrypto: () => void;
+  processing: boolean;
+}) {
   const [settings, setSettings] = useState<ChatSettings | null>(null);
   const [username, setUsername] = useState(currentUsername || "");
   const [status, setStatus] = useState("");
@@ -387,9 +422,42 @@ function SettingsPanel({ userId, currentUsername, onUsernameUpdated }: { userId:
         </label>
         {status ? <p className="text-sm text-emerald-400">{status}</p> : null}
         <p className="text-xs text-zinc-600">Device: {userId.slice(0, 8)}. Private chat keys stay in this browser storage.</p>
+        <div className="border-t border-zinc-900 pt-5 mt-5">
+          <span className="text-xs font-semibold uppercase tracking-wide text-rose-500 block mb-1">Danger Zone</span>
+          <p className="text-xs text-zinc-500">If you lose your recovery key or suspect your account is compromised, you can reset your chat encryption profile. You will lose access to all previous encrypted messages.</p>
+          <button
+            onClick={onResetCrypto}
+            disabled={processing}
+            className="mt-3 rounded-lg border border-rose-800 bg-rose-950/20 px-4 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-900/40 disabled:opacity-40"
+          >
+            Reset Chat Encryption
+          </button>
+        </div>
       </div>
     </div>
   );
+}
+
+const decryptedMessagesCache: Record<string, ChatMessage[]> = {};
+
+function mergeMessagesList(existing: ChatMessage[], incoming: ChatMessage[]): ChatMessage[] {
+  const map = new Map<string, ChatMessage>();
+  existing.forEach((msg) => {
+    const key = msg.client_message_id || msg.id;
+    map.set(key, msg);
+  });
+  incoming.forEach((msg) => {
+    const key = msg.client_message_id || msg.id;
+    const prev = map.get(key);
+    map.set(key, { ...prev, ...msg, ...(msg.id ? { pending: false, failed: false } : {}) });
+  });
+  return Array.from(map.values()).sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
+}
+
+function replaceMessageByClientId(messages: ChatMessage[], clientMessageId: string, replacement: ChatMessage): ChatMessage[] {
+  return messages.map((item) => (item.client_message_id === clientMessageId ? replacement : item));
 }
 
 export default function ChatPage() {
@@ -402,14 +470,27 @@ export default function ChatPage() {
   const [draft, setDraft] = useState("");
   const [error, setError] = useState("");
   const [deviceReady, setDeviceReady] = useState(false);
+  const [vaultLocked, setVaultLocked] = useState(false);
+  const [setupNeeded, setSetupNeeded] = useState(false);
+  const [inputPin, setInputPin] = useState("");
+  const [setupPin, setSetupPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [isResettingE2EE, setIsResettingE2EE] = useState(false);
+  const [processingCrypto, setProcessingCrypto] = useState(false);
+
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
   const [showGroupInfo, setShowGroupInfo] = useState(false);
   const [creatingGroup, setCreatingGroup] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const prevActiveIdRef = useRef<string | null>(null);
+  const prevMessagesCountRef = useRef(0);
+  const messagesRef = useRef<ChatMessage[]>([]);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
   const socket = useChatSocket(Boolean(user && deviceReady));
   const activeIsGroup = active?.type === "group";
   const groupChat = useGroupChat(activeIsGroup ? active?.id || null : null);
-  const syncGroupChat = groupChat.sync;
   const activeOtherUserId = useMemo(() => active?.other_user?.id, [active]);
   const activeId = active?.id || null;
 
@@ -417,6 +498,15 @@ export default function ChatPage() {
   useEffect(() => {
     activeRef.current = active;
   }, [active]);
+
+  useEffect(() => {
+    if (!activeId) {
+      setMessages([]);
+      return;
+    }
+    const cached = decryptedMessagesCache[activeId];
+    setMessages(cached || []);
+  }, [activeId]);
 
   const mergeConversation = useCallback((conversation: ChatConversation) => {
     const normalized = activeRef.current?.id === conversation.id
@@ -444,20 +534,48 @@ export default function ChatPage() {
   }, []);
 
   const loadMessages = useCallback(async (conversation: ChatConversation) => {
+    const cached = decryptedMessagesCache[conversation.id];
+    if (cached) {
+      setMessages(cached);
+    } else {
+      setMessages([]);
+    }
+
     setConversations((prev) =>
       prev.map((c) =>
         c.id === conversation.id ? { ...c, unread_count: 0 } : c
       )
     );
-    if (conversation.type === "group") {
-      await syncGroupChat(conversation.id).catch(() => undefined);
+
+    try {
+      const fetchHistoryPromise = listChatMessages(conversation.id);
+      const syncKeysPromise = syncConversationKeys(conversation.id);
+
+      const [data] = await Promise.all([fetchHistoryPromise, syncKeysPromise.catch(() => undefined)]);
+
+      const decryptor = conversation.type === "group" ? decryptGroupMessage : decryptChatMessage;
+      const decrypted = await Promise.all(data.messages.reverse().map((message) => decryptor(message as ChatMessage)));
+
+      // Read cache after API fetch to include socket messages that arrived during fetch
+      const merged = mergeMessagesList(
+        decryptedMessagesCache[conversation.id] || [],
+        decrypted,
+      );
+      decryptedMessagesCache[conversation.id] = merged;
+
+      if (activeRef.current?.id === conversation.id) {
+        setMessages(merged);
+      }
+
+      const lastDecrypted = decrypted[decrypted.length - 1];
+      const lastMessageId = lastDecrypted?.id || data.messages[data.messages.length - 1]?.id;
+      if (lastMessageId) {
+        void markChatRead(conversation.id, lastMessageId).catch(() => undefined);
+      }
+    } catch (err) {
+      console.error("Failed to load messages", err);
     }
-    const data = await listChatMessages(conversation.id);
-    const decryptor = conversation.type === "group" ? decryptGroupMessage : decryptChatMessage;
-    const decrypted = await Promise.all(data.messages.reverse().map((message) => decryptor(message as ChatMessage)));
-    setMessages(decrypted);
-    if (decrypted.length) await markChatRead(conversation.id, decrypted[decrypted.length - 1].id).catch(() => undefined);
-  }, [syncGroupChat]);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -466,13 +584,26 @@ export default function ChatPage() {
         setDeviceReady(false);
         return;
       }
-      try {
-        await ensureChatDeviceRegistered();
+      setError("");
+      if (!user.chat_encryption_enabled) {
         if (cancelled) return;
-        setDeviceReady(true);
-        await loadConversations();
-      } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Could not initialize encrypted chat");
+        setSetupNeeded(true);
+        setVaultLocked(false);
+        setDeviceReady(false);
+      } else {
+        const vault = getStoredVault();
+        if (!vault) {
+          if (cancelled) return;
+          setVaultLocked(true);
+          setSetupNeeded(false);
+          setDeviceReady(false);
+        } else {
+          if (cancelled) return;
+          setVaultLocked(false);
+          setSetupNeeded(false);
+          setDeviceReady(true);
+          await loadConversations();
+        }
       }
     }
     bootChat();
@@ -507,12 +638,12 @@ export default function ChatPage() {
   useEffect(() => {
     const conversation = activeRef.current;
     if (!conversation || !activeId) return;
-    socket.joinConversation(activeId);
-    const timer = window.setTimeout(() => {
-      loadMessages(conversation).catch((err) => setError(err.message));
-    }, 0);
+    let cancelled = false;
+    void socket.joinConversationWithAck(activeId).finally(() => {
+      if (!cancelled) loadMessages(conversation).catch((err) => setError(err.message));
+    });
     return () => {
-      window.clearTimeout(timer);
+      cancelled = true;
       socket.leaveConversation(activeId);
     };
   }, [activeId, loadMessages, socket]);
@@ -521,18 +652,32 @@ export default function ChatPage() {
     const offNew = socket.on("message:new", async (payload) => {
       const incoming = payload as ChatMessage;
       const isGroupMessage = Boolean(incoming.group_payload);
-      const message = isGroupMessage ? await decryptGroupMessage(incoming) : await decryptChatMessage(incoming);
+      const decryptor = isGroupMessage ? decryptGroupMessage : decryptChatMessage;
+
+      // Fast path: try decrypt immediately with what's already in the vault.
+      // Only hit the server for key shares if the key is genuinely missing.
+      let message = await decryptor(incoming);
+      if (message.missing_envelope) {
+        await syncConversationKeys(incoming.conversation_id).catch(() => undefined);
+        message = await decryptor(incoming);
+      }
+
       const isCurrentActive = activeRef.current?.id === message.conversation_id;
 
-      setMessages((prev) => {
-        if (prev.some((item) => item.id === message.id)) return prev;
-        if (message.client_message_id && prev.some((item) => item.client_message_id === message.client_message_id)) {
-          return prev.map((item) => (item.client_message_id === message.client_message_id ? message : item));
-        }
-        return [...prev, message];
-      });
+      const cacheKey = message.conversation_id;
+      decryptedMessagesCache[cacheKey] = mergeMessagesList(
+        decryptedMessagesCache[cacheKey] || [],
+        [message],
+      );
 
       if (isCurrentActive) {
+        setMessages((prev) => {
+          if (prev.some((item) => item.id === message.id)) return prev;
+          if (message.client_message_id && prev.some((item) => item.client_message_id === message.client_message_id)) {
+            return replaceMessageByClientId(prev, message.client_message_id, message);
+          }
+          return [...prev, message];
+        });
         await markChatRead(message.conversation_id, message.id).catch(() => undefined);
         setConversations((prev) =>
           prev.map((c) =>
@@ -556,92 +701,266 @@ export default function ChatPage() {
   }, [loadConversations, mergeConversation, socket]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ block: "end" });
-  }, [messages]);
+    if (!socket.lastConnectedAt) return;
+    const conversation = activeRef.current;
+    if (!conversation) return;
+    loadMessages(conversation).catch(() => undefined);
+  }, [loadMessages, socket.lastConnectedAt]);
 
-  async function sendMessage() {
-    if (!user || !active || !draft.trim()) return;
-    const body = draft.trim();
-    const client_message_id = crypto.randomUUID();
-    setDraft("");
-    setMessages((prev) => [...prev, {
-      id: client_message_id,
+  useEffect(() => {
+    if (!messagesEndRef.current) return;
+
+    const activeIdChanged = prevActiveIdRef.current !== activeId;
+    const isNewMessage =
+      !activeIdChanged &&
+      messages.length > prevMessagesCountRef.current &&
+      prevMessagesCountRef.current > 0;
+
+    if (activeIdChanged || !isNewMessage) {
+      messagesEndRef.current.scrollIntoView({ behavior: "auto", block: "end" });
+    } else {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+
+    prevActiveIdRef.current = activeId;
+    prevMessagesCountRef.current = messages.length;
+  }, [messages, activeId]);
+
+  async function handleSetupE2EE(event: React.FormEvent) {
+    event.preventDefault();
+    if (!setupPin || !confirmPin) {
+      setError("Please fill in both PIN fields.");
+      return;
+    }
+    const cleanPin = setupPin.replace(/\D/g, "");
+    const cleanConfirm = confirmPin.replace(/\D/g, "");
+    if (cleanPin.length !== 4 || cleanConfirm.length !== 4) {
+      setError("PIN must be exactly 4 digits.");
+      return;
+    }
+    if (cleanPin !== cleanConfirm) {
+      setError("PINs do not match.");
+      return;
+    }
+    setProcessingCrypto(true);
+    setError("");
+    try {
+      await setupEncryptedChat(cleanPin);
+      setSetupNeeded(false);
+      setVaultLocked(false);
+      setDeviceReady(true);
+      if (user) {
+        refreshUser({ ...user, chat_encryption_enabled: true });
+      }
+      await loadConversations();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to setup E2EE");
+    } finally {
+      setProcessingCrypto(false);
+    }
+  }
+
+  async function handleUnlockE2EE(event: React.FormEvent) {
+    event.preventDefault();
+    const cleanPin = inputPin.replace(/\D/g, "");
+    if (!cleanPin) return;
+    if (cleanPin.length !== 4) {
+      setError("PIN must be exactly 4 digits.");
+      return;
+    }
+    if (!user) return;
+    setProcessingCrypto(true);
+    setError("");
+    try {
+      await restoreEncryptedChat(cleanPin, user.id);
+      setInputPin("");
+      setVaultLocked(false);
+      setDeviceReady(true);
+      await loadConversations();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to unlock");
+    } finally {
+      setProcessingCrypto(false);
+    }
+  }
+
+  async function handleResetE2EE(event: React.FormEvent) {
+    event.preventDefault();
+    if (!setupPin || !confirmPin) {
+      setError("Please fill in both PIN fields.");
+      return;
+    }
+    const cleanPin = setupPin.replace(/\D/g, "");
+    const cleanConfirm = confirmPin.replace(/\D/g, "");
+    if (cleanPin.length !== 4 || cleanConfirm.length !== 4) {
+      setError("PIN must be exactly 4 digits.");
+      return;
+    }
+    if (cleanPin !== cleanConfirm) {
+      setError("PINs do not match.");
+      return;
+    }
+    if (!confirm("Are you sure you want to reset your encryption? Your previous encrypted messages will not be recoverable on this device. This cannot be undone.")) {
+      return;
+    }
+    setProcessingCrypto(true);
+    setError("");
+    try {
+      Object.keys(decryptedMessagesCache).forEach((key) => {
+        delete decryptedMessagesCache[key];
+      });
+      setMessages([]);
+
+      await resetEncryptedChat(cleanPin);
+      setSetupPin("");
+      setConfirmPin("");
+      setIsResettingE2EE(false);
+      setSetupNeeded(false);
+      setVaultLocked(false);
+      setDeviceReady(true);
+      if (user) {
+        refreshUser({ ...user, chat_encryption_enabled: true });
+      }
+      await loadConversations();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to reset encryption");
+    } finally {
+      setProcessingCrypto(false);
+    }
+  }
+
+  function triggerResetFlow() {
+    setIsResettingE2EE(true);
+    setSetupNeeded(true);
+    setVaultLocked(false);
+    setError("");
+    setSetupPin("");
+    setConfirmPin("");
+  }
+
+  async function sendMessage(retryMessage?: ChatMessage) {
+    if (!user || !active) return;
+    const body = (retryMessage?.decrypted_body || draft).trim();
+    if (!body) return;
+    const client_message_id = retryMessage?.client_message_id || crypto.randomUUID();
+    const vault = getStoredVault();
+    if (!vault) {
+      setError("Key vault not unlocked. Unlock to send messages.");
+      return;
+    }
+
+    const pendingMsg: ChatMessage = {
+      id: retryMessage?.id || client_message_id,
       client_message_id,
       conversation_id: active.id,
       sender_id: user.id,
       message_type: "text",
       attachment_count: 0,
-      encryption_version: activeIsGroup ? "group-senderkey-v1" : "webcrypto-v1",
-      group_epoch_id: groupChat.currentEpoch?.epoch_id || null,
+      encryption_version: "webcrypto-v2",
       created_at: new Date().toISOString(),
-      envelopes: [],
       decrypted_body: body,
+      envelopes: [],
       pending: true,
-    }]);
+      failed: false,
+    };
+
+    if (!retryMessage) setDraft("");
+
+    setMessages((prev) => {
+      if (prev.some((item) => item.client_message_id === client_message_id)) {
+        return replaceMessageByClientId(prev, client_message_id, pendingMsg);
+      }
+      return [...prev, pendingMsg];
+    });
+    decryptedMessagesCache[active.id] = mergeMessagesList(
+      decryptedMessagesCache[active.id] || [],
+      [pendingMsg],
+    );
+    setPreviews((prev) => ({ ...prev, [active.id]: body }));
+    mergeConversation({
+      ...active,
+      last_message_id: active.last_message_id || client_message_id,
+      last_message_at: pendingMsg.created_at,
+      updated_at: pendingMsg.created_at,
+      last_message: pendingMsg,
+      unread_count: 0,
+    });
 
     try {
-      await ensureChatDeviceRegistered();
-      if (activeIsGroup) {
-        const sent = await groupChat.sendGroupMessage(body, client_message_id);
-        const decrypted = await decryptGroupMessage(sent);
-        setMessages((prev) => prev.map((item) => (item.client_message_id === client_message_id ? decrypted : item)));
-        setPreviews((prev) => ({ ...prev, [active.id]: body }));
-        mergeConversation({
-          ...active,
-          last_message_id: sent.id,
-          last_message_at: sent.created_at,
-          updated_at: sent.created_at,
-          last_message: sent,
-          unread_count: 0,
-        });
-      } else {
-        const conversationUserIds = activeOtherUserId ? [user.id, activeOtherUserId] : [user.id];
-        const envelopes = await buildEncryptedMessageEnvelopes({ conversationUserIds, body });
-        const data = await sendEncryptedChatMessage(active.id, {
+      const participantUserIds = activeIsGroup
+        ? groupChat.members.map((m) => m.user_id)
+        : activeOtherUserId ? [user.id, activeOtherUserId] : [user.id];
+
+      const epochNumber = await syncConversationKeys(active.id, participantUserIds);
+
+      const encrypted = await encryptChatMessage({
+        conversationId: active.id,
+        epochNumber,
+        body,
+      });
+
+      const data = await sendEncryptedChatMessage(active.id, {
+        client_message_id,
+        message_type: "text",
+        encryption_version: encrypted.encryption_version,
+        ciphertext: encrypted.ciphertext,
+        nonce_or_iv: encrypted.nonce_or_iv,
+        key_epoch_id: encrypted.key_epoch_id,
+      });
+
+      try {
+        const decrypted = activeIsGroup ? await decryptGroupMessage(data.message) : await decryptChatMessage(data.message);
+        setMessages((prev) => replaceMessageByClientId(prev, client_message_id, decrypted));
+        decryptedMessagesCache[active.id] = replaceMessageByClientId(
+          decryptedMessagesCache[active.id] || [],
           client_message_id,
-          message_type: "text",
-          encryption_version: "webcrypto-v1",
-          envelopes,
-        });
-        const decrypted = await decryptChatMessage(data.message);
-        setMessages((prev) => prev.map((item) => (item.client_message_id === client_message_id ? decrypted : item)));
-        setPreviews((prev) => ({ ...prev, [active.id]: body }));
-        mergeConversation({
-          ...active,
-          last_message_id: data.message.id,
-          last_message_at: data.message.created_at,
-          updated_at: data.message.created_at,
-          last_message: data.message,
-          unread_count: 0,
-        });
+          decrypted,
+        );
+      } catch {
+        // Server confirmed the message; decrypt of own echo failed but socket will resolve it
       }
+
+      mergeConversation({
+        ...active,
+        last_message_id: data.message.id,
+        last_message_at: data.message.created_at,
+        updated_at: data.message.created_at,
+        last_message: data.message,
+        unread_count: 0,
+      });
     } catch (err) {
-      setMessages((prev) => prev.map((item) => (item.client_message_id === client_message_id ? { ...item, pending: false, failed: true } : item)));
+      const failed = { ...pendingMsg, pending: false, failed: true };
+      setMessages((prev) => replaceMessageByClientId(prev, client_message_id, failed));
+      decryptedMessagesCache[active.id] = replaceMessageByClientId(
+        decryptedMessagesCache[active.id] || [],
+        client_message_id,
+        failed,
+      );
       setError(err instanceof Error ? err.message : "Message failed");
     }
   }
 
   async function handleCreateGroup(input: { title: string; description?: string | null; member_user_ids: string[] }) {
     if (!user) return;
+    if (!getStoredVault()) {
+      setError("Key vault not unlocked. Unlock to create a group.");
+      return;
+    }
     setCreatingGroup(true);
     setError("");
     try {
-      await ensureChatDeviceRegistered();
-      const allTargets = Array.from(new Set([user.id, ...input.member_user_ids]));
-      const { envelopes, epochKeyJwk } = await wrapGroupKeyForMembers("__pending__", 1, allTargets);
       const result = await createGroup({
         title: input.title,
         description: input.description,
         member_user_ids: input.member_user_ids,
-        epoch_envelopes: envelopes,
+        epoch_envelopes: [],
       });
+      const allTargets = Array.from(new Set([user.id, ...input.member_user_ids]));
+      await shareConversationKey(result.conversation.id, 1, allTargets);
       const full = await getChatConversation(result.conversation.id);
       await loadConversations();
       setActive(full.conversation);
-      // The device's own epoch-1 envelope will be imported by useGroupChat on the
-      // next render once `active` switches to the new group. Belt-and-braces sync:
       void groupChat.sync(result.conversation.id).catch(() => undefined);
-      void epochKeyJwk;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create group");
       throw err;
@@ -652,7 +971,164 @@ export default function ChatPage() {
 
   if (!user) return <div className="p-6 text-sm text-zinc-400">Loading chat…</div>;
 
+  if (setupNeeded) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4 text-white">
+        <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl">
+          <div className="flex flex-col items-center text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+              <LockIcon className="h-6 w-6" />
+            </div>
+            <h2 className="mt-4 text-xl font-bold tracking-tight text-white">
+              {isResettingE2EE ? "Reset Encryption Profile" : "Enable End-to-End Encryption"}
+            </h2>
+            <p className="mt-2 text-sm text-zinc-400">
+              {isResettingE2EE
+                ? "Set a new 4-digit PIN for your chat backup. Old history cannot be recovered."
+                : "Create a 4-digit PIN to secure your chat backup. This PIN is required to restore chats on other devices."}
+            </p>
+          </div>
+
+          <form onSubmit={isResettingE2EE ? handleResetE2EE : handleSetupE2EE} className="mt-6 space-y-4">
+            {isResettingE2EE && (
+              <div className="rounded-lg bg-rose-950/20 border border-rose-900/50 p-4 text-xs text-rose-300">
+                <p className="font-semibold">Resetting Profile Warning:</p>
+                <p className="mt-1">
+                  Your previous encrypted messages will be lost permanently on this device. This action cannot be undone.
+                </p>
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="setupPin" className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">
+                Create 4-Digit PIN
+              </label>
+              <input
+                id="setupPin"
+                type="password"
+                inputMode="numeric"
+                pattern="[0-9]{4}"
+                maxLength={4}
+                placeholder="••••"
+                value={setupPin}
+                onChange={(e) => setSetupPin(e.target.value.replace(/\D/g, ""))}
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-center text-xl tracking-[0.75em] text-white outline-none focus:border-zinc-600 transition-colors"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirmPin" className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">
+                Confirm 4-Digit PIN
+              </label>
+              <input
+                id="confirmPin"
+                type="password"
+                inputMode="numeric"
+                pattern="[0-9]{4}"
+                maxLength={4}
+                placeholder="••••"
+                value={confirmPin}
+                onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-center text-xl tracking-[0.75em] text-white outline-none focus:border-zinc-600 transition-colors"
+                required
+              />
+            </div>
+
+            {error ? <p className="text-sm text-rose-400 text-center">{error}</p> : null}
+
+            <button
+              type="submit"
+              disabled={processingCrypto || setupPin.length !== 4 || confirmPin.length !== 4}
+              className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 disabled:opacity-40 transition-colors"
+            >
+              {processingCrypto ? "Processing…" : isResettingE2EE ? "Reset & Enable E2EE" : "Enable E2EE Chat"}
+            </button>
+
+            {isResettingE2EE && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsResettingE2EE(false);
+                  setSetupNeeded(false);
+                  setVaultLocked(true);
+                  setError("");
+                }}
+                className="w-full rounded-xl border border-zinc-800 bg-transparent py-3 text-sm font-semibold text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
+              >
+                Cancel
+              </button>
+            )}
+          </form>
+        </div>
+      </main>
+    );
+  }
+
+  if (vaultLocked) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4 text-white">
+        <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl">
+          <div className="flex flex-col items-center text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10 text-amber-400">
+              <LockIcon className="h-6 w-6" />
+            </div>
+            <h2 className="mt-4 text-xl font-bold tracking-tight text-white">Unlock Your Secure Chats</h2>
+            <p className="mt-2 text-sm text-zinc-400">
+              This device does not have access to your chat encryption keys. Enter your secure 4-digit PIN to decrypt your backup.
+            </p>
+          </div>
+
+          <form onSubmit={handleUnlockE2EE} className="mt-6 space-y-4">
+            <div>
+              <label htmlFor="unlockPin" className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">
+                Enter 4-Digit PIN
+              </label>
+              <input
+                id="unlockPin"
+                type="password"
+                inputMode="numeric"
+                pattern="[0-9]{4}"
+                maxLength={4}
+                placeholder="••••"
+                value={inputPin}
+                onChange={(e) => setInputPin(e.target.value.replace(/\D/g, ""))}
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-center text-xl tracking-[0.75em] text-white outline-none focus:border-zinc-600 transition-colors"
+                required
+              />
+            </div>
+
+            {error ? <p className="text-sm text-rose-400 text-center">{error}</p> : null}
+
+            <button
+              type="submit"
+              disabled={processingCrypto || inputPin.length !== 4}
+              className="w-full rounded-xl bg-white py-3 text-sm font-semibold text-zinc-950 hover:bg-zinc-200 disabled:opacity-40 transition-colors"
+            >
+              {processingCrypto ? "Unlocking backup…" : "Unlock Chats"}
+            </button>
+
+            <div className="border-t border-zinc-800 pt-5 text-center">
+              <p className="text-xs text-zinc-500">
+                Forgotten your PIN? You can reset your E2EE profile, but you will permanently lose access to all previous messages.
+              </p>
+              <button
+                type="button"
+                onClick={triggerResetFlow}
+                disabled={processingCrypto}
+                className="mt-3 text-xs font-semibold text-rose-400 hover:text-rose-300 transition-colors"
+              >
+                Reset E2EE Profile & Start Fresh
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+    );
+  }
+
   return (
+    <CallProvider user={user} socket={socket}>
     <main className="min-h-screen bg-zinc-950 text-white">
       <div className="flex h-[calc(100vh-64px)] min-h-[680px] flex-col lg:flex-row">
         <aside className="w-full border-b border-zinc-900 lg:w-[360px] lg:border-b-0 lg:border-r">
@@ -714,6 +1190,8 @@ export default function ChatPage() {
               userId={user.id}
               currentUsername={user.username}
               onUsernameUpdated={(username) => refreshUser({ ...user, username })}
+              onResetCrypto={triggerResetFlow}
+              processing={processingCrypto}
             />
           )}
         </aside>
@@ -739,7 +1217,10 @@ export default function ChatPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-zinc-500">
+                <div className="flex items-center gap-2 text-xs text-zinc-500">
+                  <CallErrorBoundary>
+                    <ConversationCallControls conversation={active} />
+                  </CallErrorBoundary>
                   {activeIsGroup ? (
                     <button onClick={() => setShowGroupInfo((value) => !value)} className="flex items-center gap-1 rounded-lg border border-zinc-800 px-2 py-1 text-zinc-200 hover:bg-zinc-900">
                       <UsersIcon className="h-4 w-4" /> Info
@@ -749,6 +1230,9 @@ export default function ChatPage() {
                   Device ready
                 </div>
               </header>
+              <CallErrorBoundary>
+                <OngoingGroupCallBanner conversation={active} />
+              </CallErrorBoundary>
               {error ? <div className="border-b border-rose-950 bg-rose-950/30 px-5 py-2 text-sm text-rose-300">{error}</div> : null}
               <div className="flex-1 space-y-3 overflow-y-auto px-5 py-5">
                 {messages.map((message) => (
@@ -758,6 +1242,7 @@ export default function ChatPage() {
                     currentUserId={user.id}
                     showSender={activeIsGroup}
                     senderLabel={activeIsGroup ? (groupChat.members.find((member) => member.user_id === message.sender_id)?.user?.username || "Member") : undefined}
+                    onRetry={message.failed ? sendMessage : undefined}
                   />
                 ))}
                 {!messages.length ? <p className="py-16 text-center text-sm text-zinc-500">No messages yet.</p> : null}
@@ -811,6 +1296,7 @@ export default function ChatPage() {
             onClose={() => setShowGroupInfo(false)}
             onLeftOrDeleted={() => {
               setShowGroupInfo(false);
+              if (active?.id) delete decryptedMessagesCache[active.id];
               setActive(null);
               setMessages([]);
               loadConversations().catch(() => undefined);
@@ -829,5 +1315,6 @@ export default function ChatPage() {
         onCreate={handleCreateGroup}
       />
     </main>
+    </CallProvider>
   );
 }
