@@ -14,7 +14,7 @@ import type {
   FollowListUser,
 } from "./types";
 import { API_BASE_URL } from "./apiBaseUrl";
-import * as requestCache from "./services/requestCache";
+import { clearClientSessionAndRedirect } from "./auth/logoutCleanup";
 
 export { API_BASE_URL };
 
@@ -35,11 +35,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
     // server error into a redirect plus a generic "Unauthorized" message.
     const hasSession = typeof window !== "undefined" && Boolean(localStorage.getItem("authToken"));
     if (hasSession) {
-      // Drop any cached user-scoped data so a different account can't read it.
-      requestCache.clear();
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("currentUser");
-      if (window.location.pathname !== "/login") window.location.href = "/login";
+      clearClientSessionAndRedirect("/login");
     }
   }
 

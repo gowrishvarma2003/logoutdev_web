@@ -16,10 +16,33 @@ export interface KeyVault {
   account_master_key: string;
   account_public_wrapping_key: string; // stringified JWK
   account_private_wrapping_key: JsonWebKey;
-  conversation_keys: Record<string, Record<number, { key_jwk: JsonWebKey; epoch_id: string }>>;
+  conversation_keys: Record<string, Record<number, { key_jwk: JsonWebKey; epoch_id: string; key_commitment?: string | null }>>;
   created_at: string;
   updated_at: string;
   backup_salt?: string;
+}
+
+interface RemoteKeyEpoch {
+  id: string;
+  epoch_number: number;
+  key_commitment?: string | null;
+}
+
+interface RemoteKeyShare {
+  epoch_id: string;
+  epoch_number?: number;
+  encrypted_conversation_key: string;
+  key_commitment?: string | null;
+}
+
+interface UserCryptoProfileData {
+  account_public_wrapping_key: string;
+  backup_salt?: string;
+}
+
+interface SyncConversationKeyOptions {
+  allowCreate?: boolean;
+  allowRepair?: boolean;
 }
 
 // Memory cache of decrypted vault
@@ -27,18 +50,20 @@ let cachedVault: KeyVault | null = null;
 
 // ─── Performance Caches ────────────────────────────────────────────────────────
 // Cache crypto profiles so repeated sends to the same user don't re-fetch
-const _cryptoProfileCache = new Map<string, { data: any; ts: number }>();
+const _cryptoProfileCache = new Map<string, { data: UserCryptoProfileData; ts: number }>();
 const PROFILE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 // Track when we last synced key-shares per conversation to avoid re-fetching
 // on every message send. We still always fetch if the vault has no key yet.
 const _keyShareSyncTs = new Map<string, number>();
 const KEY_SHARE_SYNC_TTL_MS = 2 * 60 * 1000; // 2 minutes
+const _keyShareRepairTs = new Map<string, number>();
+const KEY_SHARE_REPAIR_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-async function fetchUserCryptoProfileCached(userId: string): Promise<any> {
+async function fetchUserCryptoProfileCached(userId: string): Promise<UserCryptoProfileData> {
   const hit = _cryptoProfileCache.get(userId);
   if (hit && Date.now() - hit.ts < PROFILE_CACHE_TTL_MS) return hit.data;
-  const data = await fetchUserCryptoProfile(userId);
+  const data = await fetchUserCryptoProfile(userId) as UserCryptoProfileData;
   _cryptoProfileCache.set(userId, { data, ts: Date.now() });
   return data;
 }
@@ -69,6 +94,27 @@ function decodeText(value: ArrayBuffer | Uint8Array): string {
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
   return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+}
+
+function bytesToHex(bytes: ArrayBuffer | Uint8Array): string {
+  const view = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  return Array.from(view).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+export async function computeConversationKeyCommitment(keyJwk: JsonWebKey): Promise<string> {
+  const keyMaterial = typeof keyJwk.k === "string" ? keyJwk.k : JSON.stringify(keyJwk);
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    toArrayBuffer(encodeText(`logoutdev-chat-key-v1:${keyMaterial}`))
+  );
+  return `sha256:${bytesToHex(digest)}`;
+}
+
+async function ensureStoredKeyCommitment(stored: { key_jwk: JsonWebKey; key_commitment?: string | null }) {
+  if (!stored.key_commitment) {
+    stored.key_commitment = await computeConversationKeyCommitment(stored.key_jwk);
+  }
+  return stored.key_commitment;
 }
 
 export function getStoredVault(): KeyVault | null {
@@ -505,6 +551,35 @@ export async function resetEncryptedChat(pin: string): Promise<string> {
   return pin;
 }
 
+function cloneVault(vault: KeyVault): KeyVault {
+  return JSON.parse(JSON.stringify(vault)) as KeyVault;
+}
+
+function mergeVaults(localVault: KeyVault, remoteVault: KeyVault | null): KeyVault {
+  if (!remoteVault) return localVault;
+  const merged = cloneVault(localVault);
+  for (const [conversationId, remoteEpochs] of Object.entries(remoteVault.conversation_keys || {})) {
+    if (!merged.conversation_keys[conversationId]) merged.conversation_keys[conversationId] = {};
+    for (const [epochNumberText, remoteStored] of Object.entries(remoteEpochs || {})) {
+      const epochNumber = Number(epochNumberText);
+      const localStored = merged.conversation_keys[conversationId][epochNumber];
+      if (!localStored) {
+        merged.conversation_keys[conversationId][epochNumber] = remoteStored;
+        continue;
+      }
+      if (!localStored.key_commitment && remoteStored.key_commitment) {
+        localStored.key_commitment = remoteStored.key_commitment;
+      }
+      if (localStored.key_commitment && remoteStored.key_commitment && localStored.key_commitment === remoteStored.key_commitment) {
+        localStored.epoch_id = remoteStored.epoch_id || localStored.epoch_id;
+      }
+    }
+  }
+  merged.backup_salt = localVault.backup_salt || remoteVault.backup_salt;
+  merged.updated_at = new Date().toISOString();
+  return merged;
+}
+
 export async function backupVaultIfSessionActive() {
   const vault = getStoredVault();
   const pin = getSessionRecoveryKey();
@@ -521,13 +596,31 @@ export async function backupVaultIfSessionActive() {
     if (!salt) return;
 
     const { backupKey, authKeyHash } = await deriveE2EEKeys(pin, salt);
-    const backup = await getChatCryptoBackup(authKeyHash);
-    const encrypted = await encryptKeyVault(vault, backupKey);
-    await updateChatCryptoBackup({
-      encryptedVault: encrypted.ciphertext,
-      nonceOrIv: encrypted.nonceOrIv,
-      backupVersion: backup.backup_version,
-    });
+    let vaultToUpload = vault;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const backup = await getChatCryptoBackup(authKeyHash);
+      let remoteVault: KeyVault | null = null;
+      try {
+        remoteVault = await decryptKeyVault(backup.encrypted_vault_blob, backupKey, backup.nonce_or_iv);
+        remoteVault.backup_salt = salt;
+      } catch {
+        remoteVault = null;
+      }
+
+      vaultToUpload = mergeVaults(vaultToUpload, remoteVault);
+      const encrypted = await encryptKeyVault(vaultToUpload, backupKey);
+      try {
+        await updateChatCryptoBackup({
+          encryptedVault: encrypted.ciphertext,
+          nonceOrIv: encrypted.nonceOrIv,
+          backupVersion: backup.backup_version,
+        });
+        setStoredVault(vaultToUpload);
+        return;
+      } catch (error) {
+        if (!(error instanceof Error) || !/out of sync/i.test(error.message) || attempt === 1) throw error;
+      }
+    }
   } catch (err) {
     console.warn("Background backup update failed", err);
   }
@@ -546,11 +639,13 @@ export async function shareConversationKey(conversationId: string, epochNumber: 
     vault.conversation_keys[conversationId][epochNumber] = {
       key_jwk: jwk,
       epoch_id: epochId,
+      key_commitment: await computeConversationKeyCommitment(jwk),
     };
     stored = vault.conversation_keys[conversationId][epochNumber];
     vault.updated_at = new Date().toISOString();
     setStoredVault(vault);
   }
+  const keyCommitment = await ensureStoredKeyCommitment(stored);
 
   // Fetch and encrypt for all participants in parallel (no sequential HTTP calls)
   const shareResults = await Promise.all(
@@ -563,6 +658,7 @@ export async function shareConversationKey(conversationId: string, epochNumber: 
           encrypted_conversation_key: wrapped.encrypted_conversation_key,
           nonce_or_iv: wrapped.nonce_or_iv,
           epoch_number: epochNumber,
+          key_commitment: keyCommitment,
           reason: epochNumber === 1 ? "conversation_created" : "member_added",
         };
       } catch {
@@ -583,6 +679,7 @@ export async function shareConversationKey(conversationId: string, epochNumber: 
     const freshVault = getStoredVault();
     if (backendEpochId && freshVault?.conversation_keys[conversationId]?.[epochNumber]) {
       freshVault.conversation_keys[conversationId][epochNumber].epoch_id = backendEpochId;
+      freshVault.conversation_keys[conversationId][epochNumber].key_commitment = keyCommitment;
       freshVault.updated_at = new Date().toISOString();
       setStoredVault(freshVault);
       stored = freshVault.conversation_keys[conversationId][epochNumber];
@@ -595,7 +692,13 @@ export async function shareConversationKey(conversationId: string, epochNumber: 
   return stored;
 }
 
-export async function syncConversationKeys(conversationId: string, participantUserIds: string[] = []): Promise<number> {
+export async function syncConversationKeys(
+  conversationId: string,
+  participantUserIds: string[] = [],
+  options: SyncConversationKeyOptions = {}
+): Promise<number> {
+  const allowCreate = options.allowCreate !== false;
+  const allowRepair = options.allowRepair !== false;
   const vault = getStoredVault();
   if (!vault) return 0;
 
@@ -608,14 +711,17 @@ export async function syncConversationKeys(conversationId: string, participantUs
   const syncStale = Date.now() - lastSync > KEY_SHARE_SYNC_TTL_MS;
   const shouldFetch = !hasLocalKey || syncStale;
 
-  let shares: any[] = [];
+  let shares: RemoteKeyShare[] = [];
+  let remoteEpochs: RemoteKeyEpoch[] = [];
+  let fetchFailed = false;
   if (shouldFetch) {
     try {
       const data = await fetchConversationKeyShares(conversationId);
-      shares = data.keyShares || [];
+      shares = Array.isArray(data.keyShares) ? data.keyShares : [];
+      remoteEpochs = Array.isArray(data.epochs) ? data.epochs : [];
       _keyShareSyncTs.set(conversationId, Date.now());
     } catch {
-      // non-fatal
+      fetchFailed = true;
     }
   }
 
@@ -623,33 +729,92 @@ export async function syncConversationKeys(conversationId: string, participantUs
   if (!vault.conversation_keys[conversationId]) {
     vault.conversation_keys[conversationId] = {};
   }
+  const remoteEpochByNumber = new Map(remoteEpochs.map((epoch) => [epoch.epoch_number, epoch]));
 
+  for (const remoteEpoch of remoteEpochs) {
+    const localKeyForEpoch = vault.conversation_keys[conversationId][remoteEpoch.epoch_number];
+    if (!localKeyForEpoch) continue;
+    const hadCommitment = Boolean(localKeyForEpoch.key_commitment);
+    const localCommitment = await ensureStoredKeyCommitment(localKeyForEpoch);
+    if (!remoteEpoch.key_commitment || remoteEpoch.key_commitment === localCommitment) {
+      if (localKeyForEpoch.epoch_id !== remoteEpoch.id) {
+        localKeyForEpoch.epoch_id = remoteEpoch.id;
+        vaultChanged = true;
+      }
+      if (!hadCommitment) vaultChanged = true;
+    }
+  }
+
+  let undecryptableShareCount = 0;
   for (const share of shares) {
     const epochId = share.epoch_id;
+    const epochNumber = share.epoch_number || 1;
     const existing = Object.values(vault.conversation_keys[conversationId]).find((k) => k.epoch_id === epochId);
-    if (!existing) {
+    if (existing) {
+      if (!existing.key_commitment && share.key_commitment) {
+        existing.key_commitment = share.key_commitment;
+        vaultChanged = true;
+      }
+    } else {
+      const localKeyForEpoch = vault.conversation_keys[conversationId][epochNumber];
+      if (localKeyForEpoch) {
+        const hadCommitment = Boolean(localKeyForEpoch.key_commitment);
+        const localCommitment = await ensureStoredKeyCommitment(localKeyForEpoch);
+        if (!share.key_commitment || share.key_commitment === localCommitment) {
+          localKeyForEpoch.epoch_id = epochId;
+          localKeyForEpoch.key_commitment = localCommitment;
+          vaultChanged = true;
+          continue;
+        }
+        if (!hadCommitment) vaultChanged = true;
+      }
+
       try {
         const decryptedKeyJwk = await decryptConversationKeyShare(
           share.encrypted_conversation_key,
           vault.account_private_wrapping_key
         );
-        // Backend now returns epoch_number directly on the share object
-        const epochNumber = share.epoch_number || 1;
+        const decryptedCommitment = await computeConversationKeyCommitment(decryptedKeyJwk);
+        if (share.key_commitment && share.key_commitment !== decryptedCommitment) {
+          undecryptableShareCount += 1;
+          continue;
+        }
         vault.conversation_keys[conversationId][epochNumber] = {
           key_jwk: decryptedKeyJwk,
           epoch_id: epochId,
+          key_commitment: decryptedCommitment,
         };
         vaultChanged = true;
-      } catch (err) {
-        console.error("Failed to decrypt share", err);
+      } catch {
+        undecryptableShareCount += 1;
+        console.warn("Skipped undecryptable conversation key share. It may have been wrapped for an older account key.");
       }
     }
   }
 
   const hasEpoch1 = Boolean(vault.conversation_keys[conversationId][1]);
-  if (!hasEpoch1 && participantUserIds.length > 0) {
+  const remoteHasEpochs = remoteEpochs.length > 0 || shares.length > 0 || undecryptableShareCount > 0;
+  if (!hasEpoch1 && participantUserIds.length > 0 && allowCreate) {
+    if (fetchFailed || remoteHasEpochs) {
+      throw new Error("This device could not recover the existing chat key. Open this chat on a device that can read it so it can re-share the key, or use the explicit encryption reset flow.");
+    }
     await shareConversationKey(conversationId, 1, participantUserIds);
     vaultChanged = true;
+  } else if (participantUserIds.length > 0 && allowRepair) {
+    const epochs = Object.keys(vault.conversation_keys[conversationId]).map(Number);
+    const latestEpoch = epochs.length > 0 ? Math.max(...epochs) : 1;
+    const repairKey = `${conversationId}:${latestEpoch}`;
+    const lastRepair = _keyShareRepairTs.get(repairKey) ?? 0;
+    if (latestEpoch && Date.now() - lastRepair > KEY_SHARE_REPAIR_TTL_MS) {
+      const localKeyForEpoch = vault.conversation_keys[conversationId][latestEpoch];
+      const remoteEpoch = remoteEpochByNumber.get(latestEpoch);
+      const localCommitment = localKeyForEpoch ? await ensureStoredKeyCommitment(localKeyForEpoch) : null;
+      if (!remoteEpoch?.key_commitment || remoteEpoch.key_commitment === localCommitment) {
+        await shareConversationKey(conversationId, latestEpoch, participantUserIds);
+        _keyShareRepairTs.set(repairKey, Date.now());
+        vaultChanged = true;
+      }
+    }
   }
 
   if (vaultChanged) {
@@ -677,12 +842,14 @@ export function getCurrentChatDeviceId() {
 }
 
 export async function buildEncryptedMessageEnvelopes({
-  conversationUserIds,
-  body,
+  conversationUserIds: _conversationUserIds,
+  body: _body,
 }: {
   conversationUserIds: string[];
   body: string;
 }) {
+  void _conversationUserIds;
+  void _body;
   throw new Error("buildEncryptedMessageEnvelopes is deprecated.");
 }
 
@@ -690,7 +857,7 @@ export async function wrapGroupKeyForMembers(
   conversationId: string,
   epochNumber: number,
   memberUserIds: string[]
-): Promise<any> {
+): Promise<{ envelopes: never[]; epochKeyJwk: JsonWebKey }> {
   const realEpoch = epochNumber === 0 ? 1 : epochNumber;
   const stored = await shareConversationKey(conversationId, realEpoch, memberUserIds);
   return {

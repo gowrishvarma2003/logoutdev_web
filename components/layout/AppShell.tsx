@@ -145,7 +145,7 @@ export default function AppShell({ children }: AppShellProps) {
       </div>
 
       {/* ── Mobile bottom navigation bar ── */}
-      <MobileNav userId={user.id} username={user.username} unreadCount={summary.unread_count} />
+      <MobileNav userId={user.id} username={user.username} unreadCount={summary.unread_count} onLogout={logout} />
     </div>
   );
 }

@@ -31,7 +31,7 @@ import type {
   WorkSort,
 } from "../types";
 import { API_BASE_URL } from "../apiBaseUrl";
-import * as requestCache from "./requestCache";
+import { clearClientSessionAndRedirect } from "../auth/logoutCleanup";
 
 const API = API_BASE_URL;
 
@@ -43,12 +43,7 @@ function authHeaders(): Record<string, string> {
 
 async function handleRes<T>(res: Response): Promise<T> {
   if (res.status === 401 && typeof window !== "undefined") {
-    // Drop cached user-scoped data before redirecting so a different account
-    // can't read the previous user's spaces/repos data.
-    requestCache.clear();
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("currentUser");
-    window.location.href = "/login";
+    clearClientSessionAndRedirect("/login");
     throw new Error("Unauthorized");
   }
   const data = await res.json();

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import {
   HomeIcon,
@@ -16,18 +17,21 @@ import {
   DotsIcon,
   XIcon,
   ChatBubbleIcon,
+  LogOutIcon,
 } from "@/components/ui/Icons";
 
 interface MobileNavProps {
   userId: string;
   username?: string;
   unreadCount?: number;
+  onLogout: () => void;
 }
 
-export default function MobileNav({ userId, username, unreadCount = 0 }: MobileNavProps) {
+export default function MobileNav({ userId, username, unreadCount = 0, onLogout }: MobileNavProps) {
   const pathname = usePathname();
   const profileSlug = username || userId;
   const [showMore, setShowMore] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   /* Primary items always visible in the bottom bar (max 5) */
   const primaryItems = [
@@ -86,9 +90,62 @@ export default function MobileNav({ userId, username, unreadCount = 0 }: MobileN
                   );
                 })}
               </nav>
+              <div className="border-t border-zinc-800 px-2 py-2">
+                <button
+                  onClick={() => {
+                    setShowMore(false);
+                    setShowLogoutConfirm(true);
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-rose-400 hover:bg-rose-500/10 transition-colors"
+                >
+                  <LogOutIcon className="w-5 h-5" />
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
         </>
+      )}
+
+      {/* ── Sign Out Confirmation Modal ── */}
+      {showLogoutConfirm && createPortal(
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          onClick={() => setShowLogoutConfirm(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10 text-rose-500 mb-4">
+              <LogOutIcon className="h-6 w-6" />
+            </div>
+            <h3 className="text-lg font-bold text-white text-center mb-2">Sign Out</h3>
+            <p className="text-sm text-zinc-400 text-center mb-6">
+              Are you sure you want to sign out of your account?
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 rounded-xl bg-zinc-800 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLogoutConfirm(false);
+                  onLogout();
+                }}
+                className="flex-1 rounded-xl bg-rose-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-500"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* ── Bottom navigation bar ── */}

@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../apiBaseUrl";
+import { clearClientSessionAndRedirect } from "../auth/logoutCleanup";
 import type {
   FreelanceProject,
   FreelanceProjectListResponse,
@@ -14,9 +15,7 @@ function getAuthHeaders(): Record<string, string> {
 async function handleResponse<T>(res: Response): Promise<T> {
   if (res.status === 401) {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("currentUser");
-      window.location.href = "/login";
+      clearClientSessionAndRedirect("/login");
     }
     throw new Error("Unauthorized");
   }

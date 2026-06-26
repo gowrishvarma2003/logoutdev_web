@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Avatar from "@/components/ui/Avatar";
 import { ChatBubbleIcon, CheckCircleIcon, LockIcon, PlusIcon, UsersIcon, XCircleIcon } from "@/components/ui/Icons";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -9,6 +9,7 @@ import { useGroupChat } from "@/lib/hooks/useGroupChat";
 import type { ChatConversation, ChatGroupInvite, ChatMessage, ChatMessageRequest, ChatSettings, ChatUser } from "@/lib/types";
 import {
   createDirectConversation,
+  fetchUserCryptoProfile,
   getChatConversation,
   getChatSettings,
   listChatConversations,
@@ -440,6 +441,12 @@ function SettingsPanel({
 
 const decryptedMessagesCache: Record<string, ChatMessage[]> = {};
 
+function clearDecryptedMessagesCache() {
+  Object.keys(decryptedMessagesCache).forEach((key) => {
+    delete decryptedMessagesCache[key];
+  });
+}
+
 function mergeMessagesList(existing: ChatMessage[], incoming: ChatMessage[]): ChatMessage[] {
   const map = new Map<string, ChatMessage>();
   existing.forEach((msg) => {
@@ -472,6 +479,7 @@ export default function ChatPage() {
   const [deviceReady, setDeviceReady] = useState(false);
   const [vaultLocked, setVaultLocked] = useState(false);
   const [setupNeeded, setSetupNeeded] = useState(false);
+  const [cryptoChecking, setCryptoChecking] = useState(true);
   const [inputPin, setInputPin] = useState("");
   const [setupPin, setSetupPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
@@ -491,8 +499,15 @@ export default function ChatPage() {
   const socket = useChatSocket(Boolean(user && deviceReady));
   const activeIsGroup = active?.type === "group";
   const groupChat = useGroupChat(activeIsGroup ? active?.id || null : null);
-  const activeOtherUserId = useMemo(() => active?.other_user?.id, [active]);
   const activeId = active?.id || null;
+
+  const getParticipantUserIds = useCallback((conversation: ChatConversation | null) => {
+    if (!user || !conversation) return [];
+    if (conversation.type === "group") {
+      return Array.from(new Set([user.id, ...groupChat.members.map((member) => member.user_id)]));
+    }
+    return Array.from(new Set(conversation.other_user?.id ? [user.id, conversation.other_user.id] : [user.id]));
+  }, [groupChat.members, user]);
 
   const activeRef = useRef<ChatConversation | null>(null);
   useEffect(() => {
@@ -528,9 +543,18 @@ export default function ChatPage() {
   }, []);
 
   const loadConversations = useCallback(async () => {
-    const data = await listChatConversations();
-    setConversations(data.conversations);
-    setActive((current) => current ? data.conversations.find((conversation) => conversation.id === current.id) || current : data.conversations[0] || null);
+    try {
+      const data = await listChatConversations();
+      setConversations(data.conversations);
+      setActive((current) => current ? data.conversations.find((conversation) => conversation.id === current.id) || current : data.conversations[0] || null);
+      return true;
+    } catch (err) {
+      console.error("Failed to load conversations", err);
+      setError(err instanceof TypeError
+        ? "Unable to reach the chat server. Check that the backend tunnel is running and CORS changes are deployed."
+        : err instanceof Error ? err.message : "Failed to load conversations");
+      return false;
+    }
   }, []);
 
   const loadMessages = useCallback(async (conversation: ChatConversation) => {
@@ -549,12 +573,18 @@ export default function ChatPage() {
 
     try {
       const fetchHistoryPromise = listChatMessages(conversation.id);
-      const syncKeysPromise = syncConversationKeys(conversation.id);
+      const syncKeysPromise = syncConversationKeys(conversation.id, [], { allowCreate: false, allowRepair: false });
 
       const [data] = await Promise.all([fetchHistoryPromise, syncKeysPromise.catch(() => undefined)]);
 
       const decryptor = conversation.type === "group" ? decryptGroupMessage : decryptChatMessage;
       const decrypted = await Promise.all(data.messages.reverse().map((message) => decryptor(message as ChatMessage)));
+      const participantUserIds = getParticipantUserIds(conversation);
+      const encryptedMessages = decrypted.filter((message) => message.ciphertext && !message.deleted_for_everyone_at);
+      const hasWorkingKey = encryptedMessages.some((message) => message.decrypted_body && !message.decrypt_failed);
+      if (participantUserIds.length > 0 && (!encryptedMessages.length || hasWorkingKey)) {
+        void syncConversationKeys(conversation.id, participantUserIds, { allowCreate: false, allowRepair: true }).catch(() => undefined);
+      }
 
       // Read cache after API fetch to include socket messages that arrived during fetch
       const merged = mergeMessagesList(
@@ -575,35 +605,51 @@ export default function ChatPage() {
     } catch (err) {
       console.error("Failed to load messages", err);
     }
-  }, []);
+  }, [getParticipantUserIds]);
 
   useEffect(() => {
     let cancelled = false;
     async function bootChat() {
       if (!user) {
         setDeviceReady(false);
+        setCryptoChecking(false);
         return;
       }
       setError("");
-      if (!user.chat_encryption_enabled) {
+      setCryptoChecking(true);
+      const vault = getStoredVault();
+
+      if (vault) {
         if (cancelled) return;
-        setSetupNeeded(true);
         setVaultLocked(false);
+        setSetupNeeded(false);
+        setDeviceReady(true);
+        setCryptoChecking(false);
+        await loadConversations();
+        return;
+      }
+
+      try {
+        await fetchUserCryptoProfile(user.id);
+        if (cancelled) return;
+        setVaultLocked(true);
+        setSetupNeeded(false);
         setDeviceReady(false);
-      } else {
-        const vault = getStoredVault();
-        if (!vault) {
-          if (cancelled) return;
-          setVaultLocked(true);
-          setSetupNeeded(false);
+      } catch (err) {
+        if (cancelled) return;
+        const message = err instanceof Error ? err.message : "";
+        if (/not found|no crypto profile/i.test(message)) {
+          setSetupNeeded(true);
+          setVaultLocked(false);
           setDeviceReady(false);
         } else {
-          if (cancelled) return;
-          setVaultLocked(false);
+          setError(err instanceof Error ? err.message : "Unable to verify chat encryption status.");
           setSetupNeeded(false);
-          setDeviceReady(true);
-          await loadConversations();
+          setVaultLocked(true);
+          setDeviceReady(false);
         }
+      } finally {
+        if (!cancelled) setCryptoChecking(false);
       }
     }
     bootChat();
@@ -773,6 +819,8 @@ export default function ChatPage() {
     setError("");
     try {
       await restoreEncryptedChat(cleanPin, user.id);
+      clearDecryptedMessagesCache();
+      setMessages([]);
       setInputPin("");
       setVaultLocked(false);
       setDeviceReady(true);
@@ -806,9 +854,7 @@ export default function ChatPage() {
     setProcessingCrypto(true);
     setError("");
     try {
-      Object.keys(decryptedMessagesCache).forEach((key) => {
-        delete decryptedMessagesCache[key];
-      });
+      clearDecryptedMessagesCache();
       setMessages([]);
 
       await resetEncryptedChat(cleanPin);
@@ -846,6 +892,14 @@ export default function ChatPage() {
     const vault = getStoredVault();
     if (!vault) {
       setError("Key vault not unlocked. Unlock to send messages.");
+      return;
+    }
+    const cachedHistory = decryptedMessagesCache[active.id] || messages;
+    const encryptedHistory = cachedHistory.filter((message) => message.ciphertext && !message.deleted_for_everyone_at && !message.pending);
+    const hasReadableHistory = encryptedHistory.some((message) => message.decrypted_body && !message.decrypt_failed);
+    const hasFailedHistory = encryptedHistory.some((message) => message.decrypt_failed || message.missing_envelope);
+    if (encryptedHistory.length > 0 && hasFailedHistory && !hasReadableHistory) {
+      setError("This device has not recovered the original key for this chat. Open the chat on a device that can read the history so it can re-share the key, or use the explicit encryption reset flow.");
       return;
     }
 
@@ -887,9 +941,7 @@ export default function ChatPage() {
     });
 
     try {
-      const participantUserIds = activeIsGroup
-        ? groupChat.members.map((m) => m.user_id)
-        : activeOtherUserId ? [user.id, activeOtherUserId] : [user.id];
+      const participantUserIds = getParticipantUserIds(active);
 
       const epochNumber = await syncConversationKeys(active.id, participantUserIds);
 
@@ -969,7 +1021,7 @@ export default function ChatPage() {
     }
   }
 
-  if (!user) return <div className="p-6 text-sm text-zinc-400">Loading chat…</div>;
+  if (!user || cryptoChecking) return <div className="p-6 text-sm text-zinc-400">Loading chat…</div>;
 
   if (setupNeeded) {
     return (

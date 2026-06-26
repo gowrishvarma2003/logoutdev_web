@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { User } from "../types";
 import { signOutFirebase, getCurrentFirebaseIdToken } from "../firebase";
 import { firebaseLogin, getCurrentUser } from "../api";
-import * as requestCache from "../services/requestCache";
+import { clearClientSession, clearClientSessionAndRedirect } from "../auth/logoutCleanup";
 
 interface AuthState {
   user: User | null;
@@ -35,20 +35,22 @@ export function useAuth() {
         }
       }
 
-      if (token && user) {
-        setState({ user, token, isLoaded: true });
-        return;
-      }
+      if (token) {
+        if (user) {
+          setState({ user, token, isLoaded: true });
+        }
 
-      if (token && !user) {
         try {
           const { user: fetchedUser } = await getCurrentUser();
           if (cancelled) return;
           localStorage.setItem("currentUser", JSON.stringify(fetchedUser));
           setState({ user: fetchedUser, token, isLoaded: true });
         } catch {
-          localStorage.removeItem("authToken");
-          localStorage.removeItem("currentUser");
+          if (user && localStorage.getItem("authToken")) {
+            if (!cancelled) setState({ user, token, isLoaded: true });
+            return;
+          }
+          clearClientSession();
           setState({ user: null, token: null, isLoaded: true });
         }
         return;
@@ -87,12 +89,8 @@ export function useAuth() {
     } catch {
       // Ignore Firebase sign-out errors
     }
-    // Clear any cached user-scoped data so the next signed-in user can't see
-    // the previous user's spaces/repos caches.
-    requestCache.clear();
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("currentUser");
-    window.location.href = "/login";
+    setState({ user: null, token: null, isLoaded: true });
+    clearClientSessionAndRedirect("/login");
   }, []);
 
   const refreshUser = useCallback((updated: User) => {
