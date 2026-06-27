@@ -223,30 +223,52 @@ export function CallProvider({
   }, []);
 
   const joinSfu = useCallback(async (call: CallRecord, details = null as Awaited<ReturnType<typeof callApi.joinCall>>["sfu"] | null) => {
+    const config = await ensureCallConfig();
+    let joinedCall = call;
     if (!details) {
       const joined = await callApi.joinCall(call.id, getCurrentChatDeviceId());
       details = joined.sfu;
-      call = joined.call;
+      joinedCall = joined.call;
     }
     if (!details) throw new Error("Group media credentials were not returned.");
-    socket.joinCallRoom(call.id);
-    setCurrentCall(call);
+    const roomAck = await socket.joinCallRoomWithAck(joinedCall.id).catch((err) => ({ ok: false, error: err instanceof Error ? err.message : "Could not join realtime call room." }));
+    if (roomAck?.ok === false) {
+      console.warn("[Calls] Realtime call room join failed:", roomAck.error);
+    }
+    setCurrentCall(joinedCall);
     setPendingCallIntent(null);
     setIncomingCall(null);
     setState("connecting");
-    const joinedRoom = await sfuService.joinRoom(details, { audio: true, video: wantsVideo(call) }, {
-      onRemoteStream: (participantId, stream) => setRemoteStreams((prev) => ({ ...prev, [participantId]: stream })),
-      onParticipantLeft: (participantId) => setRemoteStreams((prev) => {
-        const next = { ...prev };
-        delete next[participantId];
-        return next;
-      }),
-    });
-    roomRef.current = joinedRoom.room;
-    liveKitTracksRef.current = joinedRoom.localTracks;
-    setLocalStream(streamFromLocalTracks(joinedRoom.localTracks));
-    setState("connected");
-  }, [setCurrentCall, socket]);
+    try {
+      const joinedRoom = await sfuService.joinRoom(details, { audio: true, video: wantsVideo(joinedCall), iceServers: config.rtc.iceServers }, {
+        onConnectionState: (connectionState) => {
+          if (connectionState === "connected") setState("connected");
+          if (connectionState === "reconnecting") setState("reconnecting");
+          if (connectionState === "failed" || connectionState === "disconnected") setState((current) => (current === "ending" ? current : "failed"));
+        },
+        onError: (mediaError) => setError(mediaError.message || "Media device error."),
+        onRemoteStream: (participantId, stream) => setRemoteStreams((prev) => ({ ...prev, [participantId]: stream })),
+        onParticipantLeft: (participantId) => setRemoteStreams((prev) => {
+          const next = { ...prev };
+          delete next[participantId];
+          return next;
+        }),
+      });
+      roomRef.current = joinedRoom.room;
+      liveKitTracksRef.current = joinedRoom.localTracks;
+      setLocalStream(streamFromLocalTracks(joinedRoom.localTracks));
+      setState("connected");
+    } catch (err) {
+      await Promise.resolve(sfuService.leaveRoom(roomRef.current, liveKitTracksRef.current)).catch(() => undefined);
+      roomRef.current = null;
+      liveKitTracksRef.current = [];
+      socket.leaveCallRoom(joinedCall.id);
+      setCurrentCall(null);
+      setRemoteStreams({});
+      await callApi.leaveCall(joinedCall.id, joinedCall.created_by === user.id ? "cancelled" : "left").catch(() => undefined);
+      throw err;
+    }
+  }, [ensureCallConfig, setCurrentCall, socket, user.id]);
 
   const startDirectCall = useCallback(async (conversation: ChatConversation, kind: "audio" | "video") => {
     if (!conversation.other_user?.id || activeCallRef.current || pendingCallIntent) return;
@@ -295,6 +317,9 @@ export function CallProvider({
     setState("dialing");
     try {
       setError("");
+      const config = await ensureCallConfig();
+      if (!config.sfu.configured || !config.sfu.url) throw new Error("Group calling is not configured.");
+      sfuService.assertBrowserCanReachSfuUrl(config.sfu.url);
       const result = await callApi.startGroupCall({ conversationId: conversation.id, callType: kind, deviceId: getCurrentChatDeviceId() });
       if (startTokenRef.current !== token) {
         void callApi.leaveCall(result.call.id, "cancelled").catch(() => undefined);
@@ -306,7 +331,7 @@ export function CallProvider({
       setError(err instanceof Error ? err.message : "Could not start group call");
       setState("failed");
     }
-  }, [joinSfu, pendingCallIntent]);
+  }, [ensureCallConfig, joinSfu, pendingCallIntent]);
 
   const acceptIncoming = useCallback(async () => {
     if (!incomingCall) return;

@@ -20,7 +20,7 @@ import {
   updateGroup,
 } from "@/lib/services/groupApi";
 import { searchChatUsers } from "@/lib/services/chatApi";
-import { wrapGroupKeyForMembers } from "@/lib/chatCrypto";
+import { shareStoredConversationKeys, wrapGroupKeyForMembers } from "@/lib/chatCrypto";
 
 interface Props {
   conversation: ChatConversation;
@@ -95,10 +95,8 @@ export default function GroupInfoPanel({ conversation, currentUserId, onClose, o
     setBusy(true);
     setError("");
     try {
-      const existingIds = members.map((member) => member.user_id);
-      const allTargets = Array.from(new Set([...existingIds, user.id]));
-      const { envelopes } = await wrapGroupKeyForMembers(conversation.id, 0, allTargets);
-      await addGroupMembers(conversation.id, { member_user_ids: [user.id], epoch_envelopes: envelopes });
+      await addGroupMembers(conversation.id, { member_user_ids: [user.id], epoch_envelopes: [] });
+      await shareStoredConversationKeys(conversation.id, [user.id]);
       setQuery("");
       setResults([]);
       await loadMembers();
@@ -202,7 +200,7 @@ export default function GroupInfoPanel({ conversation, currentUserId, onClose, o
   }
 
   return (
-    <aside className="flex h-full w-full flex-col border-l border-zinc-900 bg-zinc-950 text-white lg:w-[360px]">
+    <aside className="flex h-full w-full flex-col bg-zinc-950 text-white fixed inset-0 z-50 lg:static lg:z-0 lg:w-[360px] lg:border-l lg:border-zinc-900">
       <header className="flex items-center justify-between border-b border-zinc-900 px-4 py-4">
         <div className="flex items-center gap-2">
           <CogIcon className="h-5 w-5" />

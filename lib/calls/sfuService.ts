@@ -11,14 +11,87 @@ import {
 } from "livekit-client";
 import type { SfuJoinDetails } from "@/lib/types";
 
+type SfuConnectionState = "connecting" | "connected" | "reconnecting" | "disconnected" | "failed";
+
 export interface SfuCallbacks {
   onRemoteStream?: (participantId: string, stream: MediaStream) => void;
   onParticipantLeft?: (participantId: string) => void;
+  onConnectionState?: (state: SfuConnectionState) => void;
+  onError?: (error: Error) => void;
 }
 
-export async function joinRoom(details: SfuJoinDetails, options: { audio: boolean; video: boolean }, callbacks: SfuCallbacks = {}) {
+export interface SfuJoinOptions {
+  audio: boolean;
+  video: boolean;
+  iceServers?: RTCIceServer[];
+  connectTimeoutMs?: number;
+}
+
+function isLoopbackHost(hostname: string) {
+  const normalized = hostname.toLowerCase();
+  return normalized === "localhost" || normalized === "0.0.0.0" || normalized === "::1" || normalized.startsWith("127.");
+}
+
+export function assertBrowserCanReachSfuUrl(url: string, pageLocation = typeof window !== "undefined" ? window.location : null) {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error("Group media server URL is invalid. Check LIVEKIT_PUBLIC_URL.");
+  }
+
+  if (parsed.protocol !== "ws:" && parsed.protocol !== "wss:") {
+    throw new Error("Group media server URL must use ws:// or wss://. Check LIVEKIT_PUBLIC_URL.");
+  }
+
+  if (!pageLocation) return;
+  const pageIsLoopback = isLoopbackHost(pageLocation.hostname);
+  const mediaIsLoopback = isLoopbackHost(parsed.hostname);
+
+  if (mediaIsLoopback && !pageIsLoopback) {
+    throw new Error("Group media server is configured as localhost. Set LIVEKIT_PUBLIC_URL to a public LiveKit wss:// URL for remote users.");
+  }
+
+  if (pageLocation.protocol === "https:" && parsed.protocol === "ws:" && !mediaIsLoopback) {
+    throw new Error("Secure pages require a secure LiveKit URL. Set LIVEKIT_PUBLIC_URL to wss://.");
+  }
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<T>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(message)), timeoutMs);
+  });
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
+function normalizeSfuError(error: unknown, url: string) {
+  const message = error instanceof Error ? error.message : "Failed to establish connection.";
+  let host = "the group media server";
+  try {
+    host = new URL(url).host;
+  } catch {
+    // Keep the generic host label.
+  }
+  return new Error(`Could not connect to ${host}. ${message}`);
+}
+
+export async function joinRoom(details: SfuJoinDetails, options: SfuJoinOptions, callbacks: SfuCallbacks = {}) {
+  assertBrowserCanReachSfuUrl(details.url);
   const room = new Room({ adaptiveStream: true, dynacast: true });
   const remoteStreams = new Map<string, MediaStream>();
+
+  room.on(RoomEvent.Connected, () => callbacks.onConnectionState?.("connected"));
+  room.on(RoomEvent.Reconnecting, () => callbacks.onConnectionState?.("reconnecting"));
+  room.on(RoomEvent.SignalReconnecting, () => callbacks.onConnectionState?.("reconnecting"));
+  room.on(RoomEvent.Reconnected, () => callbacks.onConnectionState?.("connected"));
+  room.on(RoomEvent.Disconnected, () => callbacks.onConnectionState?.("disconnected"));
+  room.on(RoomEvent.ConnectionStateChanged, (connectionState) => {
+    callbacks.onConnectionState?.(String(connectionState) as SfuConnectionState);
+  });
+  room.on(RoomEvent.MediaDevicesError, (error) => callbacks.onError?.(error));
 
   room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, _publication: RemoteTrackPublication, participant: RemoteParticipant) => {
     if (track.kind !== Track.Kind.Audio && track.kind !== Track.Kind.Video) return;
@@ -33,10 +106,23 @@ export async function joinRoom(details: SfuJoinDetails, options: { audio: boolea
     callbacks.onParticipantLeft?.(participant.identity);
   });
 
-  await room.connect(details.url, details.token);
-  const tracks = await createLocalTracks({ audio: options.audio, video: options.video });
-  for (const track of tracks) {
-    await room.localParticipant.publishTrack(track);
+  const tracks: LocalTrack[] = [];
+  try {
+    await withTimeout(
+      room.connect(details.url, details.token, options.iceServers?.length ? { rtcConfig: { iceServers: options.iceServers } } : undefined),
+      options.connectTimeoutMs || 15000,
+      "Timed out while connecting to the group media server."
+    );
+    const localTracks = await createLocalTracks({ audio: options.audio, video: options.video });
+    tracks.push(...localTracks);
+    for (const track of tracks) {
+      await room.localParticipant.publishTrack(track);
+    }
+  } catch (error) {
+    tracks.forEach((track) => track.stop());
+    room.disconnect();
+    callbacks.onConnectionState?.("failed");
+    throw normalizeSfuError(error, details.url);
   }
 
   return { room, localTracks: tracks, remoteStreams };

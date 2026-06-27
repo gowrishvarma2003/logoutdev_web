@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   syncGroupKeys,
   shareConversationKey,
+  shareStoredConversationKeys,
   encryptChatMessage,
   decryptGroupMessage,
   getStoredGroupEpochKey,
@@ -101,16 +102,13 @@ export function useGroupChat(conversationId: string | null) {
   const rotateAndAdd = useCallback(
     async (newUserIds: string[]) => {
       if (!conversationId) throw new Error("No group selected.");
-      const existingIds = members.map((member) => member.user_id);
-      const allTargets = Array.from(new Set([...existingIds, ...newUserIds]));
-      const nextEpoch = (currentEpoch?.epoch_number || 1) + 1;
-      await shareConversationKey(conversationId, nextEpoch, allTargets);
       const result = await addGroupMembers(conversationId, { member_user_ids: newUserIds, epoch_envelopes: [] });
+      await shareStoredConversationKeys(conversationId, newUserIds);
       await sync(conversationId);
       await reloadMembers();
       return result;
     },
-    [conversationId, members, currentEpoch, sync, reloadMembers]
+    [conversationId, sync, reloadMembers]
   );
 
   const rotateAndRemove = useCallback(

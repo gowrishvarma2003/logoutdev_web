@@ -646,8 +646,21 @@ export async function shareConversationKey(conversationId: string, epochNumber: 
     setStoredVault(vault);
   }
   const keyCommitment = await ensureStoredKeyCommitment(stored);
+  await shareStoredKeyWithParticipants(conversationId, epochNumber, stored, keyCommitment, participantUserIds);
 
-  // Fetch and encrypt for all participants in parallel (no sequential HTTP calls)
+  // Fire-and-forget: vault backup is important but should NEVER block a message send.
+  // PBKDF2 with 100k iterations takes 400-800ms — unacceptable in the hot path.
+  void backupVaultIfSessionActive();
+  return stored;
+}
+
+async function shareStoredKeyWithParticipants(
+  conversationId: string,
+  epochNumber: number,
+  stored: KeyVault["conversation_keys"][string][number],
+  keyCommitment: string,
+  participantUserIds: string[]
+) {
   const shareResults = await Promise.all(
     participantUserIds.map(async (userId) => {
       try {
@@ -685,11 +698,26 @@ export async function shareConversationKey(conversationId: string, epochNumber: 
       stored = freshVault.conversation_keys[conversationId][epochNumber];
     }
   }
+}
+
+export async function shareStoredConversationKeys(conversationId: string, participantUserIds: string[]) {
+  const vault = getStoredVault();
+  if (!vault) throw new Error("Vault is locked.");
+  const epochs = vault.conversation_keys[conversationId];
+  if (!epochs || Object.keys(epochs).length === 0) {
+    throw new Error("This device does not have the existing group keys. Unlock a device that can read this group before adding members.");
+  }
+
+  for (const epochNumber of Object.keys(epochs).map(Number).sort((a, b) => a - b)) {
+    const stored = epochs[epochNumber];
+    if (!stored) continue;
+    const keyCommitment = await ensureStoredKeyCommitment(stored);
+    await shareStoredKeyWithParticipants(conversationId, epochNumber, stored, keyCommitment, participantUserIds);
+  }
 
   // Fire-and-forget: vault backup is important but should NEVER block a message send.
   // PBKDF2 with 100k iterations takes 400-800ms — unacceptable in the hot path.
   void backupVaultIfSessionActive();
-  return stored;
 }
 
 export async function syncConversationKeys(

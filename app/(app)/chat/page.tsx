@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Avatar from "@/components/ui/Avatar";
-import { ChatBubbleIcon, CheckCircleIcon, LockIcon, PlusIcon, UsersIcon, XCircleIcon } from "@/components/ui/Icons";
+import { ArrowLeftIcon, ChatBubbleIcon, CheckCircleIcon, LockIcon, PlusIcon, UsersIcon, XCircleIcon } from "@/components/ui/Icons";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useChatSocket } from "@/lib/hooks/useChatSocket";
 import { useGroupChat } from "@/lib/hooks/useGroupChat";
@@ -1182,8 +1182,8 @@ export default function ChatPage() {
   return (
     <CallProvider user={user} socket={socket}>
     <main className="min-h-screen bg-zinc-950 text-white">
-      <div className="flex h-[calc(100vh-64px)] min-h-[680px] flex-col lg:flex-row">
-        <aside className="w-full border-b border-zinc-900 lg:w-[360px] lg:border-b-0 lg:border-r">
+      <div className="flex h-[calc(100vh-64px)] lg:min-h-[680px] flex-col lg:flex-row">
+        <aside className={`w-full border-b border-zinc-900 lg:w-[360px] lg:border-b-0 lg:border-r ${active ? "hidden lg:block" : "block"}`}>
           <div className="flex items-center justify-between border-b border-zinc-900 px-4 py-4">
             <div className="flex items-center gap-2">
               <ChatBubbleIcon className="h-5 w-5" />
@@ -1248,11 +1248,18 @@ export default function ChatPage() {
           )}
         </aside>
 
-        <section className="flex min-w-0 flex-1 flex-col">
+        <section className={`flex min-w-0 flex-1 flex-col ${active ? "flex" : "hidden lg:flex"}`}>
           {active ? (
             <>
               <header className="flex items-center justify-between border-b border-zinc-900 px-5 py-4">
                 <div className="flex min-w-0 items-center gap-3">
+                  <button
+                    onClick={() => setActive(null)}
+                    className="mr-1 rounded-lg p-1 text-zinc-400 hover:bg-zinc-900 hover:text-white lg:hidden"
+                    title="Back to chats"
+                  >
+                    <ArrowLeftIcon className="h-6 w-6" />
+                  </button>
                   {activeIsGroup ? (
                     <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-zinc-800 text-sm font-semibold text-white">
                       {active.group?.title?.[0]?.toUpperCase() || <UsersIcon className="h-4 w-4" />}
@@ -1278,8 +1285,10 @@ export default function ChatPage() {
                       <UsersIcon className="h-4 w-4" /> Info
                     </button>
                   ) : null}
-                  <CheckCircleIcon className="h-4 w-4 text-emerald-400" />
-                  Device ready
+                  <div className="hidden md:flex items-center gap-1">
+                    <CheckCircleIcon className="h-4 w-4 text-emerald-400" />
+                    <span>Device ready</span>
+                  </div>
                 </div>
               </header>
               <CallErrorBoundary>
