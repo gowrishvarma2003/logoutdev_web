@@ -159,7 +159,7 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
         </div>
       </div>
 
-      <nav className="flex gap-1 overflow-x-auto px-4" role="tablist">
+      <nav className="flex gap-1 overflow-x-auto px-4 scrollbar-none" role="tablist">
         {tabs.map((tab) => {
           const isActive = tab.href === base ? pathname === base : pathname.startsWith(tab.href);
           return (

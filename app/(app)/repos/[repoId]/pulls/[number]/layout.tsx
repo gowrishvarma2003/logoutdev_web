@@ -116,7 +116,7 @@ export default function PullRequestLayout({
       ) : null}
 
       {/* Tabs */}
-      <div className="mb-6 flex overflow-x-auto border-b border-zinc-800">
+      <div className="mb-6 flex overflow-x-auto border-b border-zinc-800 scrollbar-none">
         <nav className="-mb-px flex space-x-6" aria-label="Tabs">
           {tabs.map((tab) => {
             // Active if exact match for conversation, or starts with href for others

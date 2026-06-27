@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { User } from "../types";
-import { signOutFirebase, getCurrentFirebaseIdToken } from "../firebase";
-import { firebaseLogin, getCurrentUser } from "../api";
+import { signOutFirebase } from "../firebase";
+import { getCurrentUser } from "../api";
 import { clearClientSession, clearClientSessionAndRedirect } from "../auth/logoutCleanup";
 
 interface AuthState {
@@ -54,21 +54,6 @@ export function useAuth() {
           setState({ user: null, token: null, isLoaded: true });
         }
         return;
-      }
-
-      if (!token && !user) {
-        try {
-          const fbToken = await getCurrentFirebaseIdToken();
-          if (fbToken && !cancelled) {
-            const data = await firebaseLogin(fbToken);
-            localStorage.setItem("authToken", data.token);
-            localStorage.setItem("currentUser", JSON.stringify(data.user));
-            setState({ user: data.user, token: data.token, isLoaded: true });
-            return;
-          }
-        } catch {
-          // Firebase not signed in either - stay logged out
-        }
       }
 
       if (!cancelled) {

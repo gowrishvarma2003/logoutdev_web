@@ -726,7 +726,6 @@ export interface HashtagFeedResponse {
 export interface AuthResponse {
   token: string;
   user: User;
-  firebase_custom_token?: string;
   error?: string;
 }
 

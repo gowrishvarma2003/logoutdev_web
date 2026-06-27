@@ -388,7 +388,7 @@ export default function RepositoriesPage() {
             )}
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-3">
+          <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-none">
             {TABS.map((tab) => (
               <button
                 key={tab.key}

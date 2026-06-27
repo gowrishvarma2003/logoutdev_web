@@ -5,12 +5,10 @@ import { getCurrentUser } from "../api";
 import { signOutFirebase } from "../firebase";
 
 vi.mock("../firebase", () => ({
-  getCurrentFirebaseIdToken: vi.fn(async () => null),
   signOutFirebase: vi.fn(async () => undefined),
 }));
 
 vi.mock("../api", () => ({
-  firebaseLogin: vi.fn(),
   getCurrentUser: vi.fn(),
 }));
 

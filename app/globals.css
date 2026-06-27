@@ -39,3 +39,54 @@
 .animate-chat-fade-in {
   animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Core Scrollbar Styles (Unlayered for universal browser support) */
+* {
+  /* Hide scrollbars globally for Firefox, IE, and Edge */
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Hide scrollbars globally for Chrome, Safari, Edge, Opera, and mobile browsers */
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+  display: none !important;
+}
+
+/* Utility to completely hide scrollbars but keep scrolling functionality */
+.no-scrollbar,
+.scrollbar-none {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+/* Explicit class for thin scrollbars (fallback to none if globally hidden) */
+.scrollbar-thin {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  display: none !important;
+}
+
+
+

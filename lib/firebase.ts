@@ -2,15 +2,10 @@ import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import {
   getAuth,
   connectAuthEmulator,
-  signInWithEmailAndPassword,
-  signInWithCustomToken,
-  createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
-  onAuthStateChanged,
   type Auth,
-  type User as FirebaseUser,
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -45,33 +40,6 @@ export function getFirebaseAuth(): Auth {
   return auth;
 }
 
-export async function signupWithEmail(
-  name: string,
-  email: string,
-  password: string
-): Promise<string> {
-  const auth = getFirebaseAuth();
-  const credential = await createUserWithEmailAndPassword(auth, email, password);
-
-  if (name) {
-    const { updateProfile } = await import("firebase/auth");
-    await updateProfile(credential.user, { displayName: name });
-  }
-
-  return credential.user.getIdToken();
-}
-
-export async function loginWithEmail(email: string, password: string): Promise<string> {
-  const auth = getFirebaseAuth();
-  const credential = await signInWithEmailAndPassword(auth, email, password);
-  return credential.user.getIdToken();
-}
-
-export async function loginWithFirebaseCustomToken(customToken: string): Promise<string> {
-  const credential = await signInWithCustomToken(getFirebaseAuth(), customToken);
-  return credential.user.getIdToken();
-}
-
 export async function loginWithGoogle(): Promise<string> {
   const auth = getFirebaseAuth();
   const provider = new GoogleAuthProvider();
@@ -82,21 +50,6 @@ export async function loginWithGoogle(): Promise<string> {
 export async function signOutFirebase(): Promise<void> {
   const auth = getFirebaseAuth();
   return signOut(auth);
-}
-
-export function onFirebaseAuthStateChanged(
-  callback: (user: FirebaseUser | null) => void
-): () => void {
-  const auth = getFirebaseAuth();
-  return onAuthStateChanged(auth, callback);
-}
-
-export async function getCurrentFirebaseIdToken(): Promise<string | null> {
-  const auth = getFirebaseAuth();
-  if (auth.currentUser) {
-    return auth.currentUser.getIdToken();
-  }
-  return null;
 }
 
 export { GoogleAuthProvider };

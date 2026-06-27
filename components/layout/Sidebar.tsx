@@ -66,7 +66,7 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
   const searchParams = useSearchParams();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
-  const placeholders = ["builders...", "launches...", "spaces...", "questions...", "repos..."];
+  const placeholders = ["builders", "launches", "spaces", "questions", "repos"];
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);

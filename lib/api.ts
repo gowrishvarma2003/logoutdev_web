@@ -18,6 +18,20 @@ import { clearClientSessionAndRedirect } from "./auth/logoutCleanup";
 
 export { API_BASE_URL };
 
+export class ApiError extends Error {
+  status: number;
+  code?: string;
+  data: Record<string, unknown>;
+
+  constructor(message: string, status: number, data: Record<string, unknown> = {}) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.code = typeof data.code === "string" ? data.code : undefined;
+    this.data = data;
+  }
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function getAuthHeaders(): Record<string, string> {
@@ -39,7 +53,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
     }
   }
 
-  if (!res.ok) throw new Error(data.error || "Request failed");
+  if (!res.ok) throw new ApiError(data.error || "Request failed", res.status, data);
   return data as T;
 }
 
@@ -60,12 +74,14 @@ export async function loginUser(
 export async function registerUser(
   name: string,
   email: string,
-  password: string
+  password: string,
+  username: string,
+  verificationToken: string
 ): Promise<AuthResponse> {
   const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ name, email, password, username, verification_token: verificationToken }),
   });
   return handleResponse<AuthResponse>(res);
 }
@@ -73,13 +89,11 @@ export async function registerUser(
 export async function firebaseLogin(
   idToken: string,
   name?: string,
-  username?: string,
-  verificationToken?: string
+  username?: string
 ): Promise<AuthResponse> {
   const body: Record<string, string> = {};
   if (name) body.name = name;
   if (username) body.username = username;
-  if (verificationToken) body.verification_token = verificationToken;
 
   const res = await fetch(`${API_BASE_URL}/api/auth/firebase-login`, {
     method: "POST",
