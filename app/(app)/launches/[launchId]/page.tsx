@@ -345,7 +345,7 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
 
                 {ownerSettingsOpen && (
                   <>
-                    <div className="fixed inset-0 z-10" onClick={() => setOwnerSettingsOpen(false)} />
+                    <div className="fixed inset-0 z-10 cursor-pointer" onClick={() => setOwnerSettingsOpen(false)} />
                     <div className="absolute right-0 left-0 mt-2 z-20 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl">
                       <Link
                         href={`/launches/${launch.id}/edit`}

@@ -601,6 +601,26 @@ export interface ActivityItem {
   };
 }
 
+export interface HeatmapBucket {
+  date: string;                       // YYYY-MM-DD (UTC)
+  total: number;
+  by_type: Record<string, number>;
+}
+
+export interface ProfileHeatmap {
+  username: string;
+  user_id: string;
+  range: { start: string; end: string };
+  days: number;
+  buckets: HeatmapBucket[];
+  totals: Record<string, number>;
+  max_day_count: number;
+  active_days: number;
+  current_streak: number;
+  longest_streak: number;
+  types: string[];
+}
+
 export interface Post {
   id: string;
   user_id: string;

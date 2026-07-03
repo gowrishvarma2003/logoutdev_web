@@ -8,6 +8,7 @@ import { createReply, deletePost } from "@/lib/api";
 import type { Post, PostHashtagEntity, PostMentionEntity, User } from "@/lib/types";
 import { formatRelativeTime, emailToHandle } from "@/lib/utils";
 import Avatar from "@/components/ui/Avatar";
+import ProfileHoverCard from "@/components/profile/ProfileHoverCard";
 import PostActions from "./PostActions";
 import ComposeBox from "./ComposeBox";
 import { DotsIcon, TrashIcon, RepeatIcon } from "@/components/ui/Icons";
@@ -139,16 +140,32 @@ export default function PostCard({
       )}
 
       <div className="flex gap-3">
-        <Avatar user={post.author ?? null} size="md" className="mt-0.5 shrink-0" />
+        <Link
+          href={`/profile/${getAuthorHandle(post.author)}`}
+          onClick={(e) => e.stopPropagation()}
+          className="shrink-0"
+        >
+          <Avatar user={post.author ?? null} size="md" className="mt-0.5" />
+        </Link>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <span className="text-sm font-semibold leading-snug text-zinc-100 hover:text-white transition-colors">
-              {post.author?.name ?? "Unknown"}
-            </span>
-            <span className="truncate text-xs leading-snug text-zinc-400">
+            <ProfileHoverCard username={getAuthorHandle(post.author)} user={post.author}>
+              <Link
+                href={`/profile/${getAuthorHandle(post.author)}`}
+                onClick={(e) => e.stopPropagation()}
+                className="text-sm font-semibold leading-snug text-zinc-100 hover:text-white transition-colors hover:underline"
+              >
+                {post.author?.name ?? "Unknown"}
+              </Link>
+            </ProfileHoverCard>
+            <Link
+              href={`/profile/${getAuthorHandle(post.author)}`}
+              onClick={(e) => e.stopPropagation()}
+              className="truncate text-xs leading-snug text-zinc-400 hover:text-zinc-300 transition-colors"
+            >
               @{getAuthorHandle(post.author)}
-            </span>
+            </Link>
             <span className="text-zinc-600 text-xs font-bold">·</span>
             <span className="shrink-0 text-xs text-zinc-500 font-medium" title={new Date(post.created_at).toLocaleString()}>
               {formatRelativeTime(post.created_at)}

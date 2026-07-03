@@ -1,10 +1,12 @@
 "use client";
 
 import { use } from "react";
+import Link from "next/link";
 import { useProfileLaunches } from "@/lib/hooks/useProfile";
 import LaunchCard from "@/components/launches/LaunchCard";
 import { ProfileCardGridSkeleton } from "@/components/profile/ProfileSkeleton";
 import { SparklesIcon } from "@/components/ui/Icons";
+import EmptyState from "@/components/ui/EmptyState";
 
 export default function ProfileLaunchesPage({
   params,
@@ -24,11 +26,18 @@ export default function ProfileLaunchesPage({
 
   if (launches.length === 0) {
     return (
-      <div className="px-5 py-16 text-center">
-        <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-3">
-          <SparklesIcon className="w-5 h-5 text-zinc-600" />
-        </div>
-        <p className="text-zinc-600 text-sm">No launches yet.</p>
+      <div className="p-5">
+        <EmptyState
+          icon={<SparklesIcon className="h-7 w-7" />}
+          title="No launches yet"
+          description="Turn a repo, prototype, or product idea into a launch page when it is ready for eyes."
+          tone="feed"
+          action={
+            <Link href="/launches/new" className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+              Create launch
+            </Link>
+          }
+        />
       </div>
     );
   }

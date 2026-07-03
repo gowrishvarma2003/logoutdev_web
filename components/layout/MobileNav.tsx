@@ -63,7 +63,7 @@ export default function MobileNav({ userId, username, unreadCount = 0, onLogout 
       {/* ── Overflow menu drawn on top of content ── */}
       {showMore && (
         <>
-          <div className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={() => setShowMore(false)} />
+          <div className="lg:hidden fixed inset-0 z-40 cursor-pointer bg-black/60 backdrop-blur-sm" onClick={() => setShowMore(false)} />
           <div className="lg:hidden fixed bottom-[61px] inset-x-0 z-50 animate-in slide-in-from-bottom-2 duration-150">
             <div className="mx-4 mb-2 rounded-2xl border border-zinc-700 bg-zinc-900 shadow-2xl">
               <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">

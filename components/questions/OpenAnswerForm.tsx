@@ -49,7 +49,7 @@ export default function OpenAnswerForm({
         rows={5}
         placeholder={placeholder}
         previewClassName="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm leading-relaxed text-white"
-        className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm leading-relaxed text-transparent caret-white outline-none focus:border-zinc-600 selection:bg-[#1d9bf0]/30"
+         className="w-full px-3 py-3 text-sm leading-relaxed text-transparent caret-white outline-none selection:bg-[#1d9bf0]/30"
       />
 
       <div className="flex items-center justify-between">

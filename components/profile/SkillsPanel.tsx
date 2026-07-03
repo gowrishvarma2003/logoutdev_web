@@ -6,6 +6,8 @@
  */
 
 import type { UserProfileSkill } from "@/lib/types";
+import EmptyState from "@/components/ui/EmptyState";
+import { CodeBracketIcon } from "@/components/ui/Icons";
 
 interface SkillsPanelProps {
   skills: UserProfileSkill[];
@@ -36,7 +38,13 @@ export default function SkillsPanel({ skills, showEmpty = false }: SkillsPanelPr
       </h2>
 
       {skills.length === 0 ? (
-        <p className="text-sm text-zinc-600 italic">No skills listed yet.</p>
+        <EmptyState
+          icon={<CodeBracketIcon className="h-6 w-6" />}
+          title="No skills listed yet"
+          description="Add languages, frameworks, and tools so collaborators know where you shine."
+          tone="repo"
+          size="sm"
+        />
       ) : (
         <div className="flex flex-wrap gap-2">
           {skills.map((s, idx) => {

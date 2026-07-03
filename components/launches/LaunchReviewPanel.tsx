@@ -97,7 +97,7 @@ export default function LaunchReviewPanel({
                   rows={3}
                   placeholder="What worked? What didn't? Would you recommend it?"
                   previewClassName="w-full rounded-lg border border-zinc-800 bg-zinc-950/50 px-4 py-2.5 text-sm leading-relaxed text-white"
-                  className="w-full resize-y rounded-lg border border-zinc-800 bg-zinc-950/50 px-4 py-2.5 text-sm leading-relaxed text-transparent caret-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+                   className="w-full resize-y px-4 py-2.5 text-sm leading-relaxed text-transparent caret-white placeholder:text-zinc-600 focus:outline-none"
                 />
 
                 <div className="flex flex-wrap items-center justify-between gap-3">

@@ -5,6 +5,7 @@ import { ArrowUpIcon, CheckCircleIcon } from "@/components/ui/Icons";
 import type { QuestionAnswer, User } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils";
 import RichText from "@/components/ui/RichText";
+import EmptyState from "@/components/ui/EmptyState";
 
 export default function AnswerList({
   answers,
@@ -21,15 +22,13 @@ export default function AnswerList({
 }) {
   if (answers.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/20 px-4 py-12 text-center">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900/50 text-zinc-500">
-          <CheckCircleIcon className="h-5 w-5" />
-        </div>
-        <h4 className="mt-4 text-sm font-semibold text-zinc-200">No solutions yet</h4>
-        <p className="mt-1 max-w-sm text-xs text-zinc-500 leading-relaxed">
-          Share the first answer and help move this question forward.
-        </p>
-      </div>
+      <EmptyState
+        icon={<CheckCircleIcon className="h-7 w-7" />}
+        title="No solutions yet"
+        description="Share the first answer and help move this question forward."
+        tone="question"
+        size="md"
+      />
     );
   }
 
@@ -120,4 +119,3 @@ export default function AnswerList({
     </div>
   );
 }
-

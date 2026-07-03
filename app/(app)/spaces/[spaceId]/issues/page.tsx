@@ -17,7 +17,6 @@ import {
   BarChartIcon,
   CalendarIcon,
   ChevronDownIcon,
-  FilterIcon,
   PlusIcon,
   QuestionMarkCircleIcon,
   SearchIcon,
@@ -264,7 +263,7 @@ export default function WorkPage({
 
   // Collapsible UI state
   const [showMetrics, setShowMetrics] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     composerPhotosRef.current = composerPhotos;
@@ -708,32 +707,209 @@ export default function WorkPage({
             </button>
           ) : null}
 
-          {/* Filters toggle */}
-          <button
-            onClick={() => setShowFilters((current) => !current)}
-            className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-700 hover:bg-zinc-900"
-          >
-            <FilterIcon className="h-4 w-4 text-zinc-500" />
-            <span>Filters</span>
-            {activeFilterCount > 0 ? (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-500/20 px-1.5 text-xs font-semibold text-blue-400">
-                {activeFilterCount}
-              </span>
-            ) : null}
-            <ChevronDownIcon
-              className={`h-4 w-4 text-zinc-500 transition-transform duration-200 ${showFilters ? "rotate-180" : ""}`}
-            />
-          </button>
-
-          {/* Clear filters button - shown when filters are active */}
-          {hasActiveFilters ? (
+          {/* Filters dropdown */}
+          <div className="relative">
             <button
-              onClick={clearFilters}
-              className="text-xs text-zinc-500 transition-colors hover:text-white"
+              type="button"
+              onClick={() => setFiltersOpen(!filtersOpen)}
+              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm transition-colors ${
+                hasActiveFilters
+                  ? "border-sky-500/30 bg-sky-500/10 text-sky-300"
+                  : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200"
+              }`}
             >
-              Clear filters
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-[10px] font-bold text-white">
+                  {activeFilterCount}
+                </span>
+              )}
+              <ChevronDownIcon className={`h-4 w-4 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
             </button>
-          ) : null}
+
+            {filtersOpen && (
+              <>
+                <div className="fixed inset-0 z-10 cursor-pointer" onClick={() => setFiltersOpen(false)} />
+                <div className="absolute left-0 top-full z-20 mt-2 w-[600px] overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 p-4 shadow-xl">
+                  <div className="space-y-3">
+                    <div className="grid gap-2 md:grid-cols-5">
+                      <label className="relative col-span-2">
+                        <SearchIcon className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
+                        <input
+                          type="search"
+                          value={searchInput}
+                          onChange={(event) => setSearchInput(event.target.value)}
+                          placeholder="Search title, description, reporter, or assignee"
+                          className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-9 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+                        />
+                      </label>
+
+                      <select
+                        value={filters.sort}
+                        onChange={(event) => updateFilters({ sort: event.target.value, page: 1 })}
+                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                      >
+                        {SORT_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            Sort: {option.label}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        value={filters.status || ""}
+                        onChange={(event) => updateFilters({ status: event.target.value || null, page: 1 })}
+                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                      >
+                        {STATUS_OPTIONS.map((option) => (
+                          <option key={option.label} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        value={filters.priority || ""}
+                        onChange={(event) => updateFilters({ priority: event.target.value || null, page: 1 })}
+                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                      >
+                        {PRIORITY_OPTIONS.map((option) => (
+                          <option key={option.label} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="grid gap-2 md:grid-cols-4">
+                      <select
+                        value={filters.type || ""}
+                        onChange={(event) => updateFilters({ type: event.target.value || null, page: 1 })}
+                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                      >
+                        {TYPE_OPTIONS.map((option) => (
+                          <option key={option.label} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        value={filters.repo_id || ""}
+                        onChange={(event) => updateFilters({ repo_id: event.target.value || null, page: 1 })}
+                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                      >
+                        <option value="">All repos</option>
+                        {repos.map((repo) => (
+                          <option key={repo.id} value={repo.id}>
+                            {repo.name}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        value={filters.assignee || ""}
+                        onChange={(event) => updateFilters({ assignee: event.target.value || null, page: 1 })}
+                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                      >
+                        <option value="">Any assignee</option>
+                        <option value="unassigned">Unassigned</option>
+                        {user ? <option value="me">Assigned to me</option> : null}
+                        {contributors.map((member) => (
+                          <option key={member.id} value={member.user_id}>
+                            {member.user?.name ?? member.user_id}
+                          </option>
+                        ))}
+                      </select>
+
+                      <input
+                        type="text"
+                        value={filters.needed_skill || ""}
+                        onChange={(event) => updateFilters({ needed_skill: event.target.value || null, page: 1 })}
+                        placeholder="Needed skill"
+                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-zinc-600"
+                      />
+                    </div>
+
+                    <div className="grid gap-2 md:grid-cols-4">
+                      <select
+                        value={filters.due_state || ""}
+                        onChange={(event) => updateFilters({ due_state: event.target.value || null, page: 1 })}
+                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                      >
+                        {DUE_OPTIONS.map((option) => (
+                          <option key={option.label} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        value={filters.readiness || ""}
+                        onChange={(event) => updateFilters({ readiness: event.target.value || null, page: 1 })}
+                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                      >
+                        {READINESS_OPTIONS.map((option) => (
+                          <option key={option.label} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+
+                      <div className="col-span-2 flex flex-wrap items-center gap-2">
+                        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(filters.good_first)}
+                            onChange={(event) => updateFilters({ good_first: event.target.checked || null, page: 1 })}
+                            className="h-3.5 w-3.5 rounded border-zinc-600 bg-zinc-700 text-white"
+                          />
+                          Good first
+                        </label>
+                        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(filters.help_wanted)}
+                            onChange={(event) => updateFilters({ help_wanted: event.target.checked || null, page: 1 })}
+                            className="h-3.5 w-3.5 rounded border-zinc-600 bg-zinc-700 text-white"
+                          />
+                          Help wanted
+                        </label>
+                        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(filters.blocked)}
+                            onChange={(event) => updateFilters({ blocked: event.target.checked || null, page: 1 })}
+                            className="h-3.5 w-3.5 rounded border-zinc-600 bg-zinc-700 text-white"
+                          />
+                          Blocked
+                        </label>
+                        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(filters.stale)}
+                            onChange={(event) => updateFilters({ stale: event.target.checked || null, page: 1 })}
+                            className="h-3.5 w-3.5 rounded border-zinc-600 bg-zinc-700 text-white"
+                          />
+                          Stale
+                        </label>
+                      </div>
+                    </div>
+
+                    {hasActiveFilters && (
+                      <button
+                        type="button"
+                        onClick={() => { clearFilters(); setFiltersOpen(false); }}
+                        className="w-full rounded-lg border border-zinc-700 py-2 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                      >
+                        Clear filters
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Collapsible Metrics section */}
@@ -790,178 +966,6 @@ export default function WorkPage({
           </div>
         ) : null}
 
-        {/* Collapsible Filters section */}
-        <div
-          className={`grid transition-all duration-200 ease-in-out ${
-            showFilters ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-          }`}
-        >
-          <div className="overflow-hidden">
-            <div className="space-y-3 pt-1">
-              <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,0.9fr))]">
-                <label className="relative">
-                  <SearchIcon className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-zinc-500" />
-                  <input
-                    type="search"
-                    value={searchInput}
-                    onChange={(event) => setSearchInput(event.target.value)}
-                    placeholder="Search title, description, reporter, or assignee"
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-10 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
-                  />
-                </label>
-
-                <select
-                  value={filters.sort}
-                  onChange={(event) => updateFilters({ sort: event.target.value, page: 1 })}
-                  className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
-                >
-                  {SORT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      Sort: {option.label}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={filters.status || ""}
-                  onChange={(event) => updateFilters({ status: event.target.value || null, page: 1 })}
-                  className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
-                >
-                  {STATUS_OPTIONS.map((option) => (
-                    <option key={option.label} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={filters.priority || ""}
-                  onChange={(event) => updateFilters({ priority: event.target.value || null, page: 1 })}
-                  className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
-                >
-                  {PRIORITY_OPTIONS.map((option) => (
-                    <option key={option.label} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={filters.type || ""}
-                  onChange={(event) => updateFilters({ type: event.target.value || null, page: 1 })}
-                  className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
-                >
-                  {TYPE_OPTIONS.map((option) => (
-                    <option key={option.label} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid gap-3 lg:grid-cols-6">
-                <select
-                  value={filters.repo_id || ""}
-                  onChange={(event) => updateFilters({ repo_id: event.target.value || null, page: 1 })}
-                  className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
-                >
-                  <option value="">All repos</option>
-                  {repos.map((repo) => (
-                    <option key={repo.id} value={repo.id}>
-                      {repo.name}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={filters.assignee || ""}
-                  onChange={(event) => updateFilters({ assignee: event.target.value || null, page: 1 })}
-                  className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
-                >
-                  <option value="">Any assignee</option>
-                  <option value="unassigned">Unassigned</option>
-                  {user ? <option value="me">Assigned to me</option> : null}
-                  {contributors.map((member) => (
-                    <option key={member.id} value={member.user_id}>
-                      {member.user?.name ?? member.user_id}
-                    </option>
-                  ))}
-                </select>
-
-                <input
-                  type="text"
-                  value={filters.needed_skill || ""}
-                  onChange={(event) => updateFilters({ needed_skill: event.target.value || null, page: 1 })}
-                  placeholder="Needed skill"
-                  className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
-                />
-
-                <select
-                  value={filters.due_state || ""}
-                  onChange={(event) => updateFilters({ due_state: event.target.value || null, page: 1 })}
-                  className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
-                >
-                  {DUE_OPTIONS.map((option) => (
-                    <option key={option.label} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={filters.readiness || ""}
-                  onChange={(event) => updateFilters({ readiness: event.target.value || null, page: 1 })}
-                  className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
-                >
-                  {READINESS_OPTIONS.map((option) => (
-                    <option key={option.label} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <label className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-300">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(filters.good_first)}
-                      onChange={(event) => updateFilters({ good_first: event.target.checked || null, page: 1 })}
-                      className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-950 text-white"
-                    />
-                    Good first
-                  </label>
-                  <label className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-300">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(filters.help_wanted)}
-                      onChange={(event) => updateFilters({ help_wanted: event.target.checked || null, page: 1 })}
-                      className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-950 text-white"
-                    />
-                    Help wanted
-                  </label>
-                  <label className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-300">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(filters.blocked)}
-                      onChange={(event) => updateFilters({ blocked: event.target.checked || null, page: 1 })}
-                      className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-950 text-white"
-                    />
-                    Blocked
-                  </label>
-                  <label className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-300">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(filters.stale)}
-                      onChange={(event) => updateFilters({ stale: event.target.checked || null, page: 1 })}
-                      className="h-3.5 w-3.5 rounded border-zinc-700 bg-zinc-950 text-white"
-                    />
-                    Stale
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {showComposer ? (
@@ -1030,7 +1034,7 @@ export default function WorkPage({
             placeholder="Describe the task, bug, feature, docs request, or research need"
             rows={4}
             previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-white"
-            className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:border-zinc-600 focus:outline-none selection:bg-[#1d9bf0]/30"
+             className="w-full resize-none px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:outline-none selection:bg-[#1d9bf0]/30"
           />
 
           <div className="space-y-3 rounded-xl border border-zinc-800 bg-zinc-950/50 p-3">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useProfileFreelance } from "@/lib/hooks/useProfile";
 import { ProfileListSkeleton } from "@/components/profile/ProfileSkeleton";
 import { BoltIcon } from "@/components/ui/Icons";
+import EmptyState from "@/components/ui/EmptyState";
 
 export default function ProfileFreelancePage({
   params,
@@ -24,11 +25,18 @@ export default function ProfileFreelancePage({
 
   if (client_projects.length === 0 && wins.length === 0) {
     return (
-      <div className="px-5 py-16 text-center">
-        <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-3">
-          <BoltIcon className="w-5 h-5 text-zinc-600" />
-        </div>
-        <p className="text-zinc-600 text-sm">No freelance outcomes yet.</p>
+      <div className="p-5">
+        <EmptyState
+          icon={<BoltIcon className="h-7 w-7" />}
+          title="No freelance outcomes yet"
+          description="Posted projects and won proposals will appear here once freelance work starts landing."
+          tone="project"
+          action={
+            <Link href="/freelance" className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+              Browse freelance
+            </Link>
+          }
+        />
       </div>
     );
   }

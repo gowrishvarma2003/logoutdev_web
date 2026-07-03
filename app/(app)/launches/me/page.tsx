@@ -101,7 +101,7 @@ function LaunchManageRow({
 
           {menuOpen && (
             <>
-              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+              <div className="fixed inset-0 z-10 cursor-pointer" onClick={() => setMenuOpen(false)} />
               <div className="absolute right-0 top-9 z-20 min-w-44 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
                 <Link
                   href={`/launches/${launch.id}/edit`}

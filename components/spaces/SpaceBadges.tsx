@@ -2,6 +2,7 @@
 
 import type { SpaceStatus, SpaceVisibility } from "@/lib/types";
 import { GlobeIcon, LockIcon } from "@/components/ui/Icons";
+import BaseEmptyState from "@/components/ui/EmptyState";
 
 // ─── Status Badge ────────────────────────────────────────────────────────────
 
@@ -55,14 +56,15 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-      {icon && <div className="text-zinc-600 mb-4">{icon}</div>}
-      <h3 className="text-lg font-semibold text-zinc-300 mb-1">{title}</h3>
-      {description && (
-        <p className="text-sm text-zinc-500 max-w-sm mb-4">{description}</p>
-      )}
-      {action}
-    </div>
+    <BaseEmptyState
+      icon={icon}
+      title={title}
+      description={description}
+      action={action}
+      tone="space"
+      size="lg"
+      className="border-0 bg-transparent"
+    />
   );
 }
 

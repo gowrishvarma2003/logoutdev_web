@@ -181,7 +181,7 @@ export default function LaunchFeedbackBoard({
               rows={4}
               placeholder={details.bodyPlaceholder}
               previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-relaxed text-white prose prose-invert max-w-none"
-              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-relaxed text-transparent caret-white placeholder:text-zinc-600 focus:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-800 selection:bg-[#1d9bf0]/30"
+               className="w-full resize-y px-4 py-3 text-sm leading-relaxed text-transparent caret-white placeholder:text-zinc-600 focus:outline-none selection:bg-[#1d9bf0]/30"
             />
           </div>
 

@@ -6,6 +6,7 @@ import { useRepoContext } from "../layout";
 import * as actionsApi from "@/lib/services/actionsApi";
 import type { Workflow, WorkflowRun } from "@/lib/services/actionsApi";
 import Spinner from "@/components/ui/Spinner";
+import EmptyState from "@/components/ui/EmptyState";
 import { ArrowPathIcon, KeyIcon, PlayIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const colors: Record<string, string> = { success: "text-emerald-400", failed: "text-rose-400", running: "text-blue-400", queued: "text-amber-400", cancelled: "text-zinc-500", timeout: "text-orange-400", skipped: "text-zinc-500" };
@@ -84,11 +85,11 @@ export default function ActionsPage() {
     <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
       <aside className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-3">
         <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">Workflows</p>
-        {workflows.length ? workflows.map((workflow) => <div key={workflow.id} className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-zinc-200 hover:bg-zinc-800/70"><span className="min-w-0 flex-1 truncate">{workflow.name}</span>{repo.can_push ? <button title="Run workflow" onClick={() => dispatch(workflow)} disabled={Boolean(busy)} className="rounded p-1 text-zinc-400 hover:bg-zinc-700 hover:text-white"><PlayIcon className="h-4 w-4" /></button> : null}</div>) : <p className="px-2 py-6 text-sm text-zinc-500">No workflows found. Add a YAML file and scan again.</p>}
+        {workflows.length ? workflows.map((workflow) => <div key={workflow.id} className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm text-zinc-200 hover:bg-zinc-800/70"><span className="min-w-0 flex-1 truncate">{workflow.name}</span>{repo.can_push ? <button title="Run workflow" onClick={() => dispatch(workflow)} disabled={Boolean(busy)} className="rounded p-1 text-zinc-400 hover:bg-zinc-700 hover:text-white"><PlayIcon className="h-4 w-4" /></button> : null}</div>) : <EmptyState icon={<PlayIcon className="h-6 w-6" />} title="No workflows" description="Add a YAML workflow and scan again." tone="repo" size="sm" className="border-0 bg-transparent px-2 py-6" />}
       </aside>
       <section className="overflow-hidden rounded-xl border border-zinc-800">
         <div className="border-b border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm font-semibold text-zinc-200">Recent runs</div>
-        {runs.length ? runs.map((run) => <Link key={run.id} href={`/repos/${repo.id}/actions/runs/${run.id}`} className="flex items-center gap-4 border-b border-zinc-900 px-4 py-4 last:border-0 hover:bg-zinc-900/40"><span className={`text-xs font-semibold uppercase ${colors[run.status]}`}>{run.status}</span><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-zinc-100">{run.workflow?.name || "Workflow run"}</p><p className="mt-1 text-xs text-zinc-500">{run.branch} · {run.commit_sha.slice(0, 8)} · {run.trigger_event}</p></div><time className="text-xs text-zinc-500">{new Date(run.queued_at).toLocaleString()}</time></Link>) : <p className="p-8 text-center text-sm text-zinc-500">No workflow runs yet.</p>}
+        {runs.length ? runs.map((run) => <Link key={run.id} href={`/repos/${repo.id}/actions/runs/${run.id}`} className="flex items-center gap-4 border-b border-zinc-900 px-4 py-4 last:border-0 hover:bg-zinc-900/40"><span className={`text-xs font-semibold uppercase ${colors[run.status]}`}>{run.status}</span><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-zinc-100">{run.workflow?.name || "Workflow run"}</p><p className="mt-1 text-xs text-zinc-500">{run.branch} · {run.commit_sha.slice(0, 8)} · {run.trigger_event}</p></div><time className="text-xs text-zinc-500">{new Date(run.queued_at).toLocaleString()}</time></Link>) : <div className="p-4"><EmptyState icon={<ArrowPathIcon className="h-7 w-7" />} title="No workflow runs yet" description="Runs will appear here after a workflow is triggered." tone="repo" size="md" /></div>}
       </section>
     </div>
   </div>;

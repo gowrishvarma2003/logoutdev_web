@@ -18,6 +18,7 @@ import {
   ChatIcon,
   ChevronRightIcon,
 } from "@/components/ui/Icons";
+import EmptyState from "@/components/ui/EmptyState";
 
 interface ProfileReposPageProps {
   params: Promise<{ id: string }>;
@@ -56,11 +57,18 @@ export default function ProfileReposPage({ params }: ProfileReposPageProps) {
 
   if (repos.length === 0 && recent_prs.length === 0 && recent_reviews.length === 0) {
     return (
-      <div className="px-5 py-16 text-center">
-        <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-3">
-          <CodeBracketIcon className="w-5 h-5 text-zinc-600" />
-        </div>
-        <p className="text-zinc-600 text-sm">No repos or code activity yet.</p>
+      <div className="p-5">
+        <EmptyState
+          icon={<CodeBracketIcon className="h-7 w-7" />}
+          title="No code activity yet"
+          description="Create or connect repositories so commits, pull requests, and reviews can show up here."
+          tone="repo"
+          action={
+            <Link href="/repos" className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+              Explore repos
+            </Link>
+          }
+        />
       </div>
     );
   }

@@ -125,7 +125,7 @@ export default function AskQuestionForm({
           rows={7}
           placeholder="Add context, what you tried, constraints, and what kind of answer would help."
           previewClassName="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm leading-relaxed text-white"
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm leading-relaxed text-transparent caret-white outline-none focus:border-zinc-600 selection:bg-[#1d9bf0]/30"
+           className="w-full px-4 py-3 text-sm leading-relaxed text-transparent caret-white outline-none selection:bg-[#1d9bf0]/30"
         />
       </div>
 

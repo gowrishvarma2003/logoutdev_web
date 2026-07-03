@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: "LogoutDev - Where Developers Build in Public",
   description: "A proof-of-work platform where developers share projects, collaborate on spaces, launch products, and get hired based on real contributions.",
   keywords: ["developer", "build in public", "collaboration", "projects", "open source", "freelance", "hiring"],
+  icons: {
+    icon: "/icon.jpeg",
+  },
   openGraph: {
     title: "LogoutDev - Where Developers Build in Public",
     description: "A proof-of-work platform where developers share projects, collaborate, and get hired based on real contributions.",

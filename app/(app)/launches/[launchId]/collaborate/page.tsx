@@ -62,7 +62,7 @@ export default function LaunchCollaboratePage({ params }: { params: Promise<{ la
         >
           <div>
             <label className="mb-1.5 block text-sm font-medium text-zinc-300">Why do you want to help?</label>
-            <RichComposer value={message} onChange={(value) => setMessage(value)} rows={6} previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-white" className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:border-zinc-600 focus:outline-none selection:bg-[#1d9bf0]/30" />
+             <RichComposer value={message} onChange={(value) => setMessage(value)} rows={6} previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-white" className="w-full px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:outline-none selection:bg-[#1d9bf0]/30" />
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-zinc-300">Relevant skills</label>

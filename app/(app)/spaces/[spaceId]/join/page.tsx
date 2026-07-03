@@ -121,7 +121,7 @@ export default function JoinRequestPage({
             placeholder="Share your motivation, what you can contribute…"
             rows={4}
             previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-white"
-            className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors selection:bg-[#1d9bf0]/30"
+             className="w-full resize-none px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white placeholder:text-zinc-600 focus:outline-none transition-colors selection:bg-[#1d9bf0]/30"
           />
         </div>
 

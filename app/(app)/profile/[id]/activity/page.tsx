@@ -7,8 +7,9 @@
  */
 
 import { use, useState, useMemo } from "react";
-import { useProfileActivity } from "@/lib/hooks/useProfile";
+import { useProfileActivity, useProfileHeatmap } from "@/lib/hooks/useProfile";
 import ActivityTimeline from "@/components/profile/ActivityTimeline";
+import ActivityHeatmap from "@/components/profile/ActivityHeatmap";
 import { ProfileListSkeleton } from "@/components/profile/ProfileSkeleton";
 
 interface ProfileActivityPageProps {
@@ -34,6 +35,7 @@ export default function ProfileActivityPage({ params }: ProfileActivityPageProps
   const [filter, setFilter] = useState<FilterKey>("all");
 
   const { activity, total, loading, error } = useProfileActivity(username, page);
+  const { heatmap, loading: heatmapLoading } = useProfileHeatmap(username);
 
   const filtered = useMemo(() => {
     if (filter === "all") return activity;
@@ -53,6 +55,11 @@ export default function ProfileActivityPage({ params }: ProfileActivityPageProps
 
   return (
     <div className="px-5 py-5">
+      {/* Activity heatmap */}
+      <div className="mb-5">
+        <ActivityHeatmap heatmap={heatmap} loading={heatmapLoading} />
+      </div>
+
       {/* Filter chips */}
       <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-3 mb-1 border-b border-zinc-900">
         {FILTERS.map((f) => {

@@ -15,6 +15,7 @@ import type {
   Post,
   ProjectSpace,
   ActivityItem,
+  ProfileHeatmap,
   User,
   Launch,
   FreelanceProject,
@@ -88,6 +89,19 @@ export async function getProfileActivity(
   const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
   const res = await fetch(
     `${API_BASE_URL}/api/profiles/${encodeURIComponent(username)}/activity?${qs}`,
+    { headers: { ...getAuthHeaders() } }
+  );
+  return handleResponse(res);
+}
+
+/** GET /api/profiles/:username/activity/heatmap — platform-wide daily activity buckets */
+export async function getProfileHeatmap(
+  username: string,
+  days = 365
+): Promise<ProfileHeatmap> {
+  const qs = new URLSearchParams({ days: String(days) });
+  const res = await fetch(
+    `${API_BASE_URL}/api/profiles/${encodeURIComponent(username)}/activity/heatmap?${qs}`,
     { headers: { ...getAuthHeaders() } }
   );
   return handleResponse(res);

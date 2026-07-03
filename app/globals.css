@@ -40,6 +40,38 @@
   animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@keyframes emptyFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes emptyPulse {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(0.88);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-empty-float {
+  animation: emptyFloat 4s ease-in-out infinite;
+}
+
+.animate-empty-pulse {
+  animation: emptyPulse 2.4s ease-in-out infinite;
+}
+
+.animate-empty-pulse-delayed {
+  animation: emptyPulse 2.4s ease-in-out infinite 0.7s;
+}
+
 /* Core Scrollbar Styles (Unlayered for universal browser support) */
 * {
   /* Hide scrollbars globally for Firefox, IE, and Edge */
@@ -88,5 +120,24 @@
   display: none !important;
 }
 
+input,
+textarea,
+[contenteditable] {
+  caret-color: #ffffff !important;
+}
 
+button:not(:disabled):not([aria-disabled="true"]),
+a[href],
+label[for],
+select:not(:disabled):not([aria-disabled="true"]),
+summary,
+[role="button"]:not([aria-disabled="true"]),
+[role="link"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
 
+button:disabled,
+select:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}

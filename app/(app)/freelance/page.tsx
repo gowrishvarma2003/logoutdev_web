@@ -7,6 +7,8 @@ import FreelanceProjectCard from "@/components/freelance/FreelanceProjectCard";
 import Spinner from "@/components/ui/Spinner";
 import { useFreelanceProjects } from "@/lib/hooks/useFreelance";
 import { useAuth } from "@/lib/hooks/useAuth";
+import EmptyState from "@/components/ui/EmptyState";
+import { BriefcaseIcon } from "@/components/ui/Icons";
 
 export default function FreelancePage() {
   const { user } = useAuth();
@@ -83,9 +85,19 @@ export default function FreelancePage() {
         )}
 
         {!freelance.loading && !freelance.error && freelance.projects.length === 0 && (
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 text-center">
-            <p className="text-sm text-zinc-400">No freelance projects match these filters yet.</p>
-          </div>
+          <EmptyState
+            icon={<BriefcaseIcon className="h-7 w-7" />}
+            title="No projects match yet"
+            description="Try a broader search, or post the kind of freelance project you want to see here."
+            tone="project"
+            action={
+              user ? (
+                <Link href="/freelance/create" className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+                  Post a project
+                </Link>
+              ) : null
+            }
+          />
         )}
 
         {freelance.projects.map((project) => (

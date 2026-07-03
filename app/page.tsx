@@ -225,10 +225,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2.5 cursor-pointer">
-              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-white/5 relative overflow-hidden group">
-                <span className="text-zinc-950 font-extrabold text-sm relative z-10 transition-colors">LD</span>
-              </div>
-              <span className="text-lg font-bold text-white tracking-tight">LogoutDev</span>
+              <img src="/logo.jpeg" alt="LogoutDev" className="h-9 w-9 rounded-full object-cover" />
             </div>
             
             <div className="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-wider text-zinc-400">
@@ -855,10 +852,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 text-zinc-500">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-md">
-                <span className="text-zinc-950 font-extrabold text-xs">LD</span>
-              </div>
-              <span className="text-base font-bold text-white tracking-tight">LogoutDev</span>
+              <img src="/logo.jpeg" alt="LogoutDev" className="h-8 w-8 rounded-full object-cover" />
             </div>
             
             <nav className="flex items-center gap-6 text-xs font-bold uppercase tracking-wider">

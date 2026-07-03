@@ -48,7 +48,7 @@ export default function ResetPasswordPage() {
     <main className="flex min-h-screen">
       {/* Left branding panel */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-slate-900 p-12">
-        <span className="text-xl font-bold text-white tracking-tight">LogoutDev</span>
+        <img src="/logo.jpeg" alt="LogoutDev" className="h-10 w-10 rounded-full object-cover" />
         <div>
           <p className="text-3xl font-semibold text-white leading-snug">
             Where developers build<br />in public and get hired<br />for real work.
@@ -64,7 +64,7 @@ export default function ResetPasswordPage() {
       <div className="flex w-full lg:w-1/2 flex-col items-center justify-center px-6 py-12 bg-zinc-950">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
-          <span className="mb-8 block text-lg font-bold text-white lg:hidden">LogoutDev</span>
+          <img src="/logo.jpeg" alt="LogoutDev" className="mb-8 h-8 w-8 rounded-full object-cover lg:hidden" />
 
           <h1 className="text-2xl font-bold text-white">Reset password</h1>
           <p className="mt-1 text-sm text-zinc-500">Enter your email and a new password.</p>

@@ -8,6 +8,7 @@ import * as reposApi from "@/lib/services/reposApi";
 import * as cache from "@/lib/services/requestCache";
 import type { RepoRelease } from "@/lib/types";
 import Spinner from "@/components/ui/Spinner";
+import EmptyState from "@/components/ui/EmptyState";
 import { formatRelativeTime } from "@/lib/utils";
 import { TagIcon, PlusIcon, CubeIcon } from "@heroicons/react/24/outline";
 
@@ -226,17 +227,21 @@ export default function RepoReleasesPage() {
       {!loading && error ? <p className="px-4 py-10 text-center text-sm text-rose-400">{error}</p> : null}
 
       {!loading && !error && releases.length === 0 && !isCreating ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-zinc-800 border-dashed py-24">
-          <TagIcon className="mb-4 h-12 w-12 text-zinc-700" />
-          <h3 className="mb-2 text-lg font-semibold text-white">There aren&apos;t any releases here</h3>
-          <p className="mb-6 text-sm text-zinc-400">Releases are published iterations of your software.</p>
-          <button
-            onClick={() => setIsCreating(true)}
-            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
-          >
-            Create a new release
-          </button>
-        </div>
+        <EmptyState
+          icon={<TagIcon className="h-8 w-8" />}
+          title="No releases yet"
+          description="Publish a version when your repo is ready for testers, users, or collaborators."
+          tone="repo"
+          size="lg"
+          action={
+            <button
+              onClick={() => setIsCreating(true)}
+              className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+            >
+              Create a new release
+            </button>
+          }
+        />
       ) : null}
 
       {!loading && !error && releases.length > 0 ? (

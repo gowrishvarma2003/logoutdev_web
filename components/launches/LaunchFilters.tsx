@@ -98,7 +98,7 @@ export default function LaunchFilters({
 
           {filtersOpen && (
             <>
-              <div className="fixed inset-0 z-10" onClick={() => setFiltersOpen(false)} />
+              <div className="fixed inset-0 z-10 cursor-pointer" onClick={() => setFiltersOpen(false)} />
               <div className="absolute right-0 top-full z-20 mt-2 w-64 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 p-4 shadow-xl">
                 <div className="space-y-4">
                   {/* Tech stack filter */}

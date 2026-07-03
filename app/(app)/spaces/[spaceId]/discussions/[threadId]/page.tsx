@@ -318,12 +318,9 @@ export default function DiscussionThreadPage({
                       ? "border-zinc-600 ring-1 ring-zinc-700 pb-7"
                       : "border-zinc-800 hover:border-zinc-700"}
                     ${isOverLimit ? "border-rose-500/60 ring-rose-500/20" : ""}`}
-                  className={`w-full px-3.5 py-2.5 rounded-xl text-sm leading-relaxed text-transparent caret-white
-                    bg-zinc-900 border transition-all duration-200 resize-none focus:outline-none
-                    ${composerFocused
-                      ? "border-zinc-600 ring-1 ring-zinc-700 pb-7"
-                      : "border-zinc-800 hover:border-zinc-700"}
-                    ${isOverLimit ? "border-rose-500/60 ring-rose-500/20" : ""}`}
+                   className={`w-full px-3.5 py-2.5 text-sm leading-relaxed text-transparent caret-white
+                    transition-all duration-200 resize-none focus:outline-none
+                    ${composerFocused ? "pb-7" : ""}`}
                 />
                 {composerFocused && (
                   <span

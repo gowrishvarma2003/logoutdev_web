@@ -7,6 +7,7 @@ import LaunchFilters from "@/components/launches/LaunchFilters";
 import Spinner from "@/components/ui/Spinner";
 import { PlusIcon, SparklesIcon } from "@/components/ui/Icons";
 import { useLaunches } from "@/lib/hooks/useLaunches";
+import EmptyState from "@/components/ui/EmptyState";
 
 export default function LaunchesPage() {
   const [q, setQ] = useState("");
@@ -75,22 +76,22 @@ export default function LaunchesPage() {
         ) : launches.error ? (
           <p className="rounded-xl bg-rose-500/10 px-4 py-3 text-sm text-rose-400">{launches.error}</p>
         ) : launches.launches.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-zinc-800/60 py-20 text-center">
-            <div className="rounded-2xl bg-zinc-800/40 p-4">
-              <SparklesIcon className="h-10 w-10 text-zinc-600" />
-            </div>
-            <div>
-              <p className="text-base font-medium text-zinc-300">No launches found</p>
-              <p className="mt-1 text-sm text-zinc-500">Try adjusting your filters or be the first!</p>
-            </div>
-            <Link
-              href="/launches/new"
-              className="mt-2 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
-            >
-              <PlusIcon className="h-4 w-4" />
-              Launch your product
-            </Link>
-          </div>
+          <EmptyState
+            icon={<SparklesIcon className="h-8 w-8" />}
+            title="No launches found"
+            description="Adjust your filters, or put your product in front of the community today."
+            tone="feed"
+            size="lg"
+            action={
+              <Link
+                href="/launches/new"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+              >
+                <PlusIcon className="h-4 w-4" />
+                Launch your product
+              </Link>
+            }
+          />
         ) : (
           <>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

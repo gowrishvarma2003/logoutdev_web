@@ -15,6 +15,7 @@ import type {
   Post,
   ProjectSpace,
   ActivityItem,
+  ProfileHeatmap,
   Launch,
   FreelanceProject,
   FreelanceProposal,
@@ -153,6 +154,22 @@ export function useProfileActivity(username: string, page = 1) {
   return {
     activity: result.data?.activity ?? [],
     total: result.data?.total ?? 0,
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+/** Platform-wide daily activity heatmap (posts, PRs, launches, chat, calls, ...) */
+export function useProfileHeatmap(username: string, days = 365) {
+  const canFetch = username.trim().length > 0;
+  const result = useAsync<ProfileHeatmap>(
+    () => api.getProfileHeatmap(username, days),
+    [username, days],
+    canFetch
+  );
+  return {
+    heatmap: result.data ?? null,
     loading: result.loading,
     error: result.error,
     refetch: result.refetch,

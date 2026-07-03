@@ -9,6 +9,7 @@ import Link from "next/link";
 import type { UserFeaturedProject } from "@/lib/types";
 import { StatusBadge } from "@/components/spaces/SpaceBadges";
 import { RocketIcon, ChevronRightIcon, SparklesIcon } from "@/components/ui/Icons";
+import EmptyState from "@/components/ui/EmptyState";
 
 interface FeaturedProjectsPanelProps {
   projects: UserFeaturedProject[];
@@ -29,14 +30,13 @@ export default function FeaturedProjectsPanel({
       </h2>
 
       {projects.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-zinc-800 px-4 py-6 text-center">
-          <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center mx-auto mb-2">
-            <SparklesIcon className="w-4 h-4 text-zinc-500" />
-          </div>
-          <p className="text-sm text-zinc-500">
-            No featured projects yet.
-          </p>
-        </div>
+        <EmptyState
+          icon={<SparklesIcon className="h-6 w-6" />}
+          title="No featured projects yet"
+          description="Pin up to three spaces so visitors see the work you care about first."
+          tone="project"
+          size="sm"
+        />
       ) : (
         <div className="flex flex-col gap-2.5">
           {projects.map(({ id, space }) => (

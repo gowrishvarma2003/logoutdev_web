@@ -134,10 +134,11 @@ const RichComposer = forwardRef<RichComposerHandle, RichComposerProps>(function 
         aria-describedby={showPlaceholderWhenEmpty && !value && placeholder ? placeholderId : undefined}
         maxLength={maxLength}
         rows={rows}
-        className={className}
+        className={`relative z-[1] ${className}`}
         style={{
           caretColor: "#ffffff",
           WebkitTextFillColor: "transparent",
+          background: "transparent",
         }}
       />
 

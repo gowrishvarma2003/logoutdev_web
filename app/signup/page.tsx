@@ -132,7 +132,7 @@ export default function SignupPage() {
     <main className="flex min-h-screen">
       {/* Left branding panel */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-slate-900 p-12">
-        <span className="text-xl font-bold text-white tracking-tight">LogoutDev</span>
+        <img src="/logo.jpeg" alt="LogoutDev" className="h-10 w-10 rounded-full object-cover" />
         <div>
           <p className="text-3xl font-semibold text-white leading-snug">
             Build in public.<br />Collaborate with devs.<br />Get noticed.
@@ -148,7 +148,7 @@ export default function SignupPage() {
       <div className="flex w-full lg:w-1/2 flex-col items-center justify-center px-6 py-12 bg-zinc-950">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
-          <span className="mb-8 block text-lg font-bold text-white lg:hidden">LogoutDev</span>
+          <img src="/logo.jpeg" alt="LogoutDev" className="mb-8 h-8 w-8 rounded-full object-cover lg:hidden" />
 
           {isCompletingGoogleProfile ? (
             <>

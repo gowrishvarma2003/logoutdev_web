@@ -83,10 +83,7 @@ export default function AppShell({ children }: AppShellProps) {
         <header className="sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-md">
           <div className="mx-auto flex max-w-[1520px] items-center justify-between px-4 py-4">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
-                <span className="text-xs font-bold text-zinc-950">LD</span>
-              </div>
-              <span className="text-[17px] font-bold tracking-tight text-white">LogoutDev</span>
+              <img src="/logo.jpeg" alt="LogoutDev" className="h-8 w-8 rounded-full object-cover" />
             </Link>
 
             <div className="flex items-center gap-2">

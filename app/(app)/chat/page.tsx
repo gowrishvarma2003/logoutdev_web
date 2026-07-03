@@ -41,6 +41,7 @@ import {
 import CreateGroupModal from "@/components/chat/CreateGroupModal";
 import GroupInfoPanel from "@/components/chat/GroupInfoPanel";
 import { CallErrorBoundary, CallProvider, ConversationCallControls, OngoingGroupCallBanner } from "@/components/calls/CallProvider";
+import EmptyState from "@/components/ui/EmptyState";
 
 type ViewMode = "inbox" | "requests" | "group-invites" | "settings";
 
@@ -228,7 +229,17 @@ function GroupInvitesPanel({ onChanged }: { onChanged: () => void }) {
             </button>
           </div>
         ))}
-        {!invites.length ? <p className="p-6 text-sm text-zinc-500">No pending invites.</p> : null}
+        {!invites.length ? (
+          <div className="p-3">
+            <EmptyState
+              icon={<UsersIcon className="h-6 w-6" />}
+              title="No pending invites"
+              description="Group invitations will land here when teams add you."
+              tone="space"
+              size="sm"
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -347,7 +358,17 @@ function RequestsPanel() {
             </button>
           </div>
         ))}
-        {!requests.length ? <p className="p-6 text-sm text-zinc-500">No pending requests.</p> : null}
+        {!requests.length ? (
+          <div className="p-3">
+            <EmptyState
+              icon={<CheckCircleIcon className="h-6 w-6" />}
+              title="No pending requests"
+              description="Intro requests will appear here before a new encrypted conversation starts."
+              tone="question"
+              size="sm"
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -1230,7 +1251,17 @@ export default function ChatPage() {
                     onSelect={() => { setActive(conversation); setShowGroupInfo(false); }}
                   />
                 ))}
-                {!conversations.length ? <p className="p-6 text-sm text-zinc-500">Search a username to start an encrypted DM or create a group.</p> : null}
+                {!conversations.length ? (
+                  <div className="p-3">
+                    <EmptyState
+                      icon={<ChatBubbleIcon className="h-6 w-6" />}
+                      title="Start a conversation"
+                      description="Search a username to start an encrypted DM, or create a group for your team."
+                      tone="question"
+                      size="sm"
+                    />
+                  </div>
+                ) : null}
               </div>
             </>
           ) : mode === "requests" ? (
@@ -1306,7 +1337,16 @@ export default function ChatPage() {
                     onRetry={message.failed ? sendMessage : undefined}
                   />
                 ))}
-                {!messages.length ? <p className="py-16 text-center text-sm text-zinc-500">No messages yet.</p> : null}
+                {!messages.length ? (
+                  <EmptyState
+                    icon={<LockIcon className="h-7 w-7" />}
+                    title="No messages yet"
+                    description="Send the first encrypted message to get this thread going."
+                    tone="question"
+                    size="md"
+                    className="mx-4 my-8"
+                  />
+                ) : null}
                 <div ref={messagesEndRef} />
               </div>
               <div className="border-t border-zinc-900 p-4">

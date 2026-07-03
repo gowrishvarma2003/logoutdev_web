@@ -8,6 +8,8 @@ import type { QuestionListFilters } from "@/lib/services/questionsApi";
 import QuestionCard from "@/components/questions/QuestionCard";
 import QuestionFilters from "@/components/questions/QuestionFilters";
 import Spinner from "@/components/ui/Spinner";
+import EmptyState from "@/components/ui/EmptyState";
+import { QuestionMarkCircleIcon } from "@/components/ui/Icons";
 
 export default function QuestionsPage() {
   const { user, isLoaded } = useAuth();
@@ -81,8 +83,18 @@ export default function QuestionsPage() {
       ) : error ? (
         <div className="px-4 py-16 text-center text-sm text-zinc-500">{error}</div>
       ) : questions.length === 0 ? (
-        <div className="px-4 py-16 text-center">
-          <p className="text-sm text-zinc-500">No questions match these filters yet.</p>
+        <div className="p-4">
+          <EmptyState
+            icon={<QuestionMarkCircleIcon className="h-7 w-7" />}
+            title="No questions found"
+            description="Try loosening your filters, or ask the question other developers are probably wondering about too."
+            tone="question"
+            action={
+              <Link href="/questions/ask" className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+                Ask a question
+              </Link>
+            }
+          />
         </div>
       ) : (
         questions.map((question) => (

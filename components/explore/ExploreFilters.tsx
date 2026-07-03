@@ -70,7 +70,7 @@ export default function ExploreFilters({ q, type, stack, collab, sort, onChange 
 
           {filtersOpen && (
             <>
-              <div className="fixed inset-0 z-10" onClick={() => setFiltersOpen(false)} />
+              <div className="fixed inset-0 z-10 cursor-pointer" onClick={() => setFiltersOpen(false)} />
               <div className="absolute right-0 top-full z-20 mt-2 w-72 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 p-4 shadow-xl">
                 <div className="space-y-4">
                   {/* Stack filter */}

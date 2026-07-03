@@ -6,6 +6,7 @@ import { useBranches, useBranchProtectionRules } from "@/lib/hooks/useRepos";
 import { createBranchProtectionRule, deleteBranchProtectionRule } from "@/lib/services/reposApi";
 import * as cache from "@/lib/services/requestCache";
 import Spinner from "@/components/ui/Spinner";
+import EmptyState from "@/components/ui/EmptyState";
 import type { BranchProtectionRule } from "@/lib/types";
 import { CheckIcon, ShieldCheckIcon, TrashIcon } from "@heroicons/react/24/outline";
 
@@ -141,7 +142,15 @@ export default function BranchProtectionSettingsPage() {
         ) : error ? (
           <div className="p-4 text-sm text-rose-400">{error}</div>
         ) : rules.length === 0 ? (
-          <div className="p-8 text-center text-zinc-500">No branch protection rules defined yet.</div>
+          <div className="p-4">
+            <EmptyState
+              icon={<ShieldCheckIcon className="h-7 w-7" />}
+              title="No branch rules yet"
+              description="Add a rule when this repo needs reviews, checks, or push restrictions before changes land."
+              tone="repo"
+              size="md"
+            />
+          </div>
         ) : (
           <ul className="divide-y divide-zinc-800">
             {rules.map((rule) => (

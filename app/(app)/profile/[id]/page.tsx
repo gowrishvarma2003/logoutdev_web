@@ -9,8 +9,9 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { useProfile, useProfileSignals } from "@/lib/hooks/useProfile";
+import { useProfile, useProfileSignals, useProfileHeatmap } from "@/lib/hooks/useProfile";
 import ProofOfWorkScoreBadge from "@/components/profile/ProofOfWorkScoreBadge";
+import ActivityHeatmap from "@/components/profile/ActivityHeatmap";
 import FeaturedProjectsPanel from "@/components/profile/FeaturedProjectsPanel";
 import SkillsPanel from "@/components/profile/SkillsPanel";
 import RelatedEntitiesPanel from "@/components/connected/RelatedEntitiesPanel";
@@ -109,6 +110,7 @@ export default function ProfileOverviewPage({ params }: ProfilePageProps) {
 
   const { skills, featured_projects, is_me, career_summary, related_entities, loading: profileLoading } = useProfile(username);
   const { signals, loading: signalsLoading } = useProfileSignals(username);
+  const { heatmap, loading: heatmapLoading } = useProfileHeatmap(username);
 
   if (profileLoading || signalsLoading) {
     return <ProfileOverviewSkeleton />;
@@ -146,6 +148,9 @@ export default function ProfileOverviewPage({ params }: ProfilePageProps) {
           ) : null}
         </section>
       ) : null}
+
+      {/* ── Activity heatmap ── */}
+      <ActivityHeatmap heatmap={heatmap} loading={heatmapLoading} />
 
       {/* ── Career graph ── */}
       {career_summary && career_summary.timeline.length > 0 ? (

@@ -8,6 +8,7 @@ import { formatRelativeTime } from "@/lib/utils";
 import * as api from "@/lib/services/questionsApi";
 import RichComposer from "@/components/ui/RichComposer";
 import RichText from "@/components/ui/RichText";
+import EmptyState from "@/components/ui/EmptyState";
 
 function buildChildrenMap(comments: QuestionDiscussionComment[]) {
   return comments.reduce<Record<string, QuestionDiscussionComment[]>>((acc, comment) => {
@@ -253,9 +254,13 @@ export default function DiscussionPanel({
 
       {/* Discussion Threads List */}
       {rootComments.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-950/10 px-4 py-8 text-center text-sm text-zinc-500">
-          No posts in this discussion yet.
-        </div>
+        <EmptyState
+          icon={<ChatIcon className="h-6 w-6" />}
+          title="No discussion yet"
+          description="Start with a clarification, a constraint, or a helpful note for the next person reading."
+          tone="question"
+          size="sm"
+        />
       ) : (
         <div className="divide-y divide-zinc-800/60">
           {visibleRootComments.map((comment) => (
@@ -285,6 +290,5 @@ export default function DiscussionPanel({
     </section>
   );
 }
-
 
 

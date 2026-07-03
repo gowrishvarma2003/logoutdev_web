@@ -412,7 +412,7 @@ export default function WorkDetailPage({
                 onChange={(value) => setBody(value)}
                 rows={6}
                 previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm leading-relaxed text-white"
-                className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:border-zinc-600 focus:outline-none selection:bg-[#1d9bf0]/30"
+                 className="w-full resize-none px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:outline-none selection:bg-[#1d9bf0]/30"
               />
             </div>
 

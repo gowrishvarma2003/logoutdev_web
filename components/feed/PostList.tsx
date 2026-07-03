@@ -3,6 +3,8 @@
 import type { Post, User } from "@/lib/types";
 import PostCard from "./PostCard";
 import Spinner from "@/components/ui/Spinner";
+import EmptyState from "@/components/ui/EmptyState";
+import { PencilSquareIcon } from "@/components/ui/Icons";
 
 interface PostListProps {
   posts: Post[];
@@ -53,11 +55,14 @@ export default function PostList({
 
   if (posts.length === 0) {
     return (
-      <div className="flex flex-col items-center py-20 px-6 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center mb-4">
-          <span className="text-2xl">✦</span>
-        </div>
-        <p className="text-sm text-zinc-500">{emptyMessage}</p>
+      <div className="p-4">
+        <EmptyState
+          icon={<PencilSquareIcon className="h-7 w-7" />}
+          title="Nothing in the feed yet"
+          description={emptyMessage}
+          tone="feed"
+          size="lg"
+        />
       </div>
     );
   }

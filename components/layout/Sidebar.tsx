@@ -113,12 +113,7 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
       <nav className="flex flex-col h-full px-4 py-6">
       {/* Logo */}
       <Link href="/feed" className="flex items-center gap-2.5 px-3 mb-8">
-        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0">
-          <span className="text-zinc-950 font-bold text-xs">LD</span>
-        </div>
-        <span className="font-bold text-white text-[17px] tracking-tight">
-          LogoutDev
-        </span>
+        <img src="/logo.jpeg" alt="LogoutDev" className="h-8 w-8 rounded-full object-cover" />
       </Link>
 
       <form onSubmit={handleSearchSubmit} className="mb-6 px-1">
@@ -239,7 +234,7 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
               {user.name}
             </p>
             <p className="text-xs text-zinc-500 truncate">
-              @{emailToHandle(user.email)}
+              @{user.username || emailToHandle(user.email)}
             </p>
           </div>
         </Link>

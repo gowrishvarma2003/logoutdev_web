@@ -16,6 +16,7 @@ import {
   BoltIcon,
 } from "@/components/ui/Icons";
 import LinkedEntityCard from "@/components/connected/LinkedEntityCard";
+import EmptyState from "@/components/ui/EmptyState";
 
 interface ActivityTimelineProps {
   activity: ActivityItem[];
@@ -153,9 +154,13 @@ export default function ActivityTimeline({
 
   if (activity.length === 0) {
     return (
-      <div className="py-12 text-center">
-        <p className="text-zinc-600 text-sm">No activity to show.</p>
-      </div>
+      <EmptyState
+        icon={<RocketIcon className="h-6 w-6" />}
+        title="Quiet timeline"
+        description="Posts, launches, discussions, and repo updates will appear here as the profile gets moving."
+        tone="project"
+        size="sm"
+      />
     );
   }
 

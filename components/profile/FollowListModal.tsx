@@ -7,6 +7,7 @@ import Spinner from "@/components/ui/Spinner";
 import FollowButton from "@/components/profile/FollowButton";
 import { getFollowers, getFollowing } from "@/lib/api";
 import { XIcon } from "@/components/ui/Icons";
+import EmptyState from "@/components/ui/EmptyState";
 import type { FollowListUser } from "@/lib/types";
 
 interface FollowListModalProps {
@@ -141,8 +142,14 @@ export default function FollowListModal({
           {error && items.length === 0 ? (
             <div className="py-12 text-center text-sm text-rose-400">{error}</div>
           ) : items.length === 0 && !loading ? (
-            <div className="py-12 text-center text-sm text-zinc-600">
-              {tab === "followers" ? "No followers yet." : "Not following anyone yet."}
+            <div className="p-4">
+              <EmptyState
+                icon={<XIcon className="h-6 w-6" />}
+                title={tab === "followers" ? "No followers yet" : "Not following anyone yet"}
+                description={tab === "followers" ? "Followers will appear here as people discover this profile." : "Follow developers and builders to keep their work close."}
+                tone="default"
+                size="sm"
+              />
             </div>
           ) : (
             <ul className="divide-y divide-zinc-900">

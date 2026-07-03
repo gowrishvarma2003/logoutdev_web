@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import type { ProjectSpace } from "@/lib/types";
 import SpaceOverviewCard from "@/components/spaces/SpaceOverviewCard";
 import Spinner from "@/components/ui/Spinner";
+import EmptyState from "@/components/ui/EmptyState";
 import {
   BoltIcon,
   FolderIcon,
@@ -54,88 +55,80 @@ function EmptyTabState({
 }) {
   if (hasFilters) {
     return (
-      <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
-        <h3 className="text-base font-semibold text-white">No spaces matched</h3>
-        <button type="button" onClick={onClear} className="mt-3 text-sm font-medium text-sky-300 hover:text-sky-200">
-          Clear filters
-        </button>
-      </div>
+      <EmptyState
+        icon={<SearchIcon className="h-7 w-7" />}
+        title="No spaces matched"
+        description="Try a wider status, tag, or skill search to bring more projects into view."
+        tone="space"
+        action={
+          <button type="button" onClick={onClear} className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+            Clear filters
+          </button>
+        }
+      />
     );
   }
 
   if (tab === "mine") {
     return (
-      <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
-        <FolderIcon className="mx-auto h-11 w-11 text-zinc-700" />
-        <h3 className="mt-4 text-base font-semibold text-white">
-          {signedIn ? "No spaces yet" : "Sign in to see your spaces"}
-        </h3>
-        {signedIn ? (
-          <Link
-            href="/spaces/create"
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
-          >
-            <PlusIcon className="h-4 w-4" />
-            Create Space
-          </Link>
-        ) : (
-          <Link
-            href="/login"
-            className="mt-5 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
-          >
-            Sign in
-          </Link>
-        )}
-      </div>
+      <EmptyState
+        icon={<FolderIcon className="h-7 w-7" />}
+        title={signedIn ? "Start your first space" : "Sign in to see your spaces"}
+        description={signedIn ? "Create a space for an idea, repo, product, or collaboration you want to move forward." : "Your owned and joined spaces will appear here after you sign in."}
+        tone="space"
+        action={
+          signedIn ? (
+            <Link
+              href="/spaces/create"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+            >
+              <PlusIcon className="h-4 w-4" />
+              Create Space
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+            >
+              Sign in
+            </Link>
+          )
+        }
+      />
     );
   }
 
   if (tab === "working" || tab === "followed") {
     const isWorking = tab === "working";
     return (
-      <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
-        {isWorking ? (
-          <UsersIcon className="mx-auto h-11 w-11 text-zinc-700" />
-        ) : (
-          <BoltIcon className="mx-auto h-11 w-11 text-zinc-700" />
-        )}
-        <h3 className="mt-4 text-base font-semibold text-white">
-          {signedIn
-            ? isWorking
-              ? "No working spaces yet"
-              : "No followed spaces yet"
-            : "Sign in to see this section"}
-        </h3>
-        {signedIn ? (
-          <p className="mx-auto mt-2 max-w-md text-sm text-zinc-500">
-            {isWorking
-              ? "Spaces appear here when you join a project as a contributor or maintainer."
-              : "Follow spaces you want to keep close and they will appear here."}
-          </p>
-        ) : (
-          <Link
-            href="/login"
-            className="mt-5 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
-          >
-            Sign in
-          </Link>
-        )}
-      </div>
+      <EmptyState
+        icon={isWorking ? <UsersIcon className="h-7 w-7" /> : <BoltIcon className="h-7 w-7" />}
+        title={signedIn ? (isWorking ? "No working spaces yet" : "No followed spaces yet") : "Sign in to see this section"}
+        description={isWorking ? "Spaces appear here when you join a project as a contributor or maintainer." : "Follow spaces you want to keep close and they will appear here."}
+        tone="space"
+        action={
+          signedIn ? null : (
+            <Link
+              href="/login"
+              className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+            >
+              Sign in
+            </Link>
+          )
+        }
+      />
     );
   }
 
   return (
-    <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
-      <SparklesIcon className="mx-auto h-10 w-10 text-zinc-700" />
-      <h3 className="mt-4 text-base font-semibold text-white">
-        {tab === "recommended" ? "No recommendations yet" : "No public spaces yet"}
-      </h3>
-      <p className="mx-auto mt-2 max-w-md text-sm text-zinc-500">
-        {tab === "recommended"
-          ? "Recommended spaces will appear as public projects add contribution signals."
-          : "Public spaces from the community will appear here."}
-      </p>
-    </div>
+    <EmptyState
+      icon={<SparklesIcon className="h-7 w-7" />}
+      title={tab === "recommended" ? "No recommendations yet" : "No public spaces yet"}
+      description={tab === "recommended"
+        ? "Recommended spaces will appear as public projects add contribution signals."
+        : "Public spaces from the community will appear here."}
+      tone="space"
+    />
   );
 }
 

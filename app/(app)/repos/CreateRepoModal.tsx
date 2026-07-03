@@ -52,7 +52,7 @@ export default function CreateRepoModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 cursor-pointer bg-black/50 backdrop-blur-sm" onClick={onClose} />
       
       <div className="relative w-full max-w-lg overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl">
         <div className="flex items-center justify-between border-b border-zinc-800 p-4">
