@@ -20,6 +20,7 @@ import {
   BoltIcon,
   SparklesIcon,
   ChatBubbleIcon,
+  KeyIcon,
 } from "@/components/ui/Icons";
 
 interface SidebarProps {
@@ -218,6 +219,15 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
         <PencilSquareIcon className="w-4 h-4" />
         New Post
       </Link>
+
+      <div className="mt-4 flex flex-col gap-1">
+        <NavItem
+          href="/settings/tokens"
+          icon={<KeyIcon className="w-5 h-5" />}
+          label="Git Tokens"
+          active={pathname.startsWith("/settings/tokens")}
+        />
+      </div>
 
       {/* Spacer */}
       <div className="flex-1" />

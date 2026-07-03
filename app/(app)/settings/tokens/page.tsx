@@ -91,16 +91,19 @@ export default function SettingsTokensPage() {
           </Link>
           <div className="flex items-center gap-2">
             <KeyIcon className="w-4 h-4 text-zinc-400" />
-            <h1 className="text-[15px] font-bold text-white">Access Tokens</h1>
+            <h1 className="text-[15px] font-bold text-white">Git Access Tokens</h1>
           </div>
         </div>
       </header>
 
       <div className="space-y-6 px-5 py-6">
         <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
-          <h2 className="text-sm font-semibold text-white">Create a Git access token</h2>
+          <h2 className="text-sm font-semibold text-white">Create a repo access token</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Use this token as the Git password when pushing to LogoutDev repositories over HTTPS. You can now scope tokens to read-only or read/write Git access.
+            Use this token as your Git password when cloning or pushing LogoutDev repositories over HTTPS.
+          </p>
+          <p className="mt-1 text-xs text-zinc-600">
+            Username: your LogoutDev username. Password: the token you create here.
           </p>
           <p className="mt-1 text-xs text-zinc-600">
             If you set an expiry date, the token will remain valid until the end of that day.

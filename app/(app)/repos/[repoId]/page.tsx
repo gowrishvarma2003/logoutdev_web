@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import { API_BASE_URL } from "@/lib/apiBaseUrl";
 import { formatFileSize, formatRelativeTime } from "@/lib/utils";
-import { CheckIcon, ChevronDownIcon, FolderIcon, DocumentIcon, ClockIcon, CodeBracketIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, ChevronDownIcon, FolderIcon, DocumentIcon, ClockIcon, CodeBracketIcon, KeyIcon } from "@heroicons/react/24/outline";
 
 export default function RepoCodePage() {
   const { repo } = useRepoContext();
@@ -359,6 +359,13 @@ export default function RepoCodePage() {
                           ? "Use this remote URL from your local Git repo."
                           : "You can clone this repo, but you need write access before you can push."}
                       </p>
+                      <Link
+                        href="/settings/tokens"
+                        className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-semibold text-zinc-200 transition-colors hover:border-zinc-700 hover:bg-zinc-800 hover:text-white"
+                      >
+                        <KeyIcon className="h-3.5 w-3.5" />
+                        Manage Git access tokens
+                      </Link>
                     </div>
 
                     <div className="mt-4 border-t border-zinc-800/80 pt-3 space-y-1">

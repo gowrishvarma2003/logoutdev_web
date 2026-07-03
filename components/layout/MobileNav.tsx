@@ -18,6 +18,7 @@ import {
   XIcon,
   ChatBubbleIcon,
   LogOutIcon,
+  KeyIcon,
 } from "@/components/ui/Icons";
 
 interface MobileNavProps {
@@ -49,6 +50,7 @@ export default function MobileNav({ userId, username, unreadCount = 0, onLogout 
     { href: "/freelance", icon: <BoltIcon className="w-5 h-5" />, label: "Freelance" },
     { href: "/questions", icon: <QuestionMarkCircleIcon className="w-5 h-5" />, label: "Questions" },
     { href: "/repos", icon: <CodeBracketIcon className="w-5 h-5" />, label: "Repos" },
+    { href: "/settings/tokens", icon: <KeyIcon className="w-5 h-5" />, label: "Git Tokens" },
   ];
 
   function isActive(href: string, label: string) {
