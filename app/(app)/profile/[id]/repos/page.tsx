@@ -37,6 +37,31 @@ const REVIEW_STYLES = {
   pending: "text-zinc-400 bg-zinc-800 border-zinc-700",
 } as const;
 
+const LANGUAGE_COLORS: Record<string, string> = {
+  "C#": "#178600",
+  "C++": "#f34b7d",
+  C: "#555555",
+  CSS: "#563d7c",
+  Dart: "#00B4AB",
+  Dockerfile: "#384d54",
+  Go: "#00ADD8",
+  HTML: "#e34c26",
+  Java: "#b07219",
+  JavaScript: "#f1e05a",
+  Kotlin: "#A97BFF",
+  Makefile: "#427819",
+  PHP: "#4F5D95",
+  Python: "#3572A5",
+  Ruby: "#701516",
+  Rust: "#dea584",
+  SCSS: "#c6538c",
+  SQL: "#e38c00",
+  Shell: "#89e051",
+  Swift: "#F05138",
+  TypeScript: "#3178c6",
+  Vue: "#41b883",
+};
+
 export default function ProfileReposPage({ params }: ProfileReposPageProps) {
   const { id: username } = use(params);
   const [page, setPage] = useState(1);
@@ -111,18 +136,27 @@ export default function ProfileReposPage({ params }: ProfileReposPageProps) {
                     {repo.description}
                   </p>
                 ) : null}
-                <div className="flex items-center gap-3 mt-2 text-[11px] text-zinc-600">
-                  <span className="flex items-center gap-1">
-                    <StarIcon className="w-3 h-3" />
+                <div className="flex items-center gap-3 mt-2 text-[11px] text-zinc-650">
+                  {repo.language ? (
+                    <span className="inline-flex items-center gap-1 font-semibold text-zinc-400">
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: LANGUAGE_COLORS[repo.language] || "#8b949e" }}
+                      />
+                      {repo.language}
+                    </span>
+                  ) : null}
+                  <span className="flex items-center gap-1 text-zinc-500">
+                    <StarIcon className="w-3 h-3 text-zinc-500" />
                     {repo.star_count}
                   </span>
-                  <span className="flex items-center gap-1">
-                    <GitBranchIcon className="w-3 h-3" />
+                  <span className="flex items-center gap-1 text-zinc-500">
+                    <GitBranchIcon className="w-3 h-3 text-zinc-500" />
                     {repo.fork_count}
                   </span>
                   {repo.open_pr_count > 0 ? (
-                    <span className="flex items-center gap-1">
-                      <UsersIcon className="w-3 h-3" />
+                    <span className="flex items-center gap-1 text-zinc-500">
+                      <UsersIcon className="w-3 h-3 text-zinc-500" />
                       {repo.open_pr_count} open PR{repo.open_pr_count !== 1 ? "s" : ""}
                     </span>
                   ) : null}

@@ -1,10 +1,5 @@
 "use client";
 
-/**
- * ProofOfWorkScoreBadge — displays the proof-of-work score, band, and factor breakdown.
- * Band colors: Strong=emerald, Growing=sky, Early=zinc.
- */
-
 import { useState } from "react";
 import type { ProofOfWorkSignals } from "@/lib/types";
 import { SparklesIcon, ChevronDownIcon } from "@/components/ui/Icons";
@@ -15,24 +10,21 @@ interface ProofOfWorkScoreBadgeProps {
 
 const BAND_CONFIG: Record<
   string,
-  { label: string; ring: string; bg: string; text: string; bar: string }
+  { ring: string; bg: string; text: string; bar: string }
 > = {
   Strong: {
-    label: "Strong",
     ring: "border-emerald-500/40",
     bg: "bg-emerald-500/10",
     text: "text-emerald-400",
     bar: "bg-emerald-500",
   },
   Growing: {
-    label: "Growing",
     ring: "border-sky-500/40",
     bg: "bg-sky-500/10",
     text: "text-sky-400",
     bar: "bg-sky-500",
   },
   Early: {
-    label: "Early",
     ring: "border-zinc-600",
     bg: "bg-zinc-800/60",
     text: "text-zinc-400",
@@ -49,81 +41,170 @@ const FACTOR_LABELS: Record<string, string> = {
   community_contribution: "Community Contribution",
 };
 
-// Maximum score per factor for the progress bar
-const FACTOR_MAX: Record<string, number> = {
-  code_delivery: 30,
-  project_execution: 20,
-  collaboration: 20,
-  knowledge_sharing: 15,
-  reliability_outcomes: 10,
-  community_contribution: 5,
-};
+function formatScore(value: number): string {
+  if (value >= 10000) return `${(value / 1000).toFixed(1)}k`;
+  return value.toLocaleString();
+}
+
+function formatSigned(value: number): string {
+  return `${value >= 0 ? "+" : ""}${value.toLocaleString()}`;
+}
+
+function sumPenaltyValues(penalties: Record<string, number> | undefined): number {
+  if (!penalties) return 0;
+  return Object.values(penalties).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
+}
 
 export default function ProofOfWorkScoreBadge({ signals }: ProofOfWorkScoreBadgeProps) {
   const [expanded, setExpanded] = useState(false);
   const config = BAND_CONFIG[signals.band] ?? BAND_CONFIG.Early;
+  const badge = signals.badge || signals.band || "New Builder";
+  const peakBadge = signals.peak_badge || badge;
+  const categories = signals.category_totals || signals.factors;
+  const maxCategory = Math.max(1, ...Object.values(categories));
+  const next = signals.next_badge;
+  const progress = next
+    ? Math.min(100, Math.max(0, (signals.score / Math.max(1, next.threshold)) * 100))
+    : 100;
+  const ownerLedgers = signals.owner_details?.recent_daily_ledgers ?? [];
 
   return (
-    <div
-      className={`rounded-2xl border ${config.ring} ${config.bg} p-4 transition-all`}
-    >
-      {/* ── Header row ── */}
+    <div className={`rounded-2xl border ${config.ring} ${config.bg} p-4 transition-all`}>
       <button
-        onClick={() => setExpanded((v) => !v)}
-        className="flex items-center justify-between w-full group"
+        onClick={() => setExpanded((value) => !value)}
+        className="flex w-full items-center justify-between gap-4"
         aria-label="Toggle proof-of-work details"
         aria-expanded={expanded}
       >
-        <div className="flex items-center gap-2.5">
-          <SparklesIcon className={`w-4 h-4 shrink-0 ${config.text}`} />
-          <div className="text-left">
-            <p className="text-xs text-zinc-500 font-medium">Proof-of-Work</p>
-            <p className={`text-sm font-bold ${config.text} leading-tight`}>
-              {config.label}{" "}
-              <span className="text-zinc-400 font-normal">· {signals.score}/100</span>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <SparklesIcon className={`h-4 w-4 shrink-0 ${config.text}`} />
+          <div className="min-w-0 text-left">
+            <p className="text-xs font-medium text-zinc-500">Proof-of-Work</p>
+            <p className={`truncate text-sm font-bold leading-tight ${config.text}`}>
+              {badge}
+              <span className="font-normal text-zinc-400"> · {formatScore(signals.score)} XP</span>
             </p>
           </div>
         </div>
 
-        {/* Score ring */}
-        <div className="flex items-center gap-2">
-          <div
-            className={`w-10 h-10 rounded-full border-2 ${config.ring} flex items-center justify-center`}
-          >
-            <span className={`text-sm font-bold ${config.text}`}>{signals.score}</span>
+        <div className="flex shrink-0 items-center gap-2">
+          <div className={`flex h-10 min-w-10 items-center justify-center rounded-full border-2 px-2 ${config.ring}`}>
+            <span className={`text-sm font-bold tabular-nums ${config.text}`}>{formatScore(signals.score)}</span>
           </div>
           <ChevronDownIcon
-            className={`w-3.5 h-3.5 text-zinc-500 transition-transform duration-200 ${
+            className={`h-3.5 w-3.5 text-zinc-500 transition-transform duration-200 ${
               expanded ? "rotate-180" : ""
             }`}
           />
         </div>
       </button>
 
-      {/* ── Expanded factor breakdown ── */}
+      {next ? (
+        <div className="mt-4">
+          <div className="mb-1 flex items-center justify-between gap-3 text-xs">
+            <span className="text-zinc-500">Next: {next.name}</span>
+            <span className="tabular-nums text-zinc-400">{formatScore(next.points_needed)} XP needed</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800">
+            <div className={`h-full rounded-full ${config.bar}`} style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+      ) : (
+        <p className="mt-3 text-xs text-zinc-500">Peak badge reached · {peakBadge}</p>
+      )}
+
       {expanded && (
-        <div className="mt-4 space-y-3 border-t border-zinc-700/50 pt-4">
-          {Object.entries(signals.factors).map(([key, value]) => {
-            const max = FACTOR_MAX[key] ?? 25;
-            const pct = Math.min((value / max) * 100, 100);
-            return (
-              <div key={key}>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-zinc-400">{FACTOR_LABELS[key] ?? key}</span>
-                  <span className="text-zinc-400 tabular-nums">{value}/{max}</span>
+        <div className="mt-4 space-y-4 border-t border-zinc-700/50 pt-4">
+          <p className="text-xs text-zinc-500">Updates daily at 00:05 IST</p>
+
+          <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+            <div>
+              <p className="text-zinc-500">Current</p>
+              <p className={`font-semibold ${config.text}`}>{badge}</p>
+            </div>
+            <div>
+              <p className="text-zinc-500">Peak</p>
+              <p className="font-semibold text-zinc-300">{peakBadge}</p>
+            </div>
+            <div>
+              <p className="text-zinc-500">Updated</p>
+              <p className="font-semibold text-zinc-300">{signals.last_scored_date || "Daily IST"}</p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {Object.entries(categories).map(([key, value]) => {
+              const pct = Math.min((value / maxCategory) * 100, 100);
+              return (
+                <div key={key}>
+                  <div className="mb-1 flex justify-between gap-3 text-xs">
+                    <span className="text-zinc-400">{FACTOR_LABELS[key] ?? key}</span>
+                    <span className="tabular-nums text-zinc-400">{formatScore(value)}</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800">
+                    <div className={`h-full rounded-full ${config.bar}`} style={{ width: `${pct}%` }} />
+                  </div>
                 </div>
-                <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${config.bar} rounded-full transition-all duration-700`}
-                    style={{ width: `${pct}%` }}
-                  />
+              );
+            })}
+          </div>
+
+          {next?.blockers && next.blockers.length > 0 ? (
+            <div className="rounded-lg border border-zinc-800 bg-zinc-900/70 p-3 text-xs text-zinc-400">
+              {next.blockers.map((blocker, index) => (
+                <p key={`${blocker.type}-${index}`}>
+                  {blocker.type === "category_diversity"
+                    ? `${blocker.categories_needed ?? 0} more categories need ${blocker.gate_points ?? 0}+ XP`
+                    : `${blocker.points_needed ?? 0} XP to ${next.name}`}
+                </p>
+              ))}
+            </div>
+          ) : null}
+
+          {ownerLedgers.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-zinc-500">Recent ledger</p>
+              {ownerLedgers.slice(0, 5).map((ledger) => (
+                <div key={ledger.score_date} className="rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-xs">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-zinc-400">{ledger.score_date}</span>
+                    <span className={ledger.final_points >= 0 ? "text-emerald-400" : "text-rose-400"}>
+                      {formatSigned(ledger.final_points)}
+                    </span>
+                  </div>
+                  <div className="mt-2 grid grid-cols-4 gap-2 text-[11px]">
+                    <div>
+                      <p className="text-zinc-600">Raw</p>
+                      <p className="tabular-nums text-zinc-400">{ledger.raw_points}</p>
+                    </div>
+                    <div>
+                      <p className="text-zinc-600">Capped</p>
+                      <p className="tabular-nums text-zinc-400">{ledger.capped_points}</p>
+                    </div>
+                    <div>
+                      <p className="text-zinc-600">Caps</p>
+                      <p className="tabular-nums text-zinc-400">-{Math.max(0, ledger.raw_points - ledger.positive_points)}</p>
+                    </div>
+                    <div>
+                      <p className="text-zinc-600">Penalty</p>
+                      <p className="tabular-nums text-zinc-400">-{sumPenaltyValues(ledger.penalties)}</p>
+                    </div>
+                  </div>
+                  {sumPenaltyValues(ledger.penalties) > 0 ? (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {Object.entries(ledger.penalties).map(([key, value]) => (
+                        Number(value) > 0 ? (
+                          <span key={key} className="rounded-md bg-rose-500/10 px-1.5 py-0.5 text-[10px] text-rose-300">
+                            {key}: -{value}
+                          </span>
+                        ) : null
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
-              </div>
-            );
-          })}
-          <p className="text-[11px] text-zinc-600 mt-1">
-            Durable outcomes plus a 30-day activity boost.
-          </p>
+              ))}
+            </div>
+          ) : null}
         </div>
       )}
     </div>

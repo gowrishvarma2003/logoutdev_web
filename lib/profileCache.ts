@@ -40,12 +40,14 @@ export function setCachedProfile(username: string, data: {
 export function getCachedSignals(username: string) {
   return getCached<{
     band: string | null;
+    badge: string | null;
     score: number | null;
   }>(`signals:${username}`);
 }
 
 export function setCachedSignals(username: string, data: {
   band: string | null;
+  badge: string | null;
   score: number | null;
 }) {
   setCache(`signals:${username}`, data);

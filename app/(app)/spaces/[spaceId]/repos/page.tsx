@@ -22,6 +22,31 @@ import {
 } from "@/components/ui/Icons";
 import type { RepositoryVisibility } from "@/lib/types";
 
+const LANGUAGE_COLORS: Record<string, string> = {
+  "C#": "#178600",
+  "C++": "#f34b7d",
+  C: "#555555",
+  CSS: "#563d7c",
+  Dart: "#00B4AB",
+  Dockerfile: "#384d54",
+  Go: "#00ADD8",
+  HTML: "#e34c26",
+  Java: "#b07219",
+  JavaScript: "#f1e05a",
+  Kotlin: "#A97BFF",
+  Makefile: "#427819",
+  PHP: "#4F5D95",
+  Python: "#3572A5",
+  Ruby: "#701516",
+  Rust: "#dea584",
+  SCSS: "#c6538c",
+  SQL: "#e38c00",
+  Shell: "#89e051",
+  Swift: "#F05138",
+  TypeScript: "#3178c6",
+  Vue: "#41b883",
+};
+
 export default function ReposPage({
   params,
 }: {
@@ -361,7 +386,16 @@ export default function ReposPage({
                     {attachment.repo.description ? (
                       <p className="mt-1 text-sm text-zinc-400">{attachment.repo.description}</p>
                     ) : null}
-                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-550">
+                      {attachment.repo.language ? (
+                        <span className="inline-flex items-center gap-1.5 font-semibold text-zinc-400">
+                          <span
+                            className="h-2.5 w-2.5 rounded-full"
+                            style={{ backgroundColor: LANGUAGE_COLORS[attachment.repo.language] || "#8b949e" }}
+                          />
+                          {attachment.repo.language}
+                        </span>
+                      ) : null}
                       <span>
                         Created {new Date(attachment.repo.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       </span>

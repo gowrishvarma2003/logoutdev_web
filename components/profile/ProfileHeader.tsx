@@ -24,6 +24,7 @@ interface ProfileHeaderProps {
   is_following?: boolean;
   followerCount?: number;
   band?: ProofOfWorkBand | null;
+  badge?: string | null;
   score?: number | null;
   openToCollaborate?: boolean;
   onFollowChange?: (next: { following: boolean; followerCount: number }) => void;
@@ -64,6 +65,7 @@ export default function ProfileHeader({
   is_following = false,
   followerCount = 0,
   band = null,
+  badge = null,
   score = null,
   openToCollaborate = false,
   onFollowChange,
@@ -134,7 +136,7 @@ export default function ProfileHeader({
           <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">
             {profile.name}
           </h1>
-          {band ? <ProfileBandChip band={band} score={score ?? undefined} /> : null}
+          {band || badge ? <ProfileBandChip band={band} badge={badge} score={score ?? undefined} /> : null}
         </div>
         {profile.username ? (
           <p className="text-sm text-zinc-500 mt-0.5">@{profile.username}</p>

@@ -42,7 +42,7 @@ export default function ProposalInboxCard({
           </p>
           {signals && (
             <p className="mt-1 text-[11px] text-zinc-500">
-              Proof-of-work {signals.score}/100
+              {signals.badge || "Proof-of-work"} · {signals.score.toLocaleString()} XP
             </p>
           )}
         </div>

@@ -15,7 +15,7 @@ import {
 } from "../api";
 import { useAuth } from "./useAuth";
 
-export type NotificationTab = "needs-action" | "unread" | "all";
+export type NotificationTab = "priority" | "mentions" | "work" | "social" | "unread" | "all" | "needs-action";
 
 const REFRESH_EVENT = "notifications:changed";
 

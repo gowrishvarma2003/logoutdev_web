@@ -166,6 +166,7 @@ export default function ProfileLayout({ params, children }: ProfileLayoutProps) 
         is_following={displayFollowing}
         followerCount={displayStats?.followers ?? 0}
         band={signals?.band ?? null}
+        badge={signals?.badge ?? null}
         score={signals?.score ?? null}
         openToCollaborate={open_to_collaborate}
         onFollowChange={handleFollowChange}

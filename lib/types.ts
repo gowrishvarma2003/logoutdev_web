@@ -25,6 +25,10 @@ export interface ChatUser {
   username?: string | null;
   headline?: string | null;
   avatar_url?: string | null;
+  chat_encryption_enabled?: boolean;
+  presence_status?: "online" | "offline";
+  last_seen_at?: string | null;
+  last_seen_visible?: boolean;
 }
 
 export interface ChatEnvelope {
@@ -68,6 +72,19 @@ export interface ChatMessage {
   nonce_or_iv?: string | null;
   auth_tag?: string | null;
   key_epoch_id?: string | null;
+  attachments?: ChatAttachment[];
+}
+
+export interface ChatAttachment {
+  id: string;
+  message_id?: string | null;
+  conversation_id?: string | null;
+  storage_key: string;
+  encrypted_metadata: string;
+  size_bytes: number;
+  content_hash?: string | null;
+  download_url?: string | null;
+  created_at?: string;
 }
 
 export type ChatGroupRole = "owner" | "admin" | "member";
@@ -393,6 +410,16 @@ export interface NotificationListResponse {
 // ─── Developer Profiles ──────────────────────────────────────────────────────
 
 export type ProofOfWorkBand = "Strong" | "Growing" | "Early";
+export type ProofOfWorkBadge = "New Builder" | "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond" | "Legend";
+
+export interface ProofOfWorkCategoryTotals {
+  code_delivery: number;
+  project_execution: number;
+  collaboration: number;
+  knowledge_sharing: number;
+  reliability_outcomes: number;
+  community_contribution: number;
+}
 
 export interface UserProfileSkill {
   id: string;
@@ -439,17 +466,45 @@ export interface ProfileStats {
 export interface ProofOfWorkSignals {
   version?: string;
   window_days?: number;
+  score_version?: string;
+  score_timezone?: string;
   score: number;
   band: ProofOfWorkBand;
-  factors: {
-    code_delivery: number;
-    project_execution: number;
-    collaboration: number;
-    knowledge_sharing: number;
-    reliability_outcomes: number;
-    community_contribution: number;
-  };
+  badge?: ProofOfWorkBadge | string;
+  peak_badge?: ProofOfWorkBadge | string;
+  factors: ProofOfWorkCategoryTotals;
+  category_totals?: ProofOfWorkCategoryTotals;
   contributions?: Record<string, number>;
+  next_badge?: {
+    name: ProofOfWorkBadge | string;
+    threshold: number;
+    points_needed: number;
+    gate_categories: number;
+    gate_points: number;
+    gate_categories_met: number;
+    blockers?: Array<{
+      type: string;
+      points_needed?: number;
+      categories_needed?: number;
+      gate_points?: number;
+    }>;
+  } | null;
+  last_scored_date?: string | null;
+  owner_details?: {
+    recent_daily_ledgers: Array<{
+      score_date: string;
+      raw_points: number;
+      capped_points: number;
+      positive_points: number;
+      final_points: number;
+      penalties: Record<string, number>;
+      categories: Record<string, number>;
+      cap_explanations?: Record<string, unknown>;
+      events_count: number;
+      meaningful_activity_count: number;
+    }>;
+    inactivity_state?: Record<string, unknown>;
+  };
 }
 
 export interface CareerTimelineItem {
@@ -511,6 +566,7 @@ export interface ProfileRepoListItem {
   description?: string | null;
   visibility: RepositoryVisibility;
   default_branch: string;
+  language?: string | null;
   space?: {
     id: string;
     name: string;

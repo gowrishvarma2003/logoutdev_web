@@ -36,6 +36,31 @@ import {
 import Spinner from "@/components/ui/Spinner";
 import { formatRelativeTime } from "@/lib/utils";
 
+const LANGUAGE_COLORS: Record<string, string> = {
+  "C#": "#178600",
+  "C++": "#f34b7d",
+  C: "#555555",
+  CSS: "#563d7c",
+  Dart: "#00B4AB",
+  Dockerfile: "#384d54",
+  Go: "#00ADD8",
+  HTML: "#e34c26",
+  Java: "#b07219",
+  JavaScript: "#f1e05a",
+  Kotlin: "#A97BFF",
+  Makefile: "#427819",
+  PHP: "#4F5D95",
+  Python: "#3572A5",
+  Ruby: "#701516",
+  Rust: "#dea584",
+  SCSS: "#c6538c",
+  SQL: "#e38c00",
+  Shell: "#89e051",
+  Swift: "#F05138",
+  TypeScript: "#3178c6",
+  Vue: "#41b883",
+};
+
 export default function SpaceOverviewPage({
   params,
 }: {
@@ -415,6 +440,15 @@ export default function SpaceOverviewPage({
                         {attachment.is_primary ? (
                           <span className="rounded-full bg-emerald-500/10 border border-emerald-500/25 px-1.5 py-px text-[9px] font-bold text-emerald-400 uppercase">
                             Primary
+                          </span>
+                        ) : null}
+                        {attachment.repo?.language ? (
+                          <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-zinc-400 ml-1">
+                            <span
+                              className="h-1.5 w-1.5 rounded-full"
+                              style={{ backgroundColor: LANGUAGE_COLORS[attachment.repo.language] || "#8b949e" }}
+                            />
+                            {attachment.repo.language}
                           </span>
                         ) : null}
                       </div>

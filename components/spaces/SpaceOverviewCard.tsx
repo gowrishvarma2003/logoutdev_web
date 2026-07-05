@@ -3,16 +3,17 @@
 import Link from "next/link";
 import type { ProjectSpace } from "@/lib/types";
 import { StatusBadge, VisibilityBadge } from "./SpaceBadges";
-import { UsersIcon, ChevronRightIcon, BoltIcon, FolderIcon, CodeBracketIcon } from "@/components/ui/Icons";
+import { UsersIcon, ChevronRightIcon, BoltIcon, FolderIcon, CodeBracketIcon, RocketIcon, GitHubIcon } from "@/components/ui/Icons";
 import Avatar from "@/components/ui/Avatar";
+import { formatRelativeTime } from "@/lib/utils";
 
 type ChipTone = "skill" | "role" | "stack" | "neutral";
 
 const CHIP_STYLES: Record<ChipTone, string> = {
-  skill: "border-sky-500/20 bg-sky-500/10 text-sky-300",
-  role: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
-  stack: "border-zinc-700 bg-zinc-800/80 text-zinc-300",
-  neutral: "border-zinc-700 bg-zinc-900 text-zinc-500",
+  skill: "border-sky-500/20 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 transition-colors",
+  role: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 transition-colors",
+  stack: "border-zinc-800 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 transition-colors",
+  neutral: "border-zinc-800 bg-zinc-950 text-zinc-500",
 };
 
 function SignalChip({
@@ -29,7 +30,7 @@ function SignalChip({
   return (
     <span
       title={title}
-      className={`inline-flex max-w-full items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium leading-none sm:max-w-[180px] ${CHIP_STYLES[tone]}`}
+      className={`inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-medium leading-none sm:max-w-[180px] ${CHIP_STYLES[tone]}`}
     >
       {prefix ? <span className="shrink-0 text-zinc-500">{prefix}</span> : null}
       <span className="min-w-0 truncate">{label}</span>
@@ -40,6 +41,14 @@ function SignalChip({
 function OverflowChip({ count }: { count: number }) {
   return <SignalChip label={`+${count} more`} tone="neutral" />;
 }
+
+const STATUS_GRADIENTS = {
+  idea: "from-violet-500/15 via-violet-900/5 to-purple-500/5 text-violet-300 border-violet-500/25",
+  building: "from-amber-500/15 via-amber-900/5 to-orange-500/5 text-amber-300 border-amber-500/25",
+  shipping: "from-emerald-500/15 via-emerald-900/5 to-teal-500/5 text-emerald-300 border-emerald-500/25",
+  paused: "from-zinc-500/10 to-zinc-900/5 text-zinc-400 border-zinc-700",
+  archived: "from-zinc-800/10 to-zinc-950/5 text-zinc-500 border-zinc-800",
+};
 
 export default function SpaceOverviewCard({ space }: { space: ProjectSpace }) {
   const memberCount = space.members?.length ?? space.memberCount ?? 0;
@@ -55,61 +64,132 @@ export default function SpaceOverviewCard({ space }: { space: ProjectSpace }) {
   const visibleRoles = roles.slice(0, 2);
   const visibleStack = stack.slice(0, 3);
 
+  const relativeTime = space.updated_at
+    ? formatRelativeTime(space.updated_at)
+    : space.created_at
+    ? formatRelativeTime(space.created_at)
+    : null;
+
+  const gradientClass = STATUS_GRADIENTS[space.status] || STATUS_GRADIENTS.idea;
+
+  const getRepoName = (url?: string) => {
+    if (!url) return null;
+    try {
+      const cleanUrl = url.replace("git@github.com:", "https://github.com/").replace(/\.git$/, "");
+      const urlObj = new URL(cleanUrl);
+      const parts = urlObj.pathname.split("/").filter(Boolean);
+      if (parts.length >= 2) {
+        return parts.slice(-2).join("/");
+      }
+      return parts[0] || url;
+    } catch {
+      const parts = url.split("/").filter(Boolean);
+      if (parts.length >= 2) {
+        return parts.slice(-2).join("/");
+      }
+      return url;
+    }
+  };
+  const repoName = getRepoName(space.primary_repo_url);
+
   return (
     <Link
       href={`/spaces/${space.id}`}
-      className="group block overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/45 p-4 transition-all duration-200 hover:border-zinc-700 hover:bg-zinc-900/80"
+      className="group relative block overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900/50 to-zinc-950/70 p-5 transition-all duration-300 hover:border-zinc-700/60 hover:bg-zinc-900/80 hover:shadow-[0_8px_30px_rgb(0,0,0,0.6)] hover:shadow-sky-500/[0.01]"
     >
-      <div className="grid min-w-0 gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(210px,240px)] sm:items-stretch">
-        <div className="min-w-0">
-          <div className="flex min-w-0 items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-gradient-to-br from-sky-500/15 via-zinc-800 to-emerald-500/10 text-sm font-bold text-white">
-              {initial}
-            </div>
+      {/* Top light glow bar */}
+      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-sky-500/10 via-violet-500/10 to-emerald-500/10 opacity-30 transition-opacity group-hover:opacity-100" />
 
-            <div className="min-w-0 flex-1">
-              <div className="flex min-w-0 flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                <div className="min-w-0">
-                  <h3 className="line-clamp-1 break-words text-base font-semibold leading-6 text-white transition-colors group-hover:text-sky-300">
-                    {space.name}
-                  </h3>
-                  {ownerName ? (
-                    <p className="mt-0.5 truncate text-xs text-zinc-500">
-                      by {ownerName}
+      <div className="grid min-w-0 gap-5 sm:grid-cols-[minmax(0,1fr)_250px] sm:items-stretch">
+        {/* Left main info */}
+        <div className="flex min-w-0 flex-col justify-between">
+          <div className="min-w-0">
+            <div className="flex min-w-0 items-start gap-4">
+              {/* Status-color-coded Initial Badge */}
+              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border bg-gradient-to-br text-base font-bold shadow-sm ${gradientClass}`}>
+                {initial}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex min-w-0 flex-col gap-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="line-clamp-1 break-words text-lg font-bold text-white transition-colors group-hover:text-sky-300 tracking-tight">
+                      {space.name}
+                    </h3>
+                    <div className="flex shrink-0 flex-wrap gap-1.5">
+                      <StatusBadge status={space.status} />
+                      <VisibilityBadge visibility={space.visibility} />
+                      {space.working_in_public ? (
+                        <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400 border border-emerald-500/15">
+                          Build in public
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {/* Owner Row & Relative Time */}
+                  <div className="flex items-center gap-2">
+                    {space.owner && (
+                      <Avatar
+                        user={space.owner}
+                        size="xs"
+                        className="ring-1 ring-zinc-800"
+                      />
+                    )}
+                    <p className="truncate text-xs text-zinc-400">
+                      by <span className="font-medium text-zinc-300 group-hover:text-zinc-200 transition-colors">{ownerName}</span>
                     </p>
-                  ) : null}
-                </div>
-
-                <div className="flex shrink-0 flex-wrap gap-1.5 md:justify-end">
-                  <StatusBadge status={space.status} />
-                  <VisibilityBadge visibility={space.visibility} />
-                  {space.working_in_public ? (
-                    <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
-                      Build in public
-                    </span>
-                  ) : null}
+                    {relativeTime && (
+                      <>
+                        <span className="text-zinc-700 text-xs">•</span>
+                        <span className="text-xs text-zinc-500">
+                          updated {relativeTime}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
+
+            <p className="mt-3.5 line-clamp-2 break-words text-sm leading-relaxed text-zinc-400 font-light">
+              {space.summary}
+            </p>
+
+            {/* Integration Pills (Launch & Repo link) */}
+            {(repoName || space.linked_launch) && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {repoName && (
+                  <div className="flex items-center gap-1.5 rounded-full bg-zinc-950/60 px-2.5 py-0.5 text-[11px] text-zinc-300 border border-zinc-800/80 transition-colors hover:border-zinc-700">
+                    <GitHubIcon className="h-3.5 w-3.5 text-zinc-400" />
+                    <span className="font-mono text-[10px] text-zinc-400">{repoName}</span>
+                  </div>
+                )}
+                {space.linked_launch && (
+                  <div className="flex items-center gap-1.5 rounded-full bg-violet-500/5 px-2.5 py-0.5 text-[11px] text-violet-400 border border-violet-500/10 transition-colors hover:border-violet-500/20">
+                    <RocketIcon className="h-3.5 w-3.5 text-violet-400/80" />
+                    <span>Launch: {space.linked_launch.name}</span>
+                    <span className="text-violet-500/30">•</span>
+                    <span className="font-medium text-violet-300">{space.linked_launch.upvote_count} upvotes</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {focus ? (
+              <div className="mt-3.5 flex items-start gap-2.5 rounded-xl border border-zinc-900 bg-zinc-950/30 px-3.5 py-2.5">
+                <span className="mt-0.5 shrink-0 rounded bg-sky-500/10 px-1 py-0.5 text-[8px] font-semibold tracking-wider text-sky-400 uppercase border border-sky-500/15">
+                  Focus
+                </span>
+                <p className="line-clamp-2 break-words text-[12.5px] leading-relaxed text-zinc-300">
+                  {focus}
+                </p>
+              </div>
+            ) : null}
           </div>
 
-          <p className="mt-3 line-clamp-2 break-words text-sm leading-5 text-zinc-400">
-            {space.summary}
-          </p>
-
-          {focus ? (
-            <div className="mt-3 rounded-lg border border-zinc-800 bg-zinc-950/45 px-3 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-600">
-                Current focus
-              </p>
-              <p className="mt-1 line-clamp-2 break-words text-[13px] leading-5 text-zinc-300">
-                {focus}
-              </p>
-            </div>
-          ) : null}
-
           {(skills.length > 0 || roles.length > 0) ? (
-            <div className="mt-3 flex min-w-0 flex-wrap gap-1.5">
+            <div className="mt-4 flex min-w-0 flex-wrap gap-1.5">
               {visibleSkills.map((skill) => (
                 <SignalChip key={`skill:${skill}`} label={skill} tone="skill" />
               ))}
@@ -126,31 +206,28 @@ export default function SpaceOverviewCard({ space }: { space: ProjectSpace }) {
           ) : null}
         </div>
 
-        <div className="flex min-w-0 flex-col justify-between gap-3 rounded-xl border border-zinc-800 bg-zinc-950/40 p-3">
-          <div className="grid min-w-0 grid-cols-3 gap-2 sm:grid-cols-1">
-            <span className="flex min-w-0 items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/70 px-2.5 py-2 text-xs text-zinc-400">
-              <UsersIcon className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
-              <span className="min-w-0 truncate">
-                {memberCount} member{memberCount !== 1 ? "s" : ""}
-              </span>
-            </span>
-            <span className="flex min-w-0 items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/70 px-2.5 py-2 text-xs text-zinc-400">
-              <BoltIcon className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
-              <span className="min-w-0 truncate">
-                {followerCount} follow{followerCount !== 1 ? "s" : ""}
-              </span>
-            </span>
-            <span className="flex min-w-0 items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/70 px-2.5 py-2 text-xs text-zinc-400">
-              <FolderIcon className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
-              <span className="min-w-0 truncate">
-                {repoCount} repo{repoCount !== 1 ? "s" : ""}
-              </span>
-            </span>
+        {/* Right side info panel */}
+        <div className="flex min-w-0 flex-col justify-between gap-4 rounded-xl border border-zinc-800/40 bg-zinc-950/20 p-3.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.02)]">
+          {/* Header Stats Grid */}
+          <div className="grid grid-cols-3 divide-x divide-zinc-800/40 text-center bg-zinc-950/30 py-1.5 rounded-lg border border-zinc-900/60">
+            <div className="flex flex-col items-center justify-center px-1">
+              <span className="text-sm font-bold text-zinc-100">{memberCount}</span>
+              <span className="text-[9px] uppercase tracking-wider text-zinc-500 mt-0.5">members</span>
+            </div>
+            <div className="flex flex-col items-center justify-center px-1">
+              <span className="text-sm font-bold text-zinc-100">{followerCount}</span>
+              <span className="text-[9px] uppercase tracking-wider text-zinc-500 mt-0.5">follows</span>
+            </div>
+            <div className="flex flex-col items-center justify-center px-1">
+              <span className="text-sm font-bold text-zinc-100">{repoCount}</span>
+              <span className="text-[9px] uppercase tracking-wider text-zinc-500 mt-0.5">repos</span>
+            </div>
           </div>
 
+          {/* Tech Stack List */}
           <div className="min-w-0">
-            <div className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-600">
-              <CodeBracketIcon className="h-3.5 w-3.5" />
+            <div className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+              <CodeBracketIcon className="h-3.5 w-3.5 text-zinc-500" />
               Stack
             </div>
             {visibleStack.length > 0 ? (
@@ -163,33 +240,34 @@ export default function SpaceOverviewCard({ space }: { space: ProjectSpace }) {
                 ) : null}
               </div>
             ) : (
-              <p className="text-xs text-zinc-600">Stack not listed</p>
+              <p className="text-xs italic text-zinc-600">Stack not listed</p>
             )}
           </div>
 
-          <div className="flex min-w-0 items-center justify-between gap-3 border-t border-zinc-800 pt-3">
+          {/* Members list & Open link */}
+          <div className="flex min-w-0 items-center justify-between gap-3 border-t border-zinc-800/60 pt-3">
             {space.members && space.members.length > 0 ? (
-              <div className="flex min-w-0 -space-x-1.5 overflow-hidden">
-                {space.members.slice(0, 3).map((member) => (
+              <div className="flex min-w-0 -space-x-2 overflow-hidden py-0.5">
+                {space.members.slice(0, 4).map((member) => (
                   <Avatar
                     key={member.id}
                     user={member.user}
                     size="xs"
-                    className="ring-2 ring-zinc-950"
+                    className="ring-2 ring-zinc-950 transition-transform group-hover:scale-105"
                   />
                 ))}
-                {space.members.length > 3 ? (
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-zinc-950 bg-zinc-800 text-[9px] font-medium text-zinc-400">
-                    +{space.members.length - 3}
+                {space.members.length > 4 ? (
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-zinc-950 bg-zinc-900 text-[9px] font-semibold text-zinc-400 transition-transform group-hover:scale-105">
+                    +{space.members.length - 4}
                   </div>
                 ) : null}
               </div>
             ) : (
-              <span className="truncate text-xs text-zinc-600">No members yet</span>
+              <span className="text-xs italic text-zinc-600">No members yet</span>
             )}
-            <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-sky-300 transition-colors group-hover:text-sky-200">
+            <span className="inline-flex shrink-0 items-center gap-0.5 text-xs font-semibold text-sky-400 transition-colors group-hover:text-sky-300">
               Open
-              <ChevronRightIcon className="h-3.5 w-3.5" />
+              <ChevronRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </span>
           </div>
         </div>

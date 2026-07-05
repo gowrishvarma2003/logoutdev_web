@@ -476,6 +476,41 @@ export async function encryptAttachment(file: File) {
   };
 }
 
+export async function decryptAttachment(downloadUrl: string, encryptedMetadata: string) {
+  const metadata = JSON.parse(encryptedMetadata) as {
+    name: string;
+    type: string;
+    size: number;
+    key: JsonWebKey;
+    iv: string;
+  };
+  const headers: Record<string, string> = {};
+  if (typeof window !== "undefined" && downloadUrl.includes("/api/chat/attachments/")) {
+    const token = localStorage.getItem("authToken");
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+  const encrypted = await fetch(downloadUrl, { headers }).then((response) => {
+    if (!response.ok) throw new Error("Failed to download attachment.");
+    return response.arrayBuffer();
+  });
+  const key = await crypto.subtle.importKey(
+    "jwk",
+    metadata.key,
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["decrypt"]
+  );
+  const plain = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: toArrayBuffer(base64ToBytes(metadata.iv)) },
+    key,
+    encrypted
+  );
+  return {
+    blob: new Blob([plain], { type: metadata.type || "application/octet-stream" }),
+    metadata,
+  };
+}
+
 export async function encryptGroupAttachment(file: File) {
   return encryptAttachment(file);
 }

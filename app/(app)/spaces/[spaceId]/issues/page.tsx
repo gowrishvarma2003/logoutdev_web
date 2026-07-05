@@ -21,6 +21,7 @@ import {
   QuestionMarkCircleIcon,
   SearchIcon,
   UsersIcon,
+  ListIcon,
 } from "@/components/ui/Icons";
 import * as api from "@/lib/services/spacesApi";
 import * as cache from "@/lib/services/requestCache";
@@ -97,7 +98,7 @@ const READINESS_OPTIONS: Array<{ value: "" | WorkReadiness; label: string }> = [
 ];
 
 const VIEW_OPTIONS: Array<{ value: WorkView; label: string; icon: ReactNode }> = [
-  { value: "list", label: "List", icon: <QuestionMarkCircleIcon className="h-4 w-4" /> },
+  { value: "list", label: "List", icon: <ListIcon className="h-4 w-4" /> },
   { value: "board", label: "Board", icon: <BarChartIcon className="h-4 w-4" /> },
   { value: "calendar", label: "Calendar", icon: <CalendarIcon className="h-4 w-4" /> },
   { value: "workload", label: "Workload", icon: <UsersIcon className="h-4 w-4" /> },

@@ -19,6 +19,17 @@ export default function SettingsTokensPage() {
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [tokenToRevoke, setTokenToRevoke] = useState<{ id: string; name: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopyToken() {
+    try {
+      await navigator.clipboard.writeText(plaintext);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCopied(false);
+    }
+  }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -147,11 +158,22 @@ export default function SettingsTokensPage() {
 
         {plaintext && (
           <section className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4">
-            <h2 className="text-sm font-semibold text-amber-300">Copy this token now</h2>
-            <p className="mt-1 text-sm text-amber-100/80">
-              This value is shown only once. Store it somewhere safe.
-            </p>
-            <pre className="mt-3 overflow-x-auto rounded-xl bg-zinc-950 p-3 text-sm text-white">{plaintext}</pre>
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h2 className="text-sm font-semibold text-amber-300">Copy this token now</h2>
+                <p className="mt-1 text-sm text-amber-100/80">
+                  This value is shown only once. Store it somewhere safe.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyToken}
+                className="shrink-0 rounded-lg border border-amber-500/30 px-3 py-1.5 text-xs font-medium text-amber-300 hover:bg-amber-500/10 transition-colors"
+              >
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+            <pre className="mt-3 overflow-x-auto rounded-xl bg-zinc-950 p-3 text-sm text-white select-all">{plaintext}</pre>
           </section>
         )}
 

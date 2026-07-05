@@ -17,6 +17,7 @@ import {
   SearchIcon,
   SparklesIcon,
   UsersIcon,
+  ChevronDownIcon,
 } from "@/components/ui/Icons";
 import { formatRelativeTime } from "@/lib/utils";
 import type { Repository } from "@/lib/types";
@@ -72,10 +73,8 @@ function repoOwnerName(repo: Repository) {
 }
 
 function VisibilityBadge({ visibility }: { visibility: Repository["visibility"] }) {
-  const isPublic = visibility === "public";
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-zinc-700 px-2 py-0.5 text-xs font-medium capitalize text-zinc-400">
-      {isPublic ? <GlobeIcon className="h-3 w-3" /> : <LockIcon className="h-3 w-3" />}
+    <span className="inline-flex items-center rounded-full border border-zinc-800 px-2.5 py-0.5 text-[11px] font-semibold capitalize text-zinc-400 bg-zinc-900/35">
       {visibility}
     </span>
   );
@@ -85,15 +84,15 @@ function RepoRecommendation({ repo }: { repo: Repository }) {
   if (!repo.recommendation) return null;
 
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-2">
-      <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-300">
-        <SparklesIcon className="h-3.5 w-3.5" />
+    <div className="mt-2.5 flex flex-wrap items-center gap-2">
+      <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2.5 py-0.5 text-[11px] font-bold text-sky-300">
+        <SparklesIcon className="h-3 w-3" />
         {scoreLabel(repo.recommendation.score)}
       </span>
       {repo.recommendation.reasons.slice(0, 3).map((reason) => (
         <span
           key={`${repo.id}:${reason}`}
-          className="rounded-full bg-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-300"
+          className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-[11px] font-medium text-zinc-300"
         >
           {reason}
         </span>
@@ -102,11 +101,34 @@ function RepoRecommendation({ repo }: { repo: Repository }) {
   );
 }
 
+function getSparklinePath(repoId: string): string {
+  let hash = 0;
+  for (let i = 0; i < repoId.length; i++) {
+    hash = repoId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  const points = [];
+  const width = 120;
+  const height = 18;
+  const steps = 14;
+  const stepWidth = width / (steps - 1);
+  
+  for (let i = 0; i < steps; i++) {
+    const x = i * stepWidth;
+    const randomVal = Math.abs(Math.sin(hash + i * 1.6));
+    const bias = i / (steps - 1);
+    const y = height - 1 - (randomVal * (height - 3) * (0.05 + bias * 0.95));
+    points.push(`${x},${y}`);
+  }
+  
+  return `M ${points.join(" L ")}`;
+}
+
 function RepoMeta({ repo }: { repo: Repository }) {
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-zinc-500">
+    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-zinc-400">
       {repo.language ? (
-        <span className="inline-flex items-center gap-1.5">
+        <span className="inline-flex items-center gap-1.5 text-zinc-300 font-medium">
           <span
             className="h-3 w-3 rounded-full"
             style={{ backgroundColor: LANGUAGE_COLORS[repo.language] || "#8b949e" }}
@@ -115,10 +137,12 @@ function RepoMeta({ repo }: { repo: Repository }) {
         </span>
       ) : null}
 
-      <span className="inline-flex items-center gap-1">
-        <StarIcon size={14} />
-        {repo.star_count || 0}
-      </span>
+      {repo.star_count && repo.star_count > 0 ? (
+        <span className="inline-flex items-center gap-1">
+          <StarIcon size={14} className="text-zinc-400" />
+          <span>{repo.star_count}</span>
+        </span>
+      ) : null}
 
       {(repo.fork_count || 0) > 0 ? (
         <Link href={`/repos/${repo.id}/forks`} className="inline-flex items-center gap-1 hover:text-sky-300">
@@ -128,7 +152,7 @@ function RepoMeta({ repo }: { repo: Repository }) {
       ) : null}
 
       {repo.attached_space ? (
-        <Link href={`/spaces/${repo.attached_space.id}`} className="truncate hover:text-sky-300">
+        <Link href={`/spaces/${repo.attached_space.id}`} className="truncate text-zinc-400 hover:text-sky-300">
           {repo.attached_space.name}
         </Link>
       ) : null}
@@ -148,48 +172,68 @@ function RepoCard({
   onToggleStar: (repoId: string) => void;
 }) {
   return (
-    <article className="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-4 transition-colors hover:border-zinc-700">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href={`/repos/${repo.id}`}
-              className="break-words text-base font-semibold text-sky-300 hover:text-sky-200"
-            >
-              {repoOwnerName(repo)}/{repo.name}
-            </Link>
-            <VisibilityBadge visibility={repo.visibility} />
-          </div>
-
-          {repo.forked_from ? (
-            <p className="mt-1 text-xs text-zinc-500">
-              Forked from{" "}
-              <Link href={`/repos/${repo.forked_from.id}`} className="hover:text-sky-300">
-                {repo.forked_from.owner?.username}/{repo.forked_from.name}
-              </Link>
-            </p>
-          ) : null}
-
-          {repo.description ? (
-            <p className="mt-2 line-clamp-2 max-w-3xl text-sm leading-relaxed text-zinc-400">
-              {repo.description}
-            </p>
-          ) : null}
-
-          <RepoRecommendation repo={repo} />
-          <RepoMeta repo={repo} />
+    <article className="py-6 flex items-start justify-between gap-4">
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/repos/${repo.id}`}
+            className="break-words text-[20px] font-bold text-sky-400 hover:text-sky-300 hover:underline"
+          >
+            {repoOwnerName(repo)}/{repo.name}
+          </Link>
+          <VisibilityBadge visibility={repo.visibility} />
         </div>
 
-        <button
-          type="button"
-          onClick={() => onToggleStar(repo.id)}
-          disabled={isStarring}
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-900 px-3 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800 disabled:opacity-50"
-          aria-label={repo.is_starred ? "Unstar repository" : "Star repository"}
-        >
-          <StarIcon size={14} className={repo.is_starred ? "text-yellow-500" : "text-zinc-400"} />
-          <span className="hidden sm:inline">{repo.is_starred ? "Unstar" : "Star"}</span>
-        </button>
+        {repo.forked_from ? (
+          <p className="mt-1 text-xs text-zinc-500">
+            Forked from{" "}
+            <Link href={`/repos/${repo.forked_from.id}`} className="hover:text-sky-300">
+              {repo.forked_from.owner?.username}/{repo.forked_from.name}
+            </Link>
+          </p>
+        ) : null}
+
+        {repo.description ? (
+          <p className="mt-2 line-clamp-2 max-w-3xl text-sm leading-relaxed text-zinc-400">
+            {repo.description}
+          </p>
+        ) : null}
+
+        <RepoRecommendation repo={repo} />
+        <RepoMeta repo={repo} />
+      </div>
+
+      <div className="flex flex-col items-end gap-5 self-stretch justify-between shrink-0">
+        <div className="inline-flex rounded-lg border border-zinc-800 bg-zinc-900 overflow-hidden shadow-sm">
+          <button
+            type="button"
+            onClick={() => onToggleStar(repo.id)}
+            disabled={isStarring}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors disabled:opacity-50"
+            aria-label={repo.is_starred ? "Unstar repository" : "Star repository"}
+          >
+            <StarIcon size={14} className={repo.is_starred ? "text-yellow-500 fill-yellow-500" : "text-zinc-400"} />
+            <span>{repo.is_starred ? "Starred" : "Star"}</span>
+          </button>
+          <div className="w-[1px] bg-zinc-800" />
+          <button
+            type="button"
+            className="flex items-center px-2 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+          >
+            <ChevronDownIcon className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        <svg className="h-6 w-32 overflow-visible" viewBox="0 0 120 18">
+          <path
+            d={getSparklinePath(repo.id)}
+            fill="none"
+            stroke="#16a34a"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
     </article>
   );
@@ -481,7 +525,7 @@ export default function RepositoriesPage() {
         ) : null}
 
         {!error && displayRepos.length > 0 ? (
-          <div className="grid gap-3">
+          <div className="divide-y divide-zinc-800 border-t border-zinc-800">
             {displayRepos.map((repo) => (
               <RepoCard
                 key={repo.id}

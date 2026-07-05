@@ -373,7 +373,7 @@ export async function getNotificationSummary(): Promise<NotificationSummary> {
 }
 
 export async function listNotifications(params?: {
-  tab?: "needs-action" | "unread" | "all";
+  tab?: "priority" | "mentions" | "work" | "social" | "unread" | "all" | "needs-action";
   cursor?: string | null;
   limit?: number;
 }): Promise<NotificationListResponse> {
@@ -404,7 +404,7 @@ export async function readNotification(notificationId: string): Promise<{ read: 
 }
 
 export async function readAllNotifications(
-  tab: "needs-action" | "unread" | "all" = "all"
+  tab: "priority" | "mentions" | "work" | "social" | "unread" | "all" | "needs-action" = "all"
 ): Promise<{ read: boolean; updated: number }> {
   const res = await fetch(`${API_BASE_URL}/api/users/me/notifications/read-all`, {
     method: "POST",

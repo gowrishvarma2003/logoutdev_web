@@ -27,6 +27,7 @@ interface SidebarProps {
   user: User;
   onLogout: () => void;
   unreadCount?: number;
+  needsActionCount?: number;
 }
 
 interface NavItemProps {
@@ -35,9 +36,12 @@ interface NavItemProps {
   label: string;
   active?: boolean;
   badge?: number;
+  badgeTone?: "action" | "unread";
 }
 
-function NavItem({ href, icon, label, active, badge }: NavItemProps) {
+function NavItem({ href, icon, label, active, badge, badgeTone = "unread" }: NavItemProps) {
+  const badgeClass = badgeTone === "action" ? "bg-amber-400 text-zinc-950" : "bg-rose-500 text-white";
+
   return (
     <Link
       href={href}
@@ -51,7 +55,7 @@ function NavItem({ href, icon, label, active, badge }: NavItemProps) {
       <span className="relative inline-flex items-center">
         {icon}
         {badge ? (
-          <span className="absolute -right-2 -top-2 inline-flex min-w-[18px] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-semibold text-white">
+          <span className={`absolute -right-2 -top-2 inline-flex min-w-[18px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${badgeClass}`}>
             {badge > 99 ? "99+" : badge}
           </span>
         ) : null}
@@ -61,13 +65,15 @@ function NavItem({ href, icon, label, active, badge }: NavItemProps) {
   );
 }
 
-export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProps) {
+export default function Sidebar({ user, onLogout, unreadCount = 0, needsActionCount = 0 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
   const placeholders = ["builders", "launches", "spaces", "questions", "repos"];
+  const inboxBadge = needsActionCount || unreadCount;
+  const inboxBadgeTone = needsActionCount ? "action" : "unread";
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -166,7 +172,8 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
           icon={<BellIcon />}
           label="Inbox"
           active={pathname.startsWith("/notifications")}
-          badge={unreadCount}
+          badge={inboxBadge}
+          badgeTone={inboxBadgeTone}
         />
         <NavItem
           href="/chat"

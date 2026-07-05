@@ -5,11 +5,16 @@ import { useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ExploreFilters from "@/components/explore/ExploreFilters";
 import ExploreSection from "@/components/explore/ExploreSection";
-import FollowButton from "@/components/profile/FollowButton";
+import BuilderCard from "@/components/explore/BuilderCard";
+import LaunchCard from "@/components/explore/LaunchCard";
+import SpaceCard from "@/components/explore/SpaceCard";
+import QuestionCard from "@/components/explore/QuestionCard";
+import FreelanceCard from "@/components/explore/FreelanceCard";
 import { SparklesIcon } from "@/components/ui/Icons";
 import Spinner from "@/components/ui/Spinner";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useDiscovery } from "@/lib/hooks/useDiscovery";
+import type { DiscoveryEntity } from "@/lib/types";
 
 function buildExploreHref(
   pathname: string,
@@ -37,6 +42,46 @@ function buildExploreHref(
 
   const query = next.toString();
   return query ? `${pathname}?${query}` : pathname;
+}
+
+function FeaturedCardWrapper({ entity }: { entity: DiscoveryEntity }) {
+  // Render the appropriate card component with a premium spotlight badge
+  let cardComponent = null;
+
+  switch (entity.type) {
+    case "builder":
+      cardComponent = <BuilderCard item={entity} />;
+      break;
+    case "launch":
+      cardComponent = <LaunchCard item={entity} />;
+      break;
+    case "space":
+      cardComponent = <SpaceCard item={entity} />;
+      break;
+    case "question":
+      cardComponent = <QuestionCard item={entity} />;
+      break;
+    case "freelance_project":
+      cardComponent = <FreelanceCard item={entity} />;
+      break;
+    default:
+      cardComponent = (
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
+          <h3 className="text-sm font-semibold text-white">{entity.title}</h3>
+          <p className="mt-1 text-xs text-zinc-400">{entity.subtitle}</p>
+        </div>
+      );
+  }
+
+  return (
+    <div className="relative pt-2.5">
+      <div className="absolute -top-1.5 left-4 z-10 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-sky-400 to-indigo-500 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow-lg">
+        <SparklesIcon className="h-3 w-3" />
+        Spotlight
+      </div>
+      {cardComponent}
+    </div>
+  );
 }
 
 export default function ExplorePage() {
@@ -80,20 +125,29 @@ export default function ExplorePage() {
     );
   }
 
+  const isBrowsingAll = !filters.type;
+
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/80 px-4 py-4 backdrop-blur-md">
-        <div className="flex items-start justify-between gap-4">
+      {/* Editorial Glowing Banner Header */}
+      <header className="relative overflow-hidden border-b border-zinc-800/60 bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900 px-6 py-9">
+        {/* Abstract Background Glows */}
+        <div className="absolute right-[-10%] top-[-20%] h-[150px] w-[300px] rounded-full bg-sky-500/10 blur-[100px]" />
+        <div className="absolute left-[30%] bottom-[-50%] h-[120px] w-[240px] rounded-full bg-indigo-500/10 blur-[80px]" />
+
+        <div className="relative flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-[17px] font-bold text-white">Explore</h1>
-            <p className="mt-0.5 text-sm text-zinc-500">
-              Discover builders, projects, and opportunities across LogoutDev.
+            <h1 className="bg-gradient-to-r from-white via-zinc-200 to-sky-400 bg-clip-text text-xl font-extrabold tracking-tight text-transparent">
+              Explore LogoutDev
+            </h1>
+            <p className="mt-1 text-xs font-medium text-zinc-500 max-w-md">
+              Find collaborators, discover products, and build the future of software with the developer community.
             </p>
           </div>
           {!user ? (
             <Link
               href="/login"
-              className="rounded-xl border border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
+              className="rounded-xl border border-zinc-700 bg-zinc-900/30 px-3.5 py-2 text-xs font-semibold text-zinc-300 transition-colors hover:bg-zinc-800"
             >
               Sign in
             </Link>
@@ -101,6 +155,7 @@ export default function ExplorePage() {
         </div>
       </header>
 
+      {/* Premium Filter Controls and sliding tabs */}
       <ExploreFilters
         q={filters.q || ""}
         type={filters.type || ""}
@@ -110,91 +165,94 @@ export default function ExplorePage() {
         onChange={updateFilters}
       />
 
+      {/* Main Discover Feed */}
       {discovery.loading ? (
-        <div className="flex justify-center py-20">
+        <div className="flex justify-center py-24">
           <Spinner size="lg" />
         </div>
       ) : discovery.error ? (
-        <div className="px-4 py-16 text-center">
-          <p className="text-sm text-rose-400">{discovery.error}</p>
+        <div className="px-4 py-20 text-center animate-chat-fade-in">
+          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 mb-3">
+            !
+          </div>
+          <p className="text-xs font-semibold text-rose-400">{discovery.error}</p>
+          <button
+            onClick={() => discovery.refetch()}
+            className="mt-4 text-xs font-bold text-sky-400 hover:text-sky-300 underline"
+          >
+            Try Again
+          </button>
         </div>
       ) : (
         <>
-          {discovery.data && discovery.data.featured_entities.length > 0 ? (
-            <section className="border-b border-zinc-800 px-4 py-5">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-                <SparklesIcon className="h-4 w-4 text-sky-300" />
-                Featured right now
+          {/* Spotlight Row (Only visible when browsing "All" tab and no text query is present) */}
+          {isBrowsingAll && !filters.q && discovery.data && discovery.data.featured_entities.length > 0 ? (
+            <section className="border-b border-zinc-800/60 px-4 py-6">
+              <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-400">
+                <SparklesIcon className="h-4 w-4 text-sky-400 animate-pulse" />
+                Featured Right Now
               </div>
-              <div className="grid gap-3 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-3">
                 {discovery.data.featured_entities.map((entity) => (
-                  <div
+                  <FeaturedCardWrapper
                     key={`featured:${entity.type}:${entity.id}`}
-                    className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 transition-colors hover:border-zinc-700 hover:bg-zinc-900"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <Link href={entity.href} className="min-w-0">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
-                          {entity.meta.eyebrow}
-                        </p>
-                        <h2 className="mt-2 line-clamp-1 text-base font-semibold text-white hover:text-sky-300">
-                          {entity.title}
-                        </h2>
-                      </Link>
-                      {entity.type === "builder" ? (
-                        <FollowButton
-                          userId={entity.id}
-                          initialFollowing={Boolean(entity.meta.is_following)}
-                          initialFollowerCount={entity.meta.follower_count ?? 0}
-                          size="sm"
-                        />
-                      ) : null}
-                    </div>
-                    <Link href={entity.href} className="mt-2 block line-clamp-2 text-sm text-zinc-400 hover:text-zinc-300">
-                      {entity.subtitle}
-                    </Link>
-                    <p className="mt-4 text-xs text-sky-300">
-                      {entity.rank_explanation.reasons[0] ||
-                        entity.meta.collaboration_label ||
-                        entity.meta.stats}
-                    </p>
-                  </div>
+                    entity={entity}
+                  />
                 ))}
               </div>
             </section>
           ) : null}
 
-          {discovery.data?.sections.map((section) => (
-            <ExploreSection key={section.key} section={section} />
-          ))}
+          {/* Section results */}
+          <div className="divide-y divide-zinc-800/40">
+            {discovery.data?.sections.map((section) => (
+              <ExploreSection key={section.key} section={section} />
+            ))}
+          </div>
 
+          {/* Fallback empty view across all results */}
+          {(!discovery.data || discovery.data.sections.length === 0 || discovery.data.sections.every(s => s.items.length === 0)) ? (
+            <div className="px-4 py-24 text-center animate-chat-fade-in">
+              <p className="text-sm text-zinc-500">No matching search signals or resources found.</p>
+              <button
+                onClick={() => updateFilters({ q: "", stack: "", sort: "recommended", collab: false })}
+                className="mt-3 text-xs font-bold text-sky-400 hover:text-sky-300 transition-colors"
+              >
+                Clear all active search queries
+              </button>
+            </div>
+          ) : null}
+
+          {/* Sidebar rail modules recommendations in mobile/tablet viewport */}
           {discovery.data && discovery.data.rail_modules.length > 0 ? (
-            <section className="border-t border-zinc-800 px-4 py-5 xl:hidden">
-              <h2 className="mb-4 text-lg font-semibold text-white">
+            <section className="border-t border-zinc-800/60 px-4 py-6 xl:hidden">
+              <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-zinc-400">
                 More to explore
               </h2>
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2">
                 {discovery.data.rail_modules.map((module) => (
                   <div
                     key={module.key}
-                    className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4"
+                    className="rounded-2xl border border-zinc-800/60 bg-zinc-900/10 p-5 backdrop-blur-sm"
                   >
-                    <h3 className="text-sm font-semibold text-white">
+                    <h3 className="text-sm font-semibold text-zinc-200">
                       {module.title}
                     </h3>
-                    <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+                    <p className="mt-1 text-[10px] leading-relaxed text-zinc-500">
                       {module.reason}
                     </p>
-                    <div className="mt-3 flex flex-col gap-2">
+                    <div className="mt-4 flex flex-col gap-1.5">
                       {module.items.slice(0, 4).map((item) => (
                         <Link
                           key={`${module.key}:${item.href}`}
                           href={item.href}
-                          className="rounded-xl px-2 py-1.5 transition-colors hover:bg-zinc-800"
+                          className="group rounded-xl border border-transparent px-3 py-2 transition-colors hover:border-zinc-850 hover:bg-zinc-800/30"
                         >
-                          <p className="text-sm text-zinc-200">{item.label}</p>
+                          <p className="text-xs font-medium text-zinc-300 group-hover:text-white transition-colors">
+                            {item.label}
+                          </p>
                           {item.meta ? (
-                            <p className="text-xs text-zinc-500">{item.meta}</p>
+                            <p className="text-[10px] text-zinc-500 mt-0.5">{item.meta}</p>
                           ) : null}
                         </Link>
                       ))}

@@ -13,7 +13,7 @@ import {
   CogIcon,
   DocumentTextIcon,
   FolderIcon,
-  QuestionMarkCircleIcon,
+  BriefcaseIcon,
 } from "@/components/ui/Icons";
 import CollaborationHealthBadge from "./CollaborationHealthBadge";
 import { useHealth } from "@/lib/hooks/useSpaces";
@@ -42,7 +42,7 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
   const canSeeRepos = canManageRepos || attachedRepos.length > 0;
   const tabs = [
     { href: base, label: "Overview", icon: <DocumentTextIcon className="w-4 h-4" /> },
-    { href: `${base}/work`, label: "Work", icon: <QuestionMarkCircleIcon className="w-4 h-4" /> },
+    { href: `${base}/work`, label: "Work", icon: <BriefcaseIcon className="w-4 h-4" /> },
     { href: `${base}/discussions`, label: "Discussions", icon: <ChatBubbleIcon className="w-4 h-4" /> },
     { href: `${base}/updates`, label: "Updates", icon: <ClockIcon className="w-4 h-4" /> },
     { href: `${base}/people`, label: "People", icon: <UsersIcon className="w-4 h-4" /> },

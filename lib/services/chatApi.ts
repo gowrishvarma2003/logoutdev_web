@@ -146,6 +146,15 @@ export async function getChatConversation(conversationId: string): Promise<{ con
   return handleResponse(res);
 }
 
+export async function updateChatConversationPin(conversationId: string, pinned: boolean): Promise<{ participant: unknown }> {
+  const res = await fetch(`${API_BASE_URL}/api/chat/conversations/${encodeURIComponent(conversationId)}/pin`, {
+    method: "PATCH",
+    headers: jsonHeaders(),
+    body: JSON.stringify({ pinned }),
+  });
+  return handleResponse(res);
+}
+
 export async function listChatMessages(
   conversationId: string,
   options: { cursor?: string; limit?: number } = {}
@@ -207,6 +216,17 @@ export async function createEncryptedAttachmentUpload(input: { content_type: str
     body: JSON.stringify(input),
   });
   return handleResponse<{ upload_url: string; storage_key: string; expires_in: number; max_size_bytes: number }>(res);
+}
+
+export async function uploadEncryptedAttachmentBlob(file: Blob): Promise<{ storage_key: string; size_bytes: number; max_size_bytes: number }> {
+  const formData = new FormData();
+  formData.append("file", file, "attachment.encrypted");
+  const res = await fetch(`${API_BASE_URL}/api/chat/attachments/upload`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: formData,
+  });
+  return handleResponse(res);
 }
 
 export async function completeEncryptedAttachment(payload: Record<string, unknown>) {

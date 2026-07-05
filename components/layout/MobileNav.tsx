@@ -25,20 +25,23 @@ interface MobileNavProps {
   userId: string;
   username?: string;
   unreadCount?: number;
+  needsActionCount?: number;
   onLogout: () => void;
 }
 
-export default function MobileNav({ userId, username, unreadCount = 0, onLogout }: MobileNavProps) {
+export default function MobileNav({ userId, username, unreadCount = 0, needsActionCount = 0, onLogout }: MobileNavProps) {
   const pathname = usePathname();
   const profileSlug = username || userId;
   const [showMore, setShowMore] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const inboxBadge = needsActionCount || unreadCount;
+  const inboxBadgeTone = needsActionCount ? "action" : "unread";
 
   /* Primary items always visible in the bottom bar (max 5) */
   const primaryItems = [
     { href: "/feed", icon: <HomeIcon className="w-6 h-6" />, label: "Home" },
     { href: "/explore", icon: <CompassIcon className="w-6 h-6" />, label: "Explore" },
-    { href: "/notifications", icon: <BellIcon className="w-6 h-6" />, label: "Inbox", badge: unreadCount },
+    { href: "/notifications", icon: <BellIcon className="w-6 h-6" />, label: "Inbox", badge: inboxBadge, badgeTone: inboxBadgeTone },
     { href: "/spaces", icon: <RocketIcon className="w-6 h-6" />, label: "Spaces" },
     { href: `/profile/${profileSlug}`, icon: <UserIcon className="w-6 h-6" />, label: "Profile" },
   ];
@@ -153,8 +156,9 @@ export default function MobileNav({ userId, username, unreadCount = 0, onLogout 
       {/* ── Bottom navigation bar ── */}
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-zinc-950 border-t border-zinc-800">
         <ul className="flex items-center">
-          {primaryItems.map(({ href, icon, label, badge }) => {
+          {primaryItems.map(({ href, icon, label, badge, badgeTone }) => {
             const active = isActive(href, label);
+            const badgeClass = badgeTone === "action" ? "bg-amber-400 text-zinc-950" : "bg-rose-500 text-white";
             return (
               <li key={href} className="flex-1">
                 <Link
@@ -166,7 +170,7 @@ export default function MobileNav({ userId, username, unreadCount = 0, onLogout 
                   <span className="relative inline-flex">
                     {icon}
                     {badge ? (
-                      <span className="absolute -right-2 -top-1 inline-flex min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-semibold text-white">
+                      <span className={`absolute -right-2 -top-1 inline-flex min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold ${badgeClass}`}>
                         {badge > 99 ? "99+" : badge}
                       </span>
                     ) : null}

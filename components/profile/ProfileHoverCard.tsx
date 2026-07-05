@@ -28,6 +28,7 @@ const STAT_ITEMS: Array<{ key: string; label: string; get: (s: NonNullable<Retur
 interface CachedHoverData {
   stats: NonNullable<ReturnType<typeof useProfile>["stats"]> | null;
   band: ProofOfWorkBand | null;
+  badge: string | null;
   score: number | null;
   skills: string[];
 }
@@ -41,6 +42,7 @@ function useHoverProfile(username: string): CachedHoverData & { loading: boolean
     return {
       stats: cached.stats as CachedHoverData["stats"],
       band: cachedSignals.band as ProofOfWorkBand | null,
+      badge: cachedSignals.badge,
       score: cachedSignals.score,
       skills: (cached.skills ?? []).sort((a, b) => a.rank - b.rank).slice(0, 4).map((s) => s.skill),
     };
@@ -63,6 +65,7 @@ function useHoverProfile(username: string): CachedHoverData & { loading: boolean
     if (!signalsLoading && signals) {
       setCachedSignals(username, {
         band: signals.band ?? null,
+        badge: signals.badge ?? null,
         score: signals.score ?? null,
       });
     }
@@ -74,10 +77,11 @@ function useHoverProfile(username: string): CachedHoverData & { loading: boolean
 
   const loading = profileLoading || signalsLoading;
   const band = signals?.band ?? null;
+  const badge = signals?.badge ?? null;
   const score = signals?.score ?? null;
   const topSkills = (skills ?? []).sort((a, b) => a.rank - b.rank).slice(0, 4).map((s) => s.skill);
 
-  return { stats, band, score, skills: topSkills, loading };
+  return { stats, band, badge, score, skills: topSkills, loading };
 }
 
 function ProfileHoverCardContent({
@@ -141,15 +145,15 @@ function ProfileHoverCardContent({
 
         {!hoverData.loading && (
           <>
-            {hoverData.band && (
+            {(hoverData.band || hoverData.badge) && (
               <div className="mt-3">
                 <span
-                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${BAND_COLORS[hoverData.band]}`}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${BAND_COLORS[hoverData.band ?? "Early"]}`}
                 >
                   <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  {hoverData.band}
+                  {hoverData.badge || hoverData.band}
                   {hoverData.score != null && (
                     <span className="font-mono opacity-80">· {Math.round(hoverData.score)}</span>
                   )}
