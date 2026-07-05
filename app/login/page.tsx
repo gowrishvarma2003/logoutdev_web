@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ApiError, checkUsernameAvailability, firebaseLogin, loginUser } from "@/lib/api";
 import { loginWithGoogle, signOutFirebase } from "@/lib/firebase";
 import { FirebaseError } from "firebase/app";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 function mapFirebaseError(error: unknown): string {
   if (error instanceof FirebaseError) {
@@ -47,6 +48,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [googleName, setGoogleName] = useState("");
   const [googleUsername, setGoogleUsername] = useState("");
   const [pendingGoogleToken, setPendingGoogleToken] = useState<string | null>(null);
@@ -222,15 +224,28 @@ export default function LoginPage() {
                   <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                     Password
                   </label>
-                  <input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    required
-                    placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500 focus:ring-2 focus:ring-white/10 transition"
-                  />
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      required
+                      placeholder="••••••••"
+                      className="w-full rounded-xl border border-zinc-700 bg-zinc-900 pl-4 pr-10 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500 focus:ring-2 focus:ring-white/10 transition"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition cursor-pointer"
+                    >
+                      {showPassword ? (
+                        <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {errorMessage ? (
