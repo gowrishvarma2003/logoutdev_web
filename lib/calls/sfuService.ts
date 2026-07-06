@@ -12,11 +12,22 @@ import {
 import type { SfuJoinDetails } from "@/lib/types";
 
 type SfuConnectionState = "connecting" | "connected" | "reconnecting" | "disconnected" | "failed";
+export type SfuTrackKind = "camera" | "screen" | "audio";
+
+export interface SfuTrackUpdate {
+  participantId: string;
+  trackId: string;
+  kind: SfuTrackKind;
+  stream: MediaStream;
+}
 
 export interface SfuCallbacks {
   onRemoteStream?: (participantId: string, stream: MediaStream) => void;
+  onRemoteTrack?: (update: SfuTrackUpdate) => void;
+  onRemoteTrackRemoved?: (participantId: string, trackId: string) => void;
   onParticipantLeft?: (participantId: string) => void;
   onConnectionState?: (state: SfuConnectionState) => void;
+  onAudioPlaybackStatus?: (playing: boolean) => void;
   onError?: (error: Error) => void;
 }
 
@@ -78,10 +89,17 @@ function normalizeSfuError(error: unknown, url: string) {
   return new Error(`Could not connect to ${host}. ${message}`);
 }
 
+function publicationKind(publication: RemoteTrackPublication): SfuTrackKind {
+  if (publication.source === Track.Source.ScreenShare) return "screen";
+  if (publication.kind === Track.Kind.Audio) return "audio";
+  return "camera";
+}
+
 export async function joinRoom(details: SfuJoinDetails, options: SfuJoinOptions, callbacks: SfuCallbacks = {}) {
   assertBrowserCanReachSfuUrl(details.url);
   const room = new Room({ adaptiveStream: true, dynacast: true });
   const remoteStreams = new Map<string, MediaStream>();
+  const remoteTrackStreams = new Map<string, MediaStream>();
 
   room.on(RoomEvent.Connected, () => callbacks.onConnectionState?.("connected"));
   room.on(RoomEvent.Reconnecting, () => callbacks.onConnectionState?.("reconnecting"));
@@ -91,6 +109,7 @@ export async function joinRoom(details: SfuJoinDetails, options: SfuJoinOptions,
   room.on(RoomEvent.ConnectionStateChanged, (connectionState) => {
     callbacks.onConnectionState?.(String(connectionState) as SfuConnectionState);
   });
+  room.on(RoomEvent.AudioPlaybackStatusChanged, (playing) => callbacks.onAudioPlaybackStatus?.(playing));
   room.on(RoomEvent.MediaDevicesError, (error) => callbacks.onError?.(error));
 
   room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, _publication: RemoteTrackPublication, participant: RemoteParticipant) => {
@@ -99,10 +118,35 @@ export async function joinRoom(details: SfuJoinDetails, options: SfuJoinOptions,
     stream.addTrack(track.mediaStreamTrack);
     remoteStreams.set(participant.identity, stream);
     callbacks.onRemoteStream?.(participant.identity, stream);
+
+    const trackStream = new MediaStream([track.mediaStreamTrack]);
+    const trackId = _publication.trackSid || track.mediaStreamTrack.id;
+    remoteTrackStreams.set(`${participant.identity}:${trackId}`, trackStream);
+    callbacks.onRemoteTrack?.({
+      participantId: participant.identity,
+      trackId,
+      kind: publicationKind(_publication),
+      stream: trackStream,
+    });
+  });
+
+  room.on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack, publication: RemoteTrackPublication, participant: RemoteParticipant) => {
+    const trackId = publication.trackSid || track.mediaStreamTrack.id;
+    remoteTrackStreams.delete(`${participant.identity}:${trackId}`);
+    const stream = remoteStreams.get(participant.identity);
+    if (stream) {
+      stream.removeTrack(track.mediaStreamTrack);
+      if (stream.getTracks().length) callbacks.onRemoteStream?.(participant.identity, stream);
+      else remoteStreams.delete(participant.identity);
+    }
+    callbacks.onRemoteTrackRemoved?.(participant.identity, trackId);
   });
 
   room.on(RoomEvent.ParticipantDisconnected, (participant: RemoteParticipant) => {
     remoteStreams.delete(participant.identity);
+    for (const key of Array.from(remoteTrackStreams.keys())) {
+      if (key.startsWith(`${participant.identity}:`)) remoteTrackStreams.delete(key);
+    }
     callbacks.onParticipantLeft?.(participant.identity);
   });
 

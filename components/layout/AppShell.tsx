@@ -24,43 +24,35 @@ export default function AppShell({ children }: AppShellProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { summary } = useNotificationSummary();
-  const hideRightPanel = false;
+  const hideRightPanel = pathname.startsWith("/notes");
   const isPublicSpaceRoute =
-    pathname === "/spaces"
-    || (
-      pathname.startsWith("/spaces/")
-      && pathname !== "/spaces/create"
-      && !pathname.includes("/settings")
-      && !pathname.endsWith("/join")
-      && !pathname.endsWith("/manage")
-    );
+    pathname === "/spaces" ||
+    (pathname.startsWith("/spaces/") &&
+      pathname !== "/spaces/create" &&
+      !pathname.includes("/settings") &&
+      !pathname.endsWith("/join") &&
+      !pathname.endsWith("/manage"));
   const isPublicRepoRoute =
-    pathname === "/repos"
-    || (
-      pathname.startsWith("/repos/")
-      && !pathname.endsWith("/settings")
-    );
-  const allowsGuest = pathname === "/questions"
-    || pathname.startsWith("/questions/")
-    || pathname === "/explore"
-    || isPublicSpaceRoute
-    || isPublicRepoRoute
-    || pathname === "/launches"
-    || pathname === "/freelance"
-    || (
-      pathname.startsWith("/launches/")
-      && pathname !== "/launches/new"
-      && pathname !== "/launches/me"
-      && !pathname.endsWith("/edit")
-      && !pathname.endsWith("/collaborate")
-    )
-    || (
-      pathname.startsWith("/freelance/")
-      && pathname !== "/freelance/create"
-      && !pathname.startsWith("/freelance/my-")
-      && !pathname.endsWith("/edit")
-      && !pathname.endsWith("/proposals")
-    );
+    pathname === "/repos" ||
+    (pathname.startsWith("/repos/") && !pathname.endsWith("/settings"));
+  const allowsGuest =
+    pathname === "/questions" ||
+    pathname.startsWith("/questions/") ||
+    pathname === "/explore" ||
+    isPublicSpaceRoute ||
+    isPublicRepoRoute ||
+    pathname === "/launches" ||
+    pathname === "/freelance" ||
+    (pathname.startsWith("/launches/") &&
+      pathname !== "/launches/new" &&
+      pathname !== "/launches/me" &&
+      !pathname.endsWith("/edit") &&
+      !pathname.endsWith("/collaborate")) ||
+    (pathname.startsWith("/freelance/") &&
+      pathname !== "/freelance/create" &&
+      !pathname.startsWith("/freelance/my-") &&
+      !pathname.endsWith("/edit") &&
+      !pathname.endsWith("/proposals"));
 
   useEffect(() => {
     if (isLoaded && !user && !allowsGuest) {
@@ -83,7 +75,11 @@ export default function AppShell({ children }: AppShellProps) {
         <header className="sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-md">
           <div className="mx-auto flex max-w-[1520px] items-center justify-between px-4 py-4">
             <Link href="/" className="flex items-center gap-2.5">
-              <img src="/logo.jpeg" alt="LogoutDev" className="h-8 w-8 rounded-full object-cover" />
+              <img
+                src="/logo.jpeg"
+                alt="LogoutDev"
+                className="h-8 w-8 rounded-full object-cover"
+              />
             </Link>
 
             <div className="flex items-center gap-2">

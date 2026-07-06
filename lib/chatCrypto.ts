@@ -409,7 +409,7 @@ export async function encryptChatMessage({
 }
 
 export async function decryptChatMessage(message: ChatMessage): Promise<ChatMessage> {
-  if (!message.ciphertext || message.deleted_for_everyone_at) return message;
+  if (message.message_type === "system" || !message.ciphertext || message.deleted_for_everyone_at) return message;
   const vault = getStoredVault();
   if (!vault) return { ...message, decrypt_failed: true };
 

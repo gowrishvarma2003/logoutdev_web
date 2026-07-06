@@ -122,7 +122,7 @@ export interface ChatConversation {
   pinned_at?: string | null;
   last_read_at?: string | null;
   other_user?: ChatUser | null;
-  group?: ChatGroupInfo & Partial<ChatGroupSettings> | null;
+  group?: (ChatGroupInfo & Partial<ChatGroupSettings>) | null;
   last_message?: ChatMessage | null;
 }
 
@@ -175,15 +175,37 @@ export interface ChatMessageRequest {
 }
 
 export interface ChatSettings {
-  chat_privacy_setting: "anyone" | "followers" | "following" | "mutuals" | "nobody";
+  chat_privacy_setting:
+    "anyone" | "followers" | "following" | "mutuals" | "nobody";
   last_seen_visibility: "anyone" | "mutuals" | "nobody";
   chat_enabled: boolean;
 }
 
-export type CallType = "direct_audio" | "direct_video" | "group_audio" | "group_video";
+export type CallType =
+  "direct_audio" | "direct_video" | "group_audio" | "group_video";
 export type CallMode = "direct" | "group";
-export type CallStatus = "created" | "ringing" | "accepted" | "ongoing" | "rejected" | "missed" | "busy" | "ended" | "failed" | "cancelled";
-export type CallParticipantStatus = "invited" | "ringing" | "accepted" | "joined" | "rejected" | "missed" | "left" | "removed" | "failed" | "busy";
+export type CallStatus =
+  | "created"
+  | "ringing"
+  | "accepted"
+  | "ongoing"
+  | "rejected"
+  | "missed"
+  | "busy"
+  | "ended"
+  | "failed"
+  | "cancelled";
+export type CallParticipantStatus =
+  | "invited"
+  | "ringing"
+  | "accepted"
+  | "joined"
+  | "rejected"
+  | "missed"
+  | "left"
+  | "removed"
+  | "failed"
+  | "busy";
 
 export interface CallParticipant {
   id: string;
@@ -235,7 +257,11 @@ export interface CallConfig {
   direct_per_hour: number;
   group_create_per_hour: number;
   rtc: { iceServers: RTCIceServer[] };
-  sfu: { provider: "livekit" | string; configured: boolean; url: string | null };
+  sfu: {
+    provider: "livekit" | string;
+    configured: boolean;
+    url: string | null;
+  };
 }
 
 export interface SfuJoinDetails {
@@ -410,7 +436,14 @@ export interface NotificationListResponse {
 // ─── Developer Profiles ──────────────────────────────────────────────────────
 
 export type ProofOfWorkBand = "Strong" | "Growing" | "Early";
-export type ProofOfWorkBadge = "New Builder" | "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond" | "Legend";
+export type ProofOfWorkBadge =
+  | "New Builder"
+  | "Bronze"
+  | "Silver"
+  | "Gold"
+  | "Platinum"
+  | "Diamond"
+  | "Legend";
 
 export interface ProofOfWorkCategoryTotals {
   code_delivery: number;
@@ -639,16 +672,23 @@ export interface FollowListResponse {
 }
 
 export interface ActivityItem {
-  type: "post" | "discussion" | "update" | "launch" | "launch_review" | "freelance_project" | "freelance_win";
+  type:
+    | "post"
+    | "discussion"
+    | "update"
+    | "launch"
+    | "launch_review"
+    | "freelance_project"
+    | "freelance_win";
   created_at: string;
   item: {
     id: string;
-    content?: string;        // post
-    title?: string;          // discussion | update
+    content?: string; // post
+    title?: string; // discussion | update
     subtitle?: string;
-    category?: string;       // discussion
-    status?: string;         // discussion
-    type?: string;           // update
+    category?: string; // discussion
+    status?: string; // discussion
+    type?: string; // update
     space?: { id: string; name: string; visibility: string };
     href?: string | null;
     stats?: string | null;
@@ -658,7 +698,7 @@ export interface ActivityItem {
 }
 
 export interface HeatmapBucket {
-  date: string;                       // YYYY-MM-DD (UTC)
+  date: string; // YYYY-MM-DD (UTC)
   total: number;
   by_type: Record<string, number>;
 }
@@ -807,19 +847,30 @@ export interface AuthResponse {
 
 // ─── Project Spaces ──────────────────────────────────────────────────────────
 
-export type SpaceStatus = "idea" | "building" | "shipping" | "paused" | "archived";
+export type SpaceStatus =
+  "idea" | "building" | "shipping" | "paused" | "archived";
 export type SpaceVisibility = "public" | "private";
 export type RepositoryVisibility = "public" | "private";
-export type StackCategory = "frontend" | "backend" | "database" | "infra" | "tooling" | "other";
+export type StackCategory =
+  "frontend" | "backend" | "database" | "infra" | "tooling" | "other";
 export type StackMaturity = "planned" | "in-use" | "deprecated";
 export type MemberRole = "owner" | "maintainer" | "contributor";
 export type RepoRole = "read" | "triage" | "write" | "maintain" | "admin";
 export type RepoMemberStatus = "pending" | "accepted";
-export type JoinRequestStatus = "pending" | "accepted" | "rejected" | "need-info" | "withdrawn";
-export type DiscussionCategory = "idea" | "decision" | "question" | "blocked" | "retrospective" | "announcement";
+export type JoinRequestStatus =
+  "pending" | "accepted" | "rejected" | "need-info" | "withdrawn";
+export type DiscussionCategory =
+  | "idea"
+  | "decision"
+  | "question"
+  | "blocked"
+  | "retrospective"
+  | "announcement";
 export type DiscussionStatus = "open" | "in-progress" | "resolved" | "closed";
-export type UpdateType = "milestone" | "devlog" | "release" | "blocker" | "weekly-summary";
-export type SpaceIssueStatus = "open" | "triaged" | "in-progress" | "resolved" | "closed";
+export type UpdateType =
+  "milestone" | "devlog" | "release" | "blocker" | "weekly-summary";
+export type SpaceIssueStatus =
+  "open" | "triaged" | "in-progress" | "resolved" | "closed";
 export type SpaceIssuePriority = "low" | "medium" | "high" | "critical";
 export type WorkItemType = "task" | "bug" | "feature" | "docs" | "research";
 export type WorkSort = "updated" | "created" | "priority" | "due_date";
@@ -832,18 +883,32 @@ export type FreelancePricingModel = "fixed" | "hourly";
 export type FreelanceExperienceLevel = "any" | "junior" | "mid" | "senior";
 export type FreelanceEngagementType = "one_time" | "ongoing";
 export type FreelanceLocationMode = "remote" | "hybrid" | "onsite";
-export type FreelanceProjectStatus = "open" | "in_review" | "awarded" | "completed" | "cancelled";
-export type FreelanceProposalStatus = "submitted" | "shortlisted" | "accepted" | "rejected" | "withdrawn";
-export type LaunchProductType = "web-app" | "mobile-app" | "developer-tool" | "api" | "ai-tool" | "open-source" | "experimental" | "other";
-export type LaunchDevelopmentStage = "prototype" | "mvp" | "beta" | "live" | "maintained" | "paused";
+export type FreelanceProjectStatus =
+  "open" | "in_review" | "awarded" | "completed" | "cancelled";
+export type FreelanceProposalStatus =
+  "submitted" | "shortlisted" | "accepted" | "rejected" | "withdrawn";
+export type LaunchProductType =
+  | "web-app"
+  | "mobile-app"
+  | "developer-tool"
+  | "api"
+  | "ai-tool"
+  | "open-source"
+  | "experimental"
+  | "other";
+export type LaunchDevelopmentStage =
+  "prototype" | "mvp" | "beta" | "live" | "maintained" | "paused";
 export type LaunchPhase = "beta" | "live";
 export type LaunchCollaborationMode = "off" | "looking";
 export type LaunchStatus = "draft" | "published" | "archived";
-export type LaunchReviewRecommendation = "recommend" | "mixed" | "not_recommend";
+export type LaunchReviewRecommendation =
+  "recommend" | "mixed" | "not_recommend";
 export type LaunchFeedbackType = "suggestion" | "bug" | "idea";
-export type LaunchFeedbackStatus = "open" | "acknowledged" | "planned" | "resolved" | "closed";
+export type LaunchFeedbackStatus =
+  "open" | "acknowledged" | "planned" | "resolved" | "closed";
 export type LaunchFeedbackVisibilityScope = "beta" | "public";
-export type LaunchBetaRegistrationStatus = "pending" | "approved" | "rejected" | "withdrawn";
+export type LaunchBetaRegistrationStatus =
+  "pending" | "approved" | "rejected" | "withdrawn";
 
 export interface ProjectSpace {
   id: string;
@@ -1036,7 +1101,14 @@ export interface RepoInvitation {
   created_at: string;
   repo?: Pick<
     Repository,
-    "id" | "name" | "slug" | "description" | "visibility" | "default_branch" | "owner" | "attached_space"
+    | "id"
+    | "name"
+    | "slug"
+    | "description"
+    | "visibility"
+    | "default_branch"
+    | "owner"
+    | "attached_space"
   > | null;
 }
 
@@ -1196,7 +1268,8 @@ export interface BranchProtectionRule {
   creator?: User;
 }
 
-export type RepoDiscussionCategory = "general" | "q&a" | "ideas" | "show-and-tell";
+export type RepoDiscussionCategory =
+  "general" | "q&a" | "ideas" | "show-and-tell";
 
 export interface RepoDiscussion {
   id: string;
@@ -1234,8 +1307,10 @@ export interface RepoDiscussionState {
 }
 
 export type PullRequestStatus = "open" | "merged" | "closed";
-export type PullRequestReviewStatus = "approved" | "changes_requested" | "commented" | "pending";
-export type PullRequestMergeableState = "clean" | "blocked" | "draft" | "dirty" | "unknown" | "head_missing";
+export type PullRequestReviewStatus =
+  "approved" | "changes_requested" | "commented" | "pending";
+export type PullRequestMergeableState =
+  "clean" | "blocked" | "draft" | "dirty" | "unknown" | "head_missing";
 
 export interface PullRequestCompare {
   base_repo_id: string;
@@ -1645,7 +1720,10 @@ export interface SpaceWorkItem {
   author?: User;
   assignee?: User | null;
   repo?: Pick<Repository, "id" | "name" | "slug" | "visibility"> | null;
-  milestone?: Pick<SpaceMilestone, "id" | "title" | "status" | "target_date"> | null;
+  milestone?: Pick<
+    SpaceMilestone,
+    "id" | "title" | "status" | "target_date"
+  > | null;
   attachments?: SpaceWorkAttachment[];
 }
 
@@ -1949,11 +2027,7 @@ export interface LaunchCollaborationRequestPayload {
 }
 
 export type DiscoveryEntityType =
-  | "builder"
-  | "launch"
-  | "space"
-  | "question"
-  | "freelance_project";
+  "builder" | "launch" | "space" | "question" | "freelance_project";
 
 export interface DiscoveryRankExplanation {
   score: number;
@@ -2035,3 +2109,77 @@ export interface PaginatedResponse<T> {
   page: number;
   limit: number;
 }
+
+// ─── Notes ──────────────────────────────────────────────────────────────────
+
+export type NoteVisibility = "private" | "space" | "public";
+
+/** A Tiptap/ProseMirror JSON node. Kept loose since the editor owns the schema. */
+export interface NoteContentNode {
+  type: string;
+  attrs?: Record<string, unknown>;
+  content?: NoteContentNode[];
+  text?: string;
+  marks?: Array<{ type: string; attrs?: Record<string, unknown> }>;
+}
+
+export interface NoteContentDoc {
+  type: "doc";
+  content: NoteContentNode[];
+}
+
+export interface NoteTag {
+  id: string;
+  name: string;
+  color: string | null;
+  created_at: string;
+  updated_at: string;
+  note_count?: number;
+}
+
+export interface NoteFolder {
+  id: string;
+  parent_id: string | null;
+  name: string;
+  created_at: string;
+  updated_at: string;
+  note_count?: number;
+}
+
+export interface NoteFolderRef {
+  id: string;
+  name: string;
+}
+
+/** Lightweight projection used in lists — never carries full content. */
+export interface NoteListItem {
+  id: string;
+  folder_id: string | null;
+  title: string;
+  excerpt: string;
+  icon: string | null;
+  cover: string | null;
+  is_favorite: boolean;
+  is_pinned: boolean;
+  is_archived: boolean;
+  visibility: NoteVisibility;
+  last_opened_at: string | null;
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+  folder: NoteFolderRef | null;
+  tags: NoteTag[];
+}
+
+/** Full note, only fetched when opening a single note for editing. */
+export interface Note extends NoteListItem {
+  content_json: NoteContentDoc;
+  content_text: string;
+}
+
+export interface NoteListResponse {
+  notes: NoteListItem[];
+  next_cursor: string | null;
+}
+
+export type NoteSaveStatus = "idle" | "saving" | "saved" | "unsaved" | "error";

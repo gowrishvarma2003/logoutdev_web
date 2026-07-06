@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChatSocketApi } from "@/lib/hooks/useChatSocket";
 import type { ChatConversation, User } from "@/lib/types";
-import { CallProvider, NetworkQualityIndicator, useCalls } from "./CallProvider";
+import { buildCallTiles, CallProvider, NetworkQualityIndicator, selectPinnedTileId, useCalls, type CallTile } from "./CallProvider";
 
 vi.mock("@/lib/chatCrypto", () => ({ getCurrentChatDeviceId: () => "device-1" }));
 vi.mock("@/lib/calls/webrtcService", () => ({
@@ -55,6 +55,13 @@ const socket = {
   lastConnectedAt: Date.now(),
 } as ChatSocketApi;
 
+function mockMediaStream({ audio = 0, video = 0 }: { audio?: number; video?: number } = {}) {
+  return {
+    getAudioTracks: () => Array.from({ length: audio }, (_, index) => ({ id: `audio-${index}`, enabled: true, readyState: "live" })),
+    getVideoTracks: () => Array.from({ length: video }, (_, index) => ({ id: `video-${index}`, enabled: true, readyState: "live" })),
+  } as unknown as MediaStream;
+}
+
 function StartCallButton() {
   const calls = useCalls();
   return <button onClick={() => void calls.startDirectCall(conversation, "audio")}>Start audio</button>;
@@ -69,6 +76,90 @@ describe("NetworkQualityIndicator", () => {
   it("renders reconnecting state for degraded calls", () => {
     render(<NetworkQualityIndicator state="reconnecting" />);
     expect(screen.getByText("reconnecting")).toBeInTheDocument();
+  });
+});
+
+describe("call tile model", () => {
+  const call = {
+    id: "call-1",
+    conversation_id: "conversation-1",
+    call_type: "group_video",
+    call_mode: "group",
+    status: "ongoing",
+    created_by: "user-1",
+    created_at: "2026-06-24T00:00:00.000Z",
+    updated_at: "2026-06-24T00:00:00.000Z",
+    participants: [
+      {
+        id: "participant-1",
+        call_id: "call-1",
+        user_id: "user-1",
+        status: "joined",
+        is_muted: false,
+        is_camera_off: false,
+        is_screen_sharing: true,
+        created_at: "2026-06-24T00:00:00.000Z",
+        updated_at: "2026-06-24T00:00:00.000Z",
+      },
+      {
+        id: "participant-2",
+        call_id: "call-1",
+        user_id: "user-2",
+        status: "joined",
+        is_muted: true,
+        is_camera_off: false,
+        is_screen_sharing: true,
+        created_at: "2026-06-24T00:00:00.000Z",
+        updated_at: "2026-06-24T00:00:00.000Z",
+        user: { id: "user-2", name: "Builder", username: "builder" },
+      },
+    ],
+    current_user_participant: null,
+  } as const;
+
+  it("builds separate local camera, local screen, and remote screen tiles", () => {
+    const remoteScreen = mockMediaStream();
+    const remoteTrackTiles: Record<string, CallTile> = {
+      "user-2:screen": {
+        id: "user-2:screen",
+        participantId: "participant-2",
+        userId: "user-2",
+        label: "@builder's screen",
+        kind: "screen",
+        stream: remoteScreen,
+        isLocal: false,
+        isMuted: true,
+        isCameraOff: false,
+        isScreenSharing: true,
+        status: "joined",
+      },
+    };
+
+    const tiles = buildCallTiles({
+      call,
+      currentUserId: "user-1",
+      localStream: mockMediaStream({ audio: 1, video: 1 }),
+      localScreenStream: mockMediaStream(),
+      remoteStreams: {},
+      remoteTrackTiles,
+    });
+
+    expect(tiles.map((tile) => tile.id)).toEqual(["local-camera", "local-screen", "user-2:screen"]);
+    expect(tiles.find((tile) => tile.id === "local-screen")?.label).toBe("Your screen");
+    expect(tiles.find((tile) => tile.id === "user-2:screen")?.isMuted).toBe(true);
+    expect(tiles.find((tile) => tile.id === "local-camera")?.isMuted).toBe(false);
+  });
+
+  it("auto-pins screen share unless a manual pin or grid layout is active", () => {
+    const tiles = [
+      { id: "local-camera", kind: "camera" },
+      { id: "remote-screen", kind: "screen" },
+      { id: "remote-camera", kind: "camera" },
+    ] as CallTile[];
+
+    expect(selectPinnedTileId(tiles, null)).toBe("remote-screen");
+    expect(selectPinnedTileId(tiles, "remote-camera")).toBe("remote-camera");
+    expect(selectPinnedTileId(tiles, null, true)).toBeNull();
   });
 });
 

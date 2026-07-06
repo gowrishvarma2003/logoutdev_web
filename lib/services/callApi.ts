@@ -13,7 +13,12 @@ function jsonHeaders() {
 
 async function handleResponse<T>(res: Response): Promise<T> {
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || "Request failed");
+  if (!res.ok) {
+    const message = data.retry_after_seconds
+      ? `${data.error || "Request failed"} Try again in ${data.retry_after_seconds}s.`
+      : data.error || "Request failed";
+    throw new Error(message);
+  }
   return data as T;
 }
 
@@ -32,7 +37,7 @@ export async function startDirectCall(input: {
   callType: "audio" | "video";
   conversationId?: string;
   deviceId?: string | null;
-}): Promise<{ call: CallRecord }> {
+}): Promise<{ call: CallRecord; sfu?: SfuJoinDetails | null }> {
   const res = await fetch(`${API_BASE_URL}/api/calls/direct`, {
     method: "POST",
     headers: jsonHeaders(),
@@ -54,7 +59,7 @@ export async function startGroupCall(input: {
   return handleResponse(res);
 }
 
-export async function acceptCall(callId: string, deviceId?: string | null): Promise<{ call: CallRecord }> {
+export async function acceptCall(callId: string, deviceId?: string | null): Promise<{ call: CallRecord; sfu?: SfuJoinDetails | null }> {
   const res = await fetch(`${API_BASE_URL}/api/calls/${encodeURIComponent(callId)}/accept`, {
     method: "POST",
     headers: jsonHeaders(),

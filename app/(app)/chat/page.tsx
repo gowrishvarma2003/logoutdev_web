@@ -49,6 +49,7 @@ import GroupInfoPanel from "@/components/chat/GroupInfoPanel";
 import { CallErrorBoundary, CallProvider, ConversationCallControls, OngoingGroupCallBanner } from "@/components/calls/CallProvider";
 import EmptyState from "@/components/ui/EmptyState";
 import { API_BASE_URL } from "@/lib/apiBaseUrl";
+import { PhoneIcon, VideoCameraIcon, PhoneArrowDownLeftIcon } from "@heroicons/react/24/outline";
 
 type ViewMode = "inbox" | "requests" | "group-invites" | "settings";
 
@@ -98,21 +99,74 @@ function formatFileSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function previewTextFromMessage(message: ChatMessage | null | undefined) {
+function previewTextFromMessage(message: ChatMessage | null | undefined, currentUserId?: string) {
   if (!message) return "";
   if (message.deleted_for_everyone_at) return "Message deleted";
+
+  if (message.message_type === "system" && message.decrypted_body) {
+    try {
+      if (message.decrypted_body.startsWith("{")) {
+        const callLog = JSON.parse(message.decrypted_body);
+        if (callLog.type === "call_log") {
+          const isCaller = currentUserId ? callLog.created_by === currentUserId : false;
+          const isVideo = callLog.call_type.includes("video");
+          const isGroup = callLog.call_mode === "group";
+
+          const formatDuration = (seconds?: number | null) => {
+            if (!seconds) return "";
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            if (h > 0) return `${h}h ${m}m ${s}s`;
+            if (m > 0) return `${m}m ${s}s`;
+            return `${s}s`;
+          };
+
+          if (isGroup) {
+            if (callLog.status === "ongoing") {
+              return `Group ${isVideo ? "video" : "audio"} call started`;
+            } else {
+              const durationStr = callLog.duration_seconds ? ` (${formatDuration(callLog.duration_seconds)})` : "";
+              return `Group ${isVideo ? "video" : "audio"} call ended${durationStr}`;
+            }
+          } else {
+            if (callLog.status === "missed") {
+              return isCaller ? `Unanswered ${isVideo ? "video" : "audio"} call` : `Missed ${isVideo ? "video" : "audio"} call`;
+            } else if (callLog.status === "rejected") {
+              return isCaller ? `${isVideo ? "Video" : "Audio"} call declined` : `Declined ${isVideo ? "video" : "audio"} call`;
+            } else if (callLog.status === "cancelled") {
+              return isCaller ? `Cancelled ${isVideo ? "video" : "audio"} call` : `Missed ${isVideo ? "video" : "audio"} call`;
+            } else if (callLog.status === "failed") {
+              return `Failed ${isVideo ? "video" : "audio"} call`;
+            } else if (callLog.status === "ended") {
+              if (callLog.duration_seconds && callLog.duration_seconds > 0) {
+                return `${isVideo ? "Video" : "Audio"} call ended (${formatDuration(callLog.duration_seconds)})`;
+              } else {
+                return `${isVideo ? "Video" : "Audio"} call (no answer)`;
+              }
+            } else {
+              return `${isVideo ? "Video" : "Audio"} call`;
+            }
+          }
+        }
+      }
+    } catch {
+      // Ignore: fall back to raw message body
+    }
+  }
+
   if (message.decrypted_body) return message.decrypted_body;
   if (message.missing_envelope) return "Message not available on this device";
   if (message.decrypt_failed) return "Could not decrypt message";
   return "Encrypted message";
 }
 
-async function decryptConversationPreview(conversation: ChatConversation) {
+async function decryptConversationPreview(conversation: ChatConversation, currentUserId?: string) {
   if (!conversation.last_message) return "";
   const decrypted = conversation.type === "group"
     ? await decryptGroupMessage(conversation.last_message)
     : await decryptChatMessage(conversation.last_message);
-  return previewTextFromMessage(decrypted);
+  return previewTextFromMessage(decrypted, currentUserId);
 }
 
 function ConversationRow({
@@ -241,6 +295,106 @@ function MessageBubble({
 }) {
   const own = message.sender_id === currentUserId;
   const attachments = message.attachments || [];
+
+  if (message.message_type === "system") {
+    let callLog: {
+      type?: string;
+      call_id: string;
+      call_type: string;
+      call_mode: string;
+      status: string;
+      created_by: string;
+      duration_seconds?: number | null;
+      end_reason?: string | null;
+    } | null = null;
+
+    try {
+      if (message.decrypted_body && message.decrypted_body.startsWith("{")) {
+        callLog = JSON.parse(message.decrypted_body);
+      }
+    } catch {
+      // Ignored
+    }
+
+    if (callLog && callLog.type === "call_log") {
+      const isCaller = callLog.created_by === currentUserId;
+      const isVideo = callLog.call_type.includes("video");
+      const isGroup = callLog.call_mode === "group";
+
+      const formatDuration = (seconds?: number | null) => {
+        if (!seconds) return "";
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        if (h > 0) return `${h}h ${m}m ${s}s`;
+        if (m > 0) return `${m}m ${s}s`;
+        return `${s}s`;
+      };
+
+      let text = "";
+      let iconColor = "text-zinc-400";
+      let IconComponent = PhoneIcon;
+
+      if (isVideo) {
+        IconComponent = VideoCameraIcon;
+      }
+
+      if (isGroup) {
+        if (callLog.status === "ongoing") {
+          text = `Group ${isVideo ? "video" : "audio"} call started`;
+          iconColor = "text-emerald-400 animate-pulse";
+        } else {
+          const durationStr = callLog.duration_seconds ? ` (${formatDuration(callLog.duration_seconds)})` : "";
+          text = `Group ${isVideo ? "video" : "audio"} call ended${durationStr}`;
+          iconColor = "text-zinc-500";
+        }
+      } else {
+        if (callLog.status === "missed") {
+          text = isCaller ? `Unanswered ${isVideo ? "video" : "audio"} call` : `Missed ${isVideo ? "video" : "audio"} call`;
+          iconColor = isCaller ? "text-zinc-500" : "text-rose-400";
+          if (!isCaller) IconComponent = PhoneArrowDownLeftIcon;
+        } else if (callLog.status === "rejected") {
+          text = isCaller ? `${isVideo ? "Video" : "Audio"} call declined` : `Declined ${isVideo ? "video" : "audio"} call`;
+          iconColor = "text-zinc-500";
+        } else if (callLog.status === "cancelled") {
+          text = isCaller ? `Cancelled ${isVideo ? "video" : "audio"} call` : `Missed ${isVideo ? "video" : "audio"} call`;
+          iconColor = isCaller ? "text-zinc-500" : "text-rose-400";
+          if (!isCaller) IconComponent = PhoneArrowDownLeftIcon;
+        } else if (callLog.status === "failed") {
+          text = `Failed ${isVideo ? "video" : "audio"} call`;
+          iconColor = "text-rose-400";
+        } else if (callLog.status === "ended") {
+          if (callLog.duration_seconds && callLog.duration_seconds > 0) {
+            text = `${isVideo ? "Video" : "Audio"} call ended (${formatDuration(callLog.duration_seconds)})`;
+            iconColor = "text-emerald-400";
+          } else {
+            text = `${isVideo ? "Video" : "Audio"} call (no answer)`;
+            iconColor = "text-zinc-500";
+          }
+        } else {
+          text = `${isVideo ? "Video" : "Audio"} call`;
+        }
+      }
+
+      return (
+        <div className="flex justify-center my-3 animate-chat-fade-in w-full">
+          <div className="flex items-center gap-2 rounded-full bg-zinc-900/60 border border-zinc-800/80 px-4 py-1.5 text-xs text-zinc-300 shadow-sm backdrop-blur-sm">
+            <IconComponent className={`h-3.5 w-3.5 ${iconColor}`} />
+            <span>{text}</span>
+            <span className="text-[10px] text-zinc-500 ml-1">{formatTime(message.created_at)}</span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex justify-center my-2 animate-chat-fade-in w-full">
+        <div className="rounded-full bg-zinc-900/40 border border-zinc-800/50 px-3 py-1 text-xs text-zinc-400">
+          {message.decrypted_body}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className={`flex ${own ? "justify-end" : "justify-start"} animate-chat-fade-in`}>
       <div className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm shadow-sm ${own ? "bg-white text-zinc-950" : "bg-zinc-900 text-zinc-100"}`}>
@@ -878,7 +1032,7 @@ export default function ChatPage() {
       }
       const rows = await Promise.all(conversations.map(async (conversation) => {
         try {
-          return [conversation.id, await decryptConversationPreview(conversation)] as const;
+          return [conversation.id, await decryptConversationPreview(conversation, user?.id)] as const;
         } catch {
           return [conversation.id, "Encrypted message"] as const;
         }
