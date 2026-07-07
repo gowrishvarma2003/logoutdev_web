@@ -26,8 +26,49 @@ import {
 import * as api from "@/lib/services/spacesApi";
 import * as cache from "@/lib/services/requestCache";
 import { formatRelativeTime } from "@/lib/utils";
-import type { SpaceStatus, SpaceVisibility, StackCategory, StackMaturity } from "@/lib/types";
+import type { SpaceAccessAudience, SpaceAccessPolicy, SpaceAccessSection, SpaceStatus, SpaceVisibility, StackCategory, StackMaturity } from "@/lib/types";
 import RichText from "@/components/ui/RichText";
+
+const ACCESS_AUDIENCES: Array<{ value: SpaceAccessAudience; label: string }> = [
+  { value: "public", label: "Public" },
+  { value: "authenticated", label: "Logged in" },
+  { value: "followers", label: "Followers" },
+  { value: "contributors", label: "Contributors" },
+  { value: "maintainers", label: "Maintainers" },
+  { value: "owner", label: "Owner only" },
+];
+
+const ACCESS_SECTIONS: Array<{ value: SpaceAccessSection; label: string }> = [
+  { value: "overview", label: "Overview" },
+  { value: "work", label: "Work" },
+  { value: "discussions", label: "Discussions" },
+  { value: "updates", label: "Updates" },
+  { value: "repos", label: "Repos" },
+  { value: "people", label: "People" },
+  { value: "followers", label: "Followers" },
+  { value: "join_requests", label: "Join requests" },
+  { value: "attachments", label: "Attachments" },
+  { value: "health", label: "Health" },
+  { value: "decisions", label: "Decisions" },
+];
+
+const DEFAULT_ACCESS_POLICY: Required<SpaceAccessPolicy> = {
+  overview: "public",
+  work: "public",
+  discussions: "public",
+  updates: "public",
+  repos: "authenticated",
+  people: "public",
+  followers: "public",
+  join_requests: "maintainers",
+  attachments: "public",
+  health: "public",
+  decisions: "public",
+};
+
+function normalizePolicy(policy?: SpaceAccessPolicy | null): Required<SpaceAccessPolicy> {
+  return { ...DEFAULT_ACCESS_POLICY, ...(policy ?? {}) };
+}
 
 export default function ManagePage({
   params,
@@ -38,9 +79,11 @@ export default function ManagePage({
   const router = useRouter();
   const { user } = useAuth();
   const { space, loading: spaceLoading, refetch: refetchSpace } = useSpace(spaceId);
-  const { requests, loading: reqLoading, refetch: refetchReqs } = useJoinRequests(spaceId, "pending");
+  const canSeeJoinRequests = space?.viewer_permissions?.visible_sections?.join_requests !== false;
+  const { requests, loading: reqLoading, refetch: refetchReqs } = useJoinRequests(spaceId, "pending", canSeeJoinRequests);
   const { stack, loading: stackLoading, refetch: refetchStack } = useStack(spaceId);
-  const { repos } = useRepos(spaceId);
+  const canSeeRepos = space?.viewer_permissions?.visible_sections?.repos !== false;
+  const { repos } = useRepos(spaceId, canSeeRepos);
 
   if (spaceLoading) {
     return (
@@ -50,11 +93,15 @@ export default function ManagePage({
     );
   }
 
-  if (space && space.owner_id !== user?.id) {
+  const currentMembership = space?.members?.find((member) => member.user_id === user?.id) ?? null;
+  const isOwner = Boolean(space && space.owner_id === user?.id);
+  const canManageSpace = Boolean(isOwner || currentMembership?.role === "maintainer" || space?.viewer_permissions?.can_manage_space);
+
+  if (space && !canManageSpace) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <h2 className="mb-2 text-lg font-semibold text-white">Access Denied</h2>
-        <p className="text-sm text-zinc-500">Only the project owner can manage this space.</p>
+        <p className="text-sm text-zinc-500">Only the project owner or maintainers can manage this space.</p>
       </div>
     );
   }
@@ -67,16 +114,19 @@ export default function ManagePage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main section (Left/Center Column) */}
         <div className="lg:col-span-2 space-y-6">
-          <JoinRequestsSection spaceId={spaceId} requests={requests} loading={reqLoading} refetch={refetchReqs} />
-          <RepoManagementSection spaceId={spaceId} repos={repos} />
-          <RepoDocsSection repos={repos} />
+          {space?.viewer_permissions?.visible_sections?.join_requests !== false ? (
+            <JoinRequestsSection spaceId={spaceId} requests={requests} loading={reqLoading} refetch={refetchReqs} />
+          ) : null}
+          {canSeeRepos ? <RepoManagementSection spaceId={spaceId} repos={repos} /> : null}
+          {canSeeRepos ? <RepoDocsSection repos={repos} /> : null}
         </div>
 
         {/* Sidebar section (Right Column) */}
         <div className="space-y-6">
-          <ProjectSettingsSection space={space} refetch={refetchSpace} />
+          {isOwner ? <ProjectSettingsSection space={space} refetch={refetchSpace} /> : null}
+          {isOwner ? <VisibilitySettingsSection space={space} refetch={refetchSpace} /> : null}
           <StackManagementSection spaceId={spaceId} stack={stack} stackLoading={stackLoading} refetch={refetchStack} />
-          <DangerZoneSection space={space} onDelete={() => router.push("/spaces")} />
+          {isOwner ? <DangerZoneSection space={space} onDelete={() => router.push("/spaces")} /> : null}
         </div>
       </div>
     </div>
@@ -430,6 +480,79 @@ function ProjectSettingsSection({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function VisibilitySettingsSection({
+  space,
+  refetch,
+}: {
+  space: ReturnType<typeof useSpace>["space"];
+  refetch: () => void;
+}) {
+  const [policy, setPolicy] = useState<Required<SpaceAccessPolicy>>(normalizePolicy(space?.access_policy));
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setPolicy(normalizePolicy(space?.access_policy));
+  }, [space?.access_policy]);
+
+  if (!space) return null;
+  const currentSpaceId = space.id;
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      await api.updateSpace(currentSpaceId, { access_policy: policy });
+      cache.invalidateSpace(currentSpaceId);
+      cache.invalidateSpaceListings();
+      refetch();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function updateSection(section: SpaceAccessSection, audience: SpaceAccessAudience) {
+    setPolicy((current) => ({ ...current, [section]: audience }));
+  }
+
+  return (
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm">
+      <div className="mb-4 border-b border-zinc-800/60 pb-3">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-white uppercase tracking-wide">
+          <UsersIcon className="w-4 h-4 text-zinc-450" />
+          Visibility
+        </h3>
+        <p className="mt-1 text-xs text-zinc-500">Choose the minimum audience that can see each space section.</p>
+      </div>
+
+      <div className="space-y-2.5">
+        {ACCESS_SECTIONS.map((section) => (
+          <label key={section.value} className="flex items-center justify-between gap-3 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2">
+            <span className="text-xs font-semibold text-zinc-300">{section.label}</span>
+            <select
+              value={policy[section.value]}
+              onChange={(event) => updateSection(section.value, event.target.value as SpaceAccessAudience)}
+              className="rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-1 text-[11px] text-white focus:border-zinc-600 focus:outline-none"
+            >
+              {ACCESS_AUDIENCES.map((audience) => (
+                <option key={audience.value} value={audience.value}>
+                  {audience.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ))}
+      </div>
+
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="mt-4 w-full rounded-lg bg-white px-3.5 py-2 text-xs font-bold text-zinc-950 hover:bg-zinc-100 disabled:opacity-50 transition-colors cursor-pointer"
+      >
+        {saving ? "Saving..." : "Save Visibility"}
+      </button>
     </div>
   );
 }

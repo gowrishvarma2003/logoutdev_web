@@ -11,7 +11,7 @@ import EmptyState from "@/components/ui/EmptyState";
 
 export default function LaunchesPage() {
   const [q, setQ] = useState("");
-  const [launchPhase, setLaunchPhase] = useState("beta");
+  const [launchPhase, setLaunchPhase] = useState("");
   const [stack, setStack] = useState("");
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);

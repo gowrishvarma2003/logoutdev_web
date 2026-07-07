@@ -38,15 +38,17 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
 
   const base = `/spaces/${space.id}`;
   const canManageRepos = isOwner || memberRole === "maintainer";
+  const visibleSections = space.viewer_permissions?.visible_sections;
+  const sectionVisible = (section: keyof NonNullable<typeof visibleSections>) => visibleSections?.[section] !== false;
   const attachedRepos = space.attached_repos ?? [];
-  const canSeeRepos = canManageRepos || attachedRepos.length > 0;
+  const canSeeRepos = sectionVisible("repos") && (canManageRepos || attachedRepos.length > 0);
   const tabs = [
     { href: base, label: "Overview", icon: <DocumentTextIcon className="w-4 h-4" /> },
-    { href: `${base}/work`, label: "Work", icon: <BriefcaseIcon className="w-4 h-4" /> },
-    { href: `${base}/discussions`, label: "Discussions", icon: <ChatBubbleIcon className="w-4 h-4" /> },
-    { href: `${base}/updates`, label: "Updates", icon: <ClockIcon className="w-4 h-4" /> },
-    { href: `${base}/people`, label: "People", icon: <UsersIcon className="w-4 h-4" /> },
-  ];
+    sectionVisible("work") ? { href: `${base}/work`, label: "Work", icon: <BriefcaseIcon className="w-4 h-4" /> } : null,
+    sectionVisible("discussions") ? { href: `${base}/discussions`, label: "Discussions", icon: <ChatBubbleIcon className="w-4 h-4" /> } : null,
+    sectionVisible("updates") ? { href: `${base}/updates`, label: "Updates", icon: <ClockIcon className="w-4 h-4" /> } : null,
+    sectionVisible("people") ? { href: `${base}/people`, label: "People", icon: <UsersIcon className="w-4 h-4" /> } : null,
+  ].filter(Boolean) as Array<{ href: string; label: string; icon: React.ReactNode }>;
 
   if (canSeeRepos) {
     tabs.push({
@@ -56,7 +58,7 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
     });
   }
 
-  if (isOwner) {
+  if (isOwner || space.viewer_permissions?.can_manage_space || memberRole === "maintainer") {
     tabs.push({
       href: `${base}/manage`,
       label: "Manage",

@@ -29,6 +29,7 @@ import type {
   WorkDueState,
   WorkReadiness,
   WorkSort,
+  SpaceAccessPolicy,
 } from "../types";
 import { API_BASE_URL } from "../apiBaseUrl";
 import { clearClientSessionAndRedirect } from "../auth/logoutCleanup";
@@ -119,6 +120,7 @@ export async function createSpace(body: {
   needed_skills?: string[];
   contribution_guide?: string;
   response_sla?: string;
+  access_policy?: SpaceAccessPolicy;
 }): Promise<{ space: ProjectSpace }> {
   const res = await fetch(`${API}/api/spaces`, {
     method: "POST",
@@ -143,6 +145,7 @@ export async function updateSpace(
     needed_skills: string[];
     contribution_guide: string;
     response_sla: string;
+    access_policy: SpaceAccessPolicy;
   }>
 ): Promise<{ space: ProjectSpace }> {
   const res = await fetch(`${API}/api/spaces/${spaceId}`, {

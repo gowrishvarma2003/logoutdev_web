@@ -116,11 +116,12 @@ export function useContributors(spaceId: string) {
   };
 }
 
-export function useFollowers(spaceId: string) {
+export function useFollowers(spaceId: string, enabled = true) {
   const result = useCachedAsync(() => api.listFollowers(spaceId), [spaceId], {
     cacheKey: cache.buildKey(`space:${spaceId}`, "followers"),
     ttl: 2 * 60 * 1000,
     tags: [`space:${spaceId}`, `space:${spaceId}:followers`],
+    enabled,
   });
   return {
     followers: (result.data as { followers: SpaceFollower[] } | null)?.followers ?? [],
@@ -144,11 +145,12 @@ export function useAttachments(spaceId: string) {
   };
 }
 
-export function useJoinRequests(spaceId: string, status?: string) {
+export function useJoinRequests(spaceId: string, status?: string, enabled = true) {
   const result = useCachedAsync(() => api.listJoinRequests(spaceId, { status }), [spaceId, status], {
     cacheKey: cache.buildKey(`space:${spaceId}:join-requests`, { status }),
     ttl: TTL_SHORT,
     tags: [`space:${spaceId}`, `space:${spaceId}:join-requests`],
+    enabled,
   });
   return {
     requests: (result.data as { requests: JoinRequest[]; total?: number } | null)?.requests ?? [],

@@ -15,6 +15,7 @@ interface LaunchFiltersProps {
 }
 
 const PHASES = [
+  { value: "", label: "All", color: "zinc" },
   { value: "beta", label: "Beta", color: "sky" },
   { value: "live", label: "Live", color: "emerald" },
 ];
@@ -66,7 +67,9 @@ export default function LaunchFilters({
                   isActive
                     ? phase.color === "sky"
                       ? "bg-sky-500 text-white shadow-sm"
-                      : "bg-emerald-500 text-white shadow-sm"
+                      : phase.color === "emerald"
+                      ? "bg-emerald-500 text-white shadow-sm"
+                      : "bg-zinc-700 text-white shadow-sm"
                     : "text-zinc-400 hover:text-zinc-200"
                 }`}
               >

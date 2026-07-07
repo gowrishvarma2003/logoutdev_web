@@ -88,11 +88,12 @@ export function useRepositoryInvitations() {
   };
 }
 
-export function useAttachments(spaceId: string) {
+export function useAttachments(spaceId: string, enabled = true) {
   const result = useCachedAsync(() => spacesApi.listAttachments(spaceId), [spaceId], {
     cacheKey: cache.buildKey(`space:${spaceId}`, "attachments"),
     ttl: 5 * 60 * 1000,
     tags: [`space:${spaceId}`, `space:${spaceId}:attachments`],
+    enabled,
   });
   const attachments = (result.data as { attachments: SpaceRepoAttachment[] } | null)?.attachments ?? [];
 
@@ -105,8 +106,8 @@ export function useAttachments(spaceId: string) {
   };
 }
 
-export function useRepos(spaceId: string) {
-  const { repos, attachments, loading, error, refetch } = useAttachments(spaceId);
+export function useRepos(spaceId: string, enabled = true) {
+  const { repos, attachments, loading, error, refetch } = useAttachments(spaceId, enabled);
   return { repos, attachments, loading, error, refetch };
 }
 

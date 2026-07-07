@@ -1,14 +1,19 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as webrtc from "@/lib/calls/webrtcService";
 import type { ChatSocketApi } from "@/lib/hooks/useChatSocket";
-import type { ChatConversation, User } from "@/lib/types";
+import type { CallRecord, ChatConversation, User } from "@/lib/types";
 import { buildCallTiles, CallProvider, NetworkQualityIndicator, selectPinnedTileId, useCalls, type CallTile } from "./CallProvider";
 
 vi.mock("@/lib/chatCrypto", () => ({ getCurrentChatDeviceId: () => "device-1" }));
 vi.mock("@/lib/calls/webrtcService", () => ({
   addLocalTracks: vi.fn(),
+  addIceCandidate: vi.fn(),
+  createOffer: vi.fn().mockResolvedValue({ type: "offer", sdp: "offer-sdp" }),
   createPeerConnection: vi.fn(() => ({ close: vi.fn() })),
   getLocalMedia: vi.fn(() => new Promise(() => undefined)),
+  handleAnswer: vi.fn().mockResolvedValue(true),
+  handleOffer: vi.fn().mockResolvedValue({ type: "answer", sdp: "answer-sdp" }),
   stopLocalMedia: vi.fn(),
 }));
 vi.mock("@/lib/calls/sfuService", () => ({
@@ -55,11 +60,78 @@ const socket = {
   lastConnectedAt: Date.now(),
 } as ChatSocketApi;
 
+function createSocketMock() {
+  const handlers: Record<string, (payload?: unknown) => unknown> = {};
+  const socketMock = {
+    emit: vi.fn(),
+    connected: () => true,
+    joinCallRoom: vi.fn(),
+    joinCallRoomWithAck: vi.fn(),
+    joinConversation: vi.fn(),
+    joinConversationWithAck: vi.fn(),
+    leaveCallRoom: vi.fn(),
+    leaveConversation: vi.fn(),
+    emitTyping: vi.fn(),
+    emitWithAck: vi.fn(),
+    on: vi.fn((event: string, handler: (payload?: unknown) => unknown) => {
+      handlers[event] = handler;
+      return () => {
+        delete handlers[event];
+      };
+    }),
+    status: "connected",
+    lastConnectedAt: Date.now(),
+  } as unknown as ChatSocketApi;
+
+  return { socket: socketMock, handlers };
+}
+
 function mockMediaStream({ audio = 0, video = 0 }: { audio?: number; video?: number } = {}) {
   return {
     getAudioTracks: () => Array.from({ length: audio }, (_, index) => ({ id: `audio-${index}`, enabled: true, readyState: "live" })),
     getVideoTracks: () => Array.from({ length: video }, (_, index) => ({ id: `video-${index}`, enabled: true, readyState: "live" })),
   } as unknown as MediaStream;
+}
+
+function directCall(overrides: Partial<CallRecord> = {}) {
+  return {
+    id: "call-1",
+    conversation_id: "conversation-1",
+    call_type: "direct_video",
+    call_mode: "direct",
+    status: "accepted",
+    created_by: "user-1",
+    sfu_room_id: "logoutdev-call-1",
+    created_at: "2026-06-24T00:00:00.000Z",
+    updated_at: "2026-06-24T00:00:00.000Z",
+    participants: [
+      {
+        id: "participant-1",
+        call_id: "call-1",
+        user_id: "user-1",
+        status: "joined",
+        is_muted: false,
+        is_camera_off: false,
+        is_screen_sharing: false,
+        created_at: "2026-06-24T00:00:00.000Z",
+        updated_at: "2026-06-24T00:00:00.000Z",
+      },
+      {
+        id: "participant-2",
+        call_id: "call-1",
+        user_id: "user-2",
+        status: "joined",
+        is_muted: false,
+        is_camera_off: false,
+        is_screen_sharing: false,
+        created_at: "2026-06-24T00:00:00.000Z",
+        updated_at: "2026-06-24T00:00:00.000Z",
+        user: { id: "user-2", name: "Builder", username: "builder" },
+      },
+    ],
+    current_user_participant: null,
+    ...overrides,
+  } as CallRecord;
 }
 
 function StartCallButton() {
@@ -166,6 +238,10 @@ describe("call tile model", () => {
 describe("CallProvider calling UX", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    Object.defineProperty(HTMLMediaElement.prototype, "play", {
+      configurable: true,
+      value: vi.fn().mockResolvedValue(undefined),
+    });
   });
 
   it("shows the full call screen immediately while startup work is pending", async () => {
@@ -193,5 +269,47 @@ describe("CallProvider calling UX", () => {
     fireEvent.click(await screen.findByTitle("Cancel call"));
 
     await waitFor(() => expect(screen.queryByText("Direct call")).not.toBeInTheDocument());
+  });
+
+  it("does not start legacy peer audio after an SFU direct video call is accepted", async () => {
+    const { socket: socketMock, handlers } = createSocketMock();
+    render(
+      <CallProvider user={user} socket={socketMock}>
+        <div />
+      </CallProvider>
+    );
+
+    await waitFor(() => expect(handlers["call:accepted"]).toBeTypeOf("function"));
+
+    await act(async () => {
+      await handlers["call:accepted"]({ call: directCall() });
+    });
+
+    expect(webrtc.createPeerConnection).not.toHaveBeenCalled();
+    expect(webrtc.createOffer).not.toHaveBeenCalled();
+  });
+
+  it("keeps the legacy peer path available for non-SFU direct audio calls", async () => {
+    const { socket: socketMock, handlers } = createSocketMock();
+    vi.mocked(webrtc.getLocalMedia).mockResolvedValueOnce(mockMediaStream({ audio: 1 }));
+    render(
+      <CallProvider user={user} socket={socketMock}>
+        <div />
+      </CallProvider>
+    );
+
+    await waitFor(() => expect(handlers["call:accepted"]).toBeTypeOf("function"));
+
+    await act(async () => {
+      await handlers["call:accepted"]({
+        call: directCall({
+          call_type: "direct_audio",
+          sfu_room_id: null,
+        }),
+      });
+    });
+
+    expect(webrtc.createPeerConnection).toHaveBeenCalledTimes(1);
+    expect(webrtc.createOffer).toHaveBeenCalledTimes(1);
   });
 });

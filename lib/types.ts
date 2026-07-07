@@ -363,6 +363,11 @@ export interface SpaceViewerPermissions {
   can_create_discussion: boolean;
   allowed_discussion_categories: DiscussionCategory[];
   can_manage_discussions: boolean;
+  can_manage_space?: boolean;
+  can_manage_people?: boolean;
+  can_manage_visibility?: boolean;
+  visible_sections?: Partial<Record<SpaceAccessSection, boolean>>;
+  access_policy?: SpaceAccessPolicy;
 }
 
 export interface RepositoryCollaborationHome {
@@ -850,6 +855,26 @@ export interface AuthResponse {
 export type SpaceStatus =
   "idea" | "building" | "shipping" | "paused" | "archived";
 export type SpaceVisibility = "public" | "private";
+export type SpaceAccessAudience =
+  | "public"
+  | "authenticated"
+  | "followers"
+  | "contributors"
+  | "maintainers"
+  | "owner";
+export type SpaceAccessSection =
+  | "overview"
+  | "work"
+  | "discussions"
+  | "updates"
+  | "repos"
+  | "people"
+  | "followers"
+  | "join_requests"
+  | "attachments"
+  | "health"
+  | "decisions";
+export type SpaceAccessPolicy = Partial<Record<SpaceAccessSection, SpaceAccessAudience>>;
 export type RepositoryVisibility = "public" | "private";
 export type StackCategory =
   "frontend" | "backend" | "database" | "infra" | "tooling" | "other";
@@ -926,6 +951,7 @@ export interface ProjectSpace {
   needed_skills?: string[];
   contribution_guide?: string | null;
   response_sla?: string | null;
+  access_policy?: SpaceAccessPolicy;
   created_at: string;
   updated_at: string;
   owner?: User;

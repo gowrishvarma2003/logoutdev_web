@@ -26,7 +26,8 @@ export default function PeoplePage({
   const { user } = useAuth();
   const { space } = useSpace(spaceId);
   const { contributors, loading, error, refetch } = useContributors(spaceId);
-  const { followers, loading: followersLoading, error: followersError } = useFollowers(spaceId);
+  const canSeeFollowers = space?.viewer_permissions?.visible_sections?.followers !== false;
+  const { followers, loading: followersLoading, error: followersError } = useFollowers(spaceId, canSeeFollowers);
   const isOwner = space?.owner_id === user?.id;
   const [updating, setUpdating] = useState<string | null>(null);
 
@@ -134,7 +135,7 @@ export default function PeoplePage({
         ) : null}
       </section>
 
-      <section>
+      {canSeeFollowers ? <section>
         <SectionHeader title="Followers" count={followers.length} />
 
         {followersLoading ? (
@@ -166,7 +167,7 @@ export default function PeoplePage({
             ))}
           </div>
         ) : null}
-      </section>
+      </section> : null}
     </div>
   );
 }

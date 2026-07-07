@@ -94,6 +94,10 @@ function wantsVideo(call: CallRecord | null) {
   return Boolean(call?.call_type.includes("video"));
 }
 
+function isSfuBackedCall(call: CallRecord | null) {
+  return Boolean(call && (call.call_mode === "group" || call.sfu_room_id));
+}
+
 function streamFromLocalTracks(tracks: LocalTrack[], source?: Track.Source) {
   return new MediaStream(
     tracks
@@ -233,6 +237,12 @@ export function CallProvider({
     setConfig(nextConfig);
   }, []);
 
+  const closePeerConnection = useCallback(() => {
+    pcRef.current?.close();
+    pcRef.current = null;
+    pendingIceCandidatesRef.current = [];
+  }, []);
+
   const ensureCallConfig = useCallback(async () => {
     if (configRef.current) return configRef.current;
     const { config: nextConfig } = await callApi.getCallConfig();
@@ -241,9 +251,7 @@ export function CallProvider({
   }, [setCurrentConfig]);
 
   const cleanup = useCallback(async (nextState: CallUiState = "idle") => {
-    pcRef.current?.close();
-    pcRef.current = null;
-    pendingIceCandidatesRef.current = [];
+    closePeerConnection();
     offeredCallIdsRef.current.clear();
     screenTracksRef.current.forEach((track) => track.stop());
     screenTracksRef.current = [];
@@ -268,7 +276,7 @@ export function CallProvider({
     setPendingCallIntent(null);
     setDurationSeconds(0);
     setState(nextState);
-  }, [localStream, setCurrentCall, socket]);
+  }, [closePeerConnection, localStream, setCurrentCall, socket]);
 
   useEffect(() => {
     let cancelled = false;
@@ -383,6 +391,7 @@ export function CallProvider({
   }, [audioPlaybackBlocked, enableRemoteAudio]);
 
   const joinSfu = useCallback(async (call: CallRecord, details = null as Awaited<ReturnType<typeof callApi.joinCall>>["sfu"] | null) => {
+    closePeerConnection();
     const config = await ensureCallConfig();
     let joinedCall = call;
     if (!details) {
@@ -462,7 +471,7 @@ export function CallProvider({
       await callApi.leaveCall(joinedCall.id, joinedCall.created_by === user.id ? "cancelled" : "left").catch(() => undefined);
       throw err;
     }
-  }, [ensureCallConfig, setCurrentCall, socket, user.id]);
+  }, [closePeerConnection, ensureCallConfig, setCurrentCall, socket, user.id]);
 
   const startDirectCall = useCallback(async (conversation: ChatConversation, kind: "audio" | "video") => {
     if (!conversation.other_user?.id || activeCallRef.current || pendingCallIntent) return;
@@ -607,6 +616,7 @@ export function CallProvider({
     if (!call || !localStream) return;
     const nextMuted = localStream.getAudioTracks().some((track) => track.enabled && track.readyState === "live");
     if (roomRef.current) {
+      closePeerConnection();
       try {
         await roomRef.current.localParticipant.setMicrophoneEnabled(!nextMuted);
         syncLiveKitLocalTracks();
@@ -620,7 +630,7 @@ export function CallProvider({
       });
     }
     socket.emit("call:media-state", { call_id: call.id, is_muted: nextMuted });
-  }, [localStream, socket, syncLiveKitLocalTracks]);
+  }, [closePeerConnection, localStream, socket, syncLiveKitLocalTracks]);
 
   const toggleCamera = useCallback(() => {
     const call = activeCallRef.current;
@@ -704,7 +714,9 @@ export function CallProvider({
       const call = (payload as { call?: CallRecord }).call;
       if (!call) return;
       setCurrentCall(call);
-      if (call.call_mode === "direct" && call.created_by === user.id && !offeredCallIdsRef.current.has(call.id)) {
+      if (isSfuBackedCall(call)) {
+        closePeerConnection();
+      } else if (call.call_mode === "direct" && call.created_by === user.id && !offeredCallIdsRef.current.has(call.id)) {
         offeredCallIdsRef.current.add(call.id);
         await ensureCallConfig();
         const stream = await ensureLocalStream(wantsVideo(call));
@@ -719,6 +731,10 @@ export function CallProvider({
       const data = payload as { call_id?: string; sdp?: RTCSessionDescriptionInit; from_user_id?: string };
       const call = activeCallRef.current;
       if (!call || data.call_id !== call.id || !data.sdp) return;
+      if (isSfuBackedCall(call)) {
+        closePeerConnection();
+        return;
+      }
       await ensureCallConfig();
       const stream = await ensureLocalStream(wantsVideo(call));
       const pc = ensurePeer(call, stream);
@@ -730,7 +746,13 @@ export function CallProvider({
 
     const offAnswer = socket.on("call:answer", async (payload) => {
       const data = payload as { call_id?: string; sdp?: RTCSessionDescriptionInit };
-      if (!pcRef.current || data.call_id !== activeCallRef.current?.id || !data.sdp) return;
+      const call = activeCallRef.current;
+      if (!call || data.call_id !== call.id || !data.sdp) return;
+      if (isSfuBackedCall(call)) {
+        closePeerConnection();
+        return;
+      }
+      if (!pcRef.current) return;
       const applied = await webrtc.handleAnswer(pcRef.current, data.sdp);
       if (applied) {
         await flushPendingIceCandidates();
@@ -740,7 +762,12 @@ export function CallProvider({
 
     const offIce = socket.on("call:ice-candidate", async (payload) => {
       const data = payload as { call_id?: string; candidate?: RTCIceCandidateInit };
-      if (data.call_id !== activeCallRef.current?.id || !data.candidate) return;
+      const call = activeCallRef.current;
+      if (!call || data.call_id !== call.id || !data.candidate) return;
+      if (isSfuBackedCall(call)) {
+        closePeerConnection();
+        return;
+      }
       if (!pcRef.current?.remoteDescription) {
         pendingIceCandidatesRef.current.push(data.candidate);
         return;
@@ -826,7 +853,7 @@ export function CallProvider({
       offCancelled?.();
       offMissed?.();
     };
-  }, [cleanup, ensureCallConfig, ensureLocalStream, ensurePeer, flushPendingIceCandidates, setCurrentCall, socket, user.id]);
+  }, [cleanup, closePeerConnection, ensureCallConfig, ensureLocalStream, ensurePeer, flushPendingIceCandidates, setCurrentCall, socket, user.id]);
 
   const value = useMemo<CallContextValue>(() => ({
     activeCall,
