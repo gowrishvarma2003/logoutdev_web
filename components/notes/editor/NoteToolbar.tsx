@@ -37,7 +37,7 @@ function ToolbarButton({
       disabled={disabled}
       onClick={onClick}
       className={`inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-1.5 transition-colors ${
-        active ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-800/70 hover:text-white"
+        active ? "bg-surface-hover text-text-primary" : "text-text-muted hover:bg-surface-hover/70 hover:text-text-primary"
       } disabled:pointer-events-none disabled:opacity-30`}
     >
       {children}
@@ -46,7 +46,7 @@ function ToolbarButton({
 }
 
 function Divider() {
-  return <span className="mx-1 h-5 w-px shrink-0 bg-zinc-800" aria-hidden="true" />;
+  return <span className="mx-1 h-5 w-px shrink-0 bg-surface-hover" aria-hidden="true" />;
 }
 
 export default function NoteToolbar({ editor }: { editor: Editor }) {
@@ -74,7 +74,7 @@ export default function NoteToolbar({ editor }: { editor: Editor }) {
   });
 
   return (
-    <div className="sticky top-0 z-10 -mx-1 mb-2 flex flex-wrap items-center gap-0.5 overflow-x-auto border-b border-zinc-800/80 bg-zinc-950/95 px-1 py-1.5 backdrop-blur">
+    <div className="sticky top-0 z-10 -mx-1 mb-2 flex flex-wrap items-center gap-0.5 overflow-x-auto border-b border-border-default/80 bg-app/95 px-1 py-1.5 backdrop-blur">
       <ToolbarButton title="Heading 1" active={state.h1} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}>
         <span className="text-xs font-bold">H1</span>
       </ToolbarButton>

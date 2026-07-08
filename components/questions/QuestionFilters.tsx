@@ -41,7 +41,7 @@ export default function QuestionFilters({
     (filters.topic && filters.topic.length > 0 ? 1 : 0);
 
   return (
-    <div className="border-b border-zinc-800/60 px-4 py-3">
+    <div className="border-b border-border-default/60 px-4 py-3">
       <div className="flex flex-wrap items-center gap-3">
         {/* Filters dropdown */}
         <div className="relative">
@@ -51,12 +51,12 @@ export default function QuestionFilters({
             className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm transition-colors ${
               hasActiveFilters
                 ? "border-sky-500/30 bg-sky-500/10 text-sky-300"
-                : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200"
+                : "border-border-default bg-surface/40 text-text-muted hover:text-text-secondary"
             }`}
           >
             Filters
             {activeCount > 0 && (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-[10px] font-bold text-white">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-[10px] font-bold text-text-primary">
                 {activeCount}
               </span>
             )}
@@ -66,17 +66,17 @@ export default function QuestionFilters({
           {filtersOpen && (
             <>
               <div className="fixed inset-0 z-10 cursor-pointer" onClick={() => setFiltersOpen(false)} />
-              <div className="absolute left-0 top-full z-20 mt-2 w-80 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 p-4 shadow-xl">
+              <div className="absolute left-0 top-full z-20 mt-2 w-80 overflow-hidden rounded-xl border border-border-strong bg-surface p-4 shadow-xl">
                 <div className="space-y-4">
                   {/* Row 1: Type + Status + Sort */}
                   <div className="grid grid-cols-3 gap-2">
                     <div>
-                      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Type</label>
+                      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-text-disabled">Type</label>
                       <select
                         value={filters.type ?? ""}
                         onChange={(e) => onChange({ type: (e.target.value as QuestionListFilters["type"]) || "" })}
                         aria-label="Question type"
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                        className="w-full rounded-lg border border-border-strong bg-surface-hover px-2 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
                       >
                         <option value="">All</option>
                         <option value="open">Open</option>
@@ -84,12 +84,12 @@ export default function QuestionFilters({
                       </select>
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Status</label>
+                      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-text-disabled">Status</label>
                       <select
                         value={filters.status ?? ""}
                         onChange={(e) => onChange({ status: (e.target.value as QuestionListFilters["status"]) || "" })}
                         aria-label="Question status"
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                        className="w-full rounded-lg border border-border-strong bg-surface-hover px-2 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
                       >
                         <option value="">All</option>
                         <option value="open">Open</option>
@@ -97,12 +97,12 @@ export default function QuestionFilters({
                       </select>
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Sort</label>
+                      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-text-disabled">Sort</label>
                       <select
                         value={filters.sort ?? "active"}
                         onChange={(e) => onChange({ sort: e.target.value as QuestionListFilters["sort"] })}
                         aria-label="Sort questions"
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                        className="w-full rounded-lg border border-border-strong bg-surface-hover px-2 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
                       >
                         <option value="active">Active</option>
                         <option value="newest">Newest</option>
@@ -114,12 +114,12 @@ export default function QuestionFilters({
 
                   {/* Role */}
                   <div>
-                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Role</label>
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-text-disabled">Role</label>
                     <select
                       value={filters.role?.[0] ?? ""}
                       onChange={(e) => onChange({ role: e.target.value ? [e.target.value] : [] })}
                       aria-label="Filter by role"
-                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                      className="w-full rounded-lg border border-border-strong bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
                     >
                       <option value="">Any role</option>
                       {ROLE_OPTIONS.map((role) => (
@@ -130,25 +130,25 @@ export default function QuestionFilters({
 
                   {/* Stack tags */}
                   <div>
-                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Stack Tags</label>
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-text-disabled">Stack Tags</label>
                     <input
                       value={(filters.stack ?? []).join(",")}
                       onChange={(e) => onChange({ stack: parseCsv(e.target.value) })}
                       placeholder="react,nodejs"
                       aria-label="Filter by stack tags"
-                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-600"
+                      className="w-full rounded-lg border border-border-strong bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-disabled focus:border-border-strong"
                     />
                   </div>
 
                   {/* Topic tags */}
                   <div>
-                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Topic Tags</label>
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-text-disabled">Topic Tags</label>
                     <input
                       value={(filters.topic ?? []).join(",")}
                       onChange={(e) => onChange({ topic: parseCsv(e.target.value) })}
                       placeholder="testing,interview"
                       aria-label="Filter by topic tags"
-                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-600"
+                      className="w-full rounded-lg border border-border-strong bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-disabled focus:border-border-strong"
                     />
                   </div>
 
@@ -159,7 +159,7 @@ export default function QuestionFilters({
                       onClick={() => {
                         onChange({ type: "", status: "", sort: "active", role: [], stack: [], topic: [] });
                       }}
-                      className="w-full rounded-lg border border-zinc-700 py-2 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                      className="w-full rounded-lg border border-border-strong py-2 text-sm text-text-muted transition-colors hover:bg-surface-hover hover:text-text-secondary"
                     >
                       Clear filters
                     </button>
@@ -172,12 +172,12 @@ export default function QuestionFilters({
 
         {/* Needs my answer — stays inline */}
         {isAuthenticated && (
-          <label className="inline-flex items-center gap-2 text-sm text-zinc-400">
+          <label className="inline-flex items-center gap-2 text-sm text-text-muted">
             <input
               type="checkbox"
               checked={Boolean(filters.needs_my_answer)}
               onChange={(e) => onChange({ needs_my_answer: e.target.checked })}
-              className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-white"
+              className="h-4 w-4 rounded border-border-strong bg-surface text-text-primary"
             />
             Needs my answer
           </label>

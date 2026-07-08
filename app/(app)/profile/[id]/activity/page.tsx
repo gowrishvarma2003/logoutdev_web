@@ -61,7 +61,7 @@ export default function ProfileActivityPage({ params }: ProfileActivityPageProps
       </div>
 
       {/* Filter chips */}
-      <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-3 mb-1 border-b border-zinc-900">
+      <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-3 mb-1 border-b border-border-subtle">
         {FILTERS.map((f) => {
           const active = filter === f.key;
           return (
@@ -71,8 +71,8 @@ export default function ProfileActivityPage({ params }: ProfileActivityPageProps
               onClick={() => setFilter(f.key)}
               className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                 active
-                  ? "bg-zinc-800 text-white"
-                  : "bg-zinc-900 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/60"
+                  ? "bg-surface-hover text-text-primary"
+                  : "bg-surface text-text-disabled hover:text-text-secondary hover:bg-surface-hover/60"
               }`}
             >
               {f.label}
@@ -90,21 +90,21 @@ export default function ProfileActivityPage({ params }: ProfileActivityPageProps
       )}
 
       {!loading && totalPages > 1 ? (
-        <div className="flex items-center justify-center gap-3 pt-5 mt-4 border-t border-zinc-800">
+        <div className="flex items-center justify-center gap-3 pt-5 mt-4 border-t border-border-default">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-4 py-2 rounded-lg border border-zinc-700 text-sm text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded-lg border border-border-strong text-sm text-text-muted hover:text-text-primary hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Previous
           </button>
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-text-disabled">
             Page {page} of {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="px-4 py-2 rounded-lg border border-zinc-700 text-sm text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded-lg border border-border-strong text-sm text-text-muted hover:text-text-primary hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Next
           </button>

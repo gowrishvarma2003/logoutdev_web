@@ -102,7 +102,7 @@ function ProfileHoverCardContent({
 
   return (
     <div
-      className="absolute left-0 top-full z-30 mt-2 w-80 rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl"
+      className="absolute left-0 top-full z-30 mt-2 w-80 rounded-xl border border-border-strong bg-surface shadow-xl"
       onMouseEnter={onKeepOpen}
       onMouseLeave={onClose}
     >
@@ -120,24 +120,24 @@ function ProfileHoverCardContent({
             <Link
               href={`/profile/${username}`}
               onClick={(e) => e.stopPropagation()}
-              className="text-sm font-bold text-zinc-100 hover:underline break-words"
+              className="text-sm font-bold text-text-primary hover:underline break-words"
             >
               {user?.name ?? "Unknown"}
             </Link>
-            <p className="text-xs text-zinc-500">@{username}</p>
+            <p className="text-xs text-text-disabled">@{username}</p>
 
             {user?.headline && (
-              <p className="mt-0.5 text-xs text-zinc-300 leading-snug">{user.headline}</p>
+              <p className="mt-0.5 text-xs text-text-secondary leading-snug">{user.headline}</p>
             )}
           </div>
         </div>
 
         {truncatedBio && (
-          <p className="mt-2.5 text-xs text-zinc-400 leading-relaxed">{truncatedBio}</p>
+          <p className="mt-2.5 text-xs text-text-muted leading-relaxed">{truncatedBio}</p>
         )}
 
         {hoverData.loading && (
-          <div className="mt-3 flex items-center gap-2 text-xs text-zinc-500">
+          <div className="mt-3 flex items-center gap-2 text-xs text-text-disabled">
             <Spinner size="sm" />
             Loading...
           </div>
@@ -165,10 +165,10 @@ function ProfileHoverCardContent({
               <div className="mt-3 grid grid-cols-4 gap-1">
                 {STAT_ITEMS.map((item) => (
                   <div key={item.key} className="text-center">
-                    <p className="text-sm font-bold text-zinc-100 tabular-nums">
+                    <p className="text-sm font-bold text-text-primary tabular-nums">
                       {item.get(hoverData.stats!)}
                     </p>
-                    <p className="text-[10px] text-zinc-500 leading-tight">{item.label}</p>
+                    <p className="text-[10px] text-text-disabled leading-tight">{item.label}</p>
                   </div>
                 ))}
               </div>
@@ -179,7 +179,7 @@ function ProfileHoverCardContent({
                 {hoverData.skills.map((skill) => (
                   <span
                     key={skill}
-                    className="rounded-md border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[10px] font-medium text-zinc-300"
+                    className="rounded-md border border-border-strong bg-surface-hover px-2 py-0.5 text-[10px] font-medium text-text-secondary"
                   >
                     {skill}
                   </span>
@@ -190,7 +190,7 @@ function ProfileHoverCardContent({
         )}
       </div>
 
-      <div className="border-t border-zinc-800 px-4 py-2 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-zinc-500">
+      <div className="border-t border-border-default px-4 py-2 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-text-disabled">
         {user?.location && (
           <span className="inline-flex items-center gap-1">
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">

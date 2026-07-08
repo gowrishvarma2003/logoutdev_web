@@ -71,17 +71,17 @@ export default function ProposalForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-zinc-300">Why are you a fit?</label>
+        <label className="mb-1.5 block text-sm font-medium text-text-secondary">Why are you a fit?</label>
         <textarea
           value={coverNote}
           onChange={(e) => setCoverNote(e.target.value)}
           rows={8}
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+          className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
         />
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">
             {pricingModel === "hourly" ? "Hourly Rate (USD)" : "Bid Amount (USD)"}
           </label>
           <input
@@ -90,40 +90,40 @@ export default function ProposalForm({
             step="1"
             value={bidAmount}
             onChange={(e) => setBidAmount(e.target.value)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">ETA (weeks)</label>
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">ETA (weeks)</label>
           <input
             type="number"
             min="1"
             max="52"
             value={durationWeeks}
             onChange={(e) => setDurationWeeks(e.target.value)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Availability (hrs/week)</label>
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">Availability (hrs/week)</label>
           <input
             type="number"
             min="1"
             max="80"
             value={availabilityHours}
             onChange={(e) => setAvailabilityHours(e.target.value)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           />
         </div>
       </div>
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-zinc-300">Proof Links</label>
+        <label className="mb-1.5 block text-sm font-medium text-text-secondary">Proof Links</label>
         <textarea
           value={proofLinks}
           onChange={(e) => setProofLinks(e.target.value)}
           rows={3}
           placeholder={"https://github.com/you/project\nhttps://portfolio.dev"}
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+          className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
         />
       </div>
 
@@ -136,7 +136,7 @@ export default function ProposalForm({
       <button
         type="submit"
         disabled={loading}
-        className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-60"
+        className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-60"
       >
         {loading ? "Saving..." : submitLabel}
       </button>

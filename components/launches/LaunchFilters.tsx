@@ -40,22 +40,22 @@ export default function LaunchFilters({
   const hasActiveFilters = stack.trim().length > 0 || sort !== "newest";
 
   return (
-    <div className="border-b border-zinc-800/60 px-4 py-4">
+    <div className="border-b border-border-default/60 px-4 py-4">
       <div className="flex flex-wrap items-center gap-3">
         {/* Search - more prominent */}
         <div className="relative min-w-0 flex-1">
-          <SearchIcon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+          <SearchIcon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-disabled" />
           <input
             type="text"
             value={q}
             onChange={(e) => onQChange(e.target.value)}
             placeholder="Search launches..."
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 py-3 pl-11 pr-4 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600 focus:bg-zinc-900/60 focus:outline-none transition-colors"
+            className="w-full rounded-xl border border-border-default bg-surface/40 py-3 pl-11 pr-4 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:bg-surface/60 focus:outline-none transition-colors"
           />
         </div>
 
         {/* Phase toggle - cleaner pills */}
-        <div className="flex rounded-xl border border-zinc-800 bg-zinc-900/40 p-1">
+        <div className="flex rounded-xl border border-border-default bg-surface/40 p-1">
           {PHASES.map((phase) => {
             const isActive = launchPhase === phase.value;
             return (
@@ -66,11 +66,11 @@ export default function LaunchFilters({
                 className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                   isActive
                     ? phase.color === "sky"
-                      ? "bg-sky-500 text-white shadow-sm"
+                      ? "bg-sky-500 text-text-primary shadow-sm"
                       : phase.color === "emerald"
-                      ? "bg-emerald-500 text-white shadow-sm"
-                      : "bg-zinc-700 text-white shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-200"
+                      ? "bg-emerald-500 text-text-primary shadow-sm"
+                      : "bg-surface-active text-text-primary shadow-sm"
+                    : "text-text-muted hover:text-text-secondary"
                 }`}
               >
                 {phase.label}
@@ -87,12 +87,12 @@ export default function LaunchFilters({
             className={`inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm transition-colors ${
               hasActiveFilters
                 ? "border-sky-500/30 bg-sky-500/10 text-sky-300"
-                : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200"
+                : "border-border-default bg-surface/40 text-text-muted hover:text-text-secondary"
             }`}
           >
             Filters
             {hasActiveFilters && (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-[10px] font-bold text-white">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-[10px] font-bold text-text-primary">
                 {(stack.trim().length > 0 ? 1 : 0) + (sort !== "newest" ? 1 : 0)}
               </span>
             )}
@@ -102,11 +102,11 @@ export default function LaunchFilters({
           {filtersOpen && (
             <>
               <div className="fixed inset-0 z-10 cursor-pointer" onClick={() => setFiltersOpen(false)} />
-              <div className="absolute right-0 top-full z-20 mt-2 w-64 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 p-4 shadow-xl">
+              <div className="absolute right-0 top-full z-20 mt-2 w-64 overflow-hidden rounded-xl border border-border-strong bg-surface p-4 shadow-xl">
                 <div className="space-y-4">
                   {/* Tech stack filter */}
                   <div>
-                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-zinc-500">
+                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-text-disabled">
                       Tech Stack
                     </label>
                     <input
@@ -114,13 +114,13 @@ export default function LaunchFilters({
                       value={stack}
                       onChange={(e) => onStackChange(e.target.value)}
                       placeholder="e.g. React, Node..."
-                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-zinc-600 focus:outline-none"
+                      className="w-full rounded-lg border border-border-strong bg-surface-hover px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
                     />
                   </div>
 
                   {/* Sort */}
                   <div>
-                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-zinc-500">
+                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-text-disabled">
                       Sort by
                     </label>
                     <div className="flex flex-col gap-1">
@@ -131,8 +131,8 @@ export default function LaunchFilters({
                           onClick={() => onSortChange(option.value)}
                           className={`rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                             sort === option.value
-                              ? "bg-zinc-800 text-white"
-                              : "text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200"
+                              ? "bg-surface-hover text-text-primary"
+                              : "text-text-muted hover:bg-surface-hover/50 hover:text-text-secondary"
                           }`}
                         >
                           {option.label}
@@ -149,7 +149,7 @@ export default function LaunchFilters({
                         onStackChange("");
                         onSortChange("newest");
                       }}
-                      className="w-full rounded-lg border border-zinc-700 py-2 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                      className="w-full rounded-lg border border-border-strong py-2 text-sm text-text-muted transition-colors hover:bg-surface-hover hover:text-text-secondary"
                     >
                       Clear filters
                     </button>

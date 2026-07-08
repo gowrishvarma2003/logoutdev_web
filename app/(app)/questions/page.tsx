@@ -41,11 +41,11 @@ export default function QuestionsPage() {
 
   return (
     <div>
-      <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/80 px-4 py-4 backdrop-blur-md">
+      <header className="sticky top-0 z-10 border-b border-border-default bg-app/80 px-4 py-4 backdrop-blur-md">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-[17px] font-bold text-white">Questions</h1>
-            <p className="mt-0.5 text-sm text-zinc-500">
+            <h1 className="text-[17px] font-bold text-text-primary">Questions</h1>
+            <p className="mt-0.5 text-sm text-text-disabled">
               Ask for help, post MCQs, and unlock discussion only after answering.
             </p>
           </div>
@@ -53,14 +53,14 @@ export default function QuestionsPage() {
           {user ? (
             <Link
               href="/questions/ask"
-              className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+              className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
             >
               Ask Question
             </Link>
           ) : (
             <Link
               href="/login"
-              className="inline-flex rounded-xl border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-200 transition-colors hover:bg-zinc-800"
+              className="inline-flex rounded-xl border border-border-strong px-4 py-2 text-sm font-semibold text-text-secondary transition-colors hover:bg-surface-hover"
             >
               Sign in to ask
             </Link>
@@ -81,7 +81,7 @@ export default function QuestionsPage() {
           <Spinner size="lg" />
         </div>
       ) : error ? (
-        <div className="px-4 py-16 text-center text-sm text-zinc-500">{error}</div>
+        <div className="px-4 py-16 text-center text-sm text-text-disabled">{error}</div>
       ) : questions.length === 0 ? (
         <div className="p-4">
           <EmptyState
@@ -90,7 +90,7 @@ export default function QuestionsPage() {
             description="Try loosening your filters, or ask the question other developers are probably wondering about too."
             tone="question"
             action={
-              <Link href="/questions/ask" className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+              <Link href="/questions/ask" className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover">
                 Ask a question
               </Link>
             }

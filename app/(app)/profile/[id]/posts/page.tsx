@@ -59,7 +59,7 @@ export default function ProfilePostsPage({ params }: ProfilePostsPageProps) {
           description="Share a build note, a question, or a milestone so visitors have something to discover."
           tone="feed"
           action={
-            <a href="/feed" className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+            <a href="/feed" className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover">
               Write a post
             </a>
           }
@@ -88,17 +88,17 @@ export default function ProfilePostsPage({ params }: ProfilePostsPageProps) {
           <button
             onClick={() => { setPage((p) => Math.max(1, p - 1)); setLocalPosts(null); }}
             disabled={page === 1}
-            className="px-4 py-2 rounded-lg border border-zinc-700 text-sm text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded-lg border border-border-strong text-sm text-text-muted hover:text-text-primary hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Previous
           </button>
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-text-disabled">
             Page {page} of {totalPages}
           </span>
           <button
             onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); setLocalPosts(null); }}
             disabled={page >= totalPages}
-            className="px-4 py-2 rounded-lg border border-zinc-700 text-sm text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded-lg border border-border-strong text-sm text-text-muted hover:text-text-primary hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Next
           </button>

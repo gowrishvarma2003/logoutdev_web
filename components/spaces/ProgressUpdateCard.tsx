@@ -22,9 +22,9 @@ export default function ProgressUpdateCard({ update }: { update: SpaceUpdate }) 
   const t = TYPE_STYLES[update.type] ?? TYPE_STYLES.devlog;
 
   return (
-    <article className="relative px-4 py-4 border-b border-zinc-800/50 last:border-b-0">
+    <article className="relative px-4 py-4 border-b border-border-default/50 last:border-b-0">
       {/* Timeline dot */}
-      <div className="absolute left-0 top-7 w-0.5 h-[calc(100%-28px)] bg-zinc-800 ml-[27px]" />
+      <div className="absolute left-0 top-7 w-0.5 h-[calc(100%-28px)] bg-surface-hover ml-[27px]" />
 
       <div className="flex gap-3">
         <Avatar user={update.author} size="sm" className="relative z-10" />
@@ -35,20 +35,20 @@ export default function ProgressUpdateCard({ update }: { update: SpaceUpdate }) 
             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${t.color}`}>
               {t.icon} {t.label}
             </span>
-            <h3 className="text-sm font-semibold text-white truncate">
+            <h3 className="text-sm font-semibold text-text-primary truncate">
               {update.title}
             </h3>
           </div>
 
           {/* Meta */}
-          <div className="flex items-center gap-2 text-xs text-zinc-500 mb-2">
+          <div className="flex items-center gap-2 text-xs text-text-disabled mb-2">
             <span>{update.author?.name ?? "Unknown"}</span>
-            <span className="text-zinc-600">·</span>
+            <span className="text-text-disabled">·</span>
             <span>{formatRelativeTime(update.created_at)}</span>
           </div>
 
           {/* Content */}
-          <RichText text={update.content} className="mb-3 text-sm text-zinc-300 whitespace-pre-line" />
+          <RichText text={update.content} className="mb-3 text-sm text-text-secondary whitespace-pre-line" />
 
           {/* What shipped / Next up / Blockers */}
           <div className="space-y-2">
@@ -57,7 +57,7 @@ export default function ProgressUpdateCard({ update }: { update: SpaceUpdate }) 
                 {update.repo ? (
                   <Link
                     href={`/repos/${update.repo.id}`}
-                    className="inline-flex items-center gap-1 rounded-full bg-zinc-800 px-2 py-1 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+                    className="inline-flex items-center gap-1 rounded-full bg-surface-hover px-2 py-1 text-text-secondary transition-colors hover:bg-surface-active hover:text-text-primary"
                   >
                     <CodeBracketIcon className="w-3 h-3" />
                     {update.repo.name}
@@ -66,7 +66,7 @@ export default function ProgressUpdateCard({ update }: { update: SpaceUpdate }) 
                 {update.work_item ? (
                   <Link
                     href={`/spaces/${update.space_id}/work/${update.work_item.id}`}
-                    className="inline-flex items-center gap-1 rounded-full bg-zinc-800 px-2 py-1 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+                    className="inline-flex items-center gap-1 rounded-full bg-surface-hover px-2 py-1 text-text-secondary transition-colors hover:bg-surface-active hover:text-text-primary"
                   >
                     <QuestionMarkCircleIcon className="w-3 h-3" />
                     {update.work_item.title}
@@ -77,19 +77,19 @@ export default function ProgressUpdateCard({ update }: { update: SpaceUpdate }) 
             {update.what_shipped && (
               <div className="flex gap-2 text-xs">
                 <span className="text-emerald-400 font-semibold shrink-0">Shipped:</span>
-                <RichText text={update.what_shipped} as="span" className="text-zinc-400" />
+                <RichText text={update.what_shipped} as="span" className="text-text-muted" />
               </div>
             )}
             {update.next_up && (
               <div className="flex gap-2 text-xs">
                 <span className="text-sky-400 font-semibold shrink-0">Next:</span>
-                <RichText text={update.next_up} as="span" className="text-zinc-400" />
+                <RichText text={update.next_up} as="span" className="text-text-muted" />
               </div>
             )}
             {update.blockers && (
               <div className="flex gap-2 text-xs">
                 <span className="text-rose-400 font-semibold shrink-0">Blocked:</span>
-                <RichText text={update.blockers} as="span" className="text-zinc-400" />
+                <RichText text={update.blockers} as="span" className="text-text-muted" />
               </div>
             )}
           </div>
@@ -103,7 +103,7 @@ export default function ProgressUpdateCard({ update }: { update: SpaceUpdate }) 
                   href={link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800 text-[11px] text-sky-400 hover:text-sky-300 hover:bg-zinc-700 transition-colors"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-hover text-[11px] text-sky-400 hover:text-sky-300 hover:bg-surface-active transition-colors"
                 >
                   <LinkIcon className="w-3 h-3" />
                   {(() => { try { return new URL(link).hostname; } catch { return link; } })()}

@@ -38,8 +38,8 @@ export default function NextStepsPanel({
     .sort((left, right) => right.priority - left.priority);
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-950/40 p-5 backdrop-blur-sm transition-all duration-300 hover:border-zinc-700">
-      <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-4">{title}</h3>
+    <div className="rounded-2xl border border-border-default bg-app/40 p-5 backdrop-blur-sm transition-all duration-300 hover:border-border-strong">
+      <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-disabled mb-4">{title}</h3>
       <div className="space-y-3">
         {sortedItems.map((item, idx) => {
           const Icon = getStepIcon(item.title);
@@ -52,14 +52,14 @@ export default function NextStepsPanel({
               className={`group flex items-start gap-3.5 rounded-xl border p-3.5 transition-all duration-300 ${
                 isPrimary
                   ? "border-sky-500/20 bg-sky-500/5 hover:border-sky-500/40 hover:bg-sky-500/10"
-                  : "border-zinc-900 bg-zinc-900/10 hover:border-zinc-800 hover:bg-zinc-900/30"
+                  : "border-border-subtle bg-surface/10 hover:border-border-default hover:bg-surface/30"
               }`}
             >
               {/* Icon Container */}
               <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors ${
                 isPrimary
                   ? "border-sky-500/30 bg-sky-500/10 text-sky-400 group-hover:border-sky-500/50"
-                  : "border-zinc-800 bg-zinc-950 text-zinc-400 group-hover:border-zinc-700 group-hover:text-white"
+                  : "border-border-default bg-app text-text-muted group-hover:border-border-strong group-hover:text-text-primary"
               }`}>
                 <Icon className="h-4 w-4" />
               </div>
@@ -67,16 +67,16 @@ export default function NextStepsPanel({
               {/* Text Info */}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <p className="text-sm font-bold text-white transition-colors group-hover:text-sky-400">
+                  <p className="text-sm font-bold text-text-primary transition-colors group-hover:text-sky-400">
                     {item.title}
                   </p>
                   {isPrimary && (
-                    <span className="rounded bg-sky-500/10 px-1 py-0.2 text-[9px] font-semibold text-sky-400">
+                    <span className="rounded bg-sky-500/10 px-1 py-px text-[9px] font-semibold text-sky-400">
                       Recommended
                     </span>
                   )}
                 </div>
-                <p className="mt-1 text-xs text-zinc-400 leading-relaxed">
+                <p className="mt-1 text-xs text-text-muted leading-relaxed">
                   {item.description}
                 </p>
               </div>
@@ -84,7 +84,7 @@ export default function NextStepsPanel({
               {/* Chevron Arrow */}
               <div className="self-center pl-1">
                 <ChevronRightIcon className={`h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 ${
-                  isPrimary ? "text-sky-500/50 group-hover:text-sky-400" : "text-zinc-600 group-hover:text-zinc-400"
+                  isPrimary ? "text-sky-500/50 group-hover:text-sky-400" : "text-text-disabled group-hover:text-text-muted"
                 }`} />
               </div>
             </Link>

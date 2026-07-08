@@ -44,7 +44,7 @@ const STATUS_BADGE: Record<string, string> = {
   acknowledged: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   planned: "bg-purple-500/10 text-purple-400 border-purple-500/20",
   resolved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  closed: "bg-zinc-800 text-zinc-400 border-zinc-700",
+  closed: "bg-surface-hover text-text-muted border-border-strong",
 };
 
 const COMPOSER_DETAILS: Record<string, { title: string; desc: string; titlePlaceholder: string; bodyPlaceholder: string }> = {
@@ -117,8 +117,8 @@ export default function LaunchFeedbackBoard({
   return (
     <div className="space-y-6">
       {/* Header and navigation tabs */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-zinc-800/80 pb-4">
-        <div className="flex gap-1.5 rounded-xl border border-zinc-800 bg-zinc-950/60 p-1">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-border-default/80 pb-4">
+        <div className="flex gap-1.5 rounded-xl border border-border-default bg-app/60 p-1">
           {TABS.map(({ value, label }) => (
             <button
               key={value}
@@ -131,8 +131,8 @@ export default function LaunchFeedbackBoard({
               }}
               className={`rounded-lg px-4 py-2 text-xs font-semibold tracking-wide transition-all ${
                 activeType === value
-                  ? "bg-zinc-800 text-white shadow-sm ring-1 ring-zinc-700"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  ? "bg-surface-hover text-text-primary shadow-sm ring-1 ring-border-strong"
+                  : "text-text-muted hover:text-text-secondary"
               }`}
             >
               {label}
@@ -140,7 +140,7 @@ export default function LaunchFeedbackBoard({
           ))}
         </div>
 
-        <p className="text-xs text-zinc-500 font-light max-w-xs md:text-right">
+        <p className="text-xs text-text-disabled font-light max-w-xs md:text-right">
           Track what the community wants next and keep each thread easy to scan.
         </p>
       </div>
@@ -155,14 +155,14 @@ export default function LaunchFeedbackBoard({
             setTitle("");
             setBody("");
           }}
-          className="rounded-2xl border border-zinc-800/80 bg-zinc-950/40 p-5 space-y-4"
+          className="rounded-2xl border border-border-default/80 bg-app/40 p-5 space-y-4"
         >
           <div>
-            <h3 className="text-sm font-semibold text-white flex items-center gap-1.5">
+            <h3 className="text-sm font-semibold text-text-primary flex items-center gap-1.5">
               <SparklesIcon className="h-4 w-4 text-sky-400" />
               {details.title}
             </h3>
-            <p className="mt-1 text-xs text-zinc-500 leading-relaxed font-light">
+            <p className="mt-1 text-xs text-text-disabled leading-relaxed font-light">
               {details.desc}
             </p>
           </div>
@@ -172,7 +172,7 @@ export default function LaunchFeedbackBoard({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={details.titlePlaceholder}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-800 transition-all"
+              className="w-full rounded-xl border border-border-default bg-app px-4 py-2.5 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none focus:ring-1 focus:ring-border-default transition-all"
             />
 
             <RichComposer
@@ -180,18 +180,18 @@ export default function LaunchFeedbackBoard({
               onChange={(value) => setBody(value)}
               rows={4}
               placeholder={details.bodyPlaceholder}
-              previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-relaxed text-white prose prose-invert max-w-none"
-               className="w-full resize-y px-4 py-3 text-sm leading-relaxed text-transparent caret-white placeholder:text-zinc-600 focus:outline-none selection:bg-[#1d9bf0]/30"
+              previewClassName="w-full rounded-xl border border-border-default bg-app px-4 py-3 text-sm leading-relaxed text-text-primary prose prose-invert max-w-none"
+               className="w-full resize-y px-4 py-3 text-sm leading-relaxed text-transparent caret-white placeholder:text-text-disabled focus:outline-none selection:bg-[#1d9bf0]/30"
             />
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-zinc-900 pt-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-border-subtle pt-3">
             {error ? <p className="text-xs text-rose-400">{error}</p> : <div />}
 
             <button
               type="submit"
               disabled={loading || !title.trim() || !body.trim()}
-              className="rounded-xl bg-white px-5 py-2.5 text-xs font-semibold text-zinc-950 transition-all hover:bg-zinc-100 disabled:opacity-50 sm:ml-auto cursor-pointer"
+              className="rounded-xl bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground transition-all hover:bg-primary-hover disabled:opacity-50 sm:ml-auto cursor-pointer"
             >
               {loading ? "Posting…" : `Post ${activeType}`}
             </button>
@@ -200,18 +200,18 @@ export default function LaunchFeedbackBoard({
       )}
 
       {currentUser && !launch.viewer_state?.is_owner && !canPostFeedback ? (
-        <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/20 px-5 py-4 text-sm text-zinc-500 font-light leading-relaxed">
+        <div className="rounded-2xl border border-border-default/80 bg-app/20 px-5 py-4 text-sm text-text-disabled font-light leading-relaxed">
           {disabledMessage || "Feedback submission is not open right now."}
         </div>
       ) : null}
 
       {/* Feedback list */}
       {feedback.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-950/20 px-4 py-12 text-center">
-          <p className="text-sm text-zinc-400 font-medium mb-1">
+        <div className="rounded-2xl border border-dashed border-border-default bg-app/20 px-4 py-12 text-center">
+          <p className="text-sm text-text-muted font-medium mb-1">
             No {activeType} items yet.
           </p>
-          <p className="text-xs text-zinc-600 font-light">
+          <p className="text-xs text-text-disabled font-light">
             Be the first to suggest what LogoutDev should build or fix next.
           </p>
         </div>
@@ -219,23 +219,23 @@ export default function LaunchFeedbackBoard({
         <div className="space-y-4">
           {feedback.map((item) => {
             const accentClass = STATUS_ACCENT[item.status] ?? "border-l-zinc-600";
-            const badgeClass = STATUS_BADGE[item.status] ?? "bg-zinc-800 text-zinc-400 border-zinc-700";
+            const badgeClass = STATUS_BADGE[item.status] ?? "bg-surface-hover text-text-muted border-border-strong";
             const builderReplied = item.comments?.some((c) => c.author_id === launch.builder_id);
 
             return (
               <article
                 key={item.id}
-                className={`rounded-2xl border border-zinc-850 border-l-4 bg-zinc-900/10 p-5 shadow-sm space-y-4 transition-all hover:bg-zinc-900/20 ${accentClass}`}
+                className={`rounded-2xl border border-border-default border-l-4 bg-surface/10 p-5 shadow-sm space-y-4 transition-all hover:bg-surface/20 ${accentClass}`}
               >
                 {/* User details and status row */}
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <Avatar user={item.author} size="sm" />
                     <div>
-                      <p className="text-xs font-semibold text-zinc-300">
+                      <p className="text-xs font-semibold text-text-secondary">
                         {item.author?.name ?? "Community member"}
                       </p>
-                      <p className="text-[10px] text-zinc-500 font-light mt-0.5">
+                      <p className="text-[10px] text-text-disabled font-light mt-0.5">
                         Posted on {formatDate(item.created_at)}
                       </p>
                     </div>
@@ -255,18 +255,18 @@ export default function LaunchFeedbackBoard({
 
                 {/* Content */}
                 <div className="space-y-2">
-                  <h4 className="text-base font-bold text-white tracking-tight">
+                  <h4 className="text-base font-bold text-text-primary tracking-tight">
                     {item.title}
                   </h4>
                   <div className="pl-0.5">
-                    <RichText text={item.body} className="text-sm leading-relaxed text-zinc-300 prose prose-invert prose-sm max-w-none font-light" />
+                    <RichText text={item.body} className="text-sm leading-relaxed text-text-secondary prose prose-invert prose-sm max-w-none font-light" />
                   </div>
                 </div>
 
                 {/* Comments / Nested threads list */}
                 {(item.comments ?? []).length > 0 && (
-                  <div className="mt-4 space-y-3 rounded-xl border border-zinc-850/80 bg-zinc-950/40 p-4">
-                    <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 border-b border-zinc-900 pb-2 mb-2">Replies</p>
+                  <div className="mt-4 space-y-3 rounded-xl border border-border-default/80 bg-app/40 p-4">
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-text-disabled border-b border-border-subtle pb-2 mb-2">Replies</p>
                     {item.comments?.map((comment) => {
                       const isBuilderComment = comment.author_id === launch.builder_id;
                       return (
@@ -274,15 +274,15 @@ export default function LaunchFeedbackBoard({
                           <Avatar user={comment.author} size="xs" className="mt-0.5" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-semibold text-zinc-300 text-xs">{comment.author?.name ?? "Member"}</span>
+                              <span className="font-semibold text-text-secondary text-xs">{comment.author?.name ?? "Member"}</span>
                               {isBuilderComment && (
-                                <span className="rounded bg-sky-500/10 text-sky-400 px-1.5 py-0.25 text-[8px] font-bold uppercase tracking-wider border border-sky-500/20">
+                                <span className="rounded bg-sky-500/10 text-sky-400 px-1.5 py-px text-[8px] font-bold uppercase tracking-wider border border-sky-500/20">
                                   Builder
                                 </span>
                               )}
-                              <span className="text-[9px] text-zinc-500 font-light">{formatDate(comment.created_at)}</span>
+                              <span className="text-[9px] text-text-disabled font-light">{formatDate(comment.created_at)}</span>
                             </div>
-                            <div className="mt-1 text-xs text-zinc-400 font-light pl-0.5">
+                            <div className="mt-1 text-xs text-text-muted font-light pl-0.5">
                               <RichText text={comment.body} as="span" className="inline" />
                             </div>
                           </div>
@@ -293,7 +293,7 @@ export default function LaunchFeedbackBoard({
                 )}
 
                 {/* Actions row: admin controls and reply form */}
-                <div className="flex flex-col gap-3 pt-3 border-t border-zinc-900/60 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 pt-3 border-t border-border-subtle/60 sm:flex-row sm:items-center sm:justify-between">
                   {currentUser && (
                     <div className="flex-1 flex gap-2">
                       <input
@@ -302,7 +302,7 @@ export default function LaunchFeedbackBoard({
                           setCommentDrafts((prev) => ({ ...prev, [item.id]: e.target.value }))
                         }
                         placeholder={launch.viewer_state?.is_owner ? "Reply as builder…" : "Reply to thread…"}
-                        className="flex-1 rounded-xl border border-zinc-800 bg-zinc-950/80 px-4 py-2.5 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-700 focus:outline-none"
+                        className="flex-1 rounded-xl border border-border-default bg-app/80 px-4 py-2.5 text-xs text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
                       />
 
                       <button
@@ -313,7 +313,7 @@ export default function LaunchFeedbackBoard({
                           await onAddComment(item.id, val);
                           setCommentDrafts((prev) => ({ ...prev, [item.id]: "" }));
                         }}
-                        className="rounded-xl bg-zinc-850 hover:bg-zinc-800 px-4 py-2 text-xs font-semibold text-zinc-200 border border-zinc-800/80 transition-all cursor-pointer"
+                        className="rounded-xl bg-surface-hover hover:bg-surface-hover px-4 py-2 text-xs font-semibold text-text-secondary border border-border-default/80 transition-all cursor-pointer"
                       >
                         Reply
                       </button>
@@ -323,11 +323,11 @@ export default function LaunchFeedbackBoard({
                   <div className="flex items-center gap-2.5 sm:ml-auto">
                     {launch.viewer_state?.is_owner && (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-medium text-zinc-500">Status:</span>
+                        <span className="text-[10px] font-medium text-text-disabled">Status:</span>
                         <select
                           value={item.status}
                           onChange={(e) => onUpdateFeedbackStatus(item.id, e.target.value)}
-                          className="rounded-xl border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-xs text-white focus:border-zinc-700 focus:outline-none"
+                          className="rounded-xl border border-border-default bg-app px-2.5 py-1.5 text-xs text-text-primary focus:border-border-strong focus:outline-none"
                         >
                           {STATUSES.map((status) => (
                             <option key={status} value={status}>

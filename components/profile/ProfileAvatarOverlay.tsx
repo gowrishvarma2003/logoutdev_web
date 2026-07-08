@@ -66,11 +66,11 @@ export default function ProfileAvatarOverlay({
         <Avatar
           user={user}
           size="xl"
-          className="ring-4 ring-zinc-950 shadow-xl shadow-black/40"
+          className="ring-4 ring-app shadow-xl shadow-black/40"
         />
         {/* Hover overlay magnifying glass */}
         <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200">
-          <EyeIcon className="w-6 h-6 text-white/95" />
+          <EyeIcon className="w-6 h-6 text-text-primary/95" />
         </div>
       </div>
 
@@ -83,7 +83,7 @@ export default function ProfileAvatarOverlay({
               inputRef.current?.click();
             }}
             disabled={busy}
-            className="absolute bottom-1 right-1 flex items-center justify-center w-7 h-7 rounded-full bg-zinc-800 border border-zinc-600 text-zinc-200 hover:bg-zinc-700 hover:text-white transition-colors disabled:opacity-60 cursor-pointer z-10"
+            className="absolute bottom-1 right-1 flex items-center justify-center w-7 h-7 rounded-full bg-surface-hover border border-border-strong text-text-secondary hover:bg-surface-active hover:text-text-primary transition-colors disabled:opacity-60 cursor-pointer z-10"
             aria-label="Change avatar"
             title="Change avatar"
           >
@@ -112,7 +112,7 @@ export default function ProfileAvatarOverlay({
       {/* Lightbox Modal */}
       {showLightbox && (
         <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 bg-zinc-950/95 backdrop-blur-md animate-fade-in animate-duration-200"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 bg-app/95 backdrop-blur-md animate-fade-in animate-duration-200"
           onClick={() => setShowLightbox(false)}
         >
           {/* Close Button */}
@@ -120,7 +120,7 @@ export default function ProfileAvatarOverlay({
             <button
               type="button"
               onClick={() => setShowLightbox(false)}
-              className="p-2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors cursor-pointer"
+              className="p-2 rounded-full bg-surface border border-border-default text-text-muted hover:text-text-primary hover:border-border-strong transition-colors cursor-pointer"
               aria-label="Close photo view"
             >
               <XIcon className="w-5 h-5" />
@@ -132,7 +132,7 @@ export default function ProfileAvatarOverlay({
             className="relative max-w-md w-full flex flex-col items-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full overflow-hidden border-4 border-zinc-800 shadow-2xl bg-zinc-900 flex items-center justify-center relative">
+            <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full overflow-hidden border-4 border-border-default shadow-2xl bg-surface flex items-center justify-center relative">
               {user.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -141,13 +141,13 @@ export default function ProfileAvatarOverlay({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="text-5xl font-bold text-zinc-500 select-none">
+                <div className="text-5xl font-bold text-text-disabled select-none">
                   {getInitials(user.name)}
                 </div>
               )}
             </div>
-            <p className="mt-4 text-base font-bold text-white leading-tight">{user.name}</p>
-            {user.username && <p className="text-xs text-zinc-500 mt-1">@{user.username}</p>}
+            <p className="mt-4 text-base font-bold text-text-primary leading-tight">{user.name}</p>
+            {user.username && <p className="text-xs text-text-disabled mt-1">@{user.username}</p>}
           </div>
         </div>
       )}

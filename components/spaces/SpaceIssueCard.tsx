@@ -19,14 +19,14 @@ export default function SpaceIssueCard({
   return (
     <Link
       href={`/spaces/${spaceId}/work/${issue.id}`}
-      className="block border-b border-zinc-800/60 px-4 py-4 transition-colors hover:bg-zinc-900/30"
+      className="block border-b border-border-default/60 px-4 py-4 transition-colors hover:bg-surface/30"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <IssueStatusBadge status={issue.status} />
             <IssuePriorityBadge priority={issue.priority} />
-            <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-zinc-300">
+            <span className="rounded-full bg-surface-hover px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-text-secondary">
               {issue.type}
             </span>
             {issue.good_first_task ? (
@@ -41,12 +41,12 @@ export default function SpaceIssueCard({
             ) : null}
           </div>
 
-          <h3 className="truncate text-sm font-semibold text-white">{issue.title}</h3>
+          <h3 className="truncate text-sm font-semibold text-text-primary">{issue.title}</h3>
           {!compact && (
-            <RichText text={issue.body} className="mt-1 line-clamp-2 whitespace-pre-line text-sm text-zinc-400" />
+            <RichText text={issue.body} className="mt-1 line-clamp-2 whitespace-pre-line text-sm text-text-muted" />
           )}
 
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-zinc-500">
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-text-disabled">
             <span>Reported {formatRelativeTime(issue.created_at)}</span>
             <span>By {issue.author?.name ?? "Unknown"}</span>
             <span>{issue.assignee ? `Assigned to ${issue.assignee.name}` : "Unassigned"}</span>

@@ -82,11 +82,11 @@ export default function NotesList() {
     <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold text-white">
+          <h1 className="text-lg font-bold text-text-primary">
             {parsed.search ? `Search: "${parsed.search}"` : title}
           </h1>
           {!loading ? (
-            <p className="mt-0.5 text-xs text-zinc-500">
+            <p className="mt-0.5 text-xs text-text-disabled">
               {notes.length} note{notes.length === 1 ? "" : "s"}
             </p>
           ) : null}
@@ -94,14 +94,14 @@ export default function NotesList() {
         <button
           onClick={handleCreate}
           disabled={creating}
-          className="hidden rounded-xl bg-white px-3.5 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-60 sm:inline-flex"
+          className="hidden rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-60 sm:inline-flex"
         >
           New note
         </button>
       </div>
 
       {parsed.view === "trash" && notes.length > 0 ? (
-        <p className="mb-4 rounded-xl border border-zinc-800 bg-zinc-900/60 px-3.5 py-2.5 text-xs text-zinc-400">
+        <p className="mb-4 rounded-xl border border-border-default bg-surface/60 px-3.5 py-2.5 text-xs text-text-muted">
           Notes in Trash can be restored or permanently deleted from each
           note&apos;s menu.
         </p>
@@ -112,7 +112,7 @@ export default function NotesList() {
           {Array.from({ length: 5 }).map((_, index) => (
             <div
               key={index}
-              className="h-19 animate-pulse rounded-xl bg-zinc-900/60"
+              className="h-19 animate-pulse rounded-xl bg-surface/60"
             />
           ))}
         </div>
@@ -148,7 +148,7 @@ export default function NotesList() {
               <button
                 onClick={loadMore}
                 disabled={loadingMore}
-                className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-900 disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-xl border border-border-default px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface disabled:opacity-60"
               >
                 {loadingMore ? <Spinner size="sm" /> : null}
                 Load more
@@ -162,7 +162,7 @@ export default function NotesList() {
         onClick={handleCreate}
         disabled={creating}
         aria-label="New note"
-        className="fixed bottom-6 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-white text-zinc-950 shadow-2xl transition-transform hover:scale-105 disabled:opacity-60 sm:hidden"
+        className="fixed bottom-6 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-2xl transition-transform hover:scale-105 disabled:opacity-60 sm:hidden"
       >
         <PlusIcon className="h-6 w-6" />
       </button>

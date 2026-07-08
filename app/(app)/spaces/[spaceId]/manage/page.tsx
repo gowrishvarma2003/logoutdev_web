@@ -100,8 +100,8 @@ export default function ManagePage({
   if (space && !canManageSpace) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <h2 className="mb-2 text-lg font-semibold text-white">Access Denied</h2>
-        <p className="text-sm text-zinc-500">Only the project owner or maintainers can manage this space.</p>
+        <h2 className="mb-2 text-lg font-semibold text-text-primary">Access Denied</h2>
+        <p className="text-sm text-text-disabled">Only the project owner or maintainers can manage this space.</p>
       </div>
     );
   }
@@ -147,10 +147,10 @@ function LinkedLaunchSection({
           <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase text-sky-400 border border-sky-500/10 mb-2">
             Marketplace Launch
           </span>
-          <h3 className="text-base font-bold text-white">{space.linked_launch.name}</h3>
-          <p className="mt-1 text-sm text-zinc-400">{space.linked_launch.tagline}</p>
+          <h3 className="text-base font-bold text-text-primary">{space.linked_launch.name}</h3>
+          <p className="mt-1 text-sm text-text-muted">{space.linked_launch.tagline}</p>
           
-          <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs text-zinc-400 font-medium">
+          <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs text-text-muted font-medium">
             <span className="capitalize">{space.linked_launch.status}</span>
             <span>·</span>
             <span>{space.linked_launch.upvote_count} upvotes</span>
@@ -161,10 +161,10 @@ function LinkedLaunchSection({
 
         <Link
           href={`/launches/${space.linked_launch.id}`}
-          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 px-4 py-2.5 text-xs font-semibold text-white transition-all hover:bg-zinc-855"
+          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-surface border border-border-default hover:border-border-strong px-4 py-2.5 text-xs font-semibold text-text-primary transition-all hover:bg-surface-hover"
         >
           Open Launch Page
-          <ExternalLinkIcon className="w-3.5 h-3.5 text-zinc-400" />
+          <ExternalLinkIcon className="w-3.5 h-3.5 text-text-muted" />
         </Link>
       </div>
     </div>
@@ -236,16 +236,16 @@ function ProjectSettingsSection({
   if (!space) return null;
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm relative">
-      <div className="flex items-center justify-between mb-4 border-b border-zinc-800/60 pb-3">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-white uppercase tracking-wide">
-          <CogIcon className="w-4 h-4 text-zinc-450" />
+    <div className="rounded-2xl border border-border-default bg-surface/10 p-5 backdrop-blur-sm relative">
+      <div className="flex items-center justify-between mb-4 border-b border-border-default/60 pb-3">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-text-primary uppercase tracking-wide">
+          <CogIcon className="w-4 h-4 text-text-muted" />
           Project Profile
         </h3>
         {!editing && (
           <button
             onClick={() => setEditing(true)}
-            className="rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-zinc-850 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 transition-colors cursor-pointer"
+            className="rounded-lg bg-surface hover:bg-surface-hover border border-border-default px-2.5 py-1.5 text-xs font-semibold text-text-secondary transition-colors cursor-pointer"
           >
             Edit Profile
           </button>
@@ -255,41 +255,41 @@ function ProjectSettingsSection({
       {editing ? (
         <div className="space-y-3.5">
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Project Name</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-text-disabled mb-1">Project Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-700 focus:outline-none transition-colors"
+              className="w-full rounded-xl border border-border-default bg-app px-3 py-2 text-xs text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none transition-colors"
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Summary</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-text-disabled mb-1">Summary</label>
             <input
               type="text"
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               maxLength={300}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-955 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-700 focus:outline-none transition-colors"
+              className="w-full rounded-xl border border-border-default bg-app px-3 py-2 text-xs text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none transition-colors"
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Description</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-text-disabled mb-1">Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-955 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-700 focus:outline-none transition-colors"
+              className="w-full resize-none rounded-xl border border-border-default bg-app px-3 py-2 text-xs text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none transition-colors"
             />
           </div>
           
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Status</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-text-disabled mb-1">Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as SpaceStatus)}
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-955 px-3 py-2 text-xs text-white focus:border-zinc-750 focus:outline-none"
+                className="w-full rounded-xl border border-border-default bg-app px-3 py-2 text-xs text-text-primary focus:border-border-strong focus:outline-none"
               >
                 {["idea", "building", "shipping", "paused", "archived"].map((item) => (
                   <option key={item} value={item}>
@@ -299,11 +299,11 @@ function ProjectSettingsSection({
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Visibility</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-text-disabled mb-1">Visibility</label>
               <select
                 value={visibility}
                 onChange={(e) => setVisibility(e.target.value as SpaceVisibility)}
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-955 px-3 py-2 text-xs text-white focus:border-zinc-750 focus:outline-none"
+                className="w-full rounded-xl border border-border-default bg-app px-3 py-2 text-xs text-text-primary focus:border-border-strong focus:outline-none"
               >
                 <option value="public">Public</option>
                 <option value="private">Private</option>
@@ -311,145 +311,145 @@ function ProjectSettingsSection({
             </div>
           </div>
 
-          <label className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-xs text-zinc-355 cursor-pointer">
+          <label className="flex items-center gap-2 rounded-xl border border-border-default bg-app px-3 py-2.5 text-xs text-zinc-355 cursor-pointer">
             <input
               type="checkbox"
               checked={workingInPublic}
               onChange={(e) => setWorkingInPublic(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-700 bg-zinc-955"
+              className="h-4 w-4 rounded border-border-strong bg-app"
             />
             Working in public
           </label>
 
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Current Focus</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-text-disabled mb-1">Current Focus</label>
             <input
               type="text"
               value={currentFocus}
               onChange={(e) => setCurrentFocus(e.target.value)}
               placeholder="e.g. shipping alpha"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-705 focus:outline-none transition-colors"
+              className="w-full rounded-xl border border-border-default bg-app px-3 py-2 text-xs text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Open Roles</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-text-disabled mb-1">Open Roles</label>
             <input
               type="text"
               value={openRoles}
               onChange={(e) => setOpenRoles(e.target.value)}
               placeholder="React Engineer, Designer (comma separated)"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-705 focus:outline-none transition-colors"
+              className="w-full rounded-xl border border-border-default bg-app px-3 py-2 text-xs text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Needed Skills</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-text-disabled mb-1">Needed Skills</label>
             <input
               type="text"
               value={neededSkills}
               onChange={(e) => setNeededSkills(e.target.value)}
               placeholder="Next.js, UI Design (comma separated)"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-955 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-705 focus:outline-none transition-colors"
+              className="w-full rounded-xl border border-border-default bg-app px-3 py-2 text-xs text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Contribution Guide</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-text-disabled mb-1">Contribution Guide</label>
             <textarea
               value={contributionGuide}
               onChange={(e) => setContributionGuide(e.target.value)}
               rows={3}
               placeholder="How people should contribute..."
-              className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-955 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-705 focus:outline-none transition-colors"
+              className="w-full resize-none rounded-xl border border-border-default bg-app px-3 py-2 text-xs text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Response SLA</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-text-disabled mb-1">Response SLA</label>
             <input
               type="text"
               value={responseSla}
               onChange={(e) => setResponseSla(e.target.value)}
               placeholder="e.g. within 2 days"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-white placeholder:text-zinc-655 focus:border-zinc-705 focus:outline-none transition-colors"
+              className="w-full rounded-xl border border-border-default bg-app px-3 py-2 text-xs text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none transition-colors"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-zinc-800/60 mt-3.5">
+          <div className="flex justify-end gap-2 pt-2 border-t border-border-default/60 mt-3.5">
             <button
               onClick={() => setEditing(false)}
-              className="rounded-lg px-2.5 py-1.5 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className="rounded-lg px-2.5 py-1.5 text-xs text-text-muted hover:text-text-primary transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="rounded-lg bg-white px-3.5 py-1.5 text-xs font-bold text-zinc-950 hover:bg-zinc-100 disabled:opacity-50 transition-colors cursor-pointer"
+              className="rounded-lg bg-primary px-3.5 py-1.5 text-xs font-bold text-primary-foreground hover:bg-primary-hover disabled:opacity-50 transition-colors cursor-pointer"
             >
               {saving ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </div>
       ) : (
-        <div className="space-y-3.5 text-xs text-zinc-400">
-          <div className="grid grid-cols-2 gap-4 pb-2.5 border-b border-zinc-800/40">
+        <div className="space-y-3.5 text-xs text-text-muted">
+          <div className="grid grid-cols-2 gap-4 pb-2.5 border-b border-border-default/40">
             <div>
-              <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Status</span>
+              <span className="block text-[9px] uppercase font-bold text-text-disabled mb-0.5">Status</span>
               <StatusBadge status={space.status} />
             </div>
             <div>
-              <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Visibility</span>
+              <span className="block text-[9px] uppercase font-bold text-text-disabled mb-0.5">Visibility</span>
               <VisibilityBadge visibility={space.visibility} />
             </div>
           </div>
 
-          <div className="pb-2.5 border-b border-zinc-800/40">
-            <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Project Details</span>
-            <p className="text-sm font-semibold text-white">{space.name}</p>
-            <p className="mt-0.5 text-zinc-450 text-xs leading-relaxed">{space.summary}</p>
+          <div className="pb-2.5 border-b border-border-default/40">
+            <span className="block text-[9px] uppercase font-bold text-text-disabled mb-0.5">Project Details</span>
+            <p className="text-sm font-semibold text-text-primary">{space.name}</p>
+            <p className="mt-0.5 text-text-muted text-xs leading-relaxed">{space.summary}</p>
           </div>
 
           {space.description && (
-            <div className="pb-2.5 border-b border-zinc-800/40">
-              <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Description</span>
+            <div className="pb-2.5 border-b border-border-default/40">
+              <span className="block text-[9px] uppercase font-bold text-text-disabled mb-0.5">Description</span>
               <p className="text-zinc-350 leading-relaxed text-xs whitespace-pre-line">{space.description}</p>
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4 pb-2.5 border-b border-zinc-800/40">
+          <div className="grid grid-cols-2 gap-4 pb-2.5 border-b border-border-default/40">
             <div>
-              <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Working in public</span>
+              <span className="block text-[9px] uppercase font-bold text-text-disabled mb-0.5">Working in public</span>
               <span className={`inline-flex items-center gap-1.5 rounded-lg px-2 py-0.5 border text-[10px] font-bold ${
                 space.working_in_public 
                   ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/10" 
-                  : "bg-zinc-850 text-zinc-500 border-zinc-800"
+                  : "bg-surface-hover text-text-disabled border-border-default"
               }`}>
                 {space.working_in_public ? "Yes" : "No"}
               </span>
             </div>
             {space.response_sla && (
               <div>
-                <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Response SLA</span>
-                <span className="text-white font-medium text-xs">{space.response_sla}</span>
+                <span className="block text-[9px] uppercase font-bold text-text-disabled mb-0.5">Response SLA</span>
+                <span className="text-text-primary font-medium text-xs">{space.response_sla}</span>
               </div>
             )}
           </div>
 
           {space.current_focus && (
-            <div className="pb-2.5 border-b border-zinc-800/40">
-              <span className="block text-[9px] uppercase font-bold text-zinc-500 mb-0.5">Current Focus</span>
-              <p className="text-white font-semibold text-xs">{space.current_focus}</p>
+            <div className="pb-2.5 border-b border-border-default/40">
+              <span className="block text-[9px] uppercase font-bold text-text-disabled mb-0.5">Current Focus</span>
+              <p className="text-text-primary font-semibold text-xs">{space.current_focus}</p>
             </div>
           )}
 
           {(space.open_roles?.length ?? 0) > 0 && (
-            <div className="pb-2.5 border-b border-zinc-800/40">
-              <span className="block text-[9px] uppercase font-bold text-zinc-555 mb-0.5">Open Roles</span>
+            <div className="pb-2.5 border-b border-border-default/40">
+              <span className="block text-[9px] uppercase font-bold text-text-disabled mb-0.5">Open Roles</span>
               <div className="flex flex-wrap gap-1.5 mt-1">
                 {space.open_roles?.map((role) => (
-                  <span key={role} className="rounded-lg bg-zinc-800 border border-zinc-750 px-2 py-0.5 text-[10px] font-medium text-zinc-300">
+                  <span key={role} className="rounded-lg bg-surface-hover border border-border-strong px-2 py-0.5 text-[10px] font-medium text-text-secondary">
                     {role}
                   </span>
                 ))}
@@ -458,8 +458,8 @@ function ProjectSettingsSection({
           )}
 
           {(space.needed_skills?.length ?? 0) > 0 && (
-            <div className="pb-2.5 border-b border-zinc-800/40">
-              <span className="block text-[9px] uppercase font-bold text-zinc-555 mb-0.5">Needed Skills</span>
+            <div className="pb-2.5 border-b border-border-default/40">
+              <span className="block text-[9px] uppercase font-bold text-text-disabled mb-0.5">Needed Skills</span>
               <div className="flex flex-wrap gap-1.5 mt-1">
                 {space.needed_skills?.map((skill) => (
                   <span key={skill} className="rounded-lg bg-sky-500/10 border border-sky-500/10 px-2 py-0.5 text-[10px] font-medium text-sky-400">
@@ -472,8 +472,8 @@ function ProjectSettingsSection({
 
           {space.contribution_guide && (
             <div>
-              <span className="block text-[9px] uppercase font-bold text-zinc-555 mb-0.5">Contribution Guide</span>
-              <p className="text-zinc-450 text-xs leading-relaxed whitespace-pre-line">
+              <span className="block text-[9px] uppercase font-bold text-text-disabled mb-0.5">Contribution Guide</span>
+              <p className="text-text-muted text-xs leading-relaxed whitespace-pre-line">
                 {space.contribution_guide}
               </p>
             </div>
@@ -518,23 +518,23 @@ function VisibilitySettingsSection({
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm">
-      <div className="mb-4 border-b border-zinc-800/60 pb-3">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-white uppercase tracking-wide">
-          <UsersIcon className="w-4 h-4 text-zinc-450" />
+    <div className="rounded-2xl border border-border-default bg-surface/10 p-5 backdrop-blur-sm">
+      <div className="mb-4 border-b border-border-default/60 pb-3">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-text-primary uppercase tracking-wide">
+          <UsersIcon className="w-4 h-4 text-text-muted" />
           Visibility
         </h3>
-        <p className="mt-1 text-xs text-zinc-500">Choose the minimum audience that can see each space section.</p>
+        <p className="mt-1 text-xs text-text-disabled">Choose the minimum audience that can see each space section.</p>
       </div>
 
       <div className="space-y-2.5">
         {ACCESS_SECTIONS.map((section) => (
-          <label key={section.value} className="flex items-center justify-between gap-3 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2">
-            <span className="text-xs font-semibold text-zinc-300">{section.label}</span>
+          <label key={section.value} className="flex items-center justify-between gap-3 rounded-xl border border-border-default bg-app px-3 py-2">
+            <span className="text-xs font-semibold text-text-secondary">{section.label}</span>
             <select
               value={policy[section.value]}
               onChange={(event) => updateSection(section.value, event.target.value as SpaceAccessAudience)}
-              className="rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-1 text-[11px] text-white focus:border-zinc-600 focus:outline-none"
+              className="rounded-lg border border-border-default bg-surface px-2 py-1 text-[11px] text-text-primary focus:border-border-strong focus:outline-none"
             >
               {ACCESS_AUDIENCES.map((audience) => (
                 <option key={audience.value} value={audience.value}>
@@ -549,7 +549,7 @@ function VisibilitySettingsSection({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="mt-4 w-full rounded-lg bg-white px-3.5 py-2 text-xs font-bold text-zinc-950 hover:bg-zinc-100 disabled:opacity-50 transition-colors cursor-pointer"
+        className="mt-4 w-full rounded-lg bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground hover:bg-primary-hover disabled:opacity-50 transition-colors cursor-pointer"
       >
         {saving ? "Saving..." : "Save Visibility"}
       </button>
@@ -583,11 +583,11 @@ function JoinRequestsSection({
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm">
-      <div className="flex items-center justify-between mb-4 border-b border-zinc-800/60 pb-3">
+    <div className="rounded-2xl border border-border-default bg-surface/10 p-5 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-4 border-b border-border-default/60 pb-3">
         <div className="flex items-center gap-2.5">
-          <UsersIcon className="w-4 h-4 text-zinc-455" />
-          <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
+          <UsersIcon className="w-4 h-4 text-text-muted" />
+          <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wide">
             Pending Join Requests
           </h3>
           {requests.length > 0 && (
@@ -605,10 +605,10 @@ function JoinRequestsSection({
       )}
 
       {!loading && requests.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-xl bg-zinc-900/5">
-          <UsersIcon className="w-10 h-10 text-zinc-650 mb-3" />
-          <h4 className="text-sm font-semibold text-zinc-455 mb-1">No Pending Requests</h4>
-          <p className="text-xs text-zinc-550 max-w-[280px]">
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-xl bg-surface/5">
+          <UsersIcon className="w-10 h-10 text-text-disabled mb-3" />
+          <h4 className="text-sm font-semibold text-text-muted mb-1">No Pending Requests</h4>
+          <p className="text-xs text-text-disabled max-w-[280px]">
             Join requests from interested developers will show up here.
           </p>
         </div>
@@ -619,11 +619,11 @@ function JoinRequestsSection({
           {requests.map((request) => (
             <div
               key={request.id}
-              className="flex flex-col justify-between rounded-xl border border-zinc-800/80 bg-zinc-950/20 p-4 hover:border-zinc-700/80 transition-all duration-200"
+              className="flex flex-col justify-between rounded-xl border border-border-default/80 bg-app/20 p-4 hover:border-border-strong/80 transition-all duration-200"
             >
               <div>
                 {/* Header Row */}
-                <div className="flex items-center justify-between gap-3 mb-2.5 pb-2 border-b border-zinc-900/40">
+                <div className="flex items-center justify-between gap-3 mb-2.5 pb-2 border-b border-border-subtle/40">
                   <div className="flex items-center gap-2.5 min-w-0">
                     {request.applicant ? (
                       <>
@@ -636,7 +636,7 @@ function JoinRequestsSection({
                         <div className="min-w-0">
                           <Link
                             href={`/profile/${request.applicant.username || request.applicant.id}`}
-                            className="hover:underline hover:text-sky-450 transition-colors cursor-pointer block truncate text-xs font-bold text-white"
+                            className="hover:underline hover:text-sky-400 transition-colors cursor-pointer block truncate text-xs font-bold text-text-primary"
                           >
                             {request.applicant.name ?? "Unknown Developer"}
                           </Link>
@@ -646,20 +646,20 @@ function JoinRequestsSection({
                       <>
                         <Avatar user={null} size="sm" className="shrink-0" />
                         <div className="min-w-0">
-                          <span className="block truncate text-xs font-bold text-white">
+                          <span className="block truncate text-xs font-bold text-text-primary">
                             Unknown Developer
                           </span>
                         </div>
                       </>
                     )}
                   </div>
-                  <span className="text-[9px] text-zinc-500 shrink-0">
+                  <span className="text-[9px] text-text-disabled shrink-0">
                     {formatRelativeTime(request.created_at)}
                   </span>
                 </div>
 
                 {/* Message Box */}
-                <div className="text-xs text-zinc-300 leading-relaxed line-clamp-3 mb-3 whitespace-pre-line">
+                <div className="text-xs text-text-secondary leading-relaxed line-clamp-3 mb-3 whitespace-pre-line">
                   <RichText text={request.message} />
                 </div>
 
@@ -691,9 +691,9 @@ function JoinRequestsSection({
                           href={link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 rounded border border-zinc-850 bg-zinc-950/40 px-2 py-0.5 text-[9px] text-zinc-500 hover:text-white hover:border-zinc-700 transition-colors"
+                          className="inline-flex items-center gap-1 rounded border border-border-default bg-app/40 px-2 py-0.5 text-[9px] text-text-disabled hover:text-text-primary hover:border-border-strong transition-colors"
                         >
-                          {isGithub ? <GitHubIcon className="w-2.5 h-2.5 text-zinc-500" /> : <LinkIcon className="w-2.5 h-2.5 text-zinc-500" />}
+                          {isGithub ? <GitHubIcon className="w-2.5 h-2.5 text-text-disabled" /> : <LinkIcon className="w-2.5 h-2.5 text-text-disabled" />}
                           <span className="truncate max-w-[100px]">{link.replace(/^https?:\/\/(www\.)?/, "")}</span>
                         </a>
                       );
@@ -703,11 +703,11 @@ function JoinRequestsSection({
               </div>
 
               {/* Actions Row */}
-              <div className="flex items-center gap-1.5 border-t border-zinc-900/60 pt-2.5 mt-auto">
+              <div className="flex items-center gap-1.5 border-t border-border-subtle/60 pt-2.5 mt-auto">
                 <button
                   onClick={() => handleAction(request.id, "accept")}
                   disabled={acting === request.id}
-                  className="flex-1 inline-flex items-center justify-center gap-1 rounded bg-emerald-500/10 border border-emerald-500/20 py-1 text-[10px] font-semibold text-emerald-400 hover:bg-emerald-500 hover:text-zinc-950 transition-all disabled:opacity-50 cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-1 rounded bg-emerald-500/10 border border-emerald-500/20 py-1 text-[10px] font-semibold text-emerald-400 hover:bg-emerald-500 hover:text-primary-foreground transition-all disabled:opacity-50 cursor-pointer"
                 >
                   <CheckCircleIcon className="h-3 w-3" />
                   Accept
@@ -716,7 +716,7 @@ function JoinRequestsSection({
                 <button
                   onClick={() => handleAction(request.id, "need-info")}
                   disabled={acting === request.id}
-                  className="flex-1 inline-flex items-center justify-center gap-1 rounded bg-amber-500/10 border border-amber-500/20 py-1 text-[10px] font-semibold text-amber-400 hover:bg-amber-500 hover:text-zinc-950 transition-all disabled:opacity-50 cursor-pointer"
+                  className="flex-1 inline-flex items-center justify-center gap-1 rounded bg-amber-500/10 border border-amber-500/20 py-1 text-[10px] font-semibold text-amber-400 hover:bg-amber-500 hover:text-primary-foreground transition-all disabled:opacity-50 cursor-pointer"
                 >
                   <ChatBubbleIcon className="h-3 w-3" />
                   Info
@@ -725,7 +725,7 @@ function JoinRequestsSection({
                 <button
                   onClick={() => handleAction(request.id, "reject")}
                   disabled={acting === request.id}
-                  className="inline-flex items-center justify-center gap-1 rounded bg-zinc-900 border border-zinc-800 px-2 py-1 text-[10px] font-semibold text-zinc-500 hover:bg-rose-500/10 hover:text-rose-455 hover:border-rose-500/20 transition-all disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1 rounded bg-surface border border-border-default px-2 py-1 text-[10px] font-semibold text-text-disabled hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 transition-all disabled:opacity-50 cursor-pointer"
                   title="Reject"
                 >
                   <XCircleIcon className="h-3 w-3" />
@@ -778,9 +778,9 @@ function StackManagementSection({
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm">
-      <div className="flex items-center justify-between mb-4 border-b border-zinc-800/60 pb-3">
-        <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
+    <div className="rounded-2xl border border-border-default bg-surface/10 p-5 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-4 border-b border-border-default/60 pb-3">
+        <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wide">
           Tech Stack
         </h3>
         {!editing && (
@@ -789,7 +789,7 @@ function StackManagementSection({
               setItems(stack.map((entry) => ({ category: entry.category, technology: entry.technology, maturity: entry.maturity })));
               setEditing(true);
             }}
-            className="rounded-lg bg-zinc-900 hover:bg-zinc-855 border border-zinc-855 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 transition-colors cursor-pointer"
+            className="rounded-lg bg-surface hover:bg-surface-hover border border-border-default px-2.5 py-1.5 text-xs font-semibold text-text-secondary transition-colors cursor-pointer"
           >
             Edit Stack
           </button>
@@ -802,39 +802,39 @@ function StackManagementSection({
             {items.map((item, index) => (
               <div
                 key={`${item.category}-${item.technology}-${index}`}
-                className="flex items-center justify-between rounded-xl border border-zinc-855 bg-zinc-955 px-3 py-2"
+                className="flex items-center justify-between rounded-xl border border-border-default bg-app px-3 py-2"
               >
                 <div className="min-w-0">
-                  <span className="block text-[9px] uppercase font-bold text-zinc-500">
+                  <span className="block text-[9px] uppercase font-bold text-text-disabled">
                     {item.category}
                   </span>
-                  <span className="text-xs font-semibold text-white truncate block mt-0.5">
-                    {item.technology} <span className="text-[10px] text-zinc-500 font-medium font-mono capitalize">({item.maturity})</span>
+                  <span className="text-xs font-semibold text-text-primary truncate block mt-0.5">
+                    {item.technology} <span className="text-[10px] text-text-disabled font-medium font-mono capitalize">({item.maturity})</span>
                   </span>
                 </div>
                 <button
                   onClick={() => setItems((prev) => prev.filter((_, idx) => idx !== index))}
-                  className="rounded p-1 text-zinc-500 hover:bg-zinc-900 hover:text-rose-455 transition-colors cursor-pointer"
+                  className="rounded p-1 text-text-disabled hover:bg-surface hover:text-rose-400 transition-colors cursor-pointer"
                 >
                   <TrashIcon className="w-3.5 h-3.5" />
                 </button>
               </div>
             ))}
             {items.length === 0 && (
-              <p className="text-xs text-zinc-550 py-4 text-center">No technologies added yet.</p>
+              <p className="text-xs text-text-disabled py-4 text-center">No technologies added yet.</p>
             )}
           </div>
 
-          <div className="rounded-xl border border-zinc-850 bg-zinc-955/60 p-3 space-y-2.5">
-            <span className="block text-[9px] uppercase font-bold text-zinc-450">Add Technology</span>
+          <div className="rounded-xl border border-border-default bg-app/60 p-3 space-y-2.5">
+            <span className="block text-[9px] uppercase font-bold text-text-muted">Add Technology</span>
             
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[9px] text-zinc-500 uppercase font-semibold mb-1">Category</label>
+                <label className="block text-[9px] text-text-disabled uppercase font-semibold mb-1">Category</label>
                 <select
                   value={newCat}
                   onChange={(e) => setNewCat(e.target.value as StackCategory)}
-                  className="w-full rounded-lg border border-zinc-855 bg-zinc-955 px-2 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
+                  className="w-full rounded-lg border border-border-default bg-app px-2 py-1.5 text-xs text-text-primary focus:outline-none focus:border-border-strong"
                 >
                   {(["frontend", "backend", "database", "infra", "tooling", "other"] as StackCategory[]).map((category) => (
                     <option key={category} value={category}>
@@ -845,11 +845,11 @@ function StackManagementSection({
               </div>
               
               <div>
-                <label className="block text-[9px] text-zinc-500 uppercase font-semibold mb-1">Maturity</label>
+                <label className="block text-[9px] text-text-disabled uppercase font-semibold mb-1">Maturity</label>
                 <select
                   value={newMat}
                   onChange={(e) => setNewMat(e.target.value as StackMaturity)}
-                  className="w-full rounded-lg border border-zinc-855 bg-zinc-955 px-2 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
+                  className="w-full rounded-lg border border-border-default bg-app px-2 py-1.5 text-xs text-text-primary focus:outline-none focus:border-border-strong"
                 >
                   <option value="in-use">In Use</option>
                   <option value="planned">Planned</option>
@@ -864,7 +864,7 @@ function StackManagementSection({
                 value={newTech}
                 onChange={(e) => setNewTech(e.target.value)}
                 placeholder="Technology (e.g. Next.js)"
-                className="flex-1 rounded-lg border border-zinc-850 bg-zinc-955 px-2.5 py-1.5 text-xs text-white placeholder:text-zinc-650 focus:outline-none focus:border-zinc-705"
+                className="flex-1 rounded-lg border border-border-default bg-app px-2.5 py-1.5 text-xs text-text-primary placeholder:text-text-disabled focus:outline-none focus:border-border-strong"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -875,24 +875,24 @@ function StackManagementSection({
               <button
                 type="button"
                 onClick={addItem}
-                className="rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-1.5 text-xs font-bold text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+                className="rounded-lg bg-surface border border-border-default px-3 py-1.5 text-xs font-bold text-text-primary hover:bg-surface-hover transition-colors cursor-pointer"
               >
                 Add
               </button>
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-zinc-800/60 mt-3.5">
+          <div className="flex justify-end gap-2 pt-2 border-t border-border-default/60 mt-3.5">
             <button
               onClick={() => setEditing(false)}
-              className="rounded-lg px-2.5 py-1.5 text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className="rounded-lg px-2.5 py-1.5 text-xs text-text-muted hover:text-text-primary transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="rounded-lg bg-white px-3.5 py-1.5 text-xs font-bold text-zinc-950 hover:bg-zinc-100 disabled:opacity-50 transition-colors cursor-pointer"
+              className="rounded-lg bg-primary px-3.5 py-1.5 text-xs font-bold text-primary-foreground hover:bg-primary-hover disabled:opacity-50 transition-colors cursor-pointer"
             >
               {saving ? "Saving..." : "Save Stack"}
             </button>
@@ -927,14 +927,14 @@ function RepoDocsSection({
   if (resources.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm">
-      <div className="flex items-center justify-between mb-4 border-b border-zinc-800/60 pb-3">
+    <div className="rounded-2xl border border-border-default bg-surface/10 p-5 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-4 border-b border-border-default/60 pb-3">
         <div className="flex items-center gap-2">
-          <DocumentTextIcon className="w-4 h-4 text-zinc-450" />
-          <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
+          <DocumentTextIcon className="w-4 h-4 text-text-muted" />
+          <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wide">
             Contribution Resources
           </h3>
-          <span className="rounded-full bg-zinc-800 border border-zinc-700/60 px-2 py-0.5 text-xs font-bold text-zinc-450">
+          <span className="rounded-full bg-surface-hover border border-border-strong/60 px-2 py-0.5 text-xs font-bold text-text-muted">
             {resources.length}
           </span>
         </div>
@@ -945,14 +945,14 @@ function RepoDocsSection({
           <Link
             key={resource.key}
             href={`/repos/${resource.repoId}?path=${encodeURIComponent(resource.path)}&view=blob`}
-            className="flex items-center gap-3 rounded-xl border border-zinc-800/80 bg-zinc-955/20 px-4 py-3 hover:border-zinc-700 hover:bg-zinc-900/10 transition-all duration-200"
+            className="flex items-center gap-3 rounded-xl border border-border-default/80 bg-app/20 px-4 py-3 hover:border-border-strong hover:bg-surface/10 transition-all duration-200"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-900 border border-zinc-800 text-sky-400">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface border border-border-default text-sky-400">
               <DocumentTextIcon className="w-4 h-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-bold text-white">{resource.label}</p>
-              <p className="truncate text-[10px] text-zinc-550 font-medium">{resource.repoName}</p>
+              <p className="truncate text-xs font-bold text-text-primary">{resource.label}</p>
+              <p className="truncate text-[10px] text-text-disabled font-medium">{resource.repoName}</p>
             </div>
           </Link>
         ))}
@@ -969,15 +969,15 @@ function RepoManagementSection({
   repos: ReturnType<typeof useRepos>["repos"];
 }) {
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/10 p-5 backdrop-blur-sm">
-      <div className="flex items-center justify-between mb-4 border-b border-zinc-800/60 pb-3">
+    <div className="rounded-2xl border border-border-default bg-surface/10 p-5 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-4 border-b border-border-default/60 pb-3">
         <div className="flex items-center gap-2">
-          <CodeBracketIcon className="w-4 h-4 text-zinc-455" />
-          <h3 className="text-sm font-semibold text-white uppercase tracking-wide">
+          <CodeBracketIcon className="w-4 h-4 text-text-muted" />
+          <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wide">
             Repositories
           </h3>
           {repos.length > 0 && (
-            <span className="rounded-full bg-zinc-800 border border-zinc-700/60 px-2 py-0.5 text-xs font-bold text-zinc-450">
+            <span className="rounded-full bg-surface-hover border border-border-strong/60 px-2 py-0.5 text-xs font-bold text-text-muted">
               {repos.length}
             </span>
           )}
@@ -992,10 +992,10 @@ function RepoManagementSection({
       </div>
 
       {repos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-xl bg-zinc-900/5">
-          <CodeBracketIcon className="w-10 h-10 text-zinc-650 mb-3" />
-          <h4 className="text-sm font-semibold text-zinc-400 mb-1">No Repositories</h4>
-          <p className="text-xs text-zinc-550 max-w-[280px]">
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-xl bg-surface/5">
+          <CodeBracketIcon className="w-10 h-10 text-text-disabled mb-3" />
+          <h4 className="text-sm font-semibold text-text-muted mb-1">No Repositories</h4>
+          <p className="text-xs text-text-disabled max-w-[280px]">
             Connect private repositories to manage your code directly from the Space.
           </p>
         </div>
@@ -1004,13 +1004,13 @@ function RepoManagementSection({
           {repos.map((repo) => (
             <div
               key={repo.id}
-              className="group relative rounded-xl border border-zinc-805 bg-zinc-950/20 p-4 hover:border-zinc-700 hover:bg-zinc-900/10 transition-all duration-200"
+              className="group relative rounded-xl border border-border-default bg-app/20 p-4 hover:border-border-strong hover:bg-surface/10 transition-all duration-200"
             >
               <div className="flex items-start justify-between gap-3 mb-1.5">
                 <div className="min-w-0 flex-1">
                   <Link
                     href={`/repos/${repo.id}`}
-                    className="hover:underline hover:text-sky-400 transition-colors cursor-pointer block truncate text-sm font-bold text-white"
+                    className="hover:underline hover:text-sky-400 transition-colors cursor-pointer block truncate text-sm font-bold text-text-primary"
                   >
                     {repo.name}
                   </Link>
@@ -1018,20 +1018,20 @@ function RepoManagementSection({
                 
                 <Link
                   href={`/spaces/${spaceId}/repos/${repo.id}/settings`}
-                  className="rounded-lg p-1.5 text-zinc-550 hover:bg-zinc-800 hover:text-white transition-colors shrink-0"
+                  className="rounded-lg p-1.5 text-text-disabled hover:bg-surface-hover hover:text-text-primary transition-colors shrink-0"
                   title="Repo Settings"
                 >
                   <CogIcon className="w-3.5 h-3.5" />
                 </Link>
               </div>
 
-              <p className="line-clamp-2 text-xs text-zinc-455 h-8 mb-3">
+              <p className="line-clamp-2 text-xs text-text-muted h-8 mb-3">
                 {repo.description || "No description provided."}
               </p>
 
-              <div className="flex items-center justify-between border-t border-zinc-900/80 pt-2.5">
-                <span className="inline-flex items-center gap-1 rounded-md bg-zinc-900 border border-zinc-850 px-2 py-0.5 text-[10px] font-semibold text-zinc-450">
-                  <svg className="w-3 h-3 text-zinc-555" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <div className="flex items-center justify-between border-t border-border-subtle/80 pt-2.5">
+                <span className="inline-flex items-center gap-1 rounded-md bg-surface border border-border-default px-2 py-0.5 text-[10px] font-semibold text-text-muted">
+                  <svg className="w-3 h-3 text-text-disabled" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="18" cy="18" r="3" />
                     <circle cx="6" cy="6" r="3" />
                     <circle cx="6" cy="18" r="3" />
@@ -1043,7 +1043,7 @@ function RepoManagementSection({
 
                 <Link
                   href={`/repos/${repo.id}`}
-                  className="text-[11px] font-semibold text-zinc-550 hover:text-white hover:underline transition-colors cursor-pointer"
+                  className="text-[11px] font-semibold text-text-disabled hover:text-text-primary hover:underline transition-colors cursor-pointer"
                 >
                   Explore Files →
                 </Link>
@@ -1083,10 +1083,10 @@ function DangerZoneSection({
 
   return (
     <div className="rounded-2xl border border-rose-500/10 bg-rose-500/[0.01] p-5 backdrop-blur-sm">
-      <h3 className="text-sm font-semibold text-rose-450 uppercase tracking-wide mb-2">
+      <h3 className="text-sm font-semibold text-rose-400 uppercase tracking-wide mb-2">
         Danger Zone
       </h3>
-      <p className="text-xs text-zinc-500 mb-3.5 leading-relaxed">
+      <p className="text-xs text-text-disabled mb-3.5 leading-relaxed">
         Archiving this space will hide it from the search index and your active active spaces list. Contributors will no longer be able to submit join requests. You can restore it later if needed.
       </p>
       

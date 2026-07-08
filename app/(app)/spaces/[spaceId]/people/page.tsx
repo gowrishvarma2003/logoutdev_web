@@ -62,13 +62,13 @@ export default function PeoplePage({
   });
 
   return (
-    <div className="divide-y divide-zinc-800">
+    <div className="divide-y divide-border-default">
       <section>
         <SectionHeader title="Contributors" count={contributors.length} />
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-800 border-t-zinc-300" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-border-default border-t-zinc-300" />
           </div>
         ) : null}
 
@@ -79,7 +79,7 @@ export default function PeoplePage({
         ) : null}
 
         {!loading && !error && sorted.length > 0 ? (
-          <div className="divide-y divide-zinc-800/50">
+          <div className="divide-y divide-border-default/50">
             {sorted.map((member) => {
               const roleStyle = ROLE_STYLES[member.role] ?? ROLE_STYLES.contributor;
               const isMe = member.user_id === user?.id;
@@ -88,14 +88,14 @@ export default function PeoplePage({
               return (
                 <div
                   key={member.id}
-                  className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-zinc-900/30"
+                  className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-surface/30"
                 >
                   <Avatar user={member.user} size="md" />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="truncate text-sm font-semibold text-white">{member.user?.name ?? "Unknown"}</p>
+                      <p className="truncate text-sm font-semibold text-text-primary">{member.user?.name ?? "Unknown"}</p>
                       {isMe ? (
-                        <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-500">You</span>
+                        <span className="rounded bg-surface-hover px-1.5 py-0.5 text-[10px] text-text-disabled">You</span>
                       ) : null}
                     </div>
                     <div className="mt-0.5 flex items-center gap-2">
@@ -104,7 +104,7 @@ export default function PeoplePage({
                       >
                         {member.role}
                       </span>
-                      <span className="text-[11px] text-zinc-600">Joined {formatRelativeTime(member.joined_at)}</span>
+                      <span className="text-[11px] text-text-disabled">Joined {formatRelativeTime(member.joined_at)}</span>
                     </div>
                   </div>
 
@@ -114,7 +114,7 @@ export default function PeoplePage({
                         value={member.role}
                         onChange={(event) => handleRoleChange(member.user_id, event.target.value as MemberRole)}
                         disabled={updating === member.user_id}
-                        className="rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-1 text-[11px] text-white focus:border-zinc-600 focus:outline-none disabled:opacity-50"
+                        className="rounded-lg border border-border-default bg-surface px-2 py-1 text-[11px] text-text-primary focus:border-border-strong focus:outline-none disabled:opacity-50"
                       >
                         <option value="contributor">Contributor</option>
                         <option value="maintainer">Maintainer</option>
@@ -140,7 +140,7 @@ export default function PeoplePage({
 
         {followersLoading ? (
           <div className="flex justify-center py-10">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-800 border-t-zinc-300" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-border-default border-t-zinc-300" />
           </div>
         ) : null}
 
@@ -157,11 +157,11 @@ export default function PeoplePage({
         {!followersLoading && !followersError && followers.length > 0 ? (
           <div className="grid gap-3 px-4 py-4 sm:grid-cols-2">
             {followers.map((follow) => (
-              <div key={follow.id} className="flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/40 px-4 py-3">
+              <div key={follow.id} className="flex items-center gap-3 rounded-2xl border border-border-default bg-surface/40 px-4 py-3">
                 <Avatar user={follow.user} size="sm" />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-white">{follow.user?.name ?? "Unknown"}</p>
-                  <p className="text-xs text-zinc-500">Following since {formatRelativeTime(follow.created_at)}</p>
+                  <p className="truncate text-sm font-semibold text-text-primary">{follow.user?.name ?? "Unknown"}</p>
+                  <p className="text-xs text-text-disabled">Following since {formatRelativeTime(follow.created_at)}</p>
                 </div>
               </div>
             ))}

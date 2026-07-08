@@ -28,7 +28,7 @@ export default function LaunchLinkBar({ launch }: { launch: Launch }) {
 
   if (availableLinks.length === 0) {
     return (
-      <div className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/50 px-3.5 py-2 text-sm text-zinc-500">
+      <div className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface/50 px-3.5 py-2 text-sm text-text-disabled">
         <CodeBracketIcon className="h-4 w-4" />
         No external links added yet
       </div>
@@ -47,7 +47,7 @@ export default function LaunchLinkBar({ launch }: { launch: Launch }) {
             className={`group flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 transition-colors ${
               primary
                 ? "border-sky-500/25 bg-sky-500/10 text-sky-200 hover:bg-sky-500/14"
-                : "border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800"
+                : "border-border-strong bg-surface text-text-secondary hover:bg-surface-hover"
             }`}
           >
             <div className="flex min-w-0 items-center gap-3">
@@ -55,19 +55,19 @@ export default function LaunchLinkBar({ launch }: { launch: Launch }) {
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                   primary
                     ? "bg-sky-500/12 text-sky-300 ring-1 ring-sky-500/20"
-                    : "bg-zinc-950 text-zinc-300 ring-1 ring-zinc-700"
+                    : "bg-app text-text-secondary ring-1 ring-border-strong"
                 }`}
               >
                 <Icon className="h-4 w-4" />
               </span>
 
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-white">{label}</p>
-                <p className="truncate text-xs text-zinc-500">{getLinkHost(href)}</p>
+                <p className="truncate text-sm font-medium text-text-primary">{label}</p>
+                <p className="truncate text-xs text-text-disabled">{getLinkHost(href)}</p>
               </div>
             </div>
 
-            <ExternalLinkIcon className="h-4 w-4 shrink-0 text-zinc-500 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            <ExternalLinkIcon className="h-4 w-4 shrink-0 text-text-disabled transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </a>
         );
       })}

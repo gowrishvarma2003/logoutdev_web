@@ -86,12 +86,12 @@ export default function DiscussionsPage({
 
   return (
     <div className="flex flex-col">
-      <div className="px-5 py-3 border-b border-zinc-800">
+      <div className="px-5 py-3 border-b border-border-default">
         <div className="flex items-center gap-2">
-          <ChatBubbleIcon className="w-4 h-4 text-zinc-500" />
-          <h2 className="text-sm font-semibold text-white">Discussions</h2>
+          <ChatBubbleIcon className="w-4 h-4 text-text-disabled" />
+          <h2 className="text-sm font-semibold text-text-primary">Discussions</h2>
           {total > 0 && (
-            <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-zinc-800 text-zinc-400">
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-hover text-text-muted">
               {total}
             </span>
           )}
@@ -99,14 +99,14 @@ export default function DiscussionsPage({
       </div>
 
       {authLoaded && !user ? (
-        <div className="px-5 py-4 border-b border-zinc-800 bg-zinc-950/40">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 px-4 py-3 text-sm text-zinc-300">
+        <div className="px-5 py-4 border-b border-border-default bg-app/40">
+          <div className="rounded-2xl border border-border-default bg-surface/70 px-4 py-3 text-sm text-text-secondary">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="font-semibold text-white">Sign in to participate</p>
-                <p className="mt-1 text-zinc-400">Public discussions are readable to everyone, but posting requires an account.</p>
+                <p className="font-semibold text-text-primary">Sign in to participate</p>
+                <p className="mt-1 text-text-muted">Public discussions are readable to everyone, but posting requires an account.</p>
               </div>
-              <Link href="/login" className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+              <Link href="/login" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover">
                 Sign in
               </Link>
             </div>
@@ -115,7 +115,7 @@ export default function DiscussionsPage({
       ) : null}
 
       {authLoaded && user && !permissionsLoaded ? (
-        <div className="px-5 py-4 border-b border-zinc-800 bg-zinc-950/40">
+        <div className="px-5 py-4 border-b border-border-default bg-app/40">
           <div className="flex items-center justify-center py-4">
             <Spinner />
           </div>
@@ -123,13 +123,13 @@ export default function DiscussionsPage({
       ) : null}
 
       {authLoaded && user && permissionsLoaded && !canCreateDiscussion ? (
-        <div className="px-5 py-4 border-b border-zinc-800 bg-zinc-950/40">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 px-4 py-3 text-sm text-zinc-300">
+        <div className="px-5 py-4 border-b border-border-default bg-app/40">
+          <div className="rounded-2xl border border-border-default bg-surface/70 px-4 py-3 text-sm text-text-secondary">
             <div className="flex items-start gap-3">
-              <LockIcon className="mt-0.5 h-4 w-4 text-zinc-500" />
+              <LockIcon className="mt-0.5 h-4 w-4 text-text-disabled" />
               <div>
-                <p className="font-semibold text-white">Read-only for now</p>
-                <p className="mt-1 text-zinc-400">{postingHelpText}</p>
+                <p className="font-semibold text-text-primary">Read-only for now</p>
+                <p className="mt-1 text-text-muted">{postingHelpText}</p>
               </div>
             </div>
           </div>
@@ -137,7 +137,7 @@ export default function DiscussionsPage({
       ) : null}
 
       {authLoaded && user && permissionsLoaded && canCreateDiscussion && (
-        <form onSubmit={handlePost} className="px-5 py-4 border-b border-zinc-800 bg-zinc-950/40">
+        <form onSubmit={handlePost} className="px-5 py-4 border-b border-border-default bg-app/40">
           <div className="flex items-start gap-3">
             <Avatar user={user} size="sm" className="mt-1" />
             <div className="flex-1 space-y-2.5">
@@ -147,21 +147,21 @@ export default function DiscussionsPage({
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Discussion title"
                 maxLength={180}
-                className="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
+                className="w-full px-3 py-2 rounded-xl bg-surface border border-border-default text-sm text-text-primary placeholder:text-text-disabled focus:outline-none focus:border-border-strong transition-colors"
               />
               <RichComposer
                 value={body}
                 onChange={(value) => setBody(value)}
                 placeholder="Share your idea..."
                 rows={3}
-                previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm leading-relaxed text-white"
+                previewClassName="w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm leading-relaxed text-text-primary"
                 className="w-full resize-none px-3 py-2 text-sm leading-relaxed text-transparent caret-white focus:outline-none transition-colors selection:bg-[#1d9bf0]/30"
               />
               <div className="flex items-center gap-2">
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value as DiscussionCategory)}
-                  className="px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 focus:outline-none focus:border-zinc-600"
+                  className="px-2.5 py-1.5 rounded-lg bg-surface border border-border-default text-xs text-text-secondary focus:outline-none focus:border-border-strong"
                 >
                   {allowedCategories.map((c) => (
                     <option key={c} value={c}>
@@ -174,12 +174,12 @@ export default function DiscussionsPage({
                 <button
                   type="submit"
                   disabled={posting || !title.trim() || !body.trim()}
-                  className="px-4 py-1.5 rounded-lg bg-white text-zinc-950 text-xs font-semibold hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {posting ? "Posting…" : "Post"}
                 </button>
               </div>
-              <p className="text-xs text-zinc-500">{postingHelpText}</p>
+              <p className="text-xs text-text-disabled">{postingHelpText}</p>
             </div>
           </div>
         </form>
@@ -210,19 +210,19 @@ export default function DiscussionsPage({
       )}
 
       {(page > 1 || discussions.length >= 20) && (
-        <div className="flex items-center justify-center gap-3 py-5 border-t border-zinc-800/60">
+        <div className="flex items-center justify-center gap-3 py-5 border-t border-border-default/60">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="px-4 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-1.5 rounded-lg text-xs font-medium bg-surface text-text-muted hover:bg-surface-hover hover:text-text-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             Previous
           </button>
-          <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 text-white">{page}</span>
+          <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-surface-hover text-text-primary">{page}</span>
           <button
             onClick={() => setPage((p) => p + 1)}
             disabled={discussions.length < 20}
-            className="px-4 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-1.5 rounded-lg text-xs font-medium bg-surface text-text-muted hover:bg-surface-hover hover:text-text-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             Next
           </button>

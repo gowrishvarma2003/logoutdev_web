@@ -46,7 +46,7 @@ export default function RenameNoteDialog({ open, onClose, initialTitle, onSubmit
           onChange={(event) => setTitle(event.target.value)}
           maxLength={200}
           placeholder="Untitled"
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-zinc-600"
+          className="w-full rounded-xl border border-border-default bg-app px-3.5 py-2.5 text-sm text-text-primary outline-none focus:border-border-strong"
         />
         {error ? <p className="mt-2 text-sm text-rose-400">{error}</p> : null}
         <div className="mt-5 flex justify-end gap-3">
@@ -54,14 +54,14 @@ export default function RenameNoteDialog({ open, onClose, initialTitle, onSubmit
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="rounded-xl bg-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white disabled:opacity-50"
+            className="rounded-xl bg-surface-hover px-4 py-2 text-sm font-semibold text-text-secondary transition-colors hover:bg-surface-active hover:text-text-primary disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={busy}
-            className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-200 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-60"
           >
             {busy ? <Spinner size="sm" /> : null}
             Save

@@ -136,21 +136,21 @@ export default function RepoLayout({
 
   return (
     <RepoContext.Provider value={{ repo, refetch }}>
-      <div className="min-h-screen bg-zinc-950">
+      <div className="min-h-screen bg-app">
         {/* Repo Header */}
-        <div className="border-b border-zinc-800 bg-zinc-950 pt-6">
+        <div className="border-b border-border-default bg-app pt-6">
           <div className="mx-auto max-w-[1280px] px-4 md:px-8">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-xl text-zinc-300">
-                <FolderIcon className="h-6 w-6 text-zinc-500" />
+              <div className="flex items-center gap-2 text-xl text-text-secondary">
+                <FolderIcon className="h-6 w-6 text-text-disabled" />
                 <Link href={`/profile/${repo.owner?.username || repo.owner_id}`} className="hover:text-blue-500 hover:underline">
                   {repo.owner?.username}
                 </Link>
-                <span className="text-zinc-500">/</span>
-                <Link href={`/repos/${repo.id}`} className="font-semibold text-white hover:text-blue-500 hover:underline">
+                <span className="text-text-disabled">/</span>
+                <Link href={`/repos/${repo.id}`} className="font-semibold text-text-primary hover:text-blue-500 hover:underline">
                   {repo.name}
                 </Link>
-                <span className="ml-2 rounded-full border border-zinc-700 px-2 py-0.5 text-xs font-medium capitalize text-zinc-400">
+                <span className="ml-2 rounded-full border border-border-strong px-2 py-0.5 text-xs font-medium capitalize text-text-muted">
                   {repo.visibility}
                 </span>
                 {repo.protected_default_branch ? (
@@ -185,18 +185,18 @@ export default function RepoLayout({
 
                     {showSpaceMenu ? (
                       <div
-                        className="absolute right-0 top-full z-30 mt-2 w-56 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/60"
+                        className="absolute right-0 top-full z-30 mt-2 w-56 overflow-hidden rounded-xl border border-border-default bg-app shadow-2xl shadow-black/60"
                         role="menu"
                       >
-                        <div className="border-b border-zinc-800 px-3 py-2">
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Space Collaboration</p>
+                        <div className="border-b border-border-default px-3 py-2">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-text-disabled">Space Collaboration</p>
                         </div>
                         <div className="py-1">
                           <Link
                             href={`/spaces/${repo.attached_space.id}`}
                             onClick={() => setShowSpaceMenu(false)}
                             role="menuitem"
-                            className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
+                            className="flex items-center gap-2 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-surface hover:text-text-primary"
                           >
                             Open Space Home
                           </Link>
@@ -204,7 +204,7 @@ export default function RepoLayout({
                             href={`/spaces/${repo.attached_space.id}/work`}
                             onClick={() => setShowSpaceMenu(false)}
                             role="menuitem"
-                            className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
+                            className="flex items-center gap-2 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-surface hover:text-text-primary"
                           >
                             View Work Planning
                           </Link>
@@ -212,7 +212,7 @@ export default function RepoLayout({
                             href={`/spaces/${repo.attached_space.id}/discussions`}
                             onClick={() => setShowSpaceMenu(false)}
                             role="menuitem"
-                            className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
+                            className="flex items-center gap-2 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-surface hover:text-text-primary"
                           >
                             Space Discussions
                           </Link>
@@ -221,7 +221,7 @@ export default function RepoLayout({
                               href={`/launches/new?spaceId=${encodeURIComponent(repo.attached_space.id)}&spaceName=${encodeURIComponent(repo.attached_space.name)}&repoId=${encodeURIComponent(repo.id)}&repoName=${encodeURIComponent(repo.name)}&repoDescription=${encodeURIComponent(repo.description || "")}`}
                               onClick={() => setShowSpaceMenu(false)}
                               role="menuitem"
-                              className="flex items-center gap-2 border-t border-zinc-900 px-3 py-2 text-xs font-semibold text-emerald-400 transition-colors hover:bg-zinc-900 hover:text-emerald-300"
+                              className="flex items-center gap-2 border-t border-border-subtle px-3 py-2 text-xs font-semibold text-emerald-400 transition-colors hover:bg-surface hover:text-emerald-300"
                             >
                               Launch Product
                             </Link>
@@ -234,36 +234,36 @@ export default function RepoLayout({
                 {repo.attached_space ? (
                   <Link
                     href={`/spaces/${repo.attached_space.id}/discussions`}
-                    className="flex h-[28px] items-center gap-1.5 rounded-md border border-zinc-700 bg-zinc-800 px-3 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+                    className="flex h-[28px] items-center gap-1.5 rounded-md border border-border-strong bg-surface-hover px-3 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-active hover:text-text-primary"
                   >
-                    <ChatBubbleLeftRightIcon className="h-4 w-4 text-zinc-400" />
+                    <ChatBubbleLeftRightIcon className="h-4 w-4 text-text-muted" />
                     <span>Discussions</span>
                   </Link>
                 ) : null}
-                <div className="flex h-[28px] overflow-hidden rounded-md border border-zinc-700 bg-zinc-800 text-xs font-medium text-zinc-300">
+                <div className="flex h-[28px] overflow-hidden rounded-md border border-border-strong bg-surface-hover text-xs font-medium text-text-secondary">
                   <button 
                     onClick={handleToggleStar}
                     disabled={isStarring}
-                    className="flex items-center gap-1.5 border-r border-zinc-700 px-3 hover:bg-zinc-700 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1.5 border-r border-border-strong px-3 hover:bg-surface-active transition-colors disabled:opacity-50"
                   >
                     <StarIcon className={`h-4 w-4 ${repo.is_starred ? "fill-yellow-500 text-yellow-500" : ""}`} />
                     {repo.is_starred ? "Unstar" : "Star"}
                   </button>
-                  <span className="flex items-center px-3 font-semibold bg-zinc-900">
+                  <span className="flex items-center px-3 font-semibold bg-surface">
                     {repo.star_count || 0}
                   </span>
                 </div>
 
-                <div className="flex h-[28px] overflow-hidden rounded-md border border-zinc-700 bg-zinc-800 text-xs font-medium text-zinc-300">
+                <div className="flex h-[28px] overflow-hidden rounded-md border border-border-strong bg-surface-hover text-xs font-medium text-text-secondary">
                   <button 
                     onClick={handleFork}
                     disabled={isForking}
-                    className="flex items-center gap-1.5 border-r border-zinc-700 px-3 hover:bg-zinc-700 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1.5 border-r border-border-strong px-3 hover:bg-surface-active transition-colors disabled:opacity-50"
                   >
                     {isForking ? <Spinner size="sm" /> : <ArrowsRightLeftIcon className="h-4 w-4" />}
                     Fork
                   </button>
-                  <Link href={`/repos/${repo.id}/forks`} className="flex items-center px-3 hover:bg-zinc-700 font-semibold bg-zinc-900 transition-colors">
+                  <Link href={`/repos/${repo.id}/forks`} className="flex items-center px-3 hover:bg-surface-active font-semibold bg-surface transition-colors">
                     {repo.fork_count || 0}
                   </Link>
                 </div>
@@ -287,11 +287,11 @@ export default function RepoLayout({
                     href={tab.href}
                     className={`flex whitespace-nowrap items-center gap-2 border-b-2 py-3 px-1 text-sm font-medium transition-colors ${
                       isActive
-                        ? "border-[#f78166] text-white"
-                        : "border-transparent text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+                        ? "border-[#f78166] text-text-primary"
+                        : "border-transparent text-text-muted hover:border-zinc-500 hover:text-text-secondary"
                     }`}
                   >
-                    <tab.icon className={`h-4 w-4 ${isActive ? "text-[#f78166]" : "text-zinc-500"}`} />
+                    <tab.icon className={`h-4 w-4 ${isActive ? "text-[#f78166]" : "text-text-disabled"}`} />
                     {tab.name}
                   </Link>
                 );

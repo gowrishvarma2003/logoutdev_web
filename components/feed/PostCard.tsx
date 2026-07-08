@@ -92,7 +92,7 @@ function PostContent({ text, hashtags, mentions, clickable }: { text: string; ha
   }
 
   return (
-    <p className="mt-1.5 text-[15px] text-zinc-100 leading-relaxed whitespace-pre-wrap break-words">
+    <p className="mt-1.5 text-[15px] text-text-primary leading-relaxed whitespace-pre-wrap break-words">
       {fragments}
     </p>
   );
@@ -128,8 +128,8 @@ export default function PostCard({
   return (
     <article
       onClick={clickable ? handleCardClick : undefined}
-      className={`relative border-b border-zinc-900/60 px-5 py-4.5 transition-all duration-200 ${
-        clickable ? "hover:bg-zinc-900/25 cursor-pointer" : ""
+      className={`relative border-b border-border-subtle/60 px-5 py-4.5 transition-all duration-200 ${
+        clickable ? "hover:bg-surface/25 cursor-pointer" : ""
       }`}
     >
       {post.is_repost && (
@@ -154,7 +154,7 @@ export default function PostCard({
               <Link
                 href={`/profile/${getAuthorHandle(post.author)}`}
                 onClick={(e) => e.stopPropagation()}
-                className="text-sm font-semibold leading-snug text-zinc-100 hover:text-white transition-colors hover:underline"
+                className="text-sm font-semibold leading-snug text-text-primary hover:text-text-primary transition-colors hover:underline"
               >
                 {post.author?.name ?? "Unknown"}
               </Link>
@@ -162,12 +162,12 @@ export default function PostCard({
             <Link
               href={`/profile/${getAuthorHandle(post.author)}`}
               onClick={(e) => e.stopPropagation()}
-              className="truncate text-xs leading-snug text-zinc-400 hover:text-zinc-300 transition-colors"
+              className="truncate text-xs leading-snug text-text-muted hover:text-text-secondary transition-colors"
             >
               @{getAuthorHandle(post.author)}
             </Link>
-            <span className="text-zinc-600 text-xs font-bold">·</span>
-            <span className="shrink-0 text-xs text-zinc-500 font-medium" title={new Date(post.created_at).toLocaleString()}>
+            <span className="text-text-disabled text-xs font-bold">·</span>
+            <span className="shrink-0 text-xs text-text-disabled font-medium" title={new Date(post.created_at).toLocaleString()}>
               {formatRelativeTime(post.created_at)}
             </span>
           </div>
@@ -182,28 +182,28 @@ export default function PostCard({
           {(post.entity_tags?.length ? post.entity_tags : post.linked_entity ? [post.linked_entity] : []).map((entity) => <div className="mt-3" key={`${entity.type}:${entity.id}`} onClick={(event) => event.stopPropagation()}><LinkedEntityCard entity={entity} compact /></div>)}
 
           {post.images && post.images.length > 0 && (
-            <div 
-              className={`mt-3.5 grid gap-2 overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950/40 p-1 ${
+            <div
+              className={`mt-3.5 grid gap-2 overflow-hidden rounded-2xl border border-border-default/80 bg-app/40 p-1 ${
                 post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"
               }`}
               onClick={(event) => event.stopPropagation()}
             >
               {post.images.map((image, index) => (
-                <button 
-                  key={image.id} 
-                  type="button" 
-                  onClick={() => setLightboxImage(image.url)} 
+                <button
+                  key={image.id}
+                  type="button"
+                  onClick={() => setLightboxImage(image.url)}
                   className={`group relative ${
                     post.images?.length === 3 && index === 0 ? "col-span-2" : ""
-                  } overflow-hidden rounded-xl bg-zinc-900/60 border border-zinc-800/40`} 
+                  } overflow-hidden rounded-xl bg-surface/60 border border-border-default/40`}
                   aria-label={`Open image ${index + 1}`}
                 >
-                  <img 
-                    src={image.url} 
-                    alt={`Post image ${index + 1}`} 
+                  <img
+                    src={image.url}
+                    alt={`Post image ${index + 1}`}
                     className={`w-full object-cover transition-transform duration-300 group-hover:scale-[1.015] ${
                       post.images?.length === 1 ? "max-h-[520px]" : "h-48"
-                    }`} 
+                    }`}
                   />
                   <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                 </button>
@@ -227,7 +227,7 @@ export default function PostCard({
                 e.stopPropagation();
                 setMenuOpen((open) => !open);
               }}
-              className="rounded-full p-2 text-zinc-500 transition-all hover:bg-zinc-900/80 hover:text-zinc-300 active:scale-90 cursor-pointer"
+              className="rounded-full p-2 text-text-disabled transition-all hover:bg-surface/80 hover:text-text-secondary active:scale-90 cursor-pointer"
               aria-label="Post options"
             >
               <DotsIcon className="h-4 w-4" />
@@ -242,7 +242,7 @@ export default function PostCard({
                     setMenuOpen(false);
                   }}
                 />
-                <div className="absolute right-0 top-9 z-20 w-44 overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/95 backdrop-blur-xl shadow-2xl p-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="absolute right-0 top-9 z-20 w-44 overflow-hidden rounded-xl border border-border-default/80 bg-app/95 backdrop-blur-xl shadow-2xl p-1 animate-in fade-in slide-in-from-top-1 duration-150">
                   <button
                     onClick={handleDelete}
                     disabled={isDeleting}
@@ -260,7 +260,7 @@ export default function PostCard({
 
       {replyOpen && (
         <div
-          className="ml-[52px] mt-3 border-t border-zinc-800 pt-3"
+          className="ml-[52px] mt-3 border-t border-border-default pt-3"
           onClick={(e) => e.stopPropagation()}
         >
           <ComposeBox
@@ -277,21 +277,21 @@ export default function PostCard({
         </div>
       )}
       {lightboxImage && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 cursor-zoom-out" 
-          role="dialog" 
-          aria-modal="true" 
-          aria-label="Post image preview" 
-          onClick={(event) => { 
-            event.stopPropagation(); 
-            setLightboxImage(null); 
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 cursor-zoom-out"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Post image preview"
+          onClick={(event) => {
+            event.stopPropagation();
+            setLightboxImage(null);
           }}
         >
           <img src={lightboxImage} alt="Expanded post image" className="max-h-full max-w-full object-contain rounded-lg shadow-2xl" />
-          <button 
-            type="button" 
-            className="absolute right-5 top-5 rounded-full bg-zinc-900/80 backdrop-blur-md border border-zinc-800 px-4 py-2 text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-800 transition-all cursor-pointer shadow-lg" 
-            aria-label="Close image preview" 
+          <button
+            type="button"
+            className="absolute right-5 top-5 rounded-full bg-surface/80 backdrop-blur-md border border-border-default px-4 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-all cursor-pointer shadow-lg"
+            aria-label="Close image preview"
             onClick={() => setLightboxImage(null)}
           >
             Close
@@ -300,26 +300,26 @@ export default function PostCard({
       )}
 
       {showDeleteConfirm && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in"
           onClick={(e) => {
             e.stopPropagation();
             setShowDeleteConfirm(false);
           }}
         >
-          <div 
-            className="w-full max-w-sm rounded-2xl border border-rose-500/20 bg-zinc-950 p-6 shadow-2xl shadow-rose-950/10 transition-all duration-200"
+          <div
+            className="w-full max-w-sm rounded-2xl border border-rose-500/20 bg-app p-6 shadow-2xl shadow-rose-950/10 transition-all duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-base font-bold text-white mb-2">Delete Post?</h3>
-            <p className="text-xs text-zinc-400 mb-5 leading-relaxed">
+            <h3 className="text-base font-bold text-text-primary mb-2">Delete Post?</h3>
+            <p className="text-xs text-text-muted mb-5 leading-relaxed">
               Are you sure you want to delete this post? This action cannot be undone and it will be permanently removed from the feed.
             </p>
             <div className="flex gap-3 justify-end">
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
-                className="rounded-xl bg-zinc-900/80 border border-zinc-800 hover:bg-zinc-850 px-4.5 py-2 text-xs font-semibold text-zinc-400 hover:text-zinc-350 transition-colors cursor-pointer"
+                className="rounded-xl bg-surface/80 border border-border-default hover:bg-surface-hover px-4 py-2 text-xs font-semibold text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -340,7 +340,7 @@ export default function PostCard({
                   }
                 }}
                 disabled={isDeleting}
-                className="rounded-xl bg-rose-600 hover:bg-rose-700 border border-rose-600/30 px-4.5 py-2 text-xs font-bold text-white hover:scale-[1.01] active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                className="rounded-xl bg-rose-600 hover:bg-rose-700 border border-rose-600/30 px-4 py-2 text-xs font-bold text-text-primary hover:scale-[1.01] active:scale-95 transition-all cursor-pointer disabled:opacity-50"
               >
                 {isDeleting ? "Deleting..." : "Delete Post"}
               </button>

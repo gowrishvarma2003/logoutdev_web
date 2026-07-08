@@ -33,10 +33,10 @@ export default function LaunchHero({ launch }: { launch: Launch }) {
       : (launch.went_live_at ?? launch.published_at ?? launch.created_at)
   );
 
-  const stageStyle = STAGE_STYLES[launch.development_stage] ?? "bg-zinc-800/80 text-zinc-300 border-zinc-700/80";
+  const stageStyle = STAGE_STYLES[launch.development_stage] ?? "bg-surface-hover/80 text-text-secondary border-border-strong/80";
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-gradient-to-b from-zinc-900/60 to-zinc-950/60 backdrop-blur-md">
+    <section className="relative overflow-hidden rounded-3xl border border-border-default/80 bg-gradient-to-b from-zinc-900/60 to-zinc-950/60 backdrop-blur-md">
       {/* Visual background accents */}
       <div className="absolute top-0 right-0 -z-10 h-72 w-72 rounded-full bg-sky-500/5 blur-3xl" />
       <div className="absolute bottom-0 left-0 -z-10 h-72 w-72 rounded-full bg-emerald-500/5 blur-3xl" />
@@ -74,11 +74,11 @@ export default function LaunchHero({ launch }: { launch: Launch }) {
               Open Source
             </span>
           ) : null}
-          <span className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-1 text-xs text-zinc-400">
+          <span className="inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface/60 px-3 py-1 text-xs text-text-muted">
             {isBeta && !hasLiveAccess ? (
-              <LockIcon className="h-3 w-3 text-zinc-500" />
+              <LockIcon className="h-3 w-3 text-text-disabled" />
             ) : (
-              <GlobeIcon className="h-3 w-3 text-zinc-500" />
+              <GlobeIcon className="h-3 w-3 text-text-disabled" />
             )}
             {isBeta && !hasLiveAccess ? "Beta Access Only" : "Publicly Available"}
           </span>
@@ -86,24 +86,24 @@ export default function LaunchHero({ launch }: { launch: Launch }) {
 
         {/* Title + tagline */}
         <div className="space-y-3">
-          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
             {launch.name}
           </h1>
           {launch.tagline && (
-            <p className="max-w-3xl text-lg leading-relaxed text-zinc-300 font-light">
+            <p className="max-w-3xl text-lg leading-relaxed text-text-secondary font-light">
               {launch.tagline}
             </p>
           )}
         </div>
 
         {/* Meta line */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-zinc-800/60 pt-4 text-sm text-zinc-500">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-border-default/60 pt-4 text-sm text-text-disabled">
           {launch.builder && (
             <span className="flex items-center gap-1.5">
               <span>By</span>
               <Link
                 href={`/profile/${launch.builder.username || launch.builder.id}`}
-                className="font-semibold text-zinc-300 hover:text-white transition-colors underline decoration-zinc-700 hover:decoration-white"
+                className="font-semibold text-text-secondary hover:text-text-primary transition-colors underline decoration-border-strong hover:decoration-white"
               >
                 {launch.builder.name}
               </Link>
@@ -111,7 +111,7 @@ export default function LaunchHero({ launch }: { launch: Launch }) {
           )}
           {launchDate && (
             <span className="inline-flex items-center gap-1.5">
-              <CalendarIcon className="h-4 w-4 text-zinc-600" />
+              <CalendarIcon className="h-4 w-4 text-text-disabled" />
               <span>{isBeta ? "Beta Opened" : "Launched"} {launchDate}</span>
             </span>
           )}

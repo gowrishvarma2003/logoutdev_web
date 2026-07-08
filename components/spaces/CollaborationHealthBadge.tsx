@@ -62,21 +62,21 @@ export default function CollaborationHealthBadge({
   /* ── Full card ── */
   return (
     <div
-      className={`rounded-xl border ${style.border} bg-zinc-900/20 p-4 transition-all duration-300 hover:border-zinc-700/80`}
+      className={`rounded-xl border ${style.border} bg-surface/20 p-4 transition-all duration-300 hover:border-border-strong/80`}
     >
       {/* ── Header Row ── */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <BoltIcon className={`w-3.5 h-3.5 ${style.text}`} />
-          <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+          <span className="text-xs font-bold uppercase tracking-wider text-text-muted">
             Collaboration Health
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`text-lg font-extrabold text-white`}>
+          <span className={`text-lg font-extrabold text-text-primary`}>
             {health.score}
           </span>
-          <span className="text-xs text-zinc-500">/100</span>
+          <span className="text-xs text-text-disabled">/100</span>
           <span
             className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}
           >
@@ -86,7 +86,7 @@ export default function CollaborationHealthBadge({
       </div>
 
       {/* ── Progress Bar ── */}
-      <div className="h-1 w-full bg-zinc-800/80 rounded-full overflow-hidden mb-4">
+      <div className="h-1 w-full bg-surface-hover/80 rounded-full overflow-hidden mb-4">
         <div
           className={`h-full rounded-full transition-all duration-1000 ease-out ${style.bar}`}
           style={{ width: `${Math.min(health.score, 100)}%` }}
@@ -96,7 +96,7 @@ export default function CollaborationHealthBadge({
       {/* ── Health Factors ── */}
       {health.factors && Object.keys(health.factors).length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-2">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-text-disabled mb-2">
             Health Factors
           </p>
           {Object.entries(health.factors).map(([key, val], index) => {
@@ -106,14 +106,14 @@ export default function CollaborationHealthBadge({
             return (
               <div key={key} className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-zinc-400 capitalize font-medium">
+                  <span className="text-[11px] text-text-muted capitalize font-medium">
                     {key.replace(/_/g, " ")}
                   </span>
-                  <span className="text-[11px] font-bold text-white">
+                  <span className="text-[11px] font-bold text-text-primary">
                     {numVal.toFixed(0)}
                   </span>
                 </div>
-                <div className="h-1 w-full bg-zinc-800/80 rounded-full overflow-hidden">
+                <div className="h-1 w-full bg-surface-hover/80 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-700 ease-out ${factorBarColor(numVal)}`}
                     style={{
@@ -130,8 +130,8 @@ export default function CollaborationHealthBadge({
 
       {/* ── Activity Metrics ── */}
       {health.metrics && Object.keys(health.metrics).length > 0 && (
-        <div className="mt-3 pt-3 border-t border-zinc-800/50">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-2">
+        <div className="mt-3 pt-3 border-t border-border-default/50">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-text-disabled mb-2">
             Activity Metrics
           </p>
           <div className="grid grid-cols-2 gap-2">
@@ -140,12 +140,12 @@ export default function CollaborationHealthBadge({
               .map(([key, value]) => (
                 <div
                   key={key}
-                  className="px-2.5 py-2 rounded-lg bg-zinc-950/30"
+                  className="px-2.5 py-2 rounded-lg bg-app/30"
                 >
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-zinc-500">
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-text-disabled">
                     {key.replace(/_/g, " ")}
                   </p>
-                  <p className="text-xs font-bold text-white mt-0.5">
+                  <p className="text-xs font-bold text-text-primary mt-0.5">
                     {value}
                   </p>
                 </div>

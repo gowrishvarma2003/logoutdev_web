@@ -13,7 +13,7 @@ interface ProfileBandChipProps {
 const BAND_STYLES: Record<ProofOfWorkBand, { text: string; ring: string; bg: string }> = {
   Strong: { text: "text-emerald-300", ring: "border-emerald-500/30", bg: "bg-emerald-500/10" },
   Growing: { text: "text-sky-300", ring: "border-sky-500/30", bg: "bg-sky-500/10" },
-  Early: { text: "text-zinc-400", ring: "border-zinc-700", bg: "bg-zinc-800/60" },
+  Early: { text: "text-text-muted", ring: "border-border-strong", bg: "bg-surface-hover/60" },
 };
 
 export default function ProfileBandChip({ band, badge, score, className = "" }: ProfileBandChipProps) {
@@ -27,7 +27,7 @@ export default function ProfileBandChip({ band, badge, score, className = "" }: 
       <SparklesIcon className="w-3 h-3" />
       {label}
       {typeof score === "number" ? (
-        <span className="text-zinc-500 font-normal">· {score}</span>
+        <span className="text-text-disabled font-normal">· {score}</span>
       ) : null}
     </span>
   );

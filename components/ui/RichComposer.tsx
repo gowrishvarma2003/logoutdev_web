@@ -112,7 +112,7 @@ const RichComposer = forwardRef<RichComposerHandle, RichComposerProps>(function 
         <div
           id={placeholderId}
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-0 whitespace-pre-wrap break-words text-zinc-500 ${previewClassName}`}
+          className={`pointer-events-none absolute inset-0 whitespace-pre-wrap break-words text-text-disabled ${previewClassName}`}
         >
           {placeholder}
         </div>

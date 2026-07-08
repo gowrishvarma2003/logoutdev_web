@@ -13,7 +13,7 @@ function badgeClass(kind: "danger" | "warning" | "info" | "neutral" | "success")
   if (kind === "warning") return "bg-amber-500/10 text-amber-300";
   if (kind === "success") return "bg-emerald-500/10 text-emerald-300";
   if (kind === "info") return "bg-sky-500/10 text-sky-300";
-  return "bg-zinc-800 text-zinc-300";
+  return "bg-surface-hover text-text-secondary";
 }
 
 export default function WorkItemCard({
@@ -60,14 +60,14 @@ export default function WorkItemCard({
   return (
     <article
       onClick={handleCardClick}
-      className="cursor-pointer border-b border-zinc-800/60 px-4 py-4 transition-colors hover:bg-zinc-800/30">
+      className="cursor-pointer border-b border-border-default/60 px-4 py-4 transition-colors hover:bg-surface-hover/30">
       <div className="flex items-start gap-3">
         {selectable ? (
           <input
             type="checkbox"
             checked={selected}
             onChange={(event) => onSelectedChange?.(event.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-zinc-700 bg-zinc-950 text-white"
+            className="mt-1 h-4 w-4 rounded border-border-strong bg-app text-text-primary"
           />
         ) : null}
 
@@ -75,7 +75,7 @@ export default function WorkItemCard({
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <IssueStatusBadge status={issue.status} />
             <IssuePriorityBadge priority={issue.priority} />
-            <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-zinc-300">
+            <span className="rounded-full bg-surface-hover px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-text-secondary">
               {issue.type}
             </span>
             {issue.good_first_task ? (
@@ -120,10 +120,10 @@ export default function WorkItemCard({
 
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <Link href={href} className="text-sm font-semibold text-white transition-colors hover:text-sky-300">
+              <Link href={href} className="text-sm font-semibold text-text-primary transition-colors hover:text-sky-300">
                 {issue.title}
               </Link>
-              <RichText text={issue.body} className="mt-1 line-clamp-2 whitespace-pre-line text-sm text-zinc-400" />
+              <RichText text={issue.body} className="mt-1 line-clamp-2 whitespace-pre-line text-sm text-text-muted" />
             </div>
 
             <div className="shrink-0">
@@ -131,7 +131,7 @@ export default function WorkItemCard({
             </div>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-zinc-500">
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-text-disabled">
             <span>Opened {formatRelativeTime(issue.created_at)}</span>
             <span>By {issue.author?.name ?? "Unknown"}</span>
             <span>{issue.assignee ? `Assigned to ${issue.assignee.name}` : "Unassigned"}</span>
@@ -185,7 +185,7 @@ export default function WorkItemCard({
                 <button
                   onClick={onAssignToMe}
                   disabled={isBusy}
-                  className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800 disabled:opacity-50"
+                  className="rounded-lg border border-border-strong bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-hover disabled:opacity-50"
                 >
                   {busyAction === "assign" ? "Assigning..." : "Assign to me"}
                 </button>

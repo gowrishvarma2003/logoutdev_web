@@ -50,17 +50,17 @@ function NavItem({
 }: NavItemProps) {
   const badgeClass =
     badgeTone === "action"
-      ? "bg-amber-400 text-zinc-950"
-      : "bg-rose-500 text-white";
+      ? "bg-amber-400 text-primary-foreground"
+      : "bg-rose-500 text-text-primary";
 
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/60
         ${
           active
-            ? "bg-zinc-800 text-white"
-            : "text-zinc-400 hover:bg-zinc-800/60 hover:text-white"
+            ? "bg-surface-active text-text-primary shadow-sm"
+            : "text-text-muted hover:bg-surface-hover hover:text-text-primary"
         }`}
     >
       <span className="relative inline-flex items-center">
@@ -150,7 +150,7 @@ export default function Sidebar({
         <form onSubmit={handleSearchSubmit} className="mb-6 px-1">
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500"
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-disabled"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -170,10 +170,10 @@ export default function Sidebar({
               onChange={(e) => setSearchValue(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 pl-9 pr-3 text-sm text-white outline-none transition-colors focus:border-zinc-700"
+              className="w-full rounded-xl border border-border-default bg-surface py-2.5 pl-9 pr-3 text-sm text-text-primary outline-none transition-colors focus:border-border-strong"
             />
             {!searchValue && !isFocused && (
-              <div className="absolute left-9 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-zinc-500 flex items-center gap-1">
+              <div className="absolute left-9 top-1/2 -translate-y-1/2 pointer-events-none text-sm text-text-disabled flex items-center gap-1">
                 <span>Search</span>
                 <span
                   className={`inline-block transition-all duration-300 ${
@@ -226,7 +226,7 @@ export default function Sidebar({
         </div>
 
         {/* Build section */}
-        <div className="my-1 mx-3 border-t border-zinc-800/60" />
+        <div className="my-1 mx-3 border-t border-border-subtle" />
         <div className="flex flex-col gap-1">
           <NavItem
             href="/launches"
@@ -263,7 +263,7 @@ export default function Sidebar({
         {/* Compose CTA */}
         <Link
           href="/feed"
-          className="mt-6 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white text-zinc-950 text-sm font-semibold hover:bg-zinc-100 transition-colors"
+          className="mt-6 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover transition-colors"
         >
           <PencilSquareIcon className="w-4 h-4" />
           New Post
@@ -282,24 +282,24 @@ export default function Sidebar({
         <div className="flex-1" />
 
         {/* User footer */}
-        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-zinc-800/60 transition-colors group">
+        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-surface-hover/60 transition-colors group">
           <Link
             href={`/profile/${user.username || user.id}`}
             className="flex flex-1 items-center gap-2.5 min-w-0"
           >
             <Avatar user={user} size="sm" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white truncate">
+              <p className="text-sm font-semibold text-text-primary truncate">
                 {user.name}
               </p>
-              <p className="text-xs text-zinc-500 truncate">
+              <p className="text-xs text-text-disabled truncate">
                 @{user.username || emailToHandle(user.email)}
               </p>
             </div>
           </Link>
           <button
             onClick={() => setShowLogoutConfirm(true)}
-            className="p-1.5 rounded-full hover:bg-rose-600/35 text-zinc-500 hover:text-rose-400 cursor-pointer transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+            className="p-1.5 rounded-full hover:bg-rose-600/35 text-text-disabled hover:text-rose-400 cursor-pointer transition-colors opacity-0 group-hover:opacity-100 shrink-0"
             title="Sign out"
             aria-label="Sign out"
           >
@@ -312,27 +312,27 @@ export default function Sidebar({
       {showLogoutConfirm &&
         createPortal(
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
             onClick={() => setShowLogoutConfirm(false)}
           >
             <div
-              className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
+              className="w-full max-w-sm rounded-2xl border border-border-default bg-app p-6 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10 text-rose-500 mb-4">
                 <LogOutIcon className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-bold text-white text-center mb-2">
+              <h3 className="text-lg font-bold text-text-primary text-center mb-2">
                 Sign Out
               </h3>
-              <p className="text-sm text-zinc-400 text-center mb-6">
+              <p className="text-sm text-text-muted text-center mb-6">
                 Are you sure you want to sign out of your account?
               </p>
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setShowLogoutConfirm(false)}
-                  className="flex-1 rounded-xl bg-zinc-800 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+                  className="flex-1 rounded-xl bg-surface-hover py-2.5 text-sm font-semibold text-text-secondary transition-colors hover:bg-surface-active hover:text-text-primary"
                 >
                   Cancel
                 </button>
@@ -342,7 +342,7 @@ export default function Sidebar({
                     setShowLogoutConfirm(false);
                     onLogout();
                   }}
-                  className="flex-1 rounded-xl bg-rose-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-500"
+                  className="flex-1 rounded-xl bg-rose-600 py-2.5 text-sm font-semibold text-text-primary transition-colors hover:bg-rose-500"
                 >
                   Sign out
                 </button>

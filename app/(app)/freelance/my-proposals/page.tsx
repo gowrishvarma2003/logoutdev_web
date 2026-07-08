@@ -18,8 +18,8 @@ export default function MyFreelanceProposalsPage() {
   return (
     <div className="mx-auto max-w-4xl p-4">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">My Proposals</h1>
-        <p className="mt-1 text-sm text-zinc-500">Track where you have applied and jump into awarded workspaces.</p>
+        <h1 className="text-2xl font-bold text-text-primary">My Proposals</h1>
+        <p className="mt-1 text-sm text-text-disabled">Track where you have applied and jump into awarded workspaces.</p>
       </div>
 
       {loading && (
@@ -32,30 +32,30 @@ export default function MyFreelanceProposalsPage() {
 
       <div className="space-y-4">
         {proposals.map((proposal) => (
-          <div key={proposal.id} className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5">
+          <div key={proposal.id} className="rounded-2xl border border-border-default bg-surface/60 p-5">
             <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <h2 className="text-lg font-semibold text-white">
+                  <h2 className="text-lg font-semibold text-text-primary">
                     {proposal.project?.title || "Untitled project"}
                   </h2>
                   <ProposalStatusBadge status={proposal.status} />
                 </div>
-                <p className="text-sm text-zinc-400">{proposal.project?.summary}</p>
+                <p className="text-sm text-text-muted">{proposal.project?.summary}</p>
               </div>
               <div className="text-right">
-                <p className="text-sm font-semibold text-white">
+                <p className="text-sm font-semibold text-text-primary">
                   {formatCurrencyFromCents(proposal.bid_amount_cents, proposal.currency_code)}
                   {proposal.pricing_model === "hourly" ? "/hr" : ""}
                 </p>
-                <p className="mt-1 text-xs text-zinc-500">{formatRelativeTime(proposal.updated_at)}</p>
+                <p className="mt-1 text-xs text-text-disabled">{formatRelativeTime(proposal.updated_at)}</p>
               </div>
             </div>
 
-            <p className="mb-4 line-clamp-3 text-sm text-zinc-300">{proposal.cover_note}</p>
+            <p className="mb-4 line-clamp-3 text-sm text-text-secondary">{proposal.cover_note}</p>
 
             <div className="flex flex-wrap gap-2">
-              <Link href={`/freelance/${proposal.project_id}`} className="rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800">
+              <Link href={`/freelance/${proposal.project_id}`} className="rounded-xl border border-border-strong px-3 py-2 text-sm text-text-secondary hover:bg-surface-hover">
                 View Project
               </Link>
               {proposal.project?.linked_space_id && proposal.status === "accepted" && (

@@ -122,8 +122,8 @@ function ViewButton({
       onClick={onClick}
       className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
         active
-          ? "border-white bg-white text-zinc-950"
-          : "border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800"
+          ? "border-white bg-primary text-primary-foreground"
+          : "border-border-default bg-surface text-text-secondary hover:border-border-strong hover:bg-surface-hover"
       }`}
     >
       {icon}
@@ -144,10 +144,10 @@ function CompactWorkLink({
   return (
     <Link
       href={href}
-      className="block rounded-2xl border border-zinc-800 bg-zinc-950/60 px-3 py-3 transition-colors hover:border-zinc-700 hover:bg-zinc-950"
+      className="block rounded-2xl border border-border-default bg-app/60 px-3 py-3 transition-colors hover:border-border-strong hover:bg-app"
     >
-      <p className="text-sm font-semibold text-white">{title}</p>
-      <p className="mt-1 text-xs text-zinc-500">{meta}</p>
+      <p className="text-sm font-semibold text-text-primary">{title}</p>
+      <p className="mt-1 text-xs text-text-disabled">{meta}</p>
     </Link>
   );
 }
@@ -578,28 +578,28 @@ export default function WorkPage({
   const emptyStateAction = hasActiveFilters ? (
     <button
       onClick={clearFilters}
-      className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
+      className="rounded-lg border border-border-strong px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-hover"
     >
       Reset filters
     </button>
   ) : !user ? (
     <Link
       href="/login"
-      className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+      className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
     >
       Sign in to contribute
     </Link>
   ) : canBulkManage ? (
     <button
       onClick={() => setShowComposer(true)}
-      className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+      className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
     >
       Add the first work item
     </button>
   ) : (
     <button
       onClick={() => updateFilters({ readiness: "ready", page: 1, view: "list" })}
-      className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
+      className="rounded-lg border border-border-strong px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-hover"
     >
       Show ready work
     </button>
@@ -655,7 +655,7 @@ export default function WorkPage({
           user ? (
             <button
               onClick={() => setShowComposer((current) => !current)}
-              className="flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+              className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
             >
               <PlusIcon className="h-3.5 w-3.5" />
               Add work
@@ -664,7 +664,7 @@ export default function WorkPage({
         }
       />
 
-      <div className="space-y-3 border-b border-zinc-800 px-4 py-4">
+      <div className="space-y-3 border-b border-border-default px-4 py-4">
         {/* View mode buttons - always visible */}
         <div className="flex flex-wrap items-center gap-2">
           {VIEW_OPTIONS.map((option) => (
@@ -685,7 +685,7 @@ export default function WorkPage({
           {user ? (
             <button
               onClick={() => updateFilters({ assignee: "me", page: 1, view: "list" })}
-              className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
+              className="rounded-lg border border-border-default bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-hover"
             >
               My work
             </button>
@@ -698,12 +698,12 @@ export default function WorkPage({
           {summary || summaryLoading ? (
             <button
               onClick={() => setShowMetrics((current) => !current)}
-              className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-700 hover:bg-zinc-900"
+              className="flex items-center gap-2 rounded-lg border border-border-default bg-surface/50 px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:border-border-strong hover:bg-surface"
             >
-              <BarChartIcon className="h-4 w-4 text-zinc-500" />
+              <BarChartIcon className="h-4 w-4 text-text-disabled" />
               <span>Metrics</span>
               <ChevronDownIcon
-                className={`h-4 w-4 text-zinc-500 transition-transform duration-200 ${showMetrics ? "rotate-180" : ""}`}
+                className={`h-4 w-4 text-text-disabled transition-transform duration-200 ${showMetrics ? "rotate-180" : ""}`}
               />
             </button>
           ) : null}
@@ -716,12 +716,12 @@ export default function WorkPage({
               className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm transition-colors ${
                 hasActiveFilters
                   ? "border-sky-500/30 bg-sky-500/10 text-sky-300"
-                  : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200"
+                  : "border-border-default bg-surface/40 text-text-muted hover:text-text-secondary"
               }`}
             >
               Filters
               {activeFilterCount > 0 && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-[10px] font-bold text-white">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-[10px] font-bold text-text-primary">
                   {activeFilterCount}
                 </span>
               )}
@@ -731,24 +731,24 @@ export default function WorkPage({
             {filtersOpen && (
               <>
                 <div className="fixed inset-0 z-10 cursor-pointer" onClick={() => setFiltersOpen(false)} />
-                <div className="absolute left-0 top-full z-20 mt-2 w-[600px] overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 p-4 shadow-xl">
+                <div className="absolute left-0 top-full z-20 mt-2 w-[600px] overflow-hidden rounded-xl border border-border-strong bg-surface p-4 shadow-xl">
                   <div className="space-y-3">
                     <div className="grid gap-2 md:grid-cols-5">
                       <label className="relative col-span-2">
-                        <SearchIcon className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
+                        <SearchIcon className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-text-disabled" />
                         <input
                           type="search"
                           value={searchInput}
                           onChange={(event) => setSearchInput(event.target.value)}
                           placeholder="Search title, description, reporter, or assignee"
-                          className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-9 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+                          className="w-full rounded-lg border border-border-strong bg-surface-hover px-9 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
                         />
                       </label>
 
                       <select
                         value={filters.sort}
                         onChange={(event) => updateFilters({ sort: event.target.value, page: 1 })}
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                        className="w-full rounded-lg border border-border-strong bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
                       >
                         {SORT_OPTIONS.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -760,7 +760,7 @@ export default function WorkPage({
                       <select
                         value={filters.status || ""}
                         onChange={(event) => updateFilters({ status: event.target.value || null, page: 1 })}
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                        className="w-full rounded-lg border border-border-strong bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
                       >
                         {STATUS_OPTIONS.map((option) => (
                           <option key={option.label} value={option.value}>
@@ -772,7 +772,7 @@ export default function WorkPage({
                       <select
                         value={filters.priority || ""}
                         onChange={(event) => updateFilters({ priority: event.target.value || null, page: 1 })}
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                        className="w-full rounded-lg border border-border-strong bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
                       >
                         {PRIORITY_OPTIONS.map((option) => (
                           <option key={option.label} value={option.value}>
@@ -786,7 +786,7 @@ export default function WorkPage({
                       <select
                         value={filters.type || ""}
                         onChange={(event) => updateFilters({ type: event.target.value || null, page: 1 })}
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                        className="w-full rounded-lg border border-border-strong bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
                       >
                         {TYPE_OPTIONS.map((option) => (
                           <option key={option.label} value={option.value}>
@@ -798,7 +798,7 @@ export default function WorkPage({
                       <select
                         value={filters.repo_id || ""}
                         onChange={(event) => updateFilters({ repo_id: event.target.value || null, page: 1 })}
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                        className="w-full rounded-lg border border-border-strong bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
                       >
                         <option value="">All repos</option>
                         {repos.map((repo) => (
@@ -811,7 +811,7 @@ export default function WorkPage({
                       <select
                         value={filters.assignee || ""}
                         onChange={(event) => updateFilters({ assignee: event.target.value || null, page: 1 })}
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                        className="w-full rounded-lg border border-border-strong bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
                       >
                         <option value="">Any assignee</option>
                         <option value="unassigned">Unassigned</option>
@@ -828,7 +828,7 @@ export default function WorkPage({
                         value={filters.needed_skill || ""}
                         onChange={(event) => updateFilters({ needed_skill: event.target.value || null, page: 1 })}
                         placeholder="Needed skill"
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-zinc-600"
+                        className="w-full rounded-lg border border-border-strong bg-surface-hover px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled outline-none focus:border-border-strong"
                       />
                     </div>
 
@@ -836,7 +836,7 @@ export default function WorkPage({
                       <select
                         value={filters.due_state || ""}
                         onChange={(event) => updateFilters({ due_state: event.target.value || null, page: 1 })}
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                        className="w-full rounded-lg border border-border-strong bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
                       >
                         {DUE_OPTIONS.map((option) => (
                           <option key={option.label} value={option.value}>
@@ -848,7 +848,7 @@ export default function WorkPage({
                       <select
                         value={filters.readiness || ""}
                         onChange={(event) => updateFilters({ readiness: event.target.value || null, page: 1 })}
-                        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+                        className="w-full rounded-lg border border-border-strong bg-surface-hover px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
                       >
                         {READINESS_OPTIONS.map((option) => (
                           <option key={option.label} value={option.value}>
@@ -858,39 +858,39 @@ export default function WorkPage({
                       </select>
 
                       <div className="col-span-2 flex flex-wrap items-center gap-2">
-                        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300">
+                        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border-strong bg-surface-hover px-2.5 py-1.5 text-xs text-text-secondary">
                           <input
                             type="checkbox"
                             checked={Boolean(filters.good_first)}
                             onChange={(event) => updateFilters({ good_first: event.target.checked || null, page: 1 })}
-                            className="h-3.5 w-3.5 rounded border-zinc-600 bg-zinc-700 text-white"
+                            className="h-3.5 w-3.5 rounded border-border-strong bg-surface-active text-text-primary"
                           />
                           Good first
                         </label>
-                        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300">
+                        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border-strong bg-surface-hover px-2.5 py-1.5 text-xs text-text-secondary">
                           <input
                             type="checkbox"
                             checked={Boolean(filters.help_wanted)}
                             onChange={(event) => updateFilters({ help_wanted: event.target.checked || null, page: 1 })}
-                            className="h-3.5 w-3.5 rounded border-zinc-600 bg-zinc-700 text-white"
+                            className="h-3.5 w-3.5 rounded border-border-strong bg-surface-active text-text-primary"
                           />
                           Help wanted
                         </label>
-                        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300">
+                        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border-strong bg-surface-hover px-2.5 py-1.5 text-xs text-text-secondary">
                           <input
                             type="checkbox"
                             checked={Boolean(filters.blocked)}
                             onChange={(event) => updateFilters({ blocked: event.target.checked || null, page: 1 })}
-                            className="h-3.5 w-3.5 rounded border-zinc-600 bg-zinc-700 text-white"
+                            className="h-3.5 w-3.5 rounded border-border-strong bg-surface-active text-text-primary"
                           />
                           Blocked
                         </label>
-                        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5 text-xs text-zinc-300">
+                        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border-strong bg-surface-hover px-2.5 py-1.5 text-xs text-text-secondary">
                           <input
                             type="checkbox"
                             checked={Boolean(filters.stale)}
                             onChange={(event) => updateFilters({ stale: event.target.checked || null, page: 1 })}
-                            className="h-3.5 w-3.5 rounded border-zinc-600 bg-zinc-700 text-white"
+                            className="h-3.5 w-3.5 rounded border-border-strong bg-surface-active text-text-primary"
                           />
                           Stale
                         </label>
@@ -901,7 +901,7 @@ export default function WorkPage({
                       <button
                         type="button"
                         onClick={() => { clearFilters(); setFiltersOpen(false); }}
-                        className="w-full rounded-lg border border-zinc-700 py-2 text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                        className="w-full rounded-lg border border-border-strong py-2 text-sm text-text-muted transition-colors hover:bg-surface-hover hover:text-text-secondary"
                       >
                         Clear filters
                       </button>
@@ -940,18 +940,18 @@ export default function WorkPage({
                         <button
                           key={item.label}
                           onClick={() => updateFilters(item.patch)}
-                          className="rounded-2xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-left transition-colors hover:border-zinc-700 hover:bg-zinc-900"
+                          className="rounded-2xl border border-border-default bg-surface/50 px-4 py-3 text-left transition-colors hover:border-border-strong hover:bg-surface"
                         >
-                          <p className="text-[11px] uppercase tracking-wide text-zinc-500">{item.label}</p>
-                          <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
+                          <p className="text-[11px] uppercase tracking-wide text-text-disabled">{item.label}</p>
+                          <p className="mt-1 text-lg font-semibold text-text-primary">{item.value}</p>
                         </button>
                       ))}
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/30 px-4 py-3">
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border-default bg-surface/30 px-4 py-3">
                       <div>
-                        <p className="text-sm font-medium text-white">Triage inbox</p>
-                        <p className="text-xs text-zinc-500">{summary.needs_triage} open item(s) still need first-pass triage.</p>
+                        <p className="text-sm font-medium text-text-primary">Triage inbox</p>
+                        <p className="text-xs text-text-disabled">{summary.needs_triage} open item(s) still need first-pass triage.</p>
                       </div>
                       <button
                         onClick={() => updateFilters({ status: "open", assignee: "unassigned", readiness: "needs_triage", sort: "created", page: 1, view: "list" })}
@@ -970,12 +970,12 @@ export default function WorkPage({
       </div>
 
       {showComposer ? (
-        <form onSubmit={handlePost} className="space-y-3 border-b border-zinc-800 bg-zinc-900/30 px-4 py-4">
+        <form onSubmit={handlePost} className="space-y-3 border-b border-border-default bg-surface/30 px-4 py-4">
           <div className="grid gap-3 md:grid-cols-4">
             <select
               value={composerType}
               onChange={(event) => setComposerType(event.target.value as WorkItemType)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               {TYPE_OPTIONS.filter((option) => option.value).map((option) => (
                 <option key={option.value} value={option.value}>
@@ -986,7 +986,7 @@ export default function WorkPage({
             <select
               value={composerPriority}
               onChange={(event) => setComposerPriority(event.target.value as SpaceIssuePriority)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               {PRIORITY_OPTIONS.filter((option) => option.value).map((option) => (
                 <option key={option.value} value={option.value}>
@@ -997,7 +997,7 @@ export default function WorkPage({
             <select
               value={composerRepoId}
               onChange={(event) => setComposerRepoId(event.target.value)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               <option value="">No linked repo</option>
               {repos.map((repo) => (
@@ -1009,7 +1009,7 @@ export default function WorkPage({
             <select
               value={composerMilestoneId}
               onChange={(event) => setComposerMilestoneId(event.target.value)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               <option value="">No milestone</option>
               {milestones.map((milestone) => (
@@ -1026,7 +1026,7 @@ export default function WorkPage({
             onChange={(event) => setTitle(event.target.value)}
             placeholder="Work title"
             maxLength={180}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
           />
 
           <RichComposer
@@ -1034,17 +1034,17 @@ export default function WorkPage({
             onChange={(value) => setBody(value)}
             placeholder="Describe the task, bug, feature, docs request, or research need"
             rows={4}
-            previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-white"
+            previewClassName="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm leading-relaxed text-text-primary"
              className="w-full resize-none px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:outline-none selection:bg-[#1d9bf0]/30"
           />
 
-          <div className="space-y-3 rounded-xl border border-zinc-800 bg-zinc-950/50 p-3">
+          <div className="space-y-3 rounded-xl border border-border-default bg-app/50 p-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-medium text-white">Photos</p>
-                <p className="text-xs text-zinc-500">Attach up to 6 PNG, JPG, WebP, or GIF images. 10MB each.</p>
+                <p className="text-sm font-medium text-text-primary">Photos</p>
+                <p className="text-xs text-text-disabled">Attach up to 6 PNG, JPG, WebP, or GIF images. 10MB each.</p>
               </div>
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-800">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border-strong px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-hover">
                 <PhotoIcon className="h-4 w-4" />
                 Add photos
                 <input
@@ -1065,16 +1065,16 @@ export default function WorkPage({
             {composerPhotos.length > 0 ? (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {composerPhotos.map((photo) => (
-                  <div key={photo.id} className="group relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+                  <div key={photo.id} className="group relative overflow-hidden rounded-xl border border-border-default bg-surface">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={photo.previewUrl} alt={photo.file.name} className="aspect-video w-full object-cover" />
                     <div className="absolute inset-x-0 bottom-0 bg-black/70 px-2 py-1.5">
-                      <p className="truncate text-xs font-medium text-white">{photo.file.name}</p>
+                      <p className="truncate text-xs font-medium text-text-primary">{photo.file.name}</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => removeComposerPhoto(photo.id)}
-                      className="absolute right-2 top-2 rounded-full bg-black/70 p-1 text-white transition-colors hover:bg-rose-500"
+                      className="absolute right-2 top-2 rounded-full bg-black/70 p-1 text-text-primary transition-colors hover:bg-rose-500"
                       aria-label={`Remove ${photo.file.name}`}
                     >
                       <XMarkIcon className="h-4 w-4" />
@@ -1091,30 +1091,30 @@ export default function WorkPage({
               value={composerNeededSkill}
               onChange={(event) => setComposerNeededSkill(event.target.value)}
               placeholder="Needed skill"
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
             />
             <input
               type="text"
               value={composerEstimate}
               onChange={(event) => setComposerEstimate(event.target.value)}
               placeholder="Estimate"
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
             />
             <input
               type="date"
               value={composerTargetDate}
               onChange={(event) => setComposerTargetDate(event.target.value)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             />
           </div>
 
-          <div className="flex flex-wrap gap-3 text-sm text-zinc-300">
+          <div className="flex flex-wrap gap-3 text-sm text-text-secondary">
             <label className="inline-flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={composerGoodFirst}
                 onChange={(event) => setComposerGoodFirst(event.target.checked)}
-                className="h-4 w-4 rounded border-zinc-700 bg-zinc-950"
+                className="h-4 w-4 rounded border-border-strong bg-app"
               />
               Good first task
             </label>
@@ -1123,7 +1123,7 @@ export default function WorkPage({
                 type="checkbox"
                 checked={composerHelpWanted}
                 onChange={(event) => setComposerHelpWanted(event.target.checked)}
-                className="h-4 w-4 rounded border-zinc-700 bg-zinc-950"
+                className="h-4 w-4 rounded border-border-strong bg-app"
               />
               Help wanted
             </label>
@@ -1134,14 +1134,14 @@ export default function WorkPage({
             <button
               type="button"
               onClick={() => setShowComposer(false)}
-              className="rounded-lg px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:text-white"
+              className="rounded-lg px-3 py-1.5 text-xs text-text-muted transition-colors hover:text-text-primary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={posting || !title.trim() || !body.trim()}
-              className="rounded-lg bg-white px-4 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-50"
+              className="rounded-lg bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-50"
             >
               {posting ? "Posting..." : "Create work"}
             </button>
@@ -1150,11 +1150,11 @@ export default function WorkPage({
       ) : null}
 
       {(milestones.length > 0 || milestonesLoading || canBulkManage) ? (
-        <div className="space-y-4 border-b border-zinc-800 bg-zinc-950/20 px-4 py-4">
+        <div className="space-y-4 border-b border-border-default bg-app/20 px-4 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-white">Milestones</p>
-              <p className="text-xs text-zinc-500">
+              <p className="text-sm font-semibold text-text-primary">Milestones</p>
+              <p className="text-xs text-text-disabled">
                 Plan larger work arcs and assign items to milestone records instead of raw IDs.
               </p>
             </div>
@@ -1168,7 +1168,7 @@ export default function WorkPage({
                     setShowMilestoneManager(true);
                   }
                 }}
-                className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
+                className="rounded-lg border border-border-strong px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-hover"
               >
                 {showMilestoneManager ? "Hide milestone form" : "New milestone"}
               </button>
@@ -1182,11 +1182,11 @@ export default function WorkPage({
           ) : milestones.length > 0 ? (
             <div className="grid gap-3 xl:grid-cols-3">
               {milestones.map((milestone) => (
-                <div key={milestone.id} className="rounded-2xl border border-zinc-800 bg-zinc-900/40 px-4 py-3">
+                <div key={milestone.id} className="rounded-2xl border border-border-default bg-surface/40 px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-white">{milestone.title}</p>
-                      <p className="mt-1 text-xs text-zinc-500">
+                      <p className="truncate text-sm font-semibold text-text-primary">{milestone.title}</p>
+                      <p className="mt-1 text-xs text-text-disabled">
                         {milestone.target_date
                           ? `Target ${new Date(milestone.target_date).toLocaleDateString()}`
                           : "No target date"}
@@ -1199,7 +1199,7 @@ export default function WorkPage({
                           : milestone.status === "completed"
                             ? "bg-emerald-500/10 text-emerald-300"
                             : milestone.status === "archived"
-                              ? "bg-zinc-800 text-zinc-400"
+                              ? "bg-surface-hover text-text-muted"
                               : "bg-amber-500/10 text-amber-300"
                       }`}
                     >
@@ -1207,7 +1207,7 @@ export default function WorkPage({
                     </span>
                   </div>
                   {milestone.description ? (
-                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-zinc-400">{milestone.description}</p>
+                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-text-muted">{milestone.description}</p>
                   ) : null}
                   {canBulkManage ? (
                     <button
@@ -1221,19 +1221,19 @@ export default function WorkPage({
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-zinc-800 px-4 py-6 text-center text-sm text-zinc-500">
+            <div className="rounded-2xl border border-dashed border-border-default px-4 py-6 text-center text-sm text-text-disabled">
               No milestones yet.
             </div>
           )}
 
           {showMilestoneManager && canBulkManage ? (
-            <form onSubmit={handleMilestoneSubmit} className="space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/50 px-4 py-4">
+            <form onSubmit={handleMilestoneSubmit} className="space-y-3 rounded-2xl border border-border-default bg-surface/50 px-4 py-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-text-primary">
                     {editingMilestoneId ? "Edit milestone" : "Create milestone"}
                   </p>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-text-disabled">
                     Milestones can now be assigned directly from work create/edit flows and bulk updates.
                   </p>
                 </div>
@@ -1241,7 +1241,7 @@ export default function WorkPage({
                   <button
                     type="button"
                     onClick={resetMilestoneForm}
-                    className="text-xs text-zinc-500 transition-colors hover:text-white"
+                    className="text-xs text-text-disabled transition-colors hover:text-text-primary"
                   >
                     Switch to new
                   </button>
@@ -1254,12 +1254,12 @@ export default function WorkPage({
                   value={milestoneTitle}
                   onChange={(event) => setMilestoneTitle(event.target.value)}
                   placeholder="Milestone title"
-                  className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+                  className="rounded-xl border border-border-default bg-app px-3 py-2.5 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
                 />
                 <select
                   value={milestoneStatus}
                   onChange={(event) => setMilestoneStatus(event.target.value as MilestoneStatus)}
-                  className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+                  className="rounded-xl border border-border-default bg-app px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
                 >
                   {MILESTONE_STATUS_OPTIONS.map((status) => (
                     <option key={status} value={status}>
@@ -1271,7 +1271,7 @@ export default function WorkPage({
                   type="date"
                   value={milestoneTargetDate}
                   onChange={(event) => setMilestoneTargetDate(event.target.value)}
-                  className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+                  className="rounded-xl border border-border-default bg-app px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
                 />
               </div>
 
@@ -1280,7 +1280,7 @@ export default function WorkPage({
                 onChange={(event) => setMilestoneDescription(event.target.value)}
                 placeholder="What does this milestone cover?"
                 rows={3}
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+                className="w-full rounded-xl border border-border-default bg-app px-3 py-2.5 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
               />
 
               <div className="flex items-center justify-end gap-2">
@@ -1291,14 +1291,14 @@ export default function WorkPage({
                     setShowMilestoneManager(false);
                     resetMilestoneForm();
                   }}
-                  className="rounded-lg px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:text-white"
+                  className="rounded-lg px-3 py-1.5 text-xs text-text-muted transition-colors hover:text-text-primary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={milestoneSubmitting || !milestoneTitle.trim()}
-                  className="rounded-lg bg-white px-4 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-50"
+                  className="rounded-lg bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-50"
                 >
                   {milestoneSubmitting ? "Saving..." : editingMilestoneId ? "Save milestone" : "Create milestone"}
                 </button>
@@ -1309,20 +1309,20 @@ export default function WorkPage({
       ) : null}
 
       {!user && isLoaded ? (
-        <div className="border-b border-zinc-800 px-4 py-3 text-xs text-zinc-500">
+        <div className="border-b border-border-default px-4 py-3 text-xs text-text-disabled">
           Sign in to create work for this space.
         </div>
       ) : null}
 
       {canBulkManage && selectedIds.length > 0 && filters.view === "list" ? (
-        <div className="space-y-3 border-b border-zinc-800 bg-zinc-950/60 px-4 py-4">
+        <div className="space-y-3 border-b border-border-default bg-app/60 px-4 py-4">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full bg-zinc-800 px-3 py-1 text-xs font-medium text-zinc-200">
+            <span className="rounded-full bg-surface-hover px-3 py-1 text-xs font-medium text-text-secondary">
               {selectedIds.length} selected
             </span>
             <button
               onClick={() => setSelectedIds([])}
-              className="text-xs text-zinc-500 transition-colors hover:text-white"
+              className="text-xs text-text-disabled transition-colors hover:text-text-primary"
             >
               Clear selection
             </button>
@@ -1332,7 +1332,7 @@ export default function WorkPage({
             <select
               value={bulkStatus}
               onChange={(event) => setBulkStatus(event.target.value)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               <option value="">Bulk status</option>
               {STATUS_OPTIONS.filter((option) => option.value).map((option) => (
@@ -1344,7 +1344,7 @@ export default function WorkPage({
             <select
               value={bulkPriority}
               onChange={(event) => setBulkPriority(event.target.value)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               <option value="">Bulk priority</option>
               {PRIORITY_OPTIONS.filter((option) => option.value).map((option) => (
@@ -1356,7 +1356,7 @@ export default function WorkPage({
             <select
               value={bulkAssigneeUserId}
               onChange={(event) => setBulkAssigneeUserId(event.target.value)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               <option value="">Bulk assignee</option>
               {contributors.map((member) => (
@@ -1368,7 +1368,7 @@ export default function WorkPage({
             <select
               value={bulkRepoId}
               onChange={(event) => setBulkRepoId(event.target.value)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               <option value="">Bulk repo</option>
               {repos.map((repo) => (
@@ -1380,7 +1380,7 @@ export default function WorkPage({
             <select
               value={bulkMilestoneId}
               onChange={(event) => setBulkMilestoneId(event.target.value)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               <option value="">Bulk milestone</option>
               <option value="__clear__">Clear milestone</option>
@@ -1398,19 +1398,19 @@ export default function WorkPage({
               value={bulkNeededSkill}
               onChange={(event) => setBulkNeededSkill(event.target.value)}
               placeholder="Bulk needed skill"
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
             />
             <input
               type="text"
               value={bulkBlockedReason}
               onChange={(event) => setBulkBlockedReason(event.target.value)}
               placeholder="Bulk blocked reason"
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
             />
             <select
               value={bulkGoodFirst}
               onChange={(event) => setBulkGoodFirst(event.target.value)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               <option value="">Good first</option>
               <option value="true">Set true</option>
@@ -1419,7 +1419,7 @@ export default function WorkPage({
             <select
               value={bulkHelpWanted}
               onChange={(event) => setBulkHelpWanted(event.target.value)}
-              className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               <option value="">Help wanted</option>
               <option value="true">Set true</option>
@@ -1428,7 +1428,7 @@ export default function WorkPage({
             <button
               onClick={handleBulkApply}
               disabled={bulkSubmitting}
-              className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-50"
+              className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-50"
             >
               {bulkSubmitting ? "Applying..." : "Apply"}
             </button>
@@ -1471,7 +1471,7 @@ export default function WorkPage({
                       if (selectedIds.length === issues.length) setSelectedIds([]);
                       else setSelectedIds(issues.map((issue) => issue.id));
                     }}
-                    className="text-xs text-zinc-500 transition-colors hover:text-white"
+                    className="text-xs text-text-disabled transition-colors hover:text-text-primary"
                   >
                     {selectedIds.length === issues.length ? "Clear page" : "Select page"}
                   </button>
@@ -1507,14 +1507,14 @@ export default function WorkPage({
           {filters.view === "board" ? (
             <div className="grid gap-4 p-4 lg:grid-cols-5">
               {(Object.keys(groupedBoard) as SpaceIssueStatus[]).map((status) => (
-                <section key={status} className="rounded-2xl border border-zinc-800 bg-zinc-900/30">
-                  <div className="border-b border-zinc-800 px-4 py-3">
-                    <p className="text-sm font-semibold capitalize text-white">{status.replace("-", " ")}</p>
-                    <p className="mt-0.5 text-xs text-zinc-500">{groupedBoard[status].length} item(s)</p>
+                <section key={status} className="rounded-2xl border border-border-default bg-surface/30">
+                  <div className="border-b border-border-default px-4 py-3">
+                    <p className="text-sm font-semibold capitalize text-text-primary">{status.replace("-", " ")}</p>
+                    <p className="mt-0.5 text-xs text-text-disabled">{groupedBoard[status].length} item(s)</p>
                   </div>
                   <div className="space-y-3 p-3">
                     {groupedBoard[status].length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-zinc-800 px-3 py-6 text-center text-xs text-zinc-500">
+                      <div className="rounded-xl border border-dashed border-border-default px-3 py-6 text-center text-xs text-text-disabled">
                         No items
                       </div>
                     ) : (
@@ -1536,12 +1536,12 @@ export default function WorkPage({
           {filters.view === "calendar" ? (
             <div className="space-y-4 p-4">
               {calendarGroups.map(([key, group]) => (
-                <section key={key} className="rounded-2xl border border-zinc-800 bg-zinc-900/30">
-                  <div className="border-b border-zinc-800 px-4 py-3">
-                    <p className="text-sm font-semibold text-white">
+                <section key={key} className="rounded-2xl border border-border-default bg-surface/30">
+                  <div className="border-b border-border-default px-4 py-3">
+                    <p className="text-sm font-semibold text-text-primary">
                       {key === "Unscheduled" ? key : new Date(`${key}T00:00:00`).toLocaleDateString()}
                     </p>
-                    <p className="mt-0.5 text-xs text-zinc-500">{group.length} item(s)</p>
+                    <p className="mt-0.5 text-xs text-text-disabled">{group.length} item(s)</p>
                   </div>
                   <div className="grid gap-3 p-3 md:grid-cols-2 xl:grid-cols-3">
                     {group.map((issue) => (
@@ -1561,14 +1561,14 @@ export default function WorkPage({
           {filters.view === "workload" ? (
             <div className="space-y-4 p-4">
               {workloadGroups.map(([key, group]) => (
-                <section key={key} className="rounded-2xl border border-zinc-800 bg-zinc-900/30">
-                  <div className="border-b border-zinc-800 px-4 py-3">
+                <section key={key} className="rounded-2xl border border-border-default bg-surface/30">
+                  <div className="border-b border-border-default px-4 py-3">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-semibold text-white">{group.label}</p>
-                        <p className="mt-0.5 text-xs text-zinc-500">{group.issues.length} assigned item(s)</p>
+                        <p className="text-sm font-semibold text-text-primary">{group.label}</p>
+                        <p className="mt-0.5 text-xs text-text-disabled">{group.issues.length} assigned item(s)</p>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-zinc-500">
+                      <div className="flex items-center gap-2 text-xs text-text-disabled">
                         <span>{group.issues.filter((issue) => issue.blocked_reason).length} blocked</span>
                         <span>·</span>
                         <span>{group.issues.filter((issue) => issue.due_state === "overdue").length} overdue</span>
@@ -1597,15 +1597,15 @@ export default function WorkPage({
           <button
             onClick={() => updateFilters({ page: Math.max(1, filters.page - 1) })}
             disabled={filters.page <= 1 || loading}
-            className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40"
+            className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:bg-surface-hover disabled:opacity-40"
           >
             Previous
           </button>
-          <span className="text-xs text-zinc-500">Page {filters.page}</span>
+          <span className="text-xs text-text-disabled">Page {filters.page}</span>
           <button
             onClick={() => updateFilters({ page: filters.page + 1 })}
             disabled={issues.length < pageLimit || loading}
-            className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40"
+            className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:bg-surface-hover disabled:opacity-40"
           >
             Next
           </button>

@@ -74,15 +74,15 @@ export default function RepoReleasesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-default pb-4">
         <div>
-          <h2 className="text-xl font-semibold text-white">Releases</h2>
-          <p className="text-sm text-zinc-400">Track and publish software versions.</p>
+          <h2 className="text-xl font-semibold text-text-primary">Releases</h2>
+          <p className="text-sm text-text-muted">Track and publish software versions.</p>
         </div>
         {!isCreating && (
           <button
             onClick={() => setIsCreating(true)}
-            className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-green-700"
+            className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-text-primary transition-colors hover:bg-green-700"
           >
             <PlusIcon className="h-4 w-4" />
             Draft a new release
@@ -91,18 +91,18 @@ export default function RepoReleasesPage() {
       </div>
 
       {isCreating && (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-6 shadow-sm">
+        <div className="rounded-xl border border-border-default bg-app p-6 shadow-sm">
           <form onSubmit={handleCreateRelease} className="space-y-6">
             <div className="flex flex-col md:flex-row gap-6">
               <div className="md:w-1/3 space-y-4">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Choose a tag</label>
+                  <label className="mb-2 block text-sm font-medium text-text-secondary">Choose a tag</label>
                   {!customTag ? (
                     <div className="flex flex-col gap-2">
                       <select
                         value={tagName}
                         onChange={(e) => setTagName(e.target.value)}
-                        className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-300 focus:border-blue-500 focus:outline-none"
+                        className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-sm text-text-secondary focus:border-blue-500 focus:outline-none"
                       >
                         <option value="">Select an existing tag...</option>
                         {tags.map((t) => (
@@ -127,16 +127,16 @@ export default function RepoReleasesPage() {
                         value={newTagName}
                         onChange={(e) => setNewTagName(e.target.value)}
                         placeholder="e.g. v1.0.0"
-                        className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-300 focus:border-blue-500 focus:outline-none"
+                        className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-sm text-text-secondary focus:border-blue-500 focus:outline-none"
                       />
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-zinc-400">Target branch</label>
+                        <label className="mb-1 block text-xs font-medium text-text-muted">Target branch</label>
                         <input
                           type="text"
                           value={targetBranch}
                           onChange={(e) => setTargetBranch(e.target.value)}
                           placeholder="e.g. main"
-                          className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-300 focus:border-blue-500 focus:outline-none"
+                          className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-sm text-text-secondary focus:border-blue-500 focus:outline-none"
                         />
                       </div>
                       <button
@@ -145,7 +145,7 @@ export default function RepoReleasesPage() {
                           setCustomTag(false);
                           setNewTagName("");
                         }}
-                        className="text-xs font-medium text-zinc-500 hover:text-white hover:underline"
+                        className="text-xs font-medium text-text-disabled hover:text-text-primary hover:underline"
                       >
                         Cancel new tag
                       </button>
@@ -156,23 +156,23 @@ export default function RepoReleasesPage() {
 
               <div className="md:w-2/3 space-y-4">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Release title</label>
+                  <label className="mb-2 block text-sm font-medium text-text-secondary">Release title</label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g. Initial public release"
-                    className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-300 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-sm text-text-secondary focus:border-blue-500 focus:outline-none"
                     required
                   />
                 </div>
                 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">Describe this release</label>
+                  <label className="mb-2 block text-sm font-medium text-text-secondary">Describe this release</label>
                   <textarea
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    className="min-h-[200px] w-full resize-y rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 font-mono text-sm text-zinc-300 focus:border-blue-500 focus:outline-none"
+                    className="min-h-[200px] w-full resize-y rounded-md border border-border-default bg-surface px-3 py-2 font-mono text-sm text-text-secondary focus:border-blue-500 focus:outline-none"
                     placeholder="Describe the changes in this release..."
                   />
                 </div>
@@ -183,11 +183,11 @@ export default function RepoReleasesPage() {
                     id="prerelease"
                     checked={isPrerelease}
                     onChange={(e) => setIsPrerelease(e.target.checked)}
-                    className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-green-600 focus:ring-green-600"
+                    className="h-4 w-4 rounded border-border-strong bg-surface text-green-600 focus:ring-green-600"
                   />
-                  <label htmlFor="prerelease" className="text-sm text-zinc-200">Set as a pre-release</label>
+                  <label htmlFor="prerelease" className="text-sm text-text-secondary">Set as a pre-release</label>
                 </div>
-                <p className="pl-6 text-xs text-zinc-500">
+                <p className="pl-6 text-xs text-text-disabled">
                   We&apos;ll point out that this release is not production ready.
                 </p>
 
@@ -195,11 +195,11 @@ export default function RepoReleasesPage() {
                   <p className="text-sm text-rose-400">{actionError}</p>
                 )}
 
-                <div className="flex items-center gap-3 pt-4 border-t border-zinc-800">
+                <div className="flex items-center gap-3 pt-4 border-t border-border-default">
                   <button
                     type="submit"
                     disabled={actionLoading || (!tagName && (!customTag || !newTagName)) || !title.trim()}
-                    className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                    className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-text-primary hover:bg-green-700 disabled:opacity-50"
                   >
                     {actionLoading ? <Spinner size="sm" className="mr-2 inline" /> : null}
                     Publish release
@@ -207,7 +207,7 @@ export default function RepoReleasesPage() {
                   <button
                     type="button"
                     onClick={() => setIsCreating(false)}
-                    className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                    className="rounded-lg px-4 py-2 text-sm font-medium text-text-muted hover:bg-surface-hover hover:text-text-primary"
                   >
                     Cancel
                   </button>
@@ -236,7 +236,7 @@ export default function RepoReleasesPage() {
           action={
             <button
               onClick={() => setIsCreating(true)}
-              className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+              className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
             >
               Create a new release
             </button>
@@ -250,8 +250,8 @@ export default function RepoReleasesPage() {
             <div key={release.id} className="flex flex-col md:flex-row gap-6">
               <div className="md:w-1/4 shrink-0">
                 <div className="sticky top-20 flex flex-col gap-1">
-                  <h3 className="text-lg font-semibold text-white break-words">{release.title}</h3>
-                  <div className="flex items-center gap-2 text-sm font-medium text-zinc-400">
+                  <h3 className="text-lg font-semibold text-text-primary break-words">{release.title}</h3>
+                  <div className="flex items-center gap-2 text-sm font-medium text-text-muted">
                     <TagIcon className="h-4 w-4" />
                     <span>{release.tag_name}</span>
                   </div>
@@ -261,7 +261,7 @@ export default function RepoReleasesPage() {
                     </span>
                   )}
                   {release.is_draft && (
-                    <span className="mt-2 inline-flex w-fit rounded-full border border-zinc-600 bg-zinc-800 px-2.5 py-0.5 text-xs font-semibold text-zinc-400">
+                    <span className="mt-2 inline-flex w-fit rounded-full border border-border-strong bg-surface-hover px-2.5 py-0.5 text-xs font-semibold text-text-muted">
                       Draft
                     </span>
                   )}
@@ -269,44 +269,44 @@ export default function RepoReleasesPage() {
               </div>
               
               <div className="md:w-3/4">
-                <div className="rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden">
-                  <div className="border-b border-zinc-800 bg-zinc-900/50 p-4">
-                    <div className="flex items-center gap-2 text-sm text-zinc-400">
+                <div className="rounded-xl border border-border-default bg-app overflow-hidden">
+                  <div className="border-b border-border-default bg-surface/50 p-4">
+                    <div className="flex items-center gap-2 text-sm text-text-muted">
                       <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/20 text-[10px] font-bold text-blue-400">
                         {release.author?.name?.charAt(0).toUpperCase() || "A"}
                       </div>
-                      <strong className="text-zinc-200">{release.author?.name}</strong> released this {formatRelativeTime(release.published_at || release.created_at)}
+                      <strong className="text-text-secondary">{release.author?.name}</strong> released this {formatRelativeTime(release.published_at || release.created_at)}
                     </div>
                   </div>
                   
                   <div className="p-6">
                     {release.body ? (
-                      <article className="prose prose-invert max-w-none prose-sm text-zinc-300">
+                      <article className="prose prose-invert max-w-none prose-sm text-text-secondary">
                         <pre className="font-sans whitespace-pre-wrap">{release.body}</pre>
                       </article>
                     ) : (
-                      <p className="text-sm italic text-zinc-500">No description provided.</p>
+                      <p className="text-sm italic text-text-disabled">No description provided.</p>
                     )}
                   </div>
                   
-                  <div className="border-t border-zinc-800 bg-zinc-900/30 p-4">
-                    <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-500">Assets</h4>
+                  <div className="border-t border-border-default bg-surface/30 p-4">
+                    <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-text-disabled">Assets</h4>
                     <div className="flex flex-col gap-2">
                        <Link
                           href={`/repos/${repo.id}/releases/${release.id}/download/source.zip`}
-                          className="flex items-center justify-between rounded-md border border-zinc-800 bg-zinc-900 px-4 py-3 hover:bg-zinc-800"
+                          className="flex items-center justify-between rounded-md border border-border-default bg-surface px-4 py-3 hover:bg-surface-hover"
                         >
                           <div className="flex items-center gap-3">
-                            <CubeIcon className="h-5 w-5 text-zinc-400" />
+                            <CubeIcon className="h-5 w-5 text-text-muted" />
                             <span className="text-sm font-medium text-blue-500">Source code (zip)</span>
                           </div>
                         </Link>
                         <Link
                           href={`/repos/${repo.id}/releases/${release.id}/download/source.tar.gz`}
-                          className="flex items-center justify-between rounded-md border border-zinc-800 bg-zinc-900 px-4 py-3 hover:bg-zinc-800"
+                          className="flex items-center justify-between rounded-md border border-border-default bg-surface px-4 py-3 hover:bg-surface-hover"
                         >
                           <div className="flex items-center gap-3">
-                            <CubeIcon className="h-5 w-5 text-zinc-400" />
+                            <CubeIcon className="h-5 w-5 text-text-muted" />
                             <span className="text-sm font-medium text-blue-500">Source code (tar.gz)</span>
                           </div>
                         </Link>

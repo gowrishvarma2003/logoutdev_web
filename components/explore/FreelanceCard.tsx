@@ -20,15 +20,15 @@ export default function FreelanceCard({ item }: FreelanceCardProps) {
   // Determine styles for the freelance status
   const statusStyles = isOpen
     ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-    : "bg-zinc-800/40 text-zinc-500 border-zinc-700/20";
+    : "bg-surface-hover/40 text-text-disabled border-border-strong/20";
 
   return (
-    <div className="group flex h-full flex-col justify-between rounded-2xl border border-zinc-800/60 bg-zinc-900/30 p-5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-zinc-700/60 hover:bg-zinc-900/60">
+    <div className="group flex h-full flex-col justify-between rounded-2xl border border-border-default/60 bg-surface/30 p-5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-border-strong/60 hover:bg-surface/60">
       <div>
         {/* Header Budget and Status Row */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-950/40 text-zinc-400 group-hover:text-sky-400 transition-colors">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-default bg-app/40 text-text-muted group-hover:text-sky-400 transition-colors">
               <BriefcaseIcon className="h-4 w-4" />
             </div>
             {/* Display pricing model highlighted */}
@@ -42,12 +42,12 @@ export default function FreelanceCard({ item }: FreelanceCardProps) {
         </div>
 
         {/* Project Title */}
-        <Link href={item.href} className="mt-3.5 block text-sm font-semibold text-zinc-200 hover:text-sky-300 group-hover:text-white transition-colors line-clamp-1">
+        <Link href={item.href} className="mt-3.5 block text-sm font-semibold text-text-secondary hover:text-sky-300 group-hover:text-text-primary transition-colors line-clamp-1">
           {item.title}
         </Link>
 
         {/* Project Requirements Description */}
-        <Link href={item.href} className="mt-2 block text-xs leading-relaxed text-zinc-400 line-clamp-2 hover:text-zinc-300">
+        <Link href={item.href} className="mt-2 block text-xs leading-relaxed text-text-muted line-clamp-2 hover:text-text-secondary">
           {item.subtitle || "No description details provided."}
         </Link>
       </div>
@@ -60,7 +60,7 @@ export default function FreelanceCard({ item }: FreelanceCardProps) {
             {item.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="rounded bg-zinc-800/40 border border-zinc-800/60 px-1.5 py-0.5 text-[9px] font-medium text-zinc-400"
+                className="rounded bg-surface-hover/40 border border-border-default/60 px-1.5 py-0.5 text-[9px] font-medium text-text-muted"
               >
                 {tag}
               </span>
@@ -69,9 +69,9 @@ export default function FreelanceCard({ item }: FreelanceCardProps) {
         ) : null}
 
         {/* Space Stats Footer */}
-        <div className="flex items-center justify-between border-t border-zinc-800/40 pt-3 text-[10px] text-zinc-500">
+        <div className="flex items-center justify-between border-t border-border-default/40 pt-3 text-[10px] text-text-disabled">
           <div className="flex items-center gap-1">
-            <ClockIcon className="h-3.5 w-3.5 text-zinc-500" />
+            <ClockIcon className="h-3.5 w-3.5 text-text-disabled" />
             <span className="capitalize">{engagement.replace(/_/g, " ")}</span>
           </div>
           <span className="max-w-[120px] truncate">{item.meta.byline}</span>

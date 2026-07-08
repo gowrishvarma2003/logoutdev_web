@@ -27,7 +27,7 @@ export default function RepoForksPage() {
   if (forks.length === 0) {
     return (
       <EmptyState
-        icon={<ArrowsRightLeftIcon className="h-10 w-10 text-zinc-500" />}
+        icon={<ArrowsRightLeftIcon className="h-10 w-10 text-text-disabled" />}
         title="No forks yet"
         description="This repository hasn't been forked by anyone yet."
       />
@@ -36,16 +36,16 @@ export default function RepoForksPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div className="border-b border-zinc-800 pb-4">
-        <h2 className="text-xl font-semibold text-white">Forks</h2>
-        <p className="text-sm text-zinc-400">
+      <div className="border-b border-border-default pb-4">
+        <h2 className="text-xl font-semibold text-text-primary">Forks</h2>
+        <p className="text-sm text-text-muted">
           Showing {fork_count} {fork_count === 1 ? 'fork' : 'forks'} of {repo.owner?.username}/{repo.name}
         </p>
       </div>
 
-      <div className="divide-y divide-zinc-800/50 rounded-xl border border-zinc-800 bg-zinc-950">
+      <div className="divide-y divide-border-default/50 rounded-xl border border-border-default bg-app">
         {forks.map((fork) => (
-          <div key={fork.id} className="flex items-center justify-between gap-4 p-4 hover:bg-zinc-900/30 transition-colors">
+          <div key={fork.id} className="flex items-center justify-between gap-4 p-4 hover:bg-surface/30 transition-colors">
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/20 text-xs font-bold text-blue-400">
                 {fork.forker?.username?.charAt(0).toUpperCase() || "A"}
@@ -53,12 +53,12 @@ export default function RepoForksPage() {
               <div>
                 <Link
                   href={fork.repo ? `/repos/${fork.repo.id}` : "#"}
-                  className={`font-semibold ${fork.repo ? 'text-blue-500 hover:underline' : 'text-zinc-500 line-through'}`}
+                  className={`font-semibold ${fork.repo ? 'text-blue-500 hover:underline' : 'text-text-disabled line-through'}`}
                   title={!fork.repo ? "This fork has been deleted" : undefined}
                 >
                   {fork.forker?.username}/{fork.repo?.name || "deleted-repo"}
                 </Link>
-                <div className="text-xs text-zinc-500">
+                <div className="text-xs text-text-disabled">
                   Forked {formatRelativeTime(fork.created_at)}
                 </div>
               </div>
@@ -73,7 +73,7 @@ export default function RepoForksPage() {
                 </Link>
                 <Link
                   href={`/repos/${fork.repo.id}`}
-                  className="rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition-colors hover:bg-zinc-700"
+                  className="rounded-md border border-border-strong bg-surface-hover px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:bg-surface-active"
                 >
                   Go to fork
                 </Link>

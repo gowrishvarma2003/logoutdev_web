@@ -23,9 +23,9 @@ function DiscoveryCard({ item }: { item: DiscoveryEntity }) {
     default:
       // Fallback in case of unexpected type
       return (
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
-          <h3 className="text-sm font-semibold text-white">{item.title}</h3>
-          <p className="mt-1 text-xs text-zinc-400">{item.subtitle}</p>
+        <div className="rounded-2xl border border-border-default bg-surface/60 p-4">
+          <h3 className="text-sm font-semibold text-text-primary">{item.title}</h3>
+          <p className="mt-1 text-xs text-text-muted">{item.subtitle}</p>
         </div>
       );
   }
@@ -43,9 +43,9 @@ export default function ExploreSection({ section }: { section: DiscoverySectionT
       {/* Section Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-bold text-zinc-100 flex items-center gap-2">
+          <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
             {section.title}
-            <span className="text-[10px] font-semibold text-zinc-500 bg-zinc-900 border border-zinc-850 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-semibold text-text-disabled bg-surface border border-border-default px-2 py-0.5 rounded-full">
               {section.total}
             </span>
           </h2>
@@ -57,7 +57,7 @@ export default function ExploreSection({ section }: { section: DiscoverySectionT
 
       {/* Grid of cards */}
       {section.items.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-850 bg-zinc-900/10 px-4 py-8 text-center text-xs text-zinc-500 animate-empty-pulse">
+        <div className="rounded-2xl border border-dashed border-border-default bg-surface/10 px-4 py-8 text-center text-xs text-text-disabled animate-empty-pulse">
           {section.empty_copy}
         </div>
       ) : (

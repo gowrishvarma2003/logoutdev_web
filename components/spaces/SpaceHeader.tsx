@@ -94,24 +94,24 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
   }
 
   return (
-    <div className={`sticky ${user ? "top-0" : "top-16"} z-30 border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-sm`}>
+    <div className={`sticky ${user ? "top-0" : "top-16"} z-30 border-b border-border-default bg-app/95 backdrop-blur-sm`}>
       <div className="px-4 pb-5 pt-4">
         <Link
           href="/spaces"
-          className="mb-4 inline-flex items-center gap-1.5 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+          className="mb-4 inline-flex items-center gap-1.5 text-xs text-text-disabled transition-colors hover:text-text-secondary"
         >
           <ArrowLeftIcon className="h-3.5 w-3.5" />
           All Spaces
         </Link>
 
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-gradient-to-br from-violet-500/20 to-sky-500/20 text-lg font-bold text-white">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border-strong bg-gradient-to-br from-violet-500/20 to-sky-500/20 text-lg font-bold text-text-primary">
             {space.name.charAt(0).toUpperCase()}
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="truncate text-xl font-bold text-white">{space.name}</h1>
+              <h1 className="truncate text-xl font-bold text-text-primary">{space.name}</h1>
               <StatusBadge status={space.status} />
               <VisibilityBadge visibility={space.visibility} />
               {space.working_in_public ? (
@@ -120,9 +120,9 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
                 </span>
               ) : null}
             </div>
-            <p className="mt-1 line-clamp-2 text-sm text-zinc-400">{space.summary}</p>
+            <p className="mt-1 line-clamp-2 text-sm text-text-muted">{space.summary}</p>
 
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-zinc-500">
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-text-disabled">
               <span>{followerCount} follower{followerCount === 1 ? "" : "s"}</span>
               {(space.open_roles?.length ?? 0) > 0 ? (
                 <span>{space.open_roles?.length} open role{space.open_roles?.length === 1 ? "" : "s"}</span>
@@ -143,7 +143,7 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
             {!isMember ? (
               <Link
                 href={`${base}/join`}
-                className="rounded-xl bg-white px-4 py-2 text-center text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+                className="rounded-xl bg-primary px-4 py-2 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
               >
                 Start contributing
               </Link>
@@ -152,7 +152,7 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
               <button
                 onClick={handleFollowToggle}
                 disabled={followLoading}
-                className="rounded-xl border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:bg-zinc-800 disabled:opacity-60"
+                className="rounded-xl border border-border-strong px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-hover disabled:opacity-60"
               >
                 {followLoading ? "Saving..." : isFollowing ? "Following" : "Follow"}
               </button>
@@ -172,8 +172,8 @@ export default function SpaceHeader({ space, isMember, isOwner, memberRole }: Sp
               aria-selected={isActive}
               className={`flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
                 isActive
-                  ? "border-white text-white"
-                  : "border-transparent text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
+                  ? "border-white text-text-primary"
+                  : "border-transparent text-text-disabled hover:border-border-strong hover:text-text-secondary"
               }`}
             >
               {tab.icon}

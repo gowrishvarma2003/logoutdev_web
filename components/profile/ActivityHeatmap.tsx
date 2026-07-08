@@ -24,7 +24,7 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 
 // Emerald intensity ramp (matches the "Strong" proof-of-work band).
 const LEVELS = [
-  "bg-zinc-800/50",
+  "bg-surface-hover/50",
   "bg-emerald-950",
   "bg-emerald-800",
   "bg-emerald-600",
@@ -140,11 +140,11 @@ function formatCellTitle(bucket: HeatmapBucket): string {
 
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) {
   return (
-    <div className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 px-2.5 py-1.5">
-      <span className="text-zinc-500">{icon}</span>
+    <div className="flex items-center gap-1.5 rounded-lg border border-border-default bg-surface/60 px-2.5 py-1.5">
+      <span className="text-text-disabled">{icon}</span>
       <div className="leading-none">
-        <p className="text-[10px] uppercase tracking-wide text-zinc-600">{label}</p>
-        <p className="text-xs font-semibold text-zinc-200 tabular-nums">{value}</p>
+        <p className="text-[10px] uppercase tracking-wide text-text-disabled">{label}</p>
+        <p className="text-xs font-semibold text-text-secondary tabular-nums">{value}</p>
       </div>
     </div>
   );
@@ -163,13 +163,13 @@ export default function ActivityHeatmap({ heatmap, loading = false }: ActivityHe
   const totalContributions = heatmap ? heatmap.buckets.reduce((sum, b) => sum + b.total, 0) : 0;
 
   return (
-    <section className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
+    <section className="rounded-2xl border border-border-default bg-surface/40 p-4">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <CalendarIcon className="w-4 h-4 text-emerald-400" />
-        <h2 className="text-sm font-semibold text-white">Activity</h2>
+        <h2 className="text-sm font-semibold text-text-primary">Activity</h2>
         {heatmap ? (
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-text-disabled">
             {totalContributions.toLocaleString()} contributions in the last {heatmap.days} days
           </span>
         ) : null}
@@ -181,20 +181,20 @@ export default function ActivityHeatmap({ heatmap, loading = false }: ActivityHe
             {Array.from({ length: 53 }).map((_, w) => (
               <div key={w} className="flex flex-col gap-[3px]">
                 {Array.from({ length: 7 }).map((_, d) => (
-                  <div key={d} className="w-3 h-3 rounded-sm bg-zinc-800/50 animate-pulse" />
+                  <div key={d} className="w-3 h-3 rounded-sm bg-surface-hover/50 animate-pulse" />
                 ))}
               </div>
             ))}
           </div>
-          <div className="h-8 bg-zinc-800/40 rounded-lg animate-pulse" />
+          <div className="h-8 bg-surface-hover/40 rounded-lg animate-pulse" />
         </div>
       ) : !heatmap || weeks.length === 0 ? (
         <div className="py-10 text-center">
-          <div className="w-10 h-10 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-2">
-            <CalendarIcon className="w-5 h-5 text-zinc-600" />
+          <div className="w-10 h-10 rounded-2xl bg-surface border border-border-default flex items-center justify-center mx-auto mb-2">
+            <CalendarIcon className="w-5 h-5 text-text-disabled" />
           </div>
-          <p className="text-sm text-zinc-500">No activity yet</p>
-          <p className="text-xs text-zinc-600 mt-0.5">
+          <p className="text-sm text-text-disabled">No activity yet</p>
+          <p className="text-xs text-text-disabled mt-0.5">
             Posts, pull requests, launches, and discussions will light up here.
           </p>
         </div>
@@ -213,7 +213,7 @@ export default function ActivityHeatmap({ heatmap, loading = false }: ActivityHe
               {/* Weekday labels */}
               <div className="flex flex-col gap-[3px] mr-1 pt-4">
                 {WEEKDAYS.map((day, i) => (
-                  <div key={day} className="h-3 text-[9px] leading-3 text-zinc-600">
+                  <div key={day} className="h-3 text-[9px] leading-3 text-text-disabled">
                     {i % 2 === 1 ? day : ""}
                   </div>
                 ))}
@@ -223,7 +223,7 @@ export default function ActivityHeatmap({ heatmap, loading = false }: ActivityHe
                 {/* Month labels */}
                 <div className="flex gap-[3px] mb-1 h-3">
                   {weeks.map((week, i) => (
-                    <div key={i} className="w-3 text-[9px] leading-3 text-zinc-600">
+                    <div key={i} className="w-3 text-[9px] leading-3 text-text-disabled">
                       {week.labelMonth !== null ? MONTHS[week.labelMonth] : ""}
                     </div>
                   ))}
@@ -255,11 +255,11 @@ export default function ActivityHeatmap({ heatmap, loading = false }: ActivityHe
           {/* Legend + type breakdown */}
           <div className="flex flex-wrap items-center justify-between gap-3 mt-3">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-zinc-600">Less</span>
+              <span className="text-[10px] text-text-disabled">Less</span>
               {LEVELS.map((cls, i) => (
                 <div key={i} className={`w-3 h-3 rounded-sm ${cls}`} />
               ))}
-              <span className="text-[10px] text-zinc-600">More</span>
+              <span className="text-[10px] text-text-disabled">More</span>
             </div>
 
             {topTypes.length > 0 ? (
@@ -267,7 +267,7 @@ export default function ActivityHeatmap({ heatmap, loading = false }: ActivityHe
                 {topTypes.map(([type, count]) => (
                   <div key={type} className="flex items-center gap-1.5">
                     <span className={`w-2 h-2 rounded-full ${TYPE_COLORS[type] ?? "bg-zinc-500"}`} />
-                    <span className="text-[10px] text-zinc-500">
+                    <span className="text-[10px] text-text-disabled">
                       {TYPE_LABELS[type] ?? type} · {count}
                     </span>
                   </div>

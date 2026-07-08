@@ -2,7 +2,7 @@
  * ProfileSkeleton — loading placeholder matching the profile card recipes.
  */
 
-const SKELETON = "animate-pulse rounded-xl bg-zinc-800/70";
+const SKELETON = "animate-pulse rounded-xl bg-surface-hover/70";
 
 export function ProfileOverviewSkeleton() {
   return (
@@ -27,7 +27,7 @@ export function ProfileListSkeleton({ rows = 4 }: { rows?: number }) {
   return (
     <div className="py-4">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex items-start gap-3 px-5 py-4 border-b border-zinc-900">
+        <div key={i} className="flex items-start gap-3 px-5 py-4 border-b border-border-subtle">
           <div className={`${SKELETON} w-10 h-10 rounded-xl shrink-0`} />
           <div className="flex-1 space-y-2">
             <div className={`${SKELETON} h-4 w-1/2`} />

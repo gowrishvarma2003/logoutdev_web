@@ -22,7 +22,7 @@ export default function RepoCollaborationBanner({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-300">Collaboration Home</p>
-          <h2 className="mt-2 text-lg font-semibold text-white">
+          <h2 className="mt-2 text-lg font-semibold text-text-primary">
             Community discussion and project coordination live in {attachedSpace.name}
           </h2>
           <p className="mt-1 text-sm text-sky-100/90">
@@ -34,7 +34,7 @@ export default function RepoCollaborationBanner({
         <div className="flex flex-wrap gap-2">
           <Link
             href={`/spaces/${attachedSpace.id}`}
-            className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-sky-950 transition-colors hover:bg-sky-50"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-sky-950 transition-colors hover:bg-sky-50"
           >
             Open Space
           </Link>

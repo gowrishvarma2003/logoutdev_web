@@ -107,9 +107,9 @@ export default function SpaceOverviewPage({
     <div className="max-w-4xl mx-auto px-4 py-5 sm:px-6 lg:px-8 space-y-4">
 
       {/* ── Mission & Focus ── */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/10 p-4 transition-all duration-300 hover:border-zinc-700/80">
+      <div className="rounded-xl border border-border-default bg-surface/10 p-4 transition-all duration-300 hover:border-border-strong/80">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">Mission</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-text-disabled">Mission</p>
           {space.working_in_public && (
             <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-400">
               Working in public
@@ -117,7 +117,7 @@ export default function SpaceOverviewPage({
           )}
         </div>
 
-        <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-300">
+        <p className="whitespace-pre-line text-sm leading-relaxed text-text-secondary">
           {space.description || "This space is still getting its public project brief written."}
         </p>
 
@@ -133,9 +133,9 @@ export default function SpaceOverviewPage({
 
         {/* Role & Skill tags */}
         {(activeRoles.length > 0 || neededSkills.length > 0) && (
-          <div className="mt-4 flex flex-wrap gap-1.5 pt-3 border-t border-zinc-800/40">
+          <div className="mt-4 flex flex-wrap gap-1.5 pt-3 border-t border-border-default/40">
             {activeRoles.map((role) => (
-              <span key={role} className="rounded-full bg-zinc-800/80 border border-zinc-700/50 px-2.5 py-0.5 text-[11px] font-medium text-zinc-300">
+              <span key={role} className="rounded-full bg-surface-hover/80 border border-border-strong/50 px-2.5 py-0.5 text-[11px] font-medium text-text-secondary">
                 Role: {role}
               </span>
             ))}
@@ -148,18 +148,18 @@ export default function SpaceOverviewPage({
         )}
 
         {/* Action buttons */}
-        <div className="mt-4 flex flex-wrap gap-2.5 pt-3 border-t border-zinc-800/40">
+        <div className="mt-4 flex flex-wrap gap-2.5 pt-3 border-t border-border-default/40">
           {!isMember ? (
             <Link
               href={user ? `/spaces/${spaceId}/join` : "/login"}
-              className="inline-flex items-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-all duration-200 hover:bg-zinc-100"
+              className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary-hover"
             >
               Start contributing
             </Link>
           ) : null}
           <Link
             href={`/spaces/${spaceId}/work`}
-            className="inline-flex items-center rounded-lg border border-zinc-700 bg-zinc-900/30 px-4 py-2 text-sm font-medium text-zinc-200 transition-all duration-200 hover:bg-zinc-800 hover:text-white"
+            className="inline-flex items-center rounded-lg border border-border-strong bg-surface/30 px-4 py-2 text-sm font-medium text-text-secondary transition-all duration-200 hover:bg-surface-hover hover:text-text-primary"
           >
             Explore work
           </Link>
@@ -176,7 +176,7 @@ export default function SpaceOverviewPage({
           {(space.contribution_guide || contributionResources.length > 0) ? (
             <a
               href={`#contribute`}
-              className="inline-flex items-center rounded-lg border border-zinc-700 bg-zinc-900/30 px-4 py-2 text-sm font-medium text-zinc-200 transition-all duration-200 hover:bg-zinc-800 hover:text-white"
+              className="inline-flex items-center rounded-lg border border-border-strong bg-surface/30 px-4 py-2 text-sm font-medium text-text-secondary transition-all duration-200 hover:bg-surface-hover hover:text-text-primary"
             >
               Contribution guide
             </a>
@@ -185,38 +185,38 @@ export default function SpaceOverviewPage({
       </div>
 
       {/* ══ Public Snapshot — full-width horizontal stats bar ══ */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/10 p-4 transition-all duration-300 hover:border-zinc-700/80">
+      <div className="rounded-xl border border-border-default bg-surface/10 p-4 transition-all duration-300 hover:border-border-strong/80">
         <div className="flex items-center gap-2 mb-3">
           <BarChartIcon className="h-3.5 w-3.5 text-sky-400" />
-          <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Public Snapshot</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Public Snapshot</span>
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-4 gap-px rounded-lg bg-zinc-800/40 overflow-hidden">
-          <div className="bg-zinc-950/50 py-3 text-center">
-            <p className="text-lg font-extrabold text-white leading-none">{space.follower_count ?? 0}</p>
-            <p className="text-[9px] uppercase tracking-wider text-zinc-500 font-semibold mt-1 flex items-center justify-center gap-1">
+        <div className="grid grid-cols-4 gap-px rounded-lg bg-surface-hover/40 overflow-hidden">
+          <div className="bg-app/50 py-3 text-center">
+            <p className="text-lg font-extrabold text-text-primary leading-none">{space.follower_count ?? 0}</p>
+            <p className="text-[9px] uppercase tracking-wider text-text-disabled font-semibold mt-1 flex items-center justify-center gap-1">
               <HeartIcon className="w-2.5 h-2.5 text-sky-400" />
               Followers
             </p>
           </div>
-          <div className="bg-zinc-950/50 py-3 text-center">
-            <p className="text-lg font-extrabold text-white leading-none">{contributors.length}</p>
-            <p className="text-[9px] uppercase tracking-wider text-zinc-500 font-semibold mt-1 flex items-center justify-center gap-1">
+          <div className="bg-app/50 py-3 text-center">
+            <p className="text-lg font-extrabold text-text-primary leading-none">{contributors.length}</p>
+            <p className="text-[9px] uppercase tracking-wider text-text-disabled font-semibold mt-1 flex items-center justify-center gap-1">
               <UsersIcon className="w-2.5 h-2.5 text-emerald-400" />
               People
             </p>
           </div>
-          <div className="bg-zinc-950/50 py-3 text-center">
-            <p className="text-lg font-extrabold text-white leading-none">{managedRepos.length}</p>
-            <p className="text-[9px] uppercase tracking-wider text-zinc-500 font-semibold mt-1 flex items-center justify-center gap-1">
+          <div className="bg-app/50 py-3 text-center">
+            <p className="text-lg font-extrabold text-text-primary leading-none">{managedRepos.length}</p>
+            <p className="text-[9px] uppercase tracking-wider text-text-disabled font-semibold mt-1 flex items-center justify-center gap-1">
               <CodeBracketIcon className="w-2.5 h-2.5 text-violet-400" />
               Repos
             </p>
           </div>
-          <div className="bg-zinc-950/50 py-3 text-center">
-            <p className="text-lg font-extrabold text-white leading-none">{openWorkCount}</p>
-            <p className="text-[9px] uppercase tracking-wider text-zinc-500 font-semibold mt-1 flex items-center justify-center gap-1">
+          <div className="bg-app/50 py-3 text-center">
+            <p className="text-lg font-extrabold text-text-primary leading-none">{openWorkCount}</p>
+            <p className="text-[9px] uppercase tracking-wider text-text-disabled font-semibold mt-1 flex items-center justify-center gap-1">
               <QuestionMarkCircleIcon className="w-2.5 h-2.5 text-amber-400" />
               Open Work
             </p>
@@ -237,8 +237,8 @@ export default function SpaceOverviewPage({
             const rPct = total > 0 ? ((summary.ready_for_contributor || 0) / total) * 100 : 0;
             return (
               <div className="flex-1 min-w-0">
-                <p className="text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">Pipeline</p>
-                <div className="flex h-1.5 w-full rounded-full overflow-hidden bg-zinc-800/80">
+                <p className="text-[9px] font-bold uppercase tracking-wider text-text-disabled mb-1.5">Pipeline</p>
+                <div className="flex h-1.5 w-full rounded-full overflow-hidden bg-surface-hover/80">
                   {bPct > 0 && <div className="bg-rose-500 transition-all duration-700" style={{ width: `${bPct}%` }} />}
                   {tPct > 0 && <div className="bg-amber-500 transition-all duration-700" style={{ width: `${tPct}%` }} />}
                   {rPct > 0 && <div className="bg-emerald-500 transition-all duration-700" style={{ width: `${rPct}%` }} />}
@@ -246,17 +246,17 @@ export default function SpaceOverviewPage({
                 <div className="flex items-center gap-4 mt-1.5 text-[9px]">
                   <span className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                    <span className="text-zinc-500">Blocked</span>
+                    <span className="text-text-disabled">Blocked</span>
                     <span className="font-bold text-rose-400">{summary.blocked}</span>
                   </span>
                   <span className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                    <span className="text-zinc-500">Triage</span>
+                    <span className="text-text-disabled">Triage</span>
                     <span className="font-bold text-amber-400">{summary.needs_triage}</span>
                   </span>
                   <span className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span className="text-zinc-500">Ready</span>
+                    <span className="text-text-disabled">Ready</span>
                     <span className="font-bold text-emerald-400">{summary.ready_for_contributor}</span>
                   </span>
                 </div>
@@ -268,12 +268,12 @@ export default function SpaceOverviewPage({
           {space.linked_launch ? (
             <Link
               href={`/launches/${space.linked_launch.id}`}
-              className="flex items-center gap-2.5 rounded-lg border-l-2 border-sky-500/50 bg-zinc-950/40 px-3 py-2 transition-all duration-200 hover:bg-zinc-900/60 hover:border-sky-400 group/launch shrink-0"
+              className="flex items-center gap-2.5 rounded-lg border-l-2 border-sky-500/50 bg-app/40 px-3 py-2 transition-all duration-200 hover:bg-surface/60 hover:border-sky-400 group/launch shrink-0"
             >
               <RocketIcon className="w-3.5 h-3.5 text-sky-400 shrink-0" />
               <div className="min-w-0">
                 <p className="text-[9px] font-extrabold uppercase tracking-wider text-sky-400/80">Launch Active</p>
-                <p className="text-xs font-bold text-white group-hover/launch:text-sky-300 transition-colors truncate">{space.linked_launch.name}</p>
+                <p className="text-xs font-bold text-text-primary group-hover/launch:text-sky-300 transition-colors truncate">{space.linked_launch.name}</p>
               </div>
             </Link>
           ) : null}
@@ -281,8 +281,8 @@ export default function SpaceOverviewPage({
           {/* Response SLA */}
           {space.response_sla ? (
             <div className="flex items-center gap-2 text-[11px] shrink-0">
-              <span className="text-zinc-500 font-medium">Response Time:</span>
-              <span className="font-semibold text-zinc-300">{space.response_sla}</span>
+              <span className="text-text-disabled font-medium">Response Time:</span>
+              <span className="font-semibold text-text-secondary">{space.response_sla}</span>
             </div>
           ) : null}
         </div>
@@ -300,11 +300,11 @@ export default function SpaceOverviewPage({
         )}
 
         {/* Contributors */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/10 p-4 transition-all duration-300 hover:border-zinc-700/80">
+        <div className="rounded-xl border border-border-default bg-surface/10 p-4 transition-all duration-300 hover:border-border-strong/80">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <UsersIcon className="w-3.5 h-3.5 text-zinc-400" />
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Contributors</span>
+              <UsersIcon className="w-3.5 h-3.5 text-text-muted" />
+              <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Contributors</span>
             </div>
             <Link
               href={`/spaces/${spaceId}/people`}
@@ -314,9 +314,9 @@ export default function SpaceOverviewPage({
             </Link>
           </div>
           {contributors.length === 0 ? (
-            <p className="text-xs text-zinc-500 py-3 text-center">No contributors yet.</p>
+            <p className="text-xs text-text-disabled py-3 text-center">No contributors yet.</p>
           ) : (
-            <div className="divide-y divide-zinc-800/40">
+            <div className="divide-y divide-border-default/40">
               {contributors.slice(0, 5).map((contributor) => (
                 <div
                   key={contributor.id}
@@ -324,10 +324,10 @@ export default function SpaceOverviewPage({
                 >
                   <Avatar user={contributor.user} size="xs" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-semibold text-white leading-tight">
+                    <p className="truncate text-xs font-semibold text-text-primary leading-tight">
                       {contributor.user?.name ?? "Unknown"}
                     </p>
-                    <p className="text-[10px] text-zinc-500 capitalize leading-none mt-0.5">{contributor.role}</p>
+                    <p className="text-[10px] text-text-disabled capitalize leading-none mt-0.5">{contributor.role}</p>
                   </div>
                 </div>
               ))}
@@ -336,7 +336,7 @@ export default function SpaceOverviewPage({
           {contributors.length > 5 && (
             <Link
               href={`/spaces/${spaceId}/people`}
-              className="block mt-2 pt-2 border-t border-zinc-800/40 text-center text-[11px] font-medium text-zinc-500 hover:text-zinc-300 transition-colors"
+              className="block mt-2 pt-2 border-t border-border-default/40 text-center text-[11px] font-medium text-text-disabled hover:text-text-secondary transition-colors"
             >
               +{contributors.length - 5} more
             </Link>
@@ -345,11 +345,11 @@ export default function SpaceOverviewPage({
       </div>
 
       {/* ── Recent Updates ── */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/10 p-4 transition-all duration-300 hover:border-zinc-700/80">
-        <div className="flex items-center justify-between mb-3 pb-1.5 border-b border-zinc-800/50">
+      <div className="rounded-xl border border-border-default bg-surface/10 p-4 transition-all duration-300 hover:border-border-strong/80">
+        <div className="flex items-center justify-between mb-3 pb-1.5 border-b border-border-default/50">
           <div className="flex items-center gap-2">
-            <ClockIcon className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Recent Updates</span>
+            <ClockIcon className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Recent Updates</span>
           </div>
           {updates.length > 0 && (
             <Link
@@ -365,7 +365,7 @@ export default function SpaceOverviewPage({
             <Spinner />
           </div>
         ) : recentUpdates.length === 0 ? (
-          <p className="text-xs text-zinc-500 py-6 text-center">No progress updates yet.</p>
+          <p className="text-xs text-text-disabled py-6 text-center">No progress updates yet.</p>
         ) : (
           <div className="space-y-1">
             {recentUpdates.map((update) => (
@@ -376,11 +376,11 @@ export default function SpaceOverviewPage({
       </div>
 
       {/* ── Recent Decisions ── */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/10 p-4 transition-all duration-300 hover:border-zinc-700/80">
-        <div className="flex items-center justify-between mb-3 pb-1.5 border-b border-zinc-800/50">
+      <div className="rounded-xl border border-border-default bg-surface/10 p-4 transition-all duration-300 hover:border-border-strong/80">
+        <div className="flex items-center justify-between mb-3 pb-1.5 border-b border-border-default/50">
           <div className="flex items-center gap-2">
-            <CheckCircleIcon className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Recent Decisions</span>
+            <CheckCircleIcon className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Recent Decisions</span>
           </div>
           {decisions.length > 0 && (
             <Link
@@ -396,9 +396,9 @@ export default function SpaceOverviewPage({
             <Spinner />
           </div>
         ) : decisions.length === 0 ? (
-          <p className="text-xs text-zinc-500 py-6 text-center">No key decisions recorded.</p>
+          <p className="text-xs text-text-disabled py-6 text-center">No key decisions recorded.</p>
         ) : (
-          <div className="divide-y divide-zinc-800/40">
+          <div className="divide-y divide-border-default/40">
             {decisions.slice(0, 4).map((decision) => (
               <DecisionLedgerCard key={decision.id} decision={decision} />
             ))}
@@ -408,11 +408,11 @@ export default function SpaceOverviewPage({
 
       {/* ── Repos & Resources ── */}
       {(managedRepos.length > 0 || resources.length > 0) && (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/10 p-4">
-          <div className="flex items-center justify-between mb-3 pb-1.5 border-b border-zinc-800/50">
+        <div className="rounded-xl border border-border-default bg-surface/10 p-4">
+          <div className="flex items-center justify-between mb-3 pb-1.5 border-b border-border-default/50">
             <div className="flex items-center gap-2">
-              <CodeBracketIcon className="w-3.5 h-3.5 text-zinc-400" />
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Repos & Resources</span>
+              <CodeBracketIcon className="w-3.5 h-3.5 text-text-muted" />
+              <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Repos & Resources</span>
             </div>
             {isOwnerOrMaintainer && (
               <Link
@@ -426,24 +426,24 @@ export default function SpaceOverviewPage({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {managedRepos.length > 0 && (
               <div className="space-y-2">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Codebases</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-text-disabled">Codebases</p>
                 {managedRepos.slice(0, 3).map((attachment) => (
                   <Link
                     key={attachment.id}
                     href={`/repos/${attachment.repo?.id}`}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2.5 transition-all duration-200 hover:bg-zinc-900/60 hover:border-zinc-700"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border-default/60 bg-app/40 px-3 py-2.5 transition-all duration-200 hover:bg-surface/60 hover:border-border-strong"
                   >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <CodeBracketIcon className="h-3 w-3 text-zinc-500" />
-                        <p className="truncate text-xs font-semibold text-white">{attachment.repo?.name}</p>
+                        <CodeBracketIcon className="h-3 w-3 text-text-disabled" />
+                        <p className="truncate text-xs font-semibold text-text-primary">{attachment.repo?.name}</p>
                         {attachment.is_primary ? (
                           <span className="rounded-full bg-emerald-500/10 border border-emerald-500/25 px-1.5 py-px text-[9px] font-bold text-emerald-400 uppercase">
                             Primary
                           </span>
                         ) : null}
                         {attachment.repo?.language ? (
-                          <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-zinc-400 ml-1">
+                          <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-text-muted ml-1">
                             <span
                               className="h-1.5 w-1.5 rounded-full"
                               style={{ backgroundColor: LANGUAGE_COLORS[attachment.repo.language] || "#8b949e" }}
@@ -453,7 +453,7 @@ export default function SpaceOverviewPage({
                         ) : null}
                       </div>
                     </div>
-                    <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 shrink-0">
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-text-disabled shrink-0">
                       {attachment.repo?.my_role ?? "read"}
                     </span>
                   </Link>
@@ -462,22 +462,22 @@ export default function SpaceOverviewPage({
             )}
             {resources.length > 0 && (
               <div className="space-y-2">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Documents & Links</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-text-disabled">Documents & Links</p>
                 {resources.slice(0, 3).map((attachment) => (
                   <a
                     key={attachment.id}
                     href={attachment.external_url ?? "#"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2.5 transition-all duration-200 hover:bg-zinc-900/60 hover:border-zinc-700"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border-default/60 bg-app/40 px-3 py-2.5 transition-all duration-200 hover:bg-surface/60 hover:border-border-strong"
                   >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <FolderIcon className="h-3 w-3 text-zinc-500" />
-                        <p className="truncate text-xs font-semibold text-white">{attachment.label || attachment.external_url}</p>
+                        <FolderIcon className="h-3 w-3 text-text-disabled" />
+                        <p className="truncate text-xs font-semibold text-text-primary">{attachment.label || attachment.external_url}</p>
                       </div>
                     </div>
-                    <ExternalLinkIcon className="h-3 w-3 text-zinc-500 shrink-0" />
+                    <ExternalLinkIcon className="h-3 w-3 text-text-disabled shrink-0" />
                   </a>
                 ))}
               </div>
@@ -487,11 +487,11 @@ export default function SpaceOverviewPage({
       )}
 
       {/* ── Open Work ── */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/10 p-4">
-        <div className="flex items-center justify-between mb-3 pb-1.5 border-b border-zinc-800/50">
+      <div className="rounded-xl border border-border-default bg-surface/10 p-4">
+        <div className="flex items-center justify-between mb-3 pb-1.5 border-b border-border-default/50">
           <div className="flex items-center gap-2">
-            <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Active Work Items</span>
+            <QuestionMarkCircleIcon className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Active Work Items</span>
           </div>
           <Link
             href={`/spaces/${spaceId}/work`}
@@ -505,9 +505,9 @@ export default function SpaceOverviewPage({
             <Spinner />
           </div>
         ) : openWork.length === 0 ? (
-          <p className="text-xs text-zinc-500 py-6 text-center">No active work items at the moment.</p>
+          <p className="text-xs text-text-disabled py-6 text-center">No active work items at the moment.</p>
         ) : (
-          <div className="divide-y divide-zinc-800/40">
+          <div className="divide-y divide-border-default/40">
             {openWork.map((issue) => (
               <SpaceIssueCard key={issue.id} issue={issue} spaceId={spaceId} compact />
             ))}
@@ -517,25 +517,25 @@ export default function SpaceOverviewPage({
 
       {/* ── Contribution Handbook ── */}
       {(space.contribution_guide || contributionResources.length > 0) ? (
-        <div id="contribute" className="rounded-xl border border-zinc-800 bg-zinc-900/10 p-4 scroll-mt-6">
-          <div className="mb-3 flex items-center gap-2 pb-1.5 border-b border-zinc-800/50">
-            <ChatBubbleIcon className="h-3.5 w-3.5 text-zinc-400" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Contribution Handbook</h2>
+        <div id="contribute" className="rounded-xl border border-border-default bg-surface/10 p-4 scroll-mt-6">
+          <div className="mb-3 flex items-center gap-2 pb-1.5 border-b border-border-default/50">
+            <ChatBubbleIcon className="h-3.5 w-3.5 text-text-muted" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-text-muted">Contribution Handbook</h2>
           </div>
           {space.contribution_guide ? (
-            <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-300">{space.contribution_guide}</p>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-text-secondary">{space.contribution_guide}</p>
           ) : (
-            <p className="text-sm leading-relaxed text-zinc-400">
+            <p className="text-sm leading-relaxed text-text-muted">
               Use the linked repo docs below for contribution expectations, then coordinate work and discussion in this Space.
             </p>
           )}
           {contributionResources.length > 0 ? (
-            <div className="mt-4 flex flex-wrap gap-2 pt-3 border-t border-zinc-800/40">
+            <div className="mt-4 flex flex-wrap gap-2 pt-3 border-t border-border-default/40">
               {contributionResources.map((resource) => (
                 <Link
                   key={resource.key}
                   href={`/repos/${resource.repoId}?path=${encodeURIComponent(resource.path)}&view=blob`}
-                  className="rounded-md border border-zinc-700 bg-zinc-900/40 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-all duration-200 hover:bg-zinc-800 hover:text-white"
+                  className="rounded-md border border-border-strong bg-surface/40 px-3 py-1.5 text-xs font-medium text-text-secondary transition-all duration-200 hover:bg-surface-hover hover:text-text-primary"
                 >
                   {resource.label}
                 </Link>
@@ -547,19 +547,19 @@ export default function SpaceOverviewPage({
 
       {/* ── Member Posts ── */}
       {(space.recent_posts?.length ?? 0) > 0 ? (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/10 p-4">
-          <div className="flex items-center gap-2 mb-3 pb-1.5 border-b border-zinc-800/50">
-            <ChatBubbleIcon className="h-3.5 w-3.5 text-zinc-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Member Reflections</span>
+        <div className="rounded-xl border border-border-default bg-surface/10 p-4">
+          <div className="flex items-center gap-2 mb-3 pb-1.5 border-b border-border-default/50">
+            <ChatBubbleIcon className="h-3.5 w-3.5 text-text-muted" />
+            <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Member Reflections</span>
           </div>
           <div className="space-y-2">
             {space.recent_posts?.slice(0, 3).map((post) => (
               <Link
                 key={post.id}
                 href={`/post/${post.id}`}
-                className="block rounded-lg border border-zinc-800/50 bg-zinc-950/20 px-3 py-2.5 transition-all duration-200 hover:bg-zinc-900/40 hover:border-zinc-700"
+                className="block rounded-lg border border-border-default/50 bg-app/20 px-3 py-2.5 transition-all duration-200 hover:bg-surface/40 hover:border-border-strong"
               >
-                <p className="line-clamp-2 text-sm leading-relaxed text-zinc-300">{post.content}</p>
+                <p className="line-clamp-2 text-sm leading-relaxed text-text-secondary">{post.content}</p>
               </Link>
             ))}
           </div>
@@ -567,14 +567,14 @@ export default function SpaceOverviewPage({
       ) : null}
 
       {/* ── Tech Stack ── */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/10 p-4">
-        <div className="flex items-center justify-between mb-3 pb-1.5 border-b border-zinc-800/50">
+      <div className="rounded-xl border border-border-default bg-surface/10 p-4">
+        <div className="flex items-center justify-between mb-3 pb-1.5 border-b border-border-default/50">
           <div className="flex items-center gap-2">
-            <CodeBracketIcon className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Tech Stack</span>
+            <CodeBracketIcon className="w-3.5 h-3.5 text-text-muted" />
+            <span className="text-xs font-bold uppercase tracking-wider text-text-muted">Tech Stack</span>
           </div>
           {stack.length > 0 && (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-800/60 text-zinc-400 border border-zinc-700/40">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-surface-hover/60 text-text-muted border border-border-strong/40">
               {stack.length} {stack.length === 1 ? 'technology' : 'technologies'}
             </span>
           )}
@@ -589,7 +589,7 @@ export default function SpaceOverviewPage({
       </div>
 
       {/* ── Footer ── */}
-      <div className="border-t border-zinc-800/60 pt-4 flex flex-wrap justify-between items-center gap-3 text-xs text-zinc-500">
+      <div className="border-t border-border-default/60 pt-4 flex flex-wrap justify-between items-center gap-3 text-xs text-text-disabled">
         <div>
           Created {formatRelativeTime(space.created_at)}
           {space.updated_at && space.updated_at !== space.created_at ? (
@@ -599,7 +599,7 @@ export default function SpaceOverviewPage({
         {isOwnerOrMaintainer && (
           <Link
             href={`/spaces/${spaceId}/manage`}
-            className="rounded-md bg-zinc-900/60 px-3 py-1 border border-zinc-800/80 font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all duration-200"
+            className="rounded-md bg-surface/60 px-3 py-1 border border-border-default/80 font-semibold text-text-muted hover:text-text-primary hover:bg-surface-hover transition-all duration-200"
           >
             Manage Space Settings
           </Link>

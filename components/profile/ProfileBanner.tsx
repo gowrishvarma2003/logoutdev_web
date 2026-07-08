@@ -94,7 +94,7 @@ export default function ProfileBanner({
               type="button"
               onClick={handleRemove}
               disabled={busy}
-              className="flex items-center gap-1.5 rounded-lg bg-zinc-950/70 backdrop-blur px-2.5 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-950/90 transition-colors disabled:opacity-60"
+              className="flex items-center gap-1.5 rounded-lg bg-app/70 backdrop-blur px-2.5 py-1.5 text-xs font-medium text-text-secondary hover:bg-app/90 transition-colors disabled:opacity-60"
               aria-label="Remove banner"
             >
               <XIcon className="w-3.5 h-3.5" />
@@ -107,7 +107,7 @@ export default function ProfileBanner({
                 type="button"
                 onClick={() => inputRef.current?.click()}
                 disabled={busy}
-                className="flex items-center gap-1.5 rounded-lg bg-zinc-950/70 backdrop-blur px-2.5 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-950/90 transition-colors disabled:opacity-60"
+                className="flex items-center gap-1.5 rounded-lg bg-app/70 backdrop-blur px-2.5 py-1.5 text-xs font-medium text-text-secondary hover:bg-app/90 transition-colors disabled:opacity-60"
                 aria-label="Upload banner"
               >
                 {busy ? <Spinner size="sm" /> : <CameraIcon className="w-3.5 h-3.5" />}

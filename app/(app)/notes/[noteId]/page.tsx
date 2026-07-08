@@ -125,7 +125,7 @@ export default function NoteEditorPage() {
           action={
             <button
               onClick={() => router.push("/notes")}
-              className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+              className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
             >
               Back to Notes
             </button>
@@ -196,7 +196,7 @@ export default function NoteEditorPage() {
         </div>
       </div>
 
-      <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-zinc-500">
+      <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-disabled">
         <SaveStatusIndicator
           status={autosave.status}
           lastSavedAt={autosave.lastSavedAt || note.updated_at}

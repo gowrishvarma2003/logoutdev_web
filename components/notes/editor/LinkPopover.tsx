@@ -48,7 +48,7 @@ export default function LinkPopover({ editor, onClose }: LinkPopoverProps) {
   return (
     <div
       ref={popoverRef}
-      className="absolute left-0 top-full z-20 mt-2 w-72 rounded-xl border border-zinc-800 bg-zinc-900 p-3 shadow-2xl"
+      className="absolute left-0 top-full z-20 mt-2 w-72 rounded-xl border border-border-default bg-surface p-3 shadow-2xl"
       onKeyDown={(event) => {
         if (event.key === "Enter") {
           event.preventDefault();
@@ -58,7 +58,7 @@ export default function LinkPopover({ editor, onClose }: LinkPopoverProps) {
         }
       }}
     >
-      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-text-disabled">
         Link URL
       </label>
       <input
@@ -67,7 +67,7 @@ export default function LinkPopover({ editor, onClose }: LinkPopoverProps) {
         value={url}
         onChange={(event) => setUrl(event.target.value)}
         placeholder="https://example.com"
-        className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-sm text-white outline-none focus:border-zinc-600"
+        className="w-full rounded-lg border border-border-default bg-app px-2.5 py-1.5 text-sm text-text-primary outline-none focus:border-border-strong"
       />
       <div className="mt-2.5 flex justify-end gap-2">
         {editor.isActive("link") ? (
@@ -82,7 +82,7 @@ export default function LinkPopover({ editor, onClose }: LinkPopoverProps) {
         <button
           type="button"
           onClick={apply}
-          className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-200"
+          className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
         >
           Apply
         </button>

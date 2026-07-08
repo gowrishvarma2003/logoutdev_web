@@ -32,18 +32,18 @@ export default function FreelancePage() {
 
   return (
     <div>
-      <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/80 px-4 py-4 backdrop-blur-md">
+      <header className="sticky top-0 z-10 border-b border-border-default bg-app/80 px-4 py-4 backdrop-blur-md">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-[17px] font-bold text-white">Freelance</h1>
-            <p className="mt-0.5 text-sm text-zinc-500">
+            <h1 className="text-[17px] font-bold text-text-primary">Freelance</h1>
+            <p className="mt-0.5 text-sm text-text-disabled">
               Find and post freelance projects.
             </p>
           </div>
           {user && (
             <Link
               href="/freelance/create"
-              className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
             >
               Post a project
             </Link>
@@ -64,10 +64,10 @@ export default function FreelancePage() {
 
       {user && (
         <div className="flex flex-wrap gap-2 px-4 py-3">
-          <Link href="/freelance/my-projects" className="rounded-full bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800">
+          <Link href="/freelance/my-projects" className="rounded-full bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-hover">
             My posted projects
           </Link>
-          <Link href="/freelance/my-proposals" className="rounded-full bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800">
+          <Link href="/freelance/my-proposals" className="rounded-full bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-hover">
             My proposals
           </Link>
         </div>
@@ -92,7 +92,7 @@ export default function FreelancePage() {
             tone="project"
             action={
               user ? (
-                <Link href="/freelance/create" className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+                <Link href="/freelance/create" className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover">
                   Post a project
                 </Link>
               ) : null
@@ -109,15 +109,15 @@ export default function FreelancePage() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Previous
             </button>
-            <span className="text-xs text-zinc-500">Page {page}</span>
+            <span className="text-xs text-text-disabled">Page {page}</span>
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={!hasMore}
-              className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Next
             </button>

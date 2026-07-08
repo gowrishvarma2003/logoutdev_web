@@ -123,16 +123,16 @@ export default function MobileNav({
       {showMore && (
         <>
           <div
-            className="lg:hidden fixed inset-0 z-40 cursor-pointer bg-black/60 backdrop-blur-sm"
+            className="lg:hidden fixed inset-0 z-drawer cursor-pointer bg-black/60 backdrop-blur-sm"
             onClick={() => setShowMore(false)}
           />
-          <div className="lg:hidden fixed bottom-[61px] inset-x-0 z-50 animate-in slide-in-from-bottom-2 duration-150">
-            <div className="mx-4 mb-2 rounded-2xl border border-zinc-700 bg-zinc-900 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
-                <span className="text-sm font-semibold text-white">More</span>
+          <div className="lg:hidden fixed bottom-[61px] inset-x-0 z-modal animate-in slide-in-from-bottom-2 duration-150">
+            <div className="mx-4 mb-2 rounded-2xl border border-border-default bg-surface-elevated shadow-dropdown">
+              <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
+                <span className="text-sm font-semibold text-text-primary">More</span>
                 <button
                   onClick={() => setShowMore(false)}
-                  className="rounded-full p-1 text-zinc-400 hover:bg-zinc-800"
+                  className="rounded-full p-1 text-text-muted hover:bg-surface-hover hover:text-text-primary"
                 >
                   <XIcon className="w-4 h-4" />
                 </button>
@@ -147,8 +147,8 @@ export default function MobileNav({
                       onClick={() => setShowMore(false)}
                       className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors ${
                         active
-                          ? "bg-zinc-800 text-white"
-                          : "text-zinc-400 hover:bg-zinc-800/60 hover:text-white"
+                          ? "bg-surface-active text-text-primary"
+                          : "text-text-muted hover:bg-surface-hover hover:text-text-primary"
                       }`}
                     >
                       {icon}
@@ -157,7 +157,7 @@ export default function MobileNav({
                   );
                 })}
               </nav>
-              <div className="border-t border-zinc-800 px-2 py-2">
+              <div className="border-t border-border-subtle px-2 py-2">
                 <button
                   onClick={() => {
                     setShowMore(false);
@@ -178,27 +178,27 @@ export default function MobileNav({
       {showLogoutConfirm &&
         createPortal(
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-modal flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
             onClick={() => setShowLogoutConfirm(false)}
           >
             <div
-              className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl"
+              className="w-full max-w-sm rounded-2xl border border-border-default bg-app p-6 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10 text-rose-500 mb-4">
                 <LogOutIcon className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-bold text-white text-center mb-2">
+              <h3 className="text-lg font-bold text-text-primary text-center mb-2">
                 Sign Out
               </h3>
-              <p className="text-sm text-zinc-400 text-center mb-6">
+              <p className="text-sm text-text-muted text-center mb-6">
                 Are you sure you want to sign out of your account?
               </p>
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setShowLogoutConfirm(false)}
-                  className="flex-1 rounded-xl bg-zinc-800 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+                  className="flex-1 rounded-xl bg-surface-hover py-2.5 text-sm font-semibold text-text-secondary transition-colors hover:bg-surface-active hover:text-text-primary"
                 >
                   Cancel
                 </button>
@@ -208,7 +208,7 @@ export default function MobileNav({
                     setShowLogoutConfirm(false);
                     onLogout();
                   }}
-                  className="flex-1 rounded-xl bg-rose-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-500"
+                  className="flex-1 rounded-xl bg-rose-600 py-2.5 text-sm font-semibold text-text-primary transition-colors hover:bg-rose-500"
                 >
                   Sign out
                 </button>
@@ -219,20 +219,20 @@ export default function MobileNav({
         )}
 
       {/* ── Bottom navigation bar ── */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-zinc-950 border-t border-zinc-800">
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-sticky border-t border-border-subtle bg-app/95 backdrop-blur-md">
         <ul className="flex items-center">
           {primaryItems.map(({ href, icon, label, badge, badgeTone }) => {
             const active = isActive(href, label);
             const badgeClass =
               badgeTone === "action"
-                ? "bg-amber-400 text-zinc-950"
-                : "bg-rose-500 text-white";
+                ? "bg-amber-400 text-primary-foreground"
+                : "bg-rose-500 text-text-primary";
             return (
               <li key={href} className="flex-1">
                 <Link
                   href={href}
                   className={`flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors ${
-                    active ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                    active ? "text-text-primary" : "text-text-disabled hover:text-text-secondary"
                   }`}
                 >
                   <span className="relative inline-flex">
@@ -256,7 +256,7 @@ export default function MobileNav({
             <button
               onClick={() => setShowMore((prev) => !prev)}
               className={`flex w-full flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors ${
-                showMore ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                showMore ? "text-text-primary" : "text-text-disabled hover:text-text-secondary"
               }`}
             >
               <DotsIcon className="w-6 h-6" />

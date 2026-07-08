@@ -36,10 +36,10 @@ export default function TagList() {
   return (
     <div>
       <div className="mb-1 flex items-center justify-between px-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Tags</span>
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-text-disabled">Tags</span>
         <button
           onClick={() => setCreateOpen(true)}
-          className="rounded-lg p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-white"
+          className="rounded-lg p-1 text-text-disabled transition-colors hover:bg-surface-hover hover:text-text-primary"
           aria-label="New tag"
           title="New tag"
         >
@@ -48,7 +48,7 @@ export default function TagList() {
       </div>
 
       {tags.tags.length === 0 && !tags.loading ? (
-        <p className="px-2 py-1 text-xs text-zinc-600">No tags yet.</p>
+        <p className="px-2 py-1 text-xs text-text-disabled">No tags yet.</p>
       ) : (
         <ul className="space-y-0.5">
           {tags.tags.map((tag) => {
@@ -58,7 +58,7 @@ export default function TagList() {
                 <Link
                   href={notesViewHref({ tag: tag.id })}
                   className={`flex items-center gap-2.5 rounded-lg py-1.5 pl-2 pr-7 text-sm transition-colors ${
-                    active ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-800/60 hover:text-white"
+                    active ? "bg-surface-hover text-text-primary" : "text-text-muted hover:bg-surface-hover/60 hover:text-text-primary"
                   }`}
                 >
                   <span
@@ -66,11 +66,11 @@ export default function TagList() {
                     style={{ backgroundColor: tag.color || "#71717a" }}
                   />
                   <span className="flex-1 truncate">{tag.name}</span>
-                  {tag.note_count ? <span className="text-xs text-zinc-600">{tag.note_count}</span> : null}
+                  {tag.note_count ? <span className="text-xs text-text-disabled">{tag.note_count}</span> : null}
                 </Link>
                 <button
                   onClick={() => setOpenMenuId(openMenuId === tag.id ? null : tag.id)}
-                  className={`absolute right-1 top-1/2 -translate-y-1/2 rounded-md p-1 text-zinc-500 hover:bg-zinc-700 hover:text-white ${
+                  className={`absolute right-1 top-1/2 -translate-y-1/2 rounded-md p-1 text-text-disabled hover:bg-surface-active hover:text-text-primary ${
                     openMenuId === tag.id ? "flex" : "hidden group-hover:flex"
                   }`}
                   aria-label={`More actions for ${tag.name}`}
@@ -78,13 +78,13 @@ export default function TagList() {
                   <DotsIcon className="h-3.5 w-3.5" />
                 </button>
                 {openMenuId === tag.id ? (
-                  <div className="absolute right-0 top-full z-20 mt-1 w-40 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 py-1 shadow-2xl">
+                  <div className="absolute right-0 top-full z-20 mt-1 w-40 overflow-hidden rounded-xl border border-border-default bg-surface py-1 shadow-2xl">
                     <button
                       onClick={() => {
                         setOpenMenuId(null);
                         setEditTarget({ id: tag.id, name: tag.name, color: tag.color });
                       }}
-                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-text-secondary hover:bg-surface-hover hover:text-text-primary"
                     >
                       <EditIcon className="h-3.5 w-3.5" /> Edit
                     </button>

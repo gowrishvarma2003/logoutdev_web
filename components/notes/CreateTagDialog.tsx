@@ -66,16 +66,16 @@ export default function CreateTagDialog({
           onChange={(event) => setName(event.target.value)}
           maxLength={NAME_MAX_LENGTH}
           placeholder="Tag name"
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-zinc-600"
+          className="w-full rounded-xl border border-border-default bg-app px-3.5 py-2.5 text-sm text-text-primary outline-none focus:border-border-strong"
         />
 
-        <p className="mb-2 mt-4 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Color</p>
+        <p className="mb-2 mt-4 text-[11px] font-semibold uppercase tracking-wide text-text-disabled">Color</p>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setColor(null)}
-            className={`h-7 w-7 rounded-full border-2 border-dashed border-zinc-600 text-[10px] text-zinc-500 ${
-              !color ? "ring-2 ring-white ring-offset-2 ring-offset-zinc-950" : ""
+            className={`h-7 w-7 rounded-full border-2 border-dashed border-border-strong text-[10px] text-text-disabled ${
+              !color ? "ring-2 ring-white ring-offset-2 ring-offset-app" : ""
             }`}
             title="No color"
           >
@@ -87,7 +87,7 @@ export default function CreateTagDialog({
               type="button"
               onClick={() => setColor(preset)}
               className={`h-7 w-7 rounded-full transition-transform hover:scale-105 ${
-                color === preset ? "ring-2 ring-white ring-offset-2 ring-offset-zinc-950" : ""
+                color === preset ? "ring-2 ring-white ring-offset-2 ring-offset-app" : ""
               }`}
               style={{ backgroundColor: preset }}
               title={preset}
@@ -101,14 +101,14 @@ export default function CreateTagDialog({
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="rounded-xl bg-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white disabled:opacity-50"
+            className="rounded-xl bg-surface-hover px-4 py-2 text-sm font-semibold text-text-secondary transition-colors hover:bg-surface-active hover:text-text-primary disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={busy}
-            className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-200 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-60"
           >
             {busy ? <Spinner size="sm" /> : null}
             {mode === "create" ? "Create" : "Save"}

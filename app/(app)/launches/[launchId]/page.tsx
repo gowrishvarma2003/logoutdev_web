@@ -44,9 +44,9 @@ function Section({ id, title, count, children }: { id: string; title: string; co
   return (
     <section id={id} className="scroll-mt-20">
       <div className="mb-4 flex items-center gap-3">
-        <h2 className="text-lg font-semibold text-white">{title}</h2>
+        <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
         {typeof count === "number" && count > 0 && (
-          <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-medium tabular-nums text-zinc-400">
+          <span className="rounded-full bg-surface-hover px-2 py-0.5 text-xs font-medium tabular-nums text-text-muted">
             {count}
           </span>
         )}
@@ -121,9 +121,9 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
       {/* Back link */}
       <Link
         href="/launches"
-        className="group mb-6 inline-flex items-center gap-1.5 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+        className="group mb-6 inline-flex items-center gap-1.5 text-xs text-text-disabled transition-colors hover:text-text-secondary"
       >
-        <ArrowLeftIcon className="h-4 w-4 transition-transform group-hover:-translate-x-0.5 text-zinc-650" />
+        <ArrowLeftIcon className="h-4 w-4 transition-transform group-hover:-translate-x-0.5 text-text-disabled" />
         All launches
       </Link>
 
@@ -136,18 +136,18 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
 
           {/* Product Story / Value Proposition section */}
           <section id="about" className="scroll-mt-20 space-y-5">
-            <div className="border-b border-zinc-800/80 pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-white">Product Story</h2>
-              <p className="mt-1 text-xs text-zinc-500 font-light">
+            <div className="border-b border-border-default/80 pb-4">
+              <h2 className="text-xl font-bold tracking-tight text-text-primary">Product Story</h2>
+              <p className="mt-1 text-xs text-text-disabled font-light">
                 Why {launch.name} exists and the philosophy behind its creation.
               </p>
             </div>
             
-            <div className="space-y-4 text-sm leading-relaxed text-zinc-400 font-light">
+            <div className="space-y-4 text-sm leading-relaxed text-text-muted font-light">
               {descriptionParagraphs.length > 0 ? (
                 descriptionParagraphs.map((p, i) => <p key={i}>{p}</p>)
               ) : (
-                <p className="text-zinc-500 italic">No description provided.</p>
+                <p className="text-text-disabled italic">No description provided.</p>
               )}
             </div>
           </section>
@@ -155,14 +155,14 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
           {/* Screenshots Gallery / Preview */}
           {screenshotCount > 0 && (
             <section id="screenshots" className="scroll-mt-20 space-y-4">
-              <div className="border-b border-zinc-800/80 pb-4 flex items-center justify-between">
+              <div className="border-b border-border-default/80 pb-4 flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold tracking-tight text-white">Product Previews</h2>
-                  <p className="mt-1 text-xs text-zinc-500 font-light">
+                  <h2 className="text-xl font-bold tracking-tight text-text-primary">Product Previews</h2>
+                  <p className="mt-1 text-xs text-text-disabled font-light">
                     Walkthrough screenshots of the developer interface.
                   </p>
                 </div>
-                <span className="rounded-full bg-zinc-850 px-3 py-1 text-xs font-semibold tabular-nums text-zinc-400 border border-zinc-800">
+                <span className="rounded-full bg-surface-hover px-3 py-1 text-xs font-semibold tabular-nums text-text-muted border border-border-default">
                   {screenshotCount} preview{screenshotCount > 1 ? "s" : ""}
                 </span>
               </div>
@@ -174,15 +174,15 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
           {isBetaLaunch ? (
             canViewFeedbackSection && (
               <section id="feedback" className="scroll-mt-20 space-y-4">
-                <div className="border-b border-zinc-800/80 pb-4 flex items-center justify-between">
+                <div className="border-b border-border-default/80 pb-4 flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold tracking-tight text-white">Feedback Hub</h2>
-                    <p className="mt-1 text-xs text-zinc-500 font-light">
+                    <h2 className="text-xl font-bold tracking-tight text-text-primary">Feedback Hub</h2>
+                    <p className="mt-1 text-xs text-text-disabled font-light">
                       Roadmap ideas, bugs, and feature suggestions from testers.
                     </p>
                   </div>
                   {launch.feedback_count > 0 && (
-                    <span className="rounded-full bg-zinc-850 px-3 py-1 text-xs font-semibold tabular-nums text-zinc-400 border border-zinc-800">
+                    <span className="rounded-full bg-surface-hover px-3 py-1 text-xs font-semibold tabular-nums text-text-muted border border-border-default">
                       {launch.feedback_count} item{launch.feedback_count > 1 ? "s" : ""}
                     </span>
                   )}
@@ -222,15 +222,15 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
             )
           ) : (
             <section id="reviews" className="scroll-mt-20 space-y-4">
-              <div className="border-b border-zinc-800/80 pb-4 flex items-center justify-between">
+              <div className="border-b border-border-default/80 pb-4 flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold tracking-tight text-white">Product Reviews</h2>
-                  <p className="mt-1 text-xs text-zinc-500 font-light">
+                  <h2 className="text-xl font-bold tracking-tight text-text-primary">Product Reviews</h2>
+                  <p className="mt-1 text-xs text-text-disabled font-light">
                     What other developers think of {launch.name}.
                   </p>
                 </div>
                 {launch.review_count > 0 && (
-                  <span className="rounded-full bg-zinc-850 px-3 py-1 text-xs font-semibold tabular-nums text-zinc-400 border border-zinc-800">
+                  <span className="rounded-full bg-surface-hover px-3 py-1 text-xs font-semibold tabular-nums text-text-muted border border-border-default">
                     {launch.review_count} review{launch.review_count > 1 ? "s" : ""}
                   </span>
                 )}
@@ -266,8 +266,8 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
 
           {/* Related content */}
           {(launch.next_steps?.length || launch.related_entities?.length) && (
-            <section id="related" className="scroll-mt-20 space-y-4 border-t border-zinc-800/60 pt-6">
-              <h2 className="text-base font-bold text-white">Next Steps & Related Spaces</h2>
+            <section id="related" className="scroll-mt-20 space-y-4 border-t border-border-default/60 pt-6">
+              <h2 className="text-base font-bold text-text-primary">Next Steps & Related Spaces</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {launch.next_steps && <NextStepsPanel items={launch.next_steps} />}
                 {launch.related_entities && <RelatedEntitiesPanel items={launch.related_entities} />}
@@ -279,7 +279,7 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
         {/* Sidebar/Right column (1 col wide) */}
         <div className="lg:col-span-1 space-y-6">
           {/* 1. Action panel (Upvote & Share) */}
-          <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/40 p-5 space-y-4">
+          <div className="rounded-2xl border border-border-default/80 bg-app/40 p-5 space-y-4">
             <div className="flex items-center gap-3">
               {/* Upvote */}
               <button
@@ -301,19 +301,19 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                 className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all cursor-pointer ${
                   isUpvoted
                     ? "bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/15"
-                    : "bg-zinc-900/60 text-zinc-350 border border-zinc-800 hover:bg-zinc-800 hover:text-white"
+                    : "bg-surface/60 text-zinc-350 border border-border-default hover:bg-surface-hover hover:text-text-primary"
                 } disabled:cursor-not-allowed disabled:opacity-40`}
               >
-                <HeartIcon className="h-4.5 w-4.5" filled={isUpvoted} />
+                <HeartIcon className="h-4 w-4" filled={isUpvoted} />
                 <span>{launch.upvote_count} Upvotes</span>
               </button>
 
               {/* Share */}
               <Link
                 href={`/feed?shareType=launch&shareId=${launch.id}&shareTitle=${encodeURIComponent(launch.name)}&shareSubtitle=${encodeURIComponent(launch.tagline || "")}&shareHref=${encodeURIComponent(`/launches/${launch.id}`)}`}
-                className="flex items-center justify-center gap-2 rounded-xl bg-zinc-900/60 border border-zinc-800 px-4 py-3 text-sm font-semibold text-zinc-350 hover:bg-zinc-800 hover:text-white transition-all"
+                className="flex items-center justify-center gap-2 rounded-xl bg-surface/60 border border-border-default px-4 py-3 text-sm font-semibold text-zinc-350 hover:bg-surface-hover hover:text-text-primary transition-all"
               >
-                <ShareIcon className="h-4.5 w-4.5" />
+                <ShareIcon className="h-4 w-4" />
                 <span>Share</span>
               </Link>
             </div>
@@ -324,9 +324,9 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                 href={launch.live_url || launch.website_url || launch.demo_url || "#"}
                 target="_blank"
                 rel="noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 px-5 py-3 text-sm font-semibold text-zinc-950 shadow-lg shadow-emerald-500/10 transition-colors"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-emerald-500/10 transition-colors"
               >
-                <GlobeIcon className="h-4.5 w-4.5" />
+                <GlobeIcon className="h-4 w-4" />
                 Visit Product Live
               </a>
             )}
@@ -337,7 +337,7 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                 <button
                   type="button"
                   onClick={() => setOwnerSettingsOpen(!ownerSettingsOpen)}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900/60 border border-zinc-800 px-4 py-2.5 text-xs font-semibold text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all cursor-pointer"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-surface/60 border border-border-default px-4 py-2.5 text-xs font-semibold text-text-muted hover:bg-surface-hover hover:text-text-primary transition-all cursor-pointer"
                 >
                   <DotsIcon className="h-4 w-4" />
                   <span>Manage Launch</span>
@@ -346,11 +346,11 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                 {ownerSettingsOpen && (
                   <>
                     <div className="fixed inset-0 z-10 cursor-pointer" onClick={() => setOwnerSettingsOpen(false)} />
-                    <div className="absolute right-0 left-0 mt-2 z-20 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl">
+                    <div className="absolute right-0 left-0 mt-2 z-20 overflow-hidden rounded-xl border border-border-default bg-app shadow-2xl">
                       <Link
                         href={`/launches/${launch.id}/edit`}
                         onClick={() => setOwnerSettingsOpen(false)}
-                        className="block px-4 py-3 text-xs text-zinc-350 transition-colors hover:bg-zinc-900 hover:text-white"
+                        className="block px-4 py-3 text-xs text-zinc-350 transition-colors hover:bg-surface hover:text-text-primary"
                       >
                         Edit launch details
                       </Link>
@@ -371,9 +371,9 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                               setOwnerActionLoading(false);
                             }
                           }}
-                          className="flex w-full items-center gap-2 px-4 py-3 text-left text-xs text-zinc-350 hover:bg-zinc-900 hover:text-white cursor-pointer border-t border-zinc-900"
+                          className="flex w-full items-center gap-2 px-4 py-3 text-left text-xs text-zinc-350 hover:bg-surface hover:text-text-primary cursor-pointer border-t border-border-subtle"
                         >
-                          <RocketIcon className="h-3.5 w-3.5 text-zinc-500" />
+                          <RocketIcon className="h-3.5 w-3.5 text-text-disabled" />
                           Publish Launch
                         </button>
                       )}
@@ -392,7 +392,7 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                             setOwnerActionLoading(false);
                           }
                         }}
-                        className="flex w-full items-center border-t border-zinc-900 px-4 py-3 text-left text-xs text-rose-400 hover:bg-rose-950/20 cursor-pointer"
+                        className="flex w-full items-center border-t border-border-subtle px-4 py-3 text-left text-xs text-rose-400 hover:bg-rose-950/20 cursor-pointer"
                       >
                         Delete Launch
                       </button>
@@ -406,10 +406,10 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
 
           {/* 2. Beta program capacity & actions */}
           {isBetaLaunch && (
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/40 p-5 space-y-5">
-              <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+            <div className="rounded-2xl border border-border-default bg-app/40 p-5 space-y-5">
+              <div className="flex items-center justify-between border-b border-border-subtle pb-3">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold text-white flex items-center gap-1.5">
+                  <h3 className="text-sm font-semibold text-text-primary flex items-center gap-1.5">
                     <RocketIcon className="h-4 w-4 text-sky-400" />
                     Beta Program
                   </h3>
@@ -425,7 +425,7 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                           setRefreshing(false);
                         }
                       }}
-                      className="rounded-lg p-1 text-zinc-550 hover:bg-zinc-900 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                      className="rounded-lg p-1 text-text-disabled hover:bg-surface hover:text-text-primary transition-colors cursor-pointer disabled:opacity-50"
                       title="Reload requests"
                     >
                       <RepeatIcon className={`h-3.5 w-3.5 ${refreshing ? "animate-spin text-sky-400" : ""}`} />
@@ -441,14 +441,14 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
               {betaSummary && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-zinc-500">Program capacity</span>
-                    <span className="font-semibold text-zinc-300">
+                    <span className="text-text-disabled">Program capacity</span>
+                    <span className="font-semibold text-text-secondary">
                       {betaSummary.approved_count}
                       {betaSummary.capacity ? ` / ${betaSummary.capacity}` : ""} approved
                     </span>
                   </div>
                   {betaSummary.capacity && (
-                    <div className="h-1.5 w-full rounded-full bg-zinc-900 overflow-hidden border border-zinc-850">
+                    <div className="h-1.5 w-full rounded-full bg-surface overflow-hidden border border-border-default">
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all duration-500"
                         style={{ width: `${Math.min(100, (betaSummary.approved_count / betaSummary.capacity) * 100)}%` }}
@@ -462,10 +462,10 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
               {launch.viewer_state?.is_owner ? (
                 <div className="space-y-5">
                   {/* Go Live section */}
-                  <div className="space-y-3 rounded-xl border border-zinc-900 bg-zinc-950/80 p-3.5">
+                  <div className="space-y-3 rounded-xl border border-border-subtle bg-app/80 p-3.5">
                     <div>
-                      <p className="text-xs font-semibold text-white">Graduate to Public Launch</p>
-                      <p className="mt-0.5 text-[10px] text-zinc-500 font-light">
+                      <p className="text-xs font-semibold text-text-primary">Graduate to Public Launch</p>
+                      <p className="mt-0.5 text-[10px] text-text-disabled font-light">
                         Add your live URL and make LogoutDev open to everyone.
                       </p>
                     </div>
@@ -473,7 +473,7 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                       value={goLiveUrl}
                       onChange={(e) => setGoLiveUrl(e.target.value)}
                       placeholder={launch.live_url || "https://logoutdev.com"}
-                      className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-700 focus:outline-none"
+                      className="w-full rounded-lg border border-border-default bg-app px-3 py-2 text-xs text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
                     />
                     <button
                       type="button"
@@ -491,7 +491,7 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                           setBetaActionLoading(false);
                         }
                       }}
-                      className="w-full rounded-lg bg-emerald-500 hover:bg-emerald-400 py-2 text-xs font-semibold text-zinc-950 transition-colors cursor-pointer border border-emerald-600/30"
+                      className="w-full rounded-lg bg-emerald-500 hover:bg-emerald-400 py-2 text-xs font-semibold text-primary-foreground transition-colors cursor-pointer border border-emerald-600/30"
                     >
                       Go Live Now
                     </button>
@@ -499,24 +499,24 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
 
                   {/* Applicants list */}
                   {registrations.length > 0 ? (
-                    <div className="space-y-3 border-t border-zinc-900 pt-4">
-                      <h4 className="text-xs font-semibold text-zinc-400">
+                    <div className="space-y-3 border-t border-border-subtle pt-4">
+                      <h4 className="text-xs font-semibold text-text-muted">
                         Applicants ({betaSummary?.pending_count ?? 0} pending)
                       </h4>
                       <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
                         {registrations.map((reg) => (
-                          <div key={reg.id} className="flex flex-col gap-2 rounded-xl border border-zinc-850 bg-zinc-950/40 p-3">
+                          <div key={reg.id} className="flex flex-col gap-2 rounded-xl border border-border-default bg-app/40 p-3">
                             <div className="flex items-start justify-between gap-3">
                               <Link
                                 href={`/profile/${reg.user?.username || reg.user?.id}`}
                                 className="flex items-center gap-2.5 min-w-0 group hover:opacity-90"
                               >
-                                <Avatar user={reg.user} size="sm" className="ring-1 ring-zinc-850" />
+                                <Avatar user={reg.user} size="sm" className="ring-1 ring-border-default" />
                                 <div className="min-w-0">
-                                  <p className="text-xs font-semibold text-white truncate group-hover:underline">
+                                  <p className="text-xs font-semibold text-text-primary truncate group-hover:underline">
                                     {reg.user?.name ?? "User"}
                                   </p>
-                                  <p className="text-[9px] text-zinc-500 uppercase tracking-wider mt-0.5">{reg.status}</p>
+                                  <p className="text-[9px] text-text-disabled uppercase tracking-wider mt-0.5">{reg.status}</p>
                                 </div>
                               </Link>
                               {reg.status === "pending" && (
@@ -535,7 +535,7 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                                       await launchesApi.rejectBetaRegistration(launch.id, reg.id);
                                       await Promise.all([refetch(), refetchRegistrations()]);
                                     }}
-                                    className="rounded bg-zinc-900 px-2.5 py-1 text-[10px] font-semibold text-zinc-400 border border-zinc-800 hover:bg-zinc-850 cursor-pointer"
+                                    className="rounded bg-surface px-2.5 py-1 text-[10px] font-semibold text-text-muted border border-border-default hover:bg-surface-hover cursor-pointer"
                                   >
                                     Reject
                                   </button>
@@ -543,7 +543,7 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                               )}
                             </div>
                             {reg.message && (
-                              <p className="text-xs text-zinc-400 bg-zinc-950/60 rounded p-2 border border-zinc-900 leading-relaxed font-light">
+                              <p className="text-xs text-text-muted bg-app/60 rounded p-2 border border-border-subtle leading-relaxed font-light">
                                 {reg.message}
                               </p>
                             )}
@@ -552,7 +552,7 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                       </div>
                     </div>
                   ) : (
-                    <p className="text-xs text-zinc-550 text-center py-2 font-light">No applicants yet.</p>
+                    <p className="text-xs text-text-disabled text-center py-2 font-light">No applicants yet.</p>
                   )}
                 </div>
               ) : (
@@ -561,8 +561,8 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                   {launch.viewer_state?.can_access_beta ? (
                     <div className="space-y-3">
                       <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3.5 text-center">
-                        <p className="text-xs font-semibold text-emerald-450">✓ You have active Beta access</p>
-                        <p className="text-[10px] text-zinc-500 font-light mt-1">
+                        <p className="text-xs font-semibold text-emerald-400">✓ You have active Beta access</p>
+                        <p className="text-[10px] text-text-disabled font-light mt-1">
                           Graduate user access verified. Open application using the link below.
                         </p>
                       </div>
@@ -571,7 +571,7 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                           href={launch.beta_access_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-500 hover:bg-sky-400 px-4 py-2.5 text-sm font-semibold text-white transition-colors shadow-lg shadow-sky-500/10 cursor-pointer"
+                          className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-500 hover:bg-sky-400 px-4 py-2.5 text-sm font-semibold text-text-primary transition-colors shadow-lg shadow-sky-500/10 cursor-pointer"
                         >
                           <RocketIcon className="h-4 w-4" />
                           Access Beta Version
@@ -580,9 +580,9 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                     </div>
                   ) : launch.viewer_state?.beta_registration_status === "pending" ? (
                     <div className="space-y-3">
-                      <div className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-3.5 text-center">
+                      <div className="rounded-xl bg-surface/60 border border-border-default p-3.5 text-center">
                         <p className="text-xs font-semibold text-amber-400">⏳ Request Pending Review</p>
-                        <p className="text-[10px] text-zinc-500 font-light mt-1">
+                        <p className="text-[10px] text-text-disabled font-light mt-1">
                           Your request to access this beta version has been logged and is awaiting approval.
                         </p>
                       </div>
@@ -598,7 +598,7 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                             setBetaActionLoading(false);
                           }
                         }}
-                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900 hover:text-white py-2 text-xs font-semibold text-zinc-400 transition-colors cursor-pointer"
+                        className="w-full rounded-xl border border-border-default bg-surface/40 hover:bg-surface hover:text-text-primary py-2 text-xs font-semibold text-text-muted transition-colors cursor-pointer"
                       >
                         Withdraw Request
                       </button>
@@ -610,7 +610,7 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                         onChange={(e) => setBetaMessage(e.target.value)}
                         rows={3}
                         placeholder="Introduce yourself to the builder and share why you'd like to test this beta version... (optional)"
-                        className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-700 focus:outline-none"
+                        className="w-full rounded-xl border border-border-default bg-app px-3.5 py-2.5 text-xs text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
                       />
                       <button
                         type="button"
@@ -627,13 +627,13 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                             setBetaActionLoading(false);
                           }
                         }}
-                        className="w-full rounded-xl bg-white hover:bg-zinc-150 py-2.5 text-xs font-bold text-zinc-950 transition-colors cursor-pointer"
+                        className="w-full rounded-xl bg-primary hover:bg-zinc-150 py-2.5 text-xs font-bold text-primary-foreground transition-colors cursor-pointer"
                       >
                         {betaSummary?.is_full ? "Join Waitlist" : "Apply for Beta Access"}
                       </button>
                     </div>
                   ) : (
-                    <p className="text-xs text-zinc-550 text-center font-light py-2">
+                    <p className="text-xs text-text-disabled text-center font-light py-2">
                       Sign in to apply for beta access.
                     </p>
                   )}
@@ -645,25 +645,25 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
 
           {/* 3. Builder Info Card */}
           {launch.builder && (
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/40 p-5 space-y-4">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-550 border-b border-zinc-900 pb-2">
+            <div className="rounded-2xl border border-border-default bg-app/40 p-5 space-y-4">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-disabled border-b border-border-subtle pb-2">
                 Created By
               </p>
               <div className="flex items-center gap-4">
                 <Avatar
                   user={launch.builder}
                   size="md"
-                  className="ring-2 ring-zinc-800/80 shrink-0"
+                  className="ring-2 ring-border-default/80 shrink-0"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-white truncate">{launch.builder.name}</p>
-                  <p className="text-xs text-zinc-500 truncate mt-0.5">
+                  <p className="text-sm font-bold text-text-primary truncate">{launch.builder.name}</p>
+                  <p className="text-xs text-text-disabled truncate mt-0.5">
                     @{launch.builder.username || launch.builder.id}
                   </p>
                 </div>
                 <Link
                   href={`/profile/${launch.builder.username ?? launch.builder.id}`}
-                  className="rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 hover:text-white px-3 py-1.5 text-xs font-semibold text-zinc-350 transition-all"
+                  className="rounded-lg border border-border-default bg-surface hover:bg-surface-hover hover:text-text-primary px-3 py-1.5 text-xs font-semibold text-zinc-350 transition-all"
                 >
                   Profile
                 </Link>
@@ -678,9 +678,9 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
 
           {/* 5. Source & Workspace Card */}
           {(launch.linked_space || (launch.linked_repos && launch.linked_repos.some((r) => r.repo))) && (
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/40 p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-550">
+            <div className="rounded-2xl border border-border-default bg-app/40 p-5 space-y-4">
+              <div className="flex items-center justify-between border-b border-border-subtle pb-2">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-text-disabled">
                   Source & Workspace
                 </p>
                 {launch.is_open_source ? (
@@ -695,19 +695,19 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
               {launch.linked_space && (
                 <Link
                   href={`/spaces/${launch.linked_space.id}`}
-                  className="flex items-center gap-3 rounded-xl border border-zinc-850 bg-zinc-900/40 px-3 py-2.5 transition-colors hover:border-zinc-700 hover:bg-zinc-900"
+                  className="flex items-center gap-3 rounded-xl border border-border-default bg-surface/40 px-3 py-2.5 transition-colors hover:border-border-strong hover:bg-surface"
                 >
                   <FolderIcon className="h-4 w-4 shrink-0 text-amber-400" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-semibold text-white">
+                    <p className="truncate text-xs font-semibold text-text-primary">
                       {launch.linked_space.name ?? "Private workspace"}
                     </p>
-                    <p className="text-[10px] uppercase tracking-wider text-zinc-500">
+                    <p className="text-[10px] uppercase tracking-wider text-text-disabled">
                       {launch.linked_space.visibility === "private" ? "Private space" : "Public space"}
                     </p>
                   </div>
                   {launch.linked_space.visibility === "private" && (
-                    <LockIcon className="h-3.5 w-3.5 shrink-0 text-zinc-600" />
+                    <LockIcon className="h-3.5 w-3.5 shrink-0 text-text-disabled" />
                   )}
                 </Link>
               )}
@@ -723,18 +723,18 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                         <Link
                           key={entry.id || entry.repo_id}
                           href={`/repos/${repo.id}`}
-                          className="flex items-center gap-3 rounded-xl border border-zinc-850 bg-zinc-900/40 px-3 py-2.5 transition-colors hover:border-zinc-700 hover:bg-zinc-900"
+                          className="flex items-center gap-3 rounded-xl border border-border-default bg-surface/40 px-3 py-2.5 transition-colors hover:border-border-strong hover:bg-surface"
                         >
                           <CodeBracketIcon className="h-4 w-4 shrink-0 text-sky-400" />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs font-semibold text-white">{repo.name}</p>
-                            <p className="text-[10px] uppercase tracking-wider text-zinc-500">
+                            <p className="truncate text-xs font-semibold text-text-primary">{repo.name}</p>
+                            <p className="text-[10px] uppercase tracking-wider text-text-disabled">
                               {repo.visibility === "private" ? "Private repo" : "Public repo"}
                               {repo.archived_at ? " · Archived" : ""}
                             </p>
                           </div>
                           {repo.visibility === "private" && (
-                            <LockIcon className="h-3.5 w-3.5 shrink-0 text-zinc-600" />
+                            <LockIcon className="h-3.5 w-3.5 shrink-0 text-text-disabled" />
                           )}
                         </Link>
                       );
@@ -751,15 +751,15 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
 
           {/* 7. Tech Stack Card */}
           {techStack.length > 0 && (
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/40 p-5 space-y-3">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-550 border-b border-zinc-900 pb-2">
+            <div className="rounded-2xl border border-border-default bg-app/40 p-5 space-y-3">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-disabled border-b border-border-subtle pb-2">
                 Tech Stack
               </p>
               <div className="flex flex-wrap gap-2">
                 {techStack.map((item) => (
                   <span
                     key={item.id}
-                    className="rounded-lg border border-zinc-850 bg-zinc-900/60 px-3 py-1.5 text-xs font-medium text-zinc-300"
+                    className="rounded-lg border border-border-default bg-surface/60 px-3 py-1.5 text-xs font-medium text-text-secondary"
                   >
                     {item.technology}
                   </span>
@@ -770,8 +770,8 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
 
           {/* 8. Resources & Links Card */}
           {hasResources && (
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/40 p-5 space-y-3">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-550 border-b border-zinc-900 pb-2">
+            <div className="rounded-2xl border border-border-default bg-app/40 p-5 space-y-3">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-disabled border-b border-border-subtle pb-2">
                 Resources & Links
               </p>
               <LaunchLinkBar launch={launch} />

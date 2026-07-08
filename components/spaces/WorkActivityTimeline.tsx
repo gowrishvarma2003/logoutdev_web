@@ -63,17 +63,17 @@ export default function WorkActivityTimeline({
   const seriousActivity = activity.filter(isSeriousActivity);
 
   return (
-    <section className="rounded-2xl border border-zinc-800 bg-zinc-900/20">
-      <div className="border-b border-zinc-800 px-4 py-3">
-        <h3 className="text-sm font-semibold text-white">Activity</h3>
-        <p className="mt-0.5 text-xs text-zinc-500">
+    <section className="rounded-2xl border border-border-default bg-surface/20">
+      <div className="border-b border-border-default px-4 py-3">
+        <h3 className="text-sm font-semibold text-text-primary">Activity</h3>
+        <p className="mt-0.5 text-xs text-text-disabled">
           Timeline of significant work changes and progress updates connected to this work item.
         </p>
       </div>
 
       <div className="p-4">
         {seriousActivity.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-zinc-800 px-4 py-8 text-center text-sm text-zinc-500">
+          <div className="rounded-2xl border border-dashed border-border-default px-4 py-8 text-center text-sm text-text-disabled">
             No serious updates yet.
           </div>
         ) : (
@@ -83,13 +83,13 @@ export default function WorkActivityTimeline({
               return (
                 <article
                   key={entry.id}
-                  className="rounded-2xl border border-zinc-800 bg-zinc-950/40 px-4 py-3"
+                  className="rounded-2xl border border-border-default bg-app/40 px-4 py-3"
                 >
                   <div className="flex items-start gap-3">
                     <Avatar user={entry.actor ?? null} size="sm" className="shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-zinc-900 px-2 py-0.5 text-zinc-300">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-text-disabled">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-text-secondary">
                           {summary.icon}
                           {summary.title}
                         </span>
@@ -98,7 +98,7 @@ export default function WorkActivityTimeline({
                         <span>{formatRelativeTime(entry.created_at)}</span>
                       </div>
                       {summary.details ? (
-                        <p className="mt-2 text-sm leading-relaxed text-zinc-300">{summary.details}</p>
+                        <p className="mt-2 text-sm leading-relaxed text-text-secondary">{summary.details}</p>
                       ) : null}
                       {entry.event_type.startsWith("progress_update") ? (
                         <Link
@@ -119,7 +119,7 @@ export default function WorkActivityTimeline({
                   type="button"
                   onClick={onLoadMore}
                   disabled={loadingMore}
-                  className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800 disabled:opacity-50"
+                  className="rounded-lg border border-border-strong bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-hover disabled:opacity-50"
                 >
                   {loadingMore ? "Loading..." : "Load more activity"}
                 </button>

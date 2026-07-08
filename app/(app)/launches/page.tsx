@@ -29,24 +29,24 @@ export default function LaunchesPage() {
   return (
     <div className="flex flex-col">
       {/* Clean header */}
-      <div className="sticky top-0 z-10 border-b border-zinc-800/60 bg-zinc-950/95 backdrop-blur-md">
+      <div className="sticky top-0 z-10 border-b border-border-default/60 bg-app/95 backdrop-blur-md">
         <div className="flex items-center justify-between gap-4 px-4 py-5 sm:px-6">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-white">Launches</h1>
-            <p className="mt-1 text-sm text-zinc-500">
+            <h1 className="text-2xl font-semibold tracking-tight text-text-primary">Launches</h1>
+            <p className="mt-1 text-sm text-text-disabled">
               Discover products in beta and live
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-3">
             <Link
               href="/launches/me"
-              className="rounded-xl border border-zinc-700/80 px-4 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800/50"
+              className="rounded-xl border border-border-strong/80 px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:border-border-strong hover:bg-surface-hover/50"
             >
               My launches
             </Link>
             <Link
               href="/launches/new"
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-zinc-950 shadow-sm transition-colors hover:bg-zinc-100"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
             >
               <PlusIcon className="h-4 w-4" />
               Launch
@@ -85,7 +85,7 @@ export default function LaunchesPage() {
             action={
               <Link
                 href="/launches/new"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
               >
                 <PlusIcon className="h-4 w-4" />
                 Launch your product
@@ -105,15 +105,15 @@ export default function LaunchesPage() {
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
-                  className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
-                <span className="text-xs text-zinc-500">Page {page}</span>
+                <span className="text-xs text-text-disabled">Page {page}</span>
                 <button
                   onClick={() => setPage((p) => p + 1)}
                   disabled={!hasMore}
-                  className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>

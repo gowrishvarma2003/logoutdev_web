@@ -25,14 +25,14 @@ export default function NewFilePage() {
 
   if (!repo.can_push) {
     return (
-      <div className="mx-auto max-w-3xl rounded-xl border border-zinc-800 bg-zinc-950 p-6">
-        <h2 className="text-lg font-semibold text-white">Write access required</h2>
-        <p className="mt-2 text-sm text-zinc-400">
+      <div className="mx-auto max-w-3xl rounded-xl border border-border-default bg-app p-6">
+        <h2 className="text-lg font-semibold text-text-primary">Write access required</h2>
+        <p className="mt-2 text-sm text-text-muted">
           You can browse this repository, but adding files from the website requires write access.
         </p>
         <Link
           href={`/repos/${repo.id}?ref=${encodeURIComponent(ref)}&path=${encodeURIComponent(initialPath)}`}
-          className="mt-4 inline-flex rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+          className="mt-4 inline-flex rounded-lg bg-surface-hover px-4 py-2 text-sm font-medium text-text-primary hover:bg-surface-active"
         >
           Back to repository
         </Link>
@@ -78,7 +78,7 @@ export default function NewFilePage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex items-center gap-2 text-sm text-zinc-400">
+      <div className="flex items-center gap-2 text-sm text-text-muted">
         <Link href={`/repos/${repo.id}?ref=${encodeURIComponent(ref)}`} className="text-blue-500 hover:underline">
           {repo.name}
         </Link>
@@ -94,13 +94,13 @@ export default function NewFilePage() {
           value={filename}
           onChange={(e) => setFilename(e.target.value)}
           placeholder="Name your file..."
-          className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1 text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded-md border border-border-strong bg-surface px-3 py-1 text-sm text-text-primary focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           autoFocus
         />
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
-        <div className="border-b border-zinc-800 bg-zinc-900/50 px-4 py-2 font-mono text-sm text-white">
+      <div className="overflow-hidden rounded-xl border border-border-default bg-app">
+        <div className="border-b border-border-default bg-surface/50 px-4 py-2 font-mono text-sm text-text-primary">
           <div className="flex gap-4">
             <span className="border-b-2 border-[#f78166] py-1">Edit new file</span>
           </div>
@@ -109,15 +109,15 @@ export default function NewFilePage() {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="h-[400px] w-full resize-y bg-transparent p-4 font-mono text-sm text-zinc-300 placeholder:text-zinc-600 focus:outline-none"
+            className="h-[400px] w-full resize-y bg-transparent p-4 font-mono text-sm text-text-secondary placeholder:text-text-disabled focus:outline-none"
             placeholder="Enter file contents here"
             spellCheck={false}
           />
         </div>
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-        <h3 className="mb-4 text-sm font-semibold text-white">Commit new file</h3>
+      <div className="rounded-xl border border-border-default bg-surface/40 p-5">
+        <h3 className="mb-4 text-sm font-semibold text-text-primary">Commit new file</h3>
         
         {error && (
           <div className="mb-4 rounded-md border border-rose-900/50 bg-rose-500/10 p-3 text-sm text-rose-400">
@@ -132,16 +132,16 @@ export default function NewFilePage() {
               value={commitMessage}
               onChange={(e) => setCommitMessage(e.target.value)}
               placeholder="Enter a commit message"
-              className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border border-border-strong bg-app px-3 py-2 text-sm text-text-primary focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               required
             />
           </div>
           
-          <div className="flex items-center gap-3 border-t border-zinc-800/50 pt-4">
+          <div className="flex items-center gap-3 border-t border-border-default/50 pt-4">
             <button
               type="submit"
               disabled={isSubmitting || !filename.trim() || !commitMessage.trim()}
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-text-primary hover:bg-green-700 disabled:opacity-50"
             >
               {isSubmitting ? <Spinner size="sm" className="mr-2 inline" /> : null}
               Commit changes

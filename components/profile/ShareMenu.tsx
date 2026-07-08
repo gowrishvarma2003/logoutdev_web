@@ -59,7 +59,7 @@ export default function ShareMenu({ url, title, className = "" }: ShareMenuProps
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-700 text-sm font-medium text-zinc-300 hover:border-zinc-500 hover:text-white transition-colors"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border-strong text-sm font-medium text-text-secondary hover:border-zinc-500 hover:text-text-primary transition-colors"
         aria-label="Share profile"
         aria-haspopup="menu"
         aria-expanded={open}
@@ -71,16 +71,16 @@ export default function ShareMenu({ url, title, className = "" }: ShareMenuProps
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-full mt-1.5 z-30 w-48 rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/60 overflow-hidden"
+          className="absolute right-0 top-full mt-1.5 z-30 w-48 rounded-xl border border-border-default bg-app shadow-2xl shadow-black/60 overflow-hidden"
         >
           {hasNativeShare ? (
             <button
               type="button"
               role="menuitem"
               onClick={() => { nativeShare(); setOpen(false); }}
-              className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-zinc-200 hover:bg-zinc-800/80 transition-colors text-left"
+              className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-text-secondary hover:bg-surface-hover/80 transition-colors text-left"
             >
-              <ShareIcon className="w-3.5 h-3.5 text-zinc-400" />
+              <ShareIcon className="w-3.5 h-3.5 text-text-muted" />
               Share via…
             </button>
           ) : null}
@@ -88,7 +88,7 @@ export default function ShareMenu({ url, title, className = "" }: ShareMenuProps
             type="button"
             role="menuitem"
             onClick={() => { copy(); }}
-            className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-zinc-200 hover:bg-zinc-800/80 transition-colors text-left"
+            className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-text-secondary hover:bg-surface-hover/80 transition-colors text-left"
           >
             {copied ? (
               <>
@@ -97,7 +97,7 @@ export default function ShareMenu({ url, title, className = "" }: ShareMenuProps
               </>
             ) : (
               <>
-                <XIcon className="w-3.5 h-3.5 text-zinc-400 rotate-45" />
+                <XIcon className="w-3.5 h-3.5 text-text-muted rotate-45" />
                 Copy link
               </>
             )}

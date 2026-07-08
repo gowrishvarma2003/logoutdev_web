@@ -61,7 +61,7 @@ function EmptyTabState({
         description="Try a wider status, tag, or skill search to bring more projects into view."
         tone="space"
         action={
-          <button type="button" onClick={onClear} className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+          <button type="button" onClick={onClear} className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover">
             Clear filters
           </button>
         }
@@ -80,7 +80,7 @@ function EmptyTabState({
           signedIn ? (
             <Link
               href="/spaces/create"
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
             >
               <PlusIcon className="h-4 w-4" />
               Create Space
@@ -88,7 +88,7 @@ function EmptyTabState({
           ) : (
             <Link
               href="/login"
-              className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+              className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
             >
               Sign in
             </Link>
@@ -110,7 +110,7 @@ function EmptyTabState({
           signedIn ? null : (
             <Link
               href="/login"
-              className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+              className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
             >
               Sign in
             </Link>
@@ -179,23 +179,23 @@ export default function SpacesDiscoverPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <header className="border-b border-zinc-800 bg-zinc-950 px-4 sm:px-5 lg:px-6">
+    <div className="min-h-screen bg-app">
+      <header className="border-b border-border-default bg-app px-4 sm:px-5 lg:px-6">
         <div className="mx-auto max-w-[1080px]">
           <div className="flex flex-wrap items-center justify-between gap-3 py-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <RocketIcon className="h-5 w-5 shrink-0 text-white" />
-                <h1 className="text-xl font-semibold text-white">Spaces</h1>
+                <RocketIcon className="h-5 w-5 shrink-0 text-text-primary" />
+                <h1 className="text-xl font-semibold text-text-primary">Spaces</h1>
               </div>
-              <p className="mt-1 max-w-2xl text-sm leading-5 text-zinc-500">
+              <p className="mt-1 max-w-2xl text-sm leading-5 text-text-disabled">
                 Your project spaces, followed builds, and places to contribute.
               </p>
             </div>
             {user ? (
               <Link
                 href="/spaces/create"
-                className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg bg-white px-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+                className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
               >
                 <PlusIcon className="h-4 w-4" />
                 New
@@ -203,7 +203,7 @@ export default function SpacesDiscoverPage() {
             ) : (
               <Link
                 href="/login"
-                className="inline-flex h-9 shrink-0 items-center rounded-lg border border-zinc-700 px-3 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-900"
+                className="inline-flex h-9 shrink-0 items-center rounded-lg border border-border-strong px-3 text-sm font-medium text-text-secondary transition-colors hover:bg-surface"
               >
                 Sign in
               </Link>
@@ -218,8 +218,8 @@ export default function SpacesDiscoverPage() {
                 onClick={() => switchTab(tab.key)}
                 className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition-colors ${
                   visibleTab === tab.key
-                    ? "bg-white text-zinc-950"
-                    : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-surface text-text-muted hover:bg-surface-hover hover:text-text-primary"
                 }`}
               >
                 {tab.icon}
@@ -230,7 +230,7 @@ export default function SpacesDiscoverPage() {
 
           <div className="flex flex-col gap-2.5 pb-4 sm:flex-row sm:items-center">
             <div className="relative min-w-0 flex-1">
-              <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-disabled" />
               <input
                 type="search"
                 placeholder="Search stack or project theme"
@@ -239,7 +239,7 @@ export default function SpacesDiscoverPage() {
                   setTag(event.target.value);
                   setPage(1);
                 }}
-                className="h-9 w-full rounded-lg border border-zinc-800 bg-zinc-900 pl-9 pr-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-sky-500"
+                className="h-9 w-full rounded-lg border border-border-default bg-surface pl-9 pr-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-disabled focus:border-sky-500"
               />
             </div>
 
@@ -251,7 +251,7 @@ export default function SpacesDiscoverPage() {
                 setNeededSkill(event.target.value);
                 setPage(1);
               }}
-              className="h-9 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-sky-500 sm:w-40 lg:w-48"
+              className="h-9 w-full rounded-lg border border-border-default bg-surface px-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-disabled focus:border-sky-500 sm:w-40 lg:w-48"
             />
 
             <select
@@ -260,7 +260,7 @@ export default function SpacesDiscoverPage() {
                 setStatus(event.target.value);
                 setPage(1);
               }}
-              className="h-9 rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-300 outline-none transition-colors focus:border-sky-500 sm:w-36"
+              className="h-9 rounded-lg border border-border-default bg-surface px-3 text-sm text-text-secondary outline-none transition-colors focus:border-sky-500 sm:w-36"
             >
               {STATUS_FILTERS.map((filter) => (
                 <option key={filter.value || "all"} value={filter.value}>
@@ -274,7 +274,7 @@ export default function SpacesDiscoverPage() {
 
       <main className="mx-auto max-w-[1080px] px-4 py-4 sm:px-5 lg:px-6">
         <div className="mb-3 flex items-center justify-between gap-3 text-sm">
-          <p className="text-zinc-500">
+          <p className="text-text-disabled">
             {loading ? "Loading spaces..." : `${total || spaces.length} spaces`}
           </p>
           {hasFilters ? (
@@ -311,12 +311,12 @@ export default function SpacesDiscoverPage() {
 
         {page > 1 || spaces.length >= PAGE_LIMIT ? (
           <div className="mt-6 flex justify-center">
-            <div className="inline-flex overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
+            <div className="inline-flex overflow-hidden rounded-lg border border-border-default bg-surface">
               <button
                 type="button"
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
                 disabled={page <= 1 || loading}
-                className="px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-zinc-800 disabled:text-zinc-600 disabled:hover:bg-transparent"
+                className="px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-surface-hover disabled:text-text-disabled disabled:hover:bg-transparent"
               >
                 Previous
               </button>
@@ -324,7 +324,7 @@ export default function SpacesDiscoverPage() {
                 type="button"
                 onClick={() => setPage((current) => current + 1)}
                 disabled={spaces.length < PAGE_LIMIT || loading}
-                className="border-l border-zinc-800 px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-zinc-800 disabled:text-zinc-600 disabled:hover:bg-transparent"
+                className="border-l border-border-default px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-surface-hover disabled:text-text-disabled disabled:hover:bg-transparent"
               >
                 Next
               </button>

@@ -188,13 +188,13 @@ function ConversationRow({
   const title = isGroup ? conversation.group?.title || "Private group" : other?.username ? `@${other.username}` : other?.name || "Unknown user";
   return (
     <div
-      className={`flex w-full items-center gap-2 border-b border-zinc-900 px-3 py-2 transition-colors ${
-        active ? "bg-zinc-900" : "hover:bg-zinc-900/60"
+      className={`flex w-full items-center gap-2 border-b border-border-subtle px-3 py-2 transition-colors ${
+        active ? "bg-surface" : "hover:bg-surface/60"
       }`}
     >
       <button onClick={onSelect} className="flex min-w-0 flex-1 items-center gap-3 rounded-md px-1 py-1 text-left">
         {isGroup ? (
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-zinc-800 text-sm font-semibold text-white">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface-hover text-sm font-semibold text-text-primary">
             {conversation.group?.title?.[0]?.toUpperCase() || <UsersIcon className="h-4 w-4" />}
           </div>
         ) : (
@@ -202,24 +202,24 @@ function ConversationRow({
         )}
         <span className="min-w-0 flex-1">
           <span className="flex items-center justify-between gap-2">
-            <span className="flex min-w-0 items-center gap-1 truncate text-sm font-semibold text-white">
+            <span className="flex min-w-0 items-center gap-1 truncate text-sm font-semibold text-text-primary">
               {isGroup ? <LockIcon className="h-3 w-3 shrink-0 text-emerald-400" /> : null}
               <span className="truncate">{title}</span>
             </span>
-            <span className="flex items-center gap-1.5 shrink-0 text-[11px] text-zinc-500">
+            <span className="flex items-center gap-1.5 shrink-0 text-[11px] text-text-disabled">
               {conversation.pinned_at && (
                 <PinIcon className="h-3 w-3 text-emerald-400 shrink-0" />
               )}
               {formatTime(conversation.last_message_at || conversation.updated_at)}
             </span>
           </span>
-          <span className="mt-1 block truncate text-xs text-zinc-500">
+          <span className="mt-1 block truncate text-xs text-text-disabled">
             {preview || (conversation.last_message_id ? "Message not available on this device" : "No messages yet")}
           </span>
         </span>
       </button>
       {conversation.unread_count > 0 ? (
-        <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-zinc-950">
+        <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-primary-foreground">
           {conversation.unread_count > 99 ? "99+" : conversation.unread_count}
         </span>
       ) : null}
@@ -232,7 +232,7 @@ function ConversationRow({
             e.stopPropagation();
             setMenuOpen(!menuOpen);
           }}
-          className="grid h-8 w-8 place-items-center rounded-lg border border-zinc-800 text-zinc-500 hover:border-zinc-700 hover:bg-zinc-900/60 hover:text-zinc-200 transition-colors"
+          className="grid h-8 w-8 place-items-center rounded-lg border border-border-default text-text-disabled hover:border-border-strong hover:bg-surface/60 hover:text-text-secondary transition-colors"
           title="Options"
           aria-label="Options"
         >
@@ -248,7 +248,7 @@ function ConversationRow({
                 setMenuOpen(false);
               }}
             />
-            <div className="absolute right-0 mt-1.5 w-32 z-40 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 py-1 shadow-2xl">
+            <div className="absolute right-0 mt-1.5 w-32 z-40 overflow-hidden rounded-lg border border-border-default bg-app py-1 shadow-2xl">
               <button
                 type="button"
                 onClick={(e) => {
@@ -256,16 +256,16 @@ function ConversationRow({
                   onTogglePin();
                   setMenuOpen(false);
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-text-secondary hover:bg-surface hover:text-text-primary transition-colors"
               >
                 {conversation.pinned_at ? (
                   <>
-                    <PinSlashIcon className="h-3.5 w-3.5 text-zinc-500" />
+                    <PinSlashIcon className="h-3.5 w-3.5 text-text-disabled" />
                     <span>Unpin chat</span>
                   </>
                 ) : (
                   <>
-                    <PinIcon className="h-3.5 w-3.5 text-zinc-500" />
+                    <PinIcon className="h-3.5 w-3.5 text-text-disabled" />
                     <span>Pin chat</span>
                   </>
                 )}
@@ -332,7 +332,7 @@ function MessageBubble({
       };
 
       let text = "";
-      let iconColor = "text-zinc-400";
+      let iconColor = "text-text-muted";
       let IconComponent = PhoneIcon;
 
       if (isVideo) {
@@ -346,19 +346,19 @@ function MessageBubble({
         } else {
           const durationStr = callLog.duration_seconds ? ` (${formatDuration(callLog.duration_seconds)})` : "";
           text = `Group ${isVideo ? "video" : "audio"} call ended${durationStr}`;
-          iconColor = "text-zinc-500";
+          iconColor = "text-text-disabled";
         }
       } else {
         if (callLog.status === "missed") {
           text = isCaller ? `Unanswered ${isVideo ? "video" : "audio"} call` : `Missed ${isVideo ? "video" : "audio"} call`;
-          iconColor = isCaller ? "text-zinc-500" : "text-rose-400";
+          iconColor = isCaller ? "text-text-disabled" : "text-rose-400";
           if (!isCaller) IconComponent = PhoneArrowDownLeftIcon;
         } else if (callLog.status === "rejected") {
           text = isCaller ? `${isVideo ? "Video" : "Audio"} call declined` : `Declined ${isVideo ? "video" : "audio"} call`;
-          iconColor = "text-zinc-500";
+          iconColor = "text-text-disabled";
         } else if (callLog.status === "cancelled") {
           text = isCaller ? `Cancelled ${isVideo ? "video" : "audio"} call` : `Missed ${isVideo ? "video" : "audio"} call`;
-          iconColor = isCaller ? "text-zinc-500" : "text-rose-400";
+          iconColor = isCaller ? "text-text-disabled" : "text-rose-400";
           if (!isCaller) IconComponent = PhoneArrowDownLeftIcon;
         } else if (callLog.status === "failed") {
           text = `Failed ${isVideo ? "video" : "audio"} call`;
@@ -369,7 +369,7 @@ function MessageBubble({
             iconColor = "text-emerald-400";
           } else {
             text = `${isVideo ? "Video" : "Audio"} call (no answer)`;
-            iconColor = "text-zinc-500";
+            iconColor = "text-text-disabled";
           }
         } else {
           text = `${isVideo ? "Video" : "Audio"} call`;
@@ -378,10 +378,10 @@ function MessageBubble({
 
       return (
         <div className="flex justify-center my-3 animate-chat-fade-in w-full">
-          <div className="flex items-center gap-2 rounded-full bg-zinc-900/60 border border-zinc-800/80 px-4 py-1.5 text-xs text-zinc-300 shadow-sm backdrop-blur-sm">
+          <div className="flex items-center gap-2 rounded-full bg-surface/60 border border-border-default/80 px-4 py-1.5 text-xs text-text-secondary shadow-sm backdrop-blur-sm">
             <IconComponent className={`h-3.5 w-3.5 ${iconColor}`} />
             <span>{text}</span>
-            <span className="text-[10px] text-zinc-500 ml-1">{formatTime(message.created_at)}</span>
+            <span className="text-[10px] text-text-disabled ml-1">{formatTime(message.created_at)}</span>
           </div>
         </div>
       );
@@ -389,7 +389,7 @@ function MessageBubble({
 
     return (
       <div className="flex justify-center my-2 animate-chat-fade-in w-full">
-        <div className="rounded-full bg-zinc-900/40 border border-zinc-800/50 px-3 py-1 text-xs text-zinc-400">
+        <div className="rounded-full bg-surface/40 border border-border-default/50 px-3 py-1 text-xs text-text-muted">
           {message.decrypted_body}
         </div>
       </div>
@@ -397,7 +397,7 @@ function MessageBubble({
   }
   return (
     <div className={`flex ${own ? "justify-end" : "justify-start"} animate-chat-fade-in`}>
-      <div className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm shadow-sm ${own ? "bg-white text-zinc-950" : "bg-zinc-900 text-zinc-100"}`}>
+      <div className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm shadow-sm ${own ? "bg-primary text-primary-foreground" : "bg-surface text-text-primary"}`}>
         {showSender && !own ? (
           <span className="mb-0.5 block text-[11px] font-semibold text-emerald-300">{senderLabel || "Member"}</span>
         ) : null}
@@ -420,13 +420,13 @@ function MessageBubble({
                   target="_blank"
                   rel="noreferrer"
                   className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left ${
-                    own ? "border-zinc-300 bg-zinc-100 text-zinc-900" : "border-zinc-800 bg-zinc-950 text-zinc-100"
+                    own ? "border-zinc-300 bg-zinc-100 text-zinc-900" : "border-border-default bg-app text-text-primary"
                   }`}
                 >
                   <FolderIcon className="h-4 w-4 shrink-0" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-xs font-semibold">{view?.name || "Encrypted attachment"}</span>
-                    <span className={own ? "block text-[11px] text-zinc-500" : "block text-[11px] text-zinc-500"}>
+                    <span className={own ? "block text-[11px] text-text-disabled" : "block text-[11px] text-text-disabled"}>
                       {view ? formatFileSize(view.size) : "Decrypting..."}
                     </span>
                   </span>
@@ -436,15 +436,15 @@ function MessageBubble({
           </div>
         ) : null}
         {message.deleted_for_everyone_at ? (
-          <span className="text-zinc-500">Message deleted</span>
+          <span className="text-text-disabled">Message deleted</span>
         ) : message.missing_envelope ? (
-          <span className={own ? "text-zinc-600" : "text-zinc-500"}>Message not available on this device</span>
+          <span className={own ? "text-text-disabled" : "text-text-disabled"}>Message not available on this device</span>
         ) : message.decrypt_failed ? (
-          <span className={own ? "text-zinc-600" : "text-zinc-500"}>Could not decrypt this message</span>
+          <span className={own ? "text-text-disabled" : "text-text-disabled"}>Could not decrypt this message</span>
         ) : (
           <span className="whitespace-pre-wrap break-words">{message.decrypted_body || (attachments.length ? "" : "Encrypted message")}</span>
         )}
-        <span className={`mt-1 flex items-center justify-end gap-2 text-[10px] ${own ? "text-zinc-500" : "text-zinc-600"}`}>
+        <span className={`mt-1 flex items-center justify-end gap-2 text-[10px] ${own ? "text-text-disabled" : "text-text-disabled"}`}>
           {message.failed ? (
             <>
               <span className={own ? "text-rose-700" : "text-rose-400"}>Not sent</span>
@@ -498,30 +498,30 @@ function GroupInvitesPanel({ onChanged }: { onChanged: () => void }) {
 
   return (
     <div className="p-5">
-      <h2 className="text-lg font-semibold text-white">Group Invites</h2>
-      <p className="mt-1 text-sm text-zinc-500">Invitations to private groups.</p>
+      <h2 className="text-lg font-semibold text-text-primary">Group Invites</h2>
+      <p className="mt-1 text-sm text-text-disabled">Invitations to private groups.</p>
       {error ? <p className="mt-3 text-sm text-rose-400">{error}</p> : null}
-      <div className="mt-4 divide-y divide-zinc-900 overflow-hidden rounded-lg border border-zinc-900">
+      <div className="mt-4 divide-y divide-border-subtle overflow-hidden rounded-lg border border-border-subtle">
         {invites.map((invite) => (
           <div key={invite.id} className="flex items-center gap-3 p-3">
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-zinc-800 text-sm font-semibold text-white">
+            <div className="grid h-10 w-10 place-items-center rounded-full bg-surface-hover text-sm font-semibold text-text-primary">
               {invite.group?.title?.[0]?.toUpperCase() || <UsersIcon className="h-4 w-4" />}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-white">{invite.group?.title || "Private group"}</p>
-              <p className="text-xs text-zinc-500">Encrypted group invitation</p>
+              <p className="truncate text-sm font-semibold text-text-primary">{invite.group?.title || "Private group"}</p>
+              <p className="text-xs text-text-disabled">Encrypted group invitation</p>
             </div>
             <button
               onClick={() => respond(invite, "accept")}
               disabled={busy === invite.id}
-              className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950 disabled:opacity-40"
+              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-40"
             >
               Accept
             </button>
             <button
               onClick={() => respond(invite, "reject")}
               disabled={busy === invite.id}
-              className="rounded-lg border border-zinc-800 px-3 py-1.5 text-xs font-semibold text-zinc-300 disabled:opacity-40"
+              className="rounded-lg border border-border-default px-3 py-1.5 text-xs font-semibold text-text-secondary disabled:opacity-40"
             >
               Reject
             </button>
@@ -585,7 +585,7 @@ function SearchStartPanel({ onStarted }: { onStarted: (conversation: ChatConvers
   }
 
   return (
-    <div className="border-b border-zinc-900 p-4">
+    <div className="border-b border-border-subtle p-4">
       <input
         value={query}
         onChange={(event) => {
@@ -594,22 +594,22 @@ function SearchStartPanel({ onStarted }: { onStarted: (conversation: ChatConvers
           if (next.trim().length < 2) setResults([]);
         }}
         placeholder="Search username"
-        className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+        className="w-full rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
       />
       {error ? <p className="mt-2 text-xs text-rose-400">{error}</p> : null}
       {results.length > 0 ? (
-        <div className="mt-3 divide-y divide-zinc-900 overflow-hidden rounded-lg border border-zinc-900">
+        <div className="mt-3 divide-y divide-border-subtle overflow-hidden rounded-lg border border-border-subtle">
           {results.map((user) => (
             <button
               key={user.id}
               onClick={() => start(user)}
               disabled={user.chat_encryption_enabled === false}
-              className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Avatar user={{ id: user.id, name: user.name || user.username || "User", avatar_url: user.avatar_url }} size="sm" />
               <span className="min-w-0">
-                <span className="block truncate text-sm font-medium text-white">@{user.username}</span>
-                <span className="block truncate text-xs text-zinc-500">{user.chat_encryption_enabled === false ? "Secure chat not enabled" : user.headline || user.name}</span>
+                <span className="block truncate text-sm font-medium text-text-primary">@{user.username}</span>
+                <span className="block truncate text-xs text-text-disabled">{user.chat_encryption_enabled === false ? "Secure chat not enabled" : user.headline || user.name}</span>
               </span>
             </button>
           ))}
@@ -646,20 +646,20 @@ function RequestsPanel() {
 
   return (
     <div className="p-5">
-      <h2 className="text-lg font-semibold text-white">Message Requests</h2>
+      <h2 className="text-lg font-semibold text-text-primary">Message Requests</h2>
       {error ? <p className="mt-3 text-sm text-rose-400">{error}</p> : null}
-      <div className="mt-4 divide-y divide-zinc-900 overflow-hidden rounded-lg border border-zinc-900">
+      <div className="mt-4 divide-y divide-border-subtle overflow-hidden rounded-lg border border-border-subtle">
         {requests.map((request) => (
           <div key={request.id} className="flex items-center gap-3 p-3">
             <Avatar user={{ id: request.from_user.id, name: request.from_user.name, avatar_url: request.from_user.avatar_url }} size="md" />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-white">@{request.from_user.username}</p>
-              <p className="text-xs text-zinc-500">Encrypted intro request</p>
+              <p className="truncate text-sm font-semibold text-text-primary">@{request.from_user.username}</p>
+              <p className="text-xs text-text-disabled">Encrypted intro request</p>
             </div>
-            <button onClick={() => respond(request.id, "accept")} className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950">
+            <button onClick={() => respond(request.id, "accept")} className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">
               Accept
             </button>
-            <button onClick={() => respond(request.id, "reject")} className="rounded-lg border border-zinc-800 px-3 py-1.5 text-xs font-semibold text-zinc-300">
+            <button onClick={() => respond(request.id, "reject")} className="rounded-lg border border-border-default px-3 py-1.5 text-xs font-semibold text-text-secondary">
               Reject
             </button>
           </div>
@@ -715,22 +715,22 @@ function SettingsPanel({
 
   return (
     <div className="max-w-2xl p-5">
-      <h2 className="text-lg font-semibold text-white">Chat Settings</h2>
-      <p className="mt-1 text-sm text-zinc-500">Your public chat identity is a username, not your email.</p>
+      <h2 className="text-lg font-semibold text-text-primary">Chat Settings</h2>
+      <p className="mt-1 text-sm text-text-disabled">Your public chat identity is a username, not your email.</p>
       <div className="mt-5 space-y-5">
         <label className="block">
-          <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Username</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-text-disabled">Username</span>
           <div className="mt-2 flex gap-2">
-            <input value={username} onChange={(event) => setUsername(event.target.value.toLowerCase())} className="min-w-0 flex-1 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600" />
-            <button onClick={saveUsername} className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950">Save</button>
+            <input value={username} onChange={(event) => setUsername(event.target.value.toLowerCase())} className="min-w-0 flex-1 rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong" />
+            <button onClick={saveUsername} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Save</button>
           </div>
         </label>
         <label className="block">
-          <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Who can message you</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-text-disabled">Who can message you</span>
           <select
             value={settings?.chat_privacy_setting || "anyone"}
             onChange={(event) => saveSettings({ chat_privacy_setting: event.target.value as ChatSettings["chat_privacy_setting"] })}
-            className="mt-2 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+            className="mt-2 w-full rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
           >
             <option value="anyone">Anyone</option>
             <option value="followers">People who follow you</option>
@@ -740,11 +740,11 @@ function SettingsPanel({
           </select>
         </label>
         <label className="block">
-          <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Who can see your last seen</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-text-disabled">Who can see your last seen</span>
           <select
             value={settings?.last_seen_visibility || "anyone"}
             onChange={(event) => saveSettings({ last_seen_visibility: event.target.value as ChatSettings["last_seen_visibility"] })}
-            className="mt-2 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-zinc-600"
+            className="mt-2 w-full rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
           >
             <option value="anyone">Anyone</option>
             <option value="mutuals">Mutual follows</option>
@@ -758,13 +758,13 @@ function SettingsPanel({
             onChange={(event) => saveSettings({ chat_enabled: event.target.checked })}
             className="h-4 w-4"
           />
-          <span className="text-sm text-zinc-300">Enable direct messages</span>
+          <span className="text-sm text-text-secondary">Enable direct messages</span>
         </label>
         {status ? <p className="text-sm text-emerald-400">{status}</p> : null}
-        <p className="text-xs text-zinc-600">Device: {userId.slice(0, 8)}. Private chat keys stay in this browser storage.</p>
-        <div className="border-t border-zinc-900 pt-5 mt-5">
+        <p className="text-xs text-text-disabled">Device: {userId.slice(0, 8)}. Private chat keys stay in this browser storage.</p>
+        <div className="border-t border-border-subtle pt-5 mt-5">
           <span className="text-xs font-semibold uppercase tracking-wide text-rose-500 block mb-1">Danger Zone</span>
-          <p className="text-xs text-zinc-500">If you lose your recovery key or suspect your account is compromised, you can reset your chat encryption profile. You will lose access to all previous encrypted messages.</p>
+          <p className="text-xs text-text-disabled">If you lose your recovery key or suspect your account is compromised, you can reset your chat encryption profile. You will lose access to all previous encrypted messages.</p>
           <button
             onClick={onResetCrypto}
             disabled={processing}
@@ -1505,20 +1505,20 @@ export default function ChatPage() {
     }
   }
 
-  if (!user || cryptoChecking) return <div className="p-6 text-sm text-zinc-400">Loading chat…</div>;
+  if (!user || cryptoChecking) return <div className="p-6 text-sm text-text-muted">Loading chat…</div>;
 
   if (setupNeeded) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4 text-white">
-        <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-app px-4 text-text-primary">
+        <div className="w-full max-w-md rounded-2xl border border-border-default bg-surface p-8 shadow-xl">
           <div className="flex flex-col items-center text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
               <LockIcon className="h-6 w-6" />
             </div>
-            <h2 className="mt-4 text-xl font-bold tracking-tight text-white">
+            <h2 className="mt-4 text-xl font-bold tracking-tight text-text-primary">
               {isResettingE2EE ? "Reset Encryption Profile" : "Enable End-to-End Encryption"}
             </h2>
-            <p className="mt-2 text-sm text-zinc-400">
+            <p className="mt-2 text-sm text-text-muted">
               {isResettingE2EE
                 ? "Set a new 4-digit PIN for your chat backup. Old history cannot be recovered."
                 : "Create a 4-digit PIN to secure your chat backup. This PIN is required to restore chats on other devices."}
@@ -1536,7 +1536,7 @@ export default function ChatPage() {
             )}
 
             <div>
-              <label htmlFor="setupPin" className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">
+              <label htmlFor="setupPin" className="block text-xs font-semibold uppercase tracking-wider text-text-disabled mb-2">
                 Create 4-Digit PIN
               </label>
               <input
@@ -1548,13 +1548,13 @@ export default function ChatPage() {
                 placeholder="••••"
                 value={setupPin}
                 onChange={(e) => setSetupPin(e.target.value.replace(/\D/g, ""))}
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-center text-xl tracking-[0.75em] text-white outline-none focus:border-zinc-600 transition-colors"
+                className="w-full rounded-xl border border-border-default bg-app px-4 py-3 text-center text-xl tracking-[0.75em] text-text-primary outline-none focus:border-border-strong transition-colors"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="confirmPin" className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">
+              <label htmlFor="confirmPin" className="block text-xs font-semibold uppercase tracking-wider text-text-disabled mb-2">
                 Confirm 4-Digit PIN
               </label>
               <input
@@ -1566,7 +1566,7 @@ export default function ChatPage() {
                 placeholder="••••"
                 value={confirmPin}
                 onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-center text-xl tracking-[0.75em] text-white outline-none focus:border-zinc-600 transition-colors"
+                className="w-full rounded-xl border border-border-default bg-app px-4 py-3 text-center text-xl tracking-[0.75em] text-text-primary outline-none focus:border-border-strong transition-colors"
                 required
               />
             </div>
@@ -1576,7 +1576,7 @@ export default function ChatPage() {
             <button
               type="submit"
               disabled={processingCrypto || setupPin.length !== 4 || confirmPin.length !== 4}
-              className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 disabled:opacity-40 transition-colors"
+              className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-primary-foreground hover:bg-emerald-400 disabled:opacity-40 transition-colors"
             >
               {processingCrypto ? "Processing…" : isResettingE2EE ? "Reset & Enable E2EE" : "Enable E2EE Chat"}
             </button>
@@ -1590,7 +1590,7 @@ export default function ChatPage() {
                   setVaultLocked(true);
                   setError("");
                 }}
-                className="w-full rounded-xl border border-zinc-800 bg-transparent py-3 text-sm font-semibold text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
+                className="w-full rounded-xl border border-border-default bg-transparent py-3 text-sm font-semibold text-text-muted hover:text-text-primary hover:border-border-strong transition-colors"
               >
                 Cancel
               </button>
@@ -1603,21 +1603,21 @@ export default function ChatPage() {
 
   if (vaultLocked) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4 text-white">
-        <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-8 shadow-xl">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-app px-4 text-text-primary">
+        <div className="w-full max-w-md rounded-2xl border border-border-default bg-surface p-8 shadow-xl">
           <div className="flex flex-col items-center text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10 text-amber-400">
               <LockIcon className="h-6 w-6" />
             </div>
-            <h2 className="mt-4 text-xl font-bold tracking-tight text-white">Unlock Your Secure Chats</h2>
-            <p className="mt-2 text-sm text-zinc-400">
+            <h2 className="mt-4 text-xl font-bold tracking-tight text-text-primary">Unlock Your Secure Chats</h2>
+            <p className="mt-2 text-sm text-text-muted">
               This device does not have access to your chat encryption keys. Enter your secure 4-digit PIN to decrypt your backup.
             </p>
           </div>
 
           <form onSubmit={handleUnlockE2EE} className="mt-6 space-y-4">
             <div>
-              <label htmlFor="unlockPin" className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">
+              <label htmlFor="unlockPin" className="block text-xs font-semibold uppercase tracking-wider text-text-disabled mb-2">
                 Enter 4-Digit PIN
               </label>
               <input
@@ -1629,7 +1629,7 @@ export default function ChatPage() {
                 placeholder="••••"
                 value={inputPin}
                 onChange={(e) => setInputPin(e.target.value.replace(/\D/g, ""))}
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-center text-xl tracking-[0.75em] text-white outline-none focus:border-zinc-600 transition-colors"
+                className="w-full rounded-xl border border-border-default bg-app px-4 py-3 text-center text-xl tracking-[0.75em] text-text-primary outline-none focus:border-border-strong transition-colors"
                 required
               />
             </div>
@@ -1639,13 +1639,13 @@ export default function ChatPage() {
             <button
               type="submit"
               disabled={processingCrypto || inputPin.length !== 4}
-              className="w-full rounded-xl bg-white py-3 text-sm font-semibold text-zinc-950 hover:bg-zinc-200 disabled:opacity-40 transition-colors"
+              className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-40 transition-colors"
             >
               {processingCrypto ? "Unlocking backup…" : "Unlock Chats"}
             </button>
 
-            <div className="border-t border-zinc-800 pt-5 text-center">
-              <p className="text-xs text-zinc-500">
+            <div className="border-t border-border-default pt-5 text-center">
+              <p className="text-xs text-text-disabled">
                 Forgotten your PIN? You can reset your E2EE profile, but you will permanently lose access to all previous messages.
               </p>
               <button
@@ -1665,10 +1665,10 @@ export default function ChatPage() {
 
   return (
     <CallProvider user={user} socket={socket}>
-    <main className="h-[calc(100dvh-64px)] min-h-0 overflow-hidden bg-zinc-950 text-white">
+    <main className="h-[calc(100dvh-64px)] min-h-0 overflow-hidden bg-app text-text-primary">
       <div className="flex h-full min-h-0 flex-col lg:flex-row">
-        <aside className={`min-h-0 w-full flex-col border-b border-zinc-900 lg:flex lg:w-[360px] lg:border-b-0 lg:border-r ${active ? "hidden lg:flex" : "flex"}`}>
-          <div className="flex items-center justify-between border-b border-zinc-900 px-4 py-4">
+        <aside className={`min-h-0 w-full flex-col border-b border-border-subtle lg:flex lg:w-[360px] lg:border-b-0 lg:border-r ${active ? "hidden lg:flex" : "flex"}`}>
+          <div className="flex items-center justify-between border-b border-border-subtle px-4 py-4">
             <div className="flex items-center gap-2">
               <ChatBubbleIcon className="h-5 w-5" />
               <h1 className="text-lg font-semibold">Messages</h1>
@@ -1676,7 +1676,7 @@ export default function ChatPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCreateGroupOpen(true)}
-                className="flex items-center gap-1 rounded-lg border border-zinc-800 px-2.5 py-1.5 text-xs text-zinc-200 hover:bg-zinc-900"
+                className="flex items-center gap-1 rounded-lg border border-border-default px-2.5 py-1.5 text-xs text-text-secondary hover:bg-surface"
                 title="New group"
               >
                 <PlusIcon className="h-4 w-4" /> Group
@@ -1684,12 +1684,12 @@ export default function ChatPage() {
               <LockIcon className="h-4 w-4 text-emerald-400" />
             </div>
           </div>
-          <div className="grid grid-cols-4 border-b border-zinc-900 text-sm">
+          <div className="grid grid-cols-4 border-b border-border-subtle text-sm">
             {(["inbox", "requests", "group-invites", "settings"] as ViewMode[]).map((item) => (
               <button
                 key={item}
                 onClick={() => setMode(item)}
-                className={`px-2 py-2 capitalize ${mode === item ? "bg-zinc-900 text-white" : "text-zinc-500 hover:text-zinc-300"}`}
+                className={`px-2 py-2 capitalize ${mode === item ? "bg-surface text-text-primary" : "text-text-disabled hover:text-text-secondary"}`}
               >
                 {item === "group-invites" ? "invites" : item}
               </button>
@@ -1706,7 +1706,7 @@ export default function ChatPage() {
               />
               <div className="min-h-0 flex-1 overflow-y-auto">
                 {conversationsLoading ? (
-                  <div className="grid min-h-40 place-items-center text-sm text-zinc-500">Loading chats...</div>
+                  <div className="grid min-h-40 place-items-center text-sm text-text-disabled">Loading chats...</div>
                 ) : conversations.map((conversation) => (
                   <ConversationRow
                     key={conversation.id}
@@ -1748,36 +1748,36 @@ export default function ChatPage() {
         <section className={`flex min-w-0 flex-1 flex-col ${active ? "flex" : "hidden lg:flex"}`}>
           {active ? (
             <>
-              <header className="flex shrink-0 items-center justify-between border-b border-zinc-900 px-3 py-3 sm:px-5 sm:py-4">
+              <header className="flex shrink-0 items-center justify-between border-b border-border-subtle px-3 py-3 sm:px-5 sm:py-4">
                 <div className="flex min-w-0 items-center gap-3">
                   <button
                     onClick={() => setActive(null)}
-                    className="mr-1 rounded-lg p-1 text-zinc-400 hover:bg-zinc-900 hover:text-white lg:hidden"
+                    className="mr-1 rounded-lg p-1 text-text-muted hover:bg-surface hover:text-text-primary lg:hidden"
                     title="Back to chats"
                   >
                     <ArrowLeftIcon className="h-6 w-6" />
                   </button>
                   {activeIsGroup ? (
                     <>
-                      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-zinc-800 text-sm font-semibold text-white">
+                      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface-hover text-sm font-semibold text-text-primary">
                         {active.group?.title?.[0]?.toUpperCase() || <UsersIcon className="h-4 w-4" />}
                       </div>
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold">{active.group?.title || "Private group"}</p>
-                        <p className="truncate text-xs text-zinc-500">{groupChat.members.length ? `${groupChat.members.length} members` : "syncing group"}</p>
+                        <p className="truncate text-xs text-text-disabled">{groupChat.members.length ? `${groupChat.members.length} members` : "syncing group"}</p>
                       </div>
                     </>
                   ) : (
-                    <Link href={profileHref(active.other_user)} className="flex min-w-0 items-center gap-3 rounded-lg pr-2 hover:bg-zinc-900/60">
+                    <Link href={profileHref(active.other_user)} className="flex min-w-0 items-center gap-3 rounded-lg pr-2 hover:bg-surface/60">
                       <Avatar user={active.other_user ? { id: active.other_user.id, name: active.other_user.name || active.other_user.username || "User", avatar_url: active.other_user.avatar_url } : null} size="md" />
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold">{`@${active.other_user?.username || "user"}`}</p>
-                        <p className="truncate text-xs text-zinc-500">{formatLastSeen(active.other_user)}</p>
+                        <p className="truncate text-xs text-text-disabled">{formatLastSeen(active.other_user)}</p>
                       </div>
                     </Link>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-zinc-500">
+                <div className="flex items-center gap-2 text-xs text-text-disabled">
                   <CallErrorBoundary>
                     <ConversationCallControls conversation={active} />
                   </CallErrorBoundary>
@@ -1785,7 +1785,7 @@ export default function ChatPage() {
                     <button
                       type="button"
                       onClick={() => setActiveMenuOpen((value) => !value)}
-                      className="grid h-9 w-9 place-items-center rounded-lg border border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                      className="grid h-9 w-9 place-items-center rounded-lg border border-border-default text-text-muted hover:bg-surface hover:text-text-primary"
                       title="Chat options"
                       aria-label="Chat options"
                     >
@@ -1799,23 +1799,23 @@ export default function ChatPage() {
                           className="fixed inset-0 z-30 cursor-default"
                           onClick={() => setActiveMenuOpen(false)}
                         />
-                        <div className="absolute right-0 z-40 mt-1.5 w-36 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 py-1 shadow-2xl">
+                        <div className="absolute right-0 z-40 mt-1.5 w-36 overflow-hidden rounded-lg border border-border-default bg-app py-1 shadow-2xl">
                           <button
                             type="button"
                             onClick={() => {
                               void togglePin(active);
                               setActiveMenuOpen(false);
                             }}
-                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-900 hover:text-white"
+                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-text-secondary hover:bg-surface hover:text-text-primary"
                           >
                             {active.pinned_at ? (
                               <>
-                                <PinSlashIcon className="h-3.5 w-3.5 text-zinc-500" />
+                                <PinSlashIcon className="h-3.5 w-3.5 text-text-disabled" />
                                 <span>Unpin chat</span>
                               </>
                             ) : (
                               <>
-                                <PinIcon className="h-3.5 w-3.5 text-zinc-500" />
+                                <PinIcon className="h-3.5 w-3.5 text-text-disabled" />
                                 <span>Pin chat</span>
                               </>
                             )}
@@ -1825,7 +1825,7 @@ export default function ChatPage() {
                     ) : null}
                   </div>
                   {activeIsGroup ? (
-                    <button onClick={() => setShowGroupInfo((value) => !value)} className="flex items-center gap-1 rounded-lg border border-zinc-800 px-2 py-1 text-zinc-200 hover:bg-zinc-900">
+                    <button onClick={() => setShowGroupInfo((value) => !value)} className="flex items-center gap-1 rounded-lg border border-border-default px-2 py-1 text-text-secondary hover:bg-surface">
                       <UsersIcon className="h-4 w-4" /> Info
                     </button>
                   ) : null}
@@ -1837,7 +1837,7 @@ export default function ChatPage() {
               {error ? <div className="border-b border-rose-950 bg-rose-950/30 px-5 py-2 text-sm text-rose-300">{error}</div> : null}
               <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-4 sm:px-5 sm:py-5">
                 {messagesLoading ? (
-                  <div className="grid min-h-40 place-items-center text-sm text-zinc-500">Loading messages...</div>
+                  <div className="grid min-h-40 place-items-center text-sm text-text-disabled">Loading messages...</div>
                 ) : messages.map((message) => (
                   <MessageBubble
                     key={message.id}
@@ -1861,22 +1861,22 @@ export default function ChatPage() {
                 ) : null}
                 <div ref={messagesEndRef} />
               </div>
-              <div className="shrink-0 border-t border-zinc-900 bg-zinc-950 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4">
+              <div className="shrink-0 border-t border-border-subtle bg-app p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4">
                 {pendingAttachments.length ? (
                   <div className="mb-3 flex gap-2 overflow-x-auto">
                     {pendingAttachments.map((attachment) => (
-                      <div key={attachment.id} className="flex max-w-[220px] shrink-0 items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-zinc-300">
+                      <div key={attachment.id} className="flex max-w-[220px] shrink-0 items-center gap-2 rounded-lg border border-border-default bg-surface px-3 py-2 text-xs text-text-secondary">
                         <FolderIcon className="h-4 w-4 shrink-0" />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate">{attachment.file.name}</span>
-                          <span className={attachment.status === "failed" ? "text-rose-400" : "text-zinc-500"}>
+                          <span className={attachment.status === "failed" ? "text-rose-400" : "text-text-disabled"}>
                             {attachment.status === "local" ? "Ready to send" : attachment.status === "uploading" ? `Uploading ${attachment.progress}%` : attachment.status === "ready" ? "Uploaded" : attachment.error || "Failed"}
                           </span>
                         </span>
                         <button
                           type="button"
                           onClick={() => setPendingAttachments((prev) => prev.filter((item) => item.id !== attachment.id))}
-                          className="text-zinc-500 hover:text-white"
+                          className="text-text-disabled hover:text-text-primary"
                           aria-label="Remove attachment"
                         >
                           x
@@ -1902,7 +1902,7 @@ export default function ChatPage() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700 hover:text-white"
+                    className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-border-default bg-surface text-text-secondary hover:border-border-strong hover:text-text-primary"
                     title="Attach files"
                     aria-label="Attach files"
                   >
@@ -1921,11 +1921,11 @@ export default function ChatPage() {
                     onBlur={() => socket.emitTyping(active.id, false)}
                     placeholder={activeIsGroup && !groupChat.currentEpoch ? "Syncing group encryption key…" : "Write an encrypted message"}
                     rows={1}
-                    className="max-h-28 min-h-11 flex-1 resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-3 text-sm text-white outline-none focus:border-zinc-600"
+                    className="max-h-28 min-h-11 flex-1 resize-none rounded-xl border border-border-default bg-surface px-3 py-3 text-sm text-text-primary outline-none focus:border-border-strong"
                   />
                   <button
                     disabled={(!draft.trim() && !pendingAttachments.some((attachment) => attachment.status === "local" || attachment.status === "ready")) || pendingAttachments.some((attachment) => attachment.status === "uploading") || (activeIsGroup && !groupChat.currentEpoch)}
-                    className="h-11 rounded-xl bg-white px-4 text-sm font-semibold text-zinc-950 disabled:cursor-not-allowed disabled:opacity-40 sm:px-5"
+                    className="h-11 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-40 sm:px-5"
                   >
                     Send
                   </button>
@@ -1936,7 +1936,7 @@ export default function ChatPage() {
             <div className="grid flex-1 place-items-center p-8 text-center">
               <div>
                 <XCircleIcon className="mx-auto h-8 w-8 text-zinc-700" />
-                <p className="mt-3 text-sm text-zinc-500">Choose or start a conversation, or create a group.</p>
+                <p className="mt-3 text-sm text-text-disabled">Choose or start a conversation, or create a group.</p>
               </div>
             </div>
           )}

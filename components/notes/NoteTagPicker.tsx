@@ -48,7 +48,7 @@ export default function NoteTagPicker({ selectedTags, onChange }: NoteTagPickerP
           key={tag.id}
           onClick={() => toggleTag(tag.id)}
           disabled={busy}
-          className="inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-xs text-zinc-300 transition-colors hover:border-rose-800 hover:text-rose-300 disabled:opacity-60"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border-default bg-surface px-2.5 py-1 text-xs text-text-secondary transition-colors hover:border-rose-800 hover:text-rose-300 disabled:opacity-60"
           title="Remove tag"
         >
           <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: tag.color || "#71717a" }} />
@@ -60,20 +60,20 @@ export default function NoteTagPicker({ selectedTags, onChange }: NoteTagPickerP
       <div className="relative">
         <button
           onClick={() => setOpen((value) => !value)}
-          className="inline-flex items-center gap-1 rounded-full border border-dashed border-zinc-700 px-2.5 py-1 text-xs text-zinc-500 transition-colors hover:border-zinc-500 hover:text-zinc-300"
+          className="inline-flex items-center gap-1 rounded-full border border-dashed border-border-strong px-2.5 py-1 text-xs text-text-disabled transition-colors hover:border-zinc-500 hover:text-text-secondary"
         >
           <PlusIcon className="h-3 w-3" /> Tag
         </button>
         {open ? (
-          <div className="absolute left-0 top-full z-30 mt-1 max-h-56 w-48 overflow-y-auto rounded-xl border border-zinc-800 bg-zinc-900 p-1.5 shadow-2xl">
+          <div className="absolute left-0 top-full z-30 mt-1 max-h-56 w-48 overflow-y-auto rounded-xl border border-border-default bg-surface p-1.5 shadow-2xl">
             {tags.tags.length === 0 ? (
-              <p className="px-2 py-1.5 text-xs text-zinc-500">No tags yet. Create one from the sidebar.</p>
+              <p className="px-2 py-1.5 text-xs text-text-disabled">No tags yet. Create one from the sidebar.</p>
             ) : (
               tags.tags.map((tag) => (
                 <button
                   key={tag.id}
                   onClick={() => toggleTag(tag.id)}
-                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-zinc-300 transition-colors hover:bg-zinc-800"
+                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-text-secondary transition-colors hover:bg-surface-hover"
                 >
                   <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: tag.color || "#71717a" }} />
                   <span className="flex-1 truncate">{tag.name}</span>

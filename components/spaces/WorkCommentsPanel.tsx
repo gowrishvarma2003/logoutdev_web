@@ -70,17 +70,17 @@ function Composer({
             onChange={(value) => setBody(value)}
             rows={2}
             placeholder={placeholder}
-            previewClassName="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white"
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-sm text-white outline-none focus:border-zinc-700"
+            previewClassName="rounded-xl border border-border-default bg-app px-3 py-2 text-sm text-text-primary"
+            className="w-full rounded-xl border border-border-default bg-surface/40 px-3 py-2 text-sm text-text-primary outline-none focus:border-border-strong"
           />
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] text-zinc-500">
+            <span className="text-[11px] text-text-disabled">
               Format with markdown.
             </span>
             <button
               type="submit"
               disabled={submitting || !body.trim()}
-              className="rounded-lg bg-zinc-200 px-3 py-1.5 text-xs font-semibold text-zinc-955 hover:bg-white disabled:opacity-40 transition-colors cursor-pointer"
+              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary disabled:opacity-40 transition-colors cursor-pointer"
             >
               {submitting ? "Posting..." : ctaLabel}
             </button>
@@ -121,20 +121,20 @@ function CommentNode({
         <div className="min-w-0 flex-1">
           {/* Header metadata */}
           <div className="flex items-center gap-2 text-xs mb-1">
-            <span className="font-semibold text-white">{comment.author?.name ?? "Unknown"}</span>
-            <span className="text-zinc-600">•</span>
-            <span className="text-zinc-500">{formatRelativeTime(comment.created_at)}</span>
+            <span className="font-semibold text-text-primary">{comment.author?.name ?? "Unknown"}</span>
+            <span className="text-text-disabled">•</span>
+            <span className="text-text-disabled">{formatRelativeTime(comment.created_at)}</span>
           </div>
           
           {/* Comment body */}
-          <RichText text={comment.body} className="whitespace-pre-line text-sm leading-relaxed text-zinc-300" />
+          <RichText text={comment.body} className="whitespace-pre-line text-sm leading-relaxed text-text-secondary" />
 
           {/* Action Row */}
-          <div className="mt-2.5 flex items-center gap-3 text-xs text-zinc-500">
+          <div className="mt-2.5 flex items-center gap-3 text-xs text-text-disabled">
             {currentUser && (
               <button
                 onClick={() => setShowReply((value) => !value)}
-                className="hover:text-zinc-300 cursor-pointer flex items-center gap-1 transition-colors"
+                className="hover:text-text-secondary cursor-pointer flex items-center gap-1 transition-colors"
               >
                 <ChatIcon className="h-3 w-3" />
                 {showReply ? "Cancel" : "Reply"}
@@ -144,7 +144,7 @@ function CommentNode({
             {hasReplies && (
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hover:text-zinc-300 cursor-pointer transition-colors"
+                className="hover:text-text-secondary cursor-pointer transition-colors"
               >
                 {isCollapsed ? `Show replies (${children.length})` : "Hide replies"}
               </button>
@@ -170,7 +170,7 @@ function CommentNode({
 
           {/* Indented reply threads */}
           {hasReplies && !isCollapsed && (
-            <div className="mt-3 pl-4 border-l border-zinc-800 space-y-2">
+            <div className="mt-3 pl-4 border-l border-border-default space-y-2">
               {children.map((child) => (
                 <CommentNode
                   key={child.id}
@@ -225,14 +225,14 @@ export default function WorkCommentsPanel({
   return (
     <section className="space-y-4">
       {/* Simple Clean Header */}
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+      <div className="flex items-center justify-between border-b border-border-default pb-3">
         <div>
-          <h3 className="text-base font-semibold text-white">Discussion</h3>
-          <p className="text-xs text-zinc-500 mt-0.5">
+          <h3 className="text-base font-semibold text-text-primary">Discussion</h3>
+          <p className="text-xs text-text-disabled mt-0.5">
             Keep conversation specific to this work item.
           </p>
         </div>
-        <div className="text-xs text-zinc-400 font-medium bg-zinc-900 border border-zinc-800 rounded-full px-3 py-1">
+        <div className="text-xs text-text-muted font-medium bg-surface border border-border-default rounded-full px-3 py-1">
           {totalComments} comment{totalComments === 1 ? "" : "s"}
         </div>
       </div>
@@ -248,18 +248,18 @@ export default function WorkCommentsPanel({
           ctaLabel="Comment"
         />
       ) : (
-        <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-950/20 px-4 py-3 text-xs text-zinc-500">
+        <div className="rounded-xl border border-dashed border-border-default bg-app/20 px-4 py-3 text-xs text-text-disabled">
           Sign in to join the discussion.
         </div>
       )}
 
       {/* Discussion Threads List */}
       {rootComments.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-950/10 px-4 py-8 text-center text-sm text-zinc-500">
+        <div className="rounded-xl border border-dashed border-border-default bg-app/10 px-4 py-8 text-center text-sm text-text-disabled">
           No messages in this discussion yet.
         </div>
       ) : (
-        <div className="divide-y divide-zinc-800/60">
+        <div className="divide-y divide-border-default/60">
           {visibleRootComments.map((comment) => (
             <CommentNode
               key={comment.id}
@@ -276,7 +276,7 @@ export default function WorkCommentsPanel({
               <button
                 type="button"
                 onClick={() => setVisibleRootCount((current) => current + 20)}
-                className="rounded-lg border border-zinc-800 bg-zinc-900/40 px-3.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+                className="rounded-lg border border-border-default bg-surface/40 px-3.5 py-2 text-xs font-semibold text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors cursor-pointer"
               >
                 Load more comments
               </button>

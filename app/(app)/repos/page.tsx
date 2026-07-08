@@ -74,7 +74,7 @@ function repoOwnerName(repo: Repository) {
 
 function VisibilityBadge({ visibility }: { visibility: Repository["visibility"] }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-zinc-800 px-2.5 py-0.5 text-[11px] font-semibold capitalize text-zinc-400 bg-zinc-900/35">
+    <span className="inline-flex items-center rounded-full border border-border-default px-2.5 py-0.5 text-[11px] font-semibold capitalize text-text-muted bg-surface/35">
       {visibility}
     </span>
   );
@@ -92,7 +92,7 @@ function RepoRecommendation({ repo }: { repo: Repository }) {
       {repo.recommendation.reasons.slice(0, 3).map((reason) => (
         <span
           key={`${repo.id}:${reason}`}
-          className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-[11px] font-medium text-zinc-300"
+          className="rounded-full bg-surface-hover px-2.5 py-0.5 text-[11px] font-medium text-text-secondary"
         >
           {reason}
         </span>
@@ -126,9 +126,9 @@ function getSparklinePath(repoId: string): string {
 
 function RepoMeta({ repo }: { repo: Repository }) {
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-zinc-400">
+    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-muted">
       {repo.language ? (
-        <span className="inline-flex items-center gap-1.5 text-zinc-300 font-medium">
+        <span className="inline-flex items-center gap-1.5 text-text-secondary font-medium">
           <span
             className="h-3 w-3 rounded-full"
             style={{ backgroundColor: LANGUAGE_COLORS[repo.language] || "#8b949e" }}
@@ -139,7 +139,7 @@ function RepoMeta({ repo }: { repo: Repository }) {
 
       {repo.star_count && repo.star_count > 0 ? (
         <span className="inline-flex items-center gap-1">
-          <StarIcon size={14} className="text-zinc-400" />
+          <StarIcon size={14} className="text-text-muted" />
           <span>{repo.star_count}</span>
         </span>
       ) : null}
@@ -152,7 +152,7 @@ function RepoMeta({ repo }: { repo: Repository }) {
       ) : null}
 
       {repo.attached_space ? (
-        <Link href={`/spaces/${repo.attached_space.id}`} className="truncate text-zinc-400 hover:text-sky-300">
+        <Link href={`/spaces/${repo.attached_space.id}`} className="truncate text-text-muted hover:text-sky-300">
           {repo.attached_space.name}
         </Link>
       ) : null}
@@ -185,7 +185,7 @@ function RepoCard({
         </div>
 
         {repo.forked_from ? (
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-text-disabled">
             Forked from{" "}
             <Link href={`/repos/${repo.forked_from.id}`} className="hover:text-sky-300">
               {repo.forked_from.owner?.username}/{repo.forked_from.name}
@@ -194,7 +194,7 @@ function RepoCard({
         ) : null}
 
         {repo.description ? (
-          <p className="mt-2 line-clamp-2 max-w-3xl text-sm leading-relaxed text-zinc-400">
+          <p className="mt-2 line-clamp-2 max-w-3xl text-sm leading-relaxed text-text-muted">
             {repo.description}
           </p>
         ) : null}
@@ -204,21 +204,21 @@ function RepoCard({
       </div>
 
       <div className="flex flex-col items-end gap-5 self-stretch justify-between shrink-0">
-        <div className="inline-flex rounded-lg border border-zinc-800 bg-zinc-900 overflow-hidden shadow-sm">
+        <div className="inline-flex rounded-lg border border-border-default bg-surface overflow-hidden shadow-sm">
           <button
             type="button"
             onClick={() => onToggleStar(repo.id)}
             disabled={isStarring}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors disabled:opacity-50"
             aria-label={repo.is_starred ? "Unstar repository" : "Star repository"}
           >
-            <StarIcon size={14} className={repo.is_starred ? "text-yellow-500 fill-yellow-500" : "text-zinc-400"} />
+            <StarIcon size={14} className={repo.is_starred ? "text-yellow-500 fill-yellow-500" : "text-text-muted"} />
             <span>{repo.is_starred ? "Starred" : "Star"}</span>
           </button>
-          <div className="w-[1px] bg-zinc-800" />
+          <div className="w-[1px] bg-surface-hover" />
           <button
             type="button"
-            className="flex items-center px-2 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+            className="flex items-center px-2 hover:bg-surface-hover text-text-muted hover:text-text-primary transition-colors"
           >
             <ChevronDownIcon className="h-3.5 w-3.5" />
           </button>
@@ -254,8 +254,8 @@ function EmptyState({
 }) {
   if (hasFilters) {
     return (
-      <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
-        <h3 className="text-base font-semibold text-white">No repositories matched</h3>
+      <div className="rounded-lg border border-dashed border-border-default px-4 py-16 text-center">
+        <h3 className="text-base font-semibold text-text-primary">No repositories matched</h3>
         <button type="button" onClick={onClear} className="mt-3 text-sm font-medium text-sky-300 hover:text-sky-200">
           Clear filters
         </button>
@@ -265,23 +265,23 @@ function EmptyState({
 
   if (tab === "mine") {
     return (
-      <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
+      <div className="rounded-lg border border-dashed border-border-default px-4 py-16 text-center">
         <FolderIcon className="mx-auto h-11 w-11 text-zinc-700" />
-        <h3 className="mt-4 text-base font-semibold text-white">
+        <h3 className="mt-4 text-base font-semibold text-text-primary">
           {signedIn ? "No repos yet" : "Sign in to see your repos"}
         </h3>
         {signedIn ? (
           <button
             type="button"
             onClick={onCreate}
-            className="mt-5 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700"
+            className="mt-5 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-green-700"
           >
             Create repository
           </button>
         ) : (
           <Link
             href="/login"
-            className="mt-5 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+            className="mt-5 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
           >
             Sign in
           </Link>
@@ -293,13 +293,13 @@ function EmptyState({
   if (tab === "shared" || tab === "starred") {
     const isShared = tab === "shared";
     return (
-      <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
+      <div className="rounded-lg border border-dashed border-border-default px-4 py-16 text-center">
         {isShared ? (
           <UsersIcon className="mx-auto h-11 w-11 text-zinc-700" />
         ) : (
           <StarIcon size={42} className="mx-auto text-zinc-700" />
         )}
-        <h3 className="mt-4 text-base font-semibold text-white">
+        <h3 className="mt-4 text-base font-semibold text-text-primary">
           {signedIn
             ? isShared
               ? "No shared repos yet"
@@ -307,7 +307,7 @@ function EmptyState({
             : "Sign in to see this section"}
         </h3>
         {signedIn ? (
-          <p className="mx-auto mt-2 max-w-md text-sm text-zinc-500">
+          <p className="mx-auto mt-2 max-w-md text-sm text-text-disabled">
             {isShared
               ? "Repos appear here after you accept a contributor invitation."
               : "Star repositories you want to keep close and they will appear here."}
@@ -315,7 +315,7 @@ function EmptyState({
         ) : (
           <Link
             href="/login"
-            className="mt-5 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+            className="mt-5 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
           >
             Sign in
           </Link>
@@ -325,12 +325,12 @@ function EmptyState({
   }
 
   return (
-    <div className="rounded-lg border border-dashed border-zinc-800 px-4 py-16 text-center">
+    <div className="rounded-lg border border-dashed border-border-default px-4 py-16 text-center">
       <SparklesIcon className="mx-auto h-10 w-10 text-zinc-700" />
-      <h3 className="mt-4 text-base font-semibold text-white">
+      <h3 className="mt-4 text-base font-semibold text-text-primary">
         {tab === "recommended" ? "No recommendations yet" : "No public repositories yet"}
       </h3>
-      <p className="mx-auto mt-2 max-w-md text-sm text-zinc-500">
+      <p className="mx-auto mt-2 max-w-md text-sm text-text-disabled">
         {tab === "recommended"
           ? "Fresh public projects will appear here as builders publish repos and spaces."
           : "Public repos from the community will appear here."}
@@ -405,19 +405,19 @@ export default function RepositoriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <header className="border-b border-zinc-800 bg-zinc-950 px-4 md:px-8">
+    <div className="min-h-screen bg-app">
+      <header className="border-b border-border-default bg-app px-4 md:px-8">
         <div className="mx-auto max-w-[1180px]">
           <div className="flex flex-wrap items-center justify-between gap-3 py-5">
             <div>
-              <h1 className="text-xl font-semibold text-white">Repositories</h1>
-              <p className="mt-1 text-sm text-zinc-500">Your code, contribution matches, and public projects.</p>
+              <h1 className="text-xl font-semibold text-text-primary">Repositories</h1>
+              <p className="mt-1 text-sm text-text-disabled">Your code, contribution matches, and public projects.</p>
             </div>
             {user ? (
               <button
                 type="button"
                 onClick={() => setIsCreateModalOpen(true)}
-                className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700"
+                className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-green-700"
               >
                 <FolderIcon className="h-4 w-4" />
                 New
@@ -425,7 +425,7 @@ export default function RepositoriesPage() {
             ) : (
               <Link
                 href="/login"
-                className="rounded-lg border border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-900"
+                className="rounded-lg border border-border-strong px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface"
               >
                 Sign in
               </Link>
@@ -440,8 +440,8 @@ export default function RepositoriesPage() {
                 onClick={() => switchTab(tab.key)}
                 className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition-colors ${
                   activeTab === tab.key
-                    ? "bg-white text-zinc-950"
-                    : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-surface text-text-muted hover:bg-surface-hover hover:text-text-primary"
                 }`}
               >
                 {tab.icon}
@@ -452,7 +452,7 @@ export default function RepositoriesPage() {
 
           <div className="flex flex-col gap-3 pb-4 md:flex-row md:items-center">
             <div className="relative min-w-0 flex-1">
-              <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-disabled" />
               <input
                 type="search"
                 placeholder="Find a repository..."
@@ -461,7 +461,7 @@ export default function RepositoriesPage() {
                   setQuery(event.target.value);
                   setPage(1);
                 }}
-                className="h-10 w-full rounded-lg border border-zinc-800 bg-zinc-900 pl-9 pr-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-sky-500"
+                className="h-10 w-full rounded-lg border border-border-default bg-surface pl-9 pr-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-disabled focus:border-sky-500"
               />
             </div>
 
@@ -473,7 +473,7 @@ export default function RepositoriesPage() {
                 setStack(event.target.value);
                 setPage(1);
               }}
-              className="h-10 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-white outline-none transition-colors placeholder:text-zinc-500 focus:border-sky-500 md:w-44"
+              className="h-10 w-full rounded-lg border border-border-default bg-surface px-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-disabled focus:border-sky-500 md:w-44"
             />
 
             {activeTab === "public" ? (
@@ -483,7 +483,7 @@ export default function RepositoriesPage() {
                   setSort(event.target.value as RepoSort);
                   setPage(1);
                 }}
-                className="h-10 rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-300 outline-none transition-colors focus:border-sky-500"
+                className="h-10 rounded-lg border border-border-default bg-surface px-3 text-sm text-text-secondary outline-none transition-colors focus:border-sky-500"
               >
                 <option value="updated">Recently updated</option>
                 <option value="stars">Most starred</option>
@@ -496,7 +496,7 @@ export default function RepositoriesPage() {
 
       <main className="mx-auto max-w-[1180px] px-4 py-5 md:px-8">
         <div className="mb-4 flex items-center justify-between gap-3 text-sm">
-          <p className="text-zinc-500">
+          <p className="text-text-disabled">
             {loading ? "Loading repositories..." : `${total || displayRepos.length} repositories`}
           </p>
           {hasFilters ? (
@@ -525,7 +525,7 @@ export default function RepositoriesPage() {
         ) : null}
 
         {!error && displayRepos.length > 0 ? (
-          <div className="divide-y divide-zinc-800 border-t border-zinc-800">
+          <div className="divide-y divide-border-default border-t border-border-default">
             {displayRepos.map((repo) => (
               <RepoCard
                 key={repo.id}
@@ -539,12 +539,12 @@ export default function RepositoriesPage() {
 
         {page > 1 || displayRepos.length >= PAGE_LIMIT ? (
           <div className="mt-6 flex justify-center">
-            <div className="inline-flex overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
+            <div className="inline-flex overflow-hidden rounded-lg border border-border-default bg-surface">
               <button
                 type="button"
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
                 disabled={page <= 1}
-                className="px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-zinc-800 disabled:text-zinc-600 disabled:hover:bg-transparent"
+                className="px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-surface-hover disabled:text-text-disabled disabled:hover:bg-transparent"
               >
                 Previous
               </button>
@@ -552,7 +552,7 @@ export default function RepositoriesPage() {
                 type="button"
                 onClick={() => setPage((current) => current + 1)}
                 disabled={displayRepos.length < PAGE_LIMIT}
-                className="border-l border-zinc-800 px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-zinc-800 disabled:text-zinc-600 disabled:hover:bg-transparent"
+                className="border-l border-border-default px-4 py-2 text-sm font-medium text-sky-300 transition-colors hover:bg-surface-hover disabled:text-text-disabled disabled:hover:bg-transparent"
               >
                 Next
               </button>

@@ -175,9 +175,9 @@ function ExternalImageContent({
   if (hasError || !src || !imageSrc) {
     return (
       <div
-        className={`flex items-center justify-center bg-zinc-900 ${fallbackClassName || className}`}
+        className={`flex items-center justify-center bg-surface ${fallbackClassName || className}`}
       >
-        <div className="flex flex-col items-center gap-2 text-zinc-600">
+        <div className="flex flex-col items-center gap-2 text-text-disabled">
           <SparklesIcon className="h-8 w-8" />
           <span className="text-xs">Image unavailable</span>
         </div>
@@ -189,7 +189,7 @@ function ExternalImageContent({
     <div className={`relative overflow-hidden ${className}`}>
       {/* Loading skeleton */}
       {isLoading && (
-        <div className="absolute inset-0 animate-pulse bg-zinc-800" />
+        <div className="absolute inset-0 animate-pulse bg-surface-hover" />
       )}
 
       {/* Image */}

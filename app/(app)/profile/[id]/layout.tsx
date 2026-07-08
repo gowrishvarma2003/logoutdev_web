@@ -34,18 +34,18 @@ function Tab({ href, label, active, count }: TabProps) {
       href={href}
       className={`relative px-3.5 sm:px-4 py-3.5 text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
         active
-          ? "text-white"
-          : "text-zinc-500 hover:text-zinc-300"
+          ? "text-text-primary"
+          : "text-text-disabled hover:text-text-secondary"
       }`}
     >
       {label}
       {typeof count === "number" && count > 0 ? (
-        <span className={`text-[11px] tabular-nums rounded-full px-1.5 py-0.5 ${active ? "bg-zinc-800 text-zinc-300" : "bg-zinc-900 text-zinc-600"}`}>
+        <span className={`text-[11px] tabular-nums rounded-full px-1.5 py-0.5 ${active ? "bg-surface-hover text-text-secondary" : "bg-surface text-text-disabled"}`}>
           {count}
         </span>
       ) : null}
       {active && (
-        <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-full" />
+        <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-full" />
       )}
     </Link>
   );
@@ -118,16 +118,16 @@ export default function ProfileLayout({ params, children }: ProfileLayoutProps) 
   if (error || !profile) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-2xl">
+        <div className="w-16 h-16 rounded-2xl bg-surface border border-border-default flex items-center justify-center text-2xl">
           👤
         </div>
-        <h1 className="text-xl font-bold text-white">Profile not found</h1>
-        <p className="text-zinc-500 text-sm max-w-xs">
-          The user <span className="text-zinc-300">@{username}</span> doesn&apos;t exist or their profile isn&apos;t available.
+        <h1 className="text-xl font-bold text-text-primary">Profile not found</h1>
+        <p className="text-text-disabled text-sm max-w-xs">
+          The user <span className="text-text-secondary">@{username}</span> doesn&apos;t exist or their profile isn&apos;t available.
         </p>
         <Link
           href="/feed"
-          className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white transition-colors"
+          className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors"
         >
           <ArrowLeftIcon className="w-4 h-4" />
           Back to feed
@@ -139,21 +139,21 @@ export default function ProfileLayout({ params, children }: ProfileLayoutProps) 
   return (
     <div>
       {/* ── Sticky top bar with back button + name ── */}
-      <header className="sticky top-0 z-20 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800">
+      <header className="sticky top-0 z-20 bg-app/90 backdrop-blur-md border-b border-border-default">
         <div className="px-4 py-3 flex items-center gap-3">
           <Link
             href="/feed"
-            className="p-1.5 -ml-1.5 rounded-full text-zinc-400 hover:bg-zinc-800 transition-colors"
+            className="p-1.5 -ml-1.5 rounded-full text-text-muted hover:bg-surface-hover transition-colors"
             aria-label="Go back"
           >
             <ArrowLeftIcon className="w-5 h-5" />
           </Link>
           <div className="min-w-0">
-            <h1 className="text-[15px] font-bold text-white leading-tight truncate">
+            <h1 className="text-[15px] font-bold text-text-primary leading-tight truncate">
               {profile.name}
             </h1>
             {profile.username ? (
-              <p className="text-xs text-zinc-500">@{profile.username}</p>
+              <p className="text-xs text-text-disabled">@{profile.username}</p>
             ) : null}
           </div>
         </div>
@@ -187,7 +187,7 @@ export default function ProfileLayout({ params, children }: ProfileLayoutProps) 
 
       {/* ── Tab navigation (sticky under top bar) ── */}
       <nav
-        className="sticky top-[52px] z-10 flex border-b border-zinc-800 overflow-x-auto scrollbar-none bg-zinc-950/90 backdrop-blur-md"
+        className="sticky top-[52px] z-10 flex border-b border-border-default overflow-x-auto scrollbar-none bg-app/90 backdrop-blur-md"
         aria-label="Profile tabs"
       >
         <Tab href={base} label="Overview" active={pathname === base} />

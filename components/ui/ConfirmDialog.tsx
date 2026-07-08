@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
 import Spinner from "@/components/ui/Spinner";
+import Button from "@/components/ui/Button";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -40,25 +41,23 @@ export default function ConfirmDialog({
   return (
     <Modal open={open} onClose={busy ? () => {} : onClose} title={title} description={description}>
       <div className="flex justify-end gap-3">
-        <button
+        <Button
           type="button"
           disabled={busy}
           onClick={onClose}
-          className="rounded-xl bg-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white disabled:opacity-50"
+          variant="secondary"
         >
           {cancelLabel}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           disabled={busy}
           onClick={handleConfirm}
-          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60 ${
-            tone === "danger" ? "bg-rose-600 text-white hover:bg-rose-500" : "bg-white text-zinc-950 hover:bg-zinc-200"
-          }`}
+          variant={tone === "danger" ? "danger" : "primary"}
         >
           {busy ? <Spinner size="sm" /> : null}
           {confirmLabel}
-        </button>
+        </Button>
       </div>
     </Modal>
   );

@@ -274,7 +274,7 @@ export default function WorkDetailPage({
   if (error || !issue) {
     return (
       <div className="flex flex-col items-center justify-center px-4 py-24 text-center">
-        <p className="text-sm text-zinc-400">{error || "Work item not found."}</p>
+        <p className="text-sm text-text-muted">{error || "Work item not found."}</p>
         <Link href={backHref} className="mt-3 text-xs text-sky-400 transition-colors hover:text-sky-300">
           Back to Work
         </Link>
@@ -290,18 +290,18 @@ export default function WorkDetailPage({
     <div className="mx-auto max-w-6xl p-4">
       <Link
         href={backHref}
-        className="mb-4 inline-flex items-center gap-1.5 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+        className="mb-4 inline-flex items-center gap-1.5 text-xs text-text-disabled transition-colors hover:text-text-secondary"
       >
         <ArrowLeftIcon className="h-4 w-4" />
         Back to Work
       </Link>
 
-      <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/40">
-        <div className="border-b border-zinc-800 px-6 py-5">
+      <div className="overflow-hidden rounded-3xl border border-border-default bg-surface/40">
+        <div className="border-b border-border-default px-6 py-5">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <IssueStatusBadge status={issue.status} />
             <IssuePriorityBadge priority={issue.priority} />
-            <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-zinc-300">
+            <span className="rounded-full bg-surface-hover px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-text-secondary">
               {issue.type}
             </span>
             {issue.good_first_task ? (
@@ -329,7 +329,7 @@ export default function WorkDetailPage({
               </span>
             ) : null}
             {issue.is_stale ? (
-              <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-[11px] font-medium text-zinc-300">
+              <span className="rounded-full bg-surface-hover px-2.5 py-0.5 text-[11px] font-medium text-text-secondary">
                 Stale
               </span>
             ) : null}
@@ -337,8 +337,8 @@ export default function WorkDetailPage({
 
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <h1 className="text-2xl font-bold text-white">{issue.title}</h1>
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-zinc-400">
+              <h1 className="text-2xl font-bold text-text-primary">{issue.title}</h1>
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-text-muted">
                 <div className="flex items-center gap-2">
                   <Avatar user={issue.author} size="sm" />
                   <span>Opened by {issue.author?.name ?? "Unknown"}</span>
@@ -381,7 +381,7 @@ export default function WorkDetailPage({
               {canEditContent ? (
                 <button
                   onClick={() => setEditing(true)}
-                  className="rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-700"
+                  className="rounded-lg bg-surface-hover px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-active"
                 >
                   Edit work
                 </button>
@@ -389,7 +389,7 @@ export default function WorkDetailPage({
               {canPostUpdates ? (
                 <Link
                   href={`/spaces/${spaceId}/updates?compose=true&workItemId=${issue.id}`}
-                  className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
+                  className="rounded-lg border border-border-strong px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-hover"
                 >
                   Post update
                 </Link>
@@ -405,13 +405,13 @@ export default function WorkDetailPage({
                 type="text"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+                className="w-full rounded-xl border border-border-default bg-app px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
               />
               <RichComposer
                 value={body}
                 onChange={(value) => setBody(value)}
                 rows={6}
-                previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm leading-relaxed text-white"
+                previewClassName="w-full rounded-xl border border-border-default bg-app px-3 py-2.5 text-sm leading-relaxed text-text-primary"
                  className="w-full resize-none px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:outline-none selection:bg-[#1d9bf0]/30"
               />
             </div>
@@ -422,7 +422,7 @@ export default function WorkDetailPage({
                   <select
                     value={status}
                     onChange={(event) => setStatus(event.target.value as SpaceIssueStatus)}
-                    className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+                    className="rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
                   >
                     {STATUS_OPTIONS.map((option) => (
                       <option key={option} value={option}>
@@ -434,7 +434,7 @@ export default function WorkDetailPage({
                   <select
                     value={priority}
                     onChange={(event) => setPriority(event.target.value as SpaceIssuePriority)}
-                    className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+                    className="rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
                   >
                     {PRIORITY_OPTIONS.map((option) => (
                       <option key={option} value={option}>
@@ -446,7 +446,7 @@ export default function WorkDetailPage({
                   <select
                     value={type}
                     onChange={(event) => setType(event.target.value as WorkItemType)}
-                    className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+                    className="rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
                   >
                     {TYPE_OPTIONS.map((option) => (
                       <option key={option} value={option}>
@@ -458,7 +458,7 @@ export default function WorkDetailPage({
                   <select
                     value={assigneeUserId}
                     onChange={(event) => setAssigneeUserId(event.target.value)}
-                    className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+                    className="rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
                   >
                     <option value="">Unassigned</option>
                     {contributors.map((member) => (
@@ -473,7 +473,7 @@ export default function WorkDetailPage({
                   <select
                     value={repoId}
                     onChange={(event) => setRepoId(event.target.value)}
-                    className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+                    className="rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
                   >
                     <option value="">No linked repo</option>
                     {repos.map((repo) => (
@@ -485,7 +485,7 @@ export default function WorkDetailPage({
                   <select
                     value={milestoneId}
                     onChange={(event) => setMilestoneId(event.target.value)}
-                    className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+                    className="rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
                   >
                     <option value="">No milestone</option>
                     {milestones.map((milestone) => (
@@ -499,7 +499,7 @@ export default function WorkDetailPage({
                     value={neededSkill}
                     onChange={(event) => setNeededSkill(event.target.value)}
                     placeholder="Needed skill"
-                    className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+                    className="rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
                   />
                 </div>
 
@@ -509,13 +509,13 @@ export default function WorkDetailPage({
                     value={estimate}
                     onChange={(event) => setEstimate(event.target.value)}
                     placeholder="Estimate"
-                    className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+                    className="rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
                   />
                   <input
                     type="date"
                     value={targetDate}
                     onChange={(event) => setTargetDate(event.target.value)}
-                    className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+                    className="rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
                   />
                   <select
                     value={closeReasonSelectValue}
@@ -529,7 +529,7 @@ export default function WorkDetailPage({
                       }
                       setCloseReason(nextValue);
                     }}
-                    className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+                    className="rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
                   >
                     {CLOSE_REASON_OPTIONS.map((option) => (
                       <option key={option || "none"} value={option}>
@@ -546,7 +546,7 @@ export default function WorkDetailPage({
                     value={closeReason}
                     onChange={(event) => setCloseReason(event.target.value)}
                     placeholder="Type close reason"
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+                    className="w-full rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
                   />
                 ) : null}
 
@@ -555,16 +555,16 @@ export default function WorkDetailPage({
                   value={blockedReason}
                   onChange={(event) => setBlockedReason(event.target.value)}
                   placeholder="Blocked reason"
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+                  className="w-full rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
                 />
 
-                <div className="flex flex-wrap gap-3 text-sm text-zinc-300">
+                <div className="flex flex-wrap gap-3 text-sm text-text-secondary">
                   <label className="inline-flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={goodFirstTask}
                       onChange={(event) => setGoodFirstTask(event.target.checked)}
-                      className="h-4 w-4 rounded border-zinc-700 bg-zinc-950"
+                      className="h-4 w-4 rounded border-border-strong bg-app"
                     />
                     Good first task
                   </label>
@@ -573,7 +573,7 @@ export default function WorkDetailPage({
                       type="checkbox"
                       checked={helpWanted}
                       onChange={(event) => setHelpWanted(event.target.checked)}
-                      className="h-4 w-4 rounded border-zinc-700 bg-zinc-950"
+                      className="h-4 w-4 rounded border-border-strong bg-app"
                     />
                     Help wanted
                   </label>
@@ -589,14 +589,14 @@ export default function WorkDetailPage({
                   setEditing(false);
                   populateDraftFromIssue(issue);
                 }}
-                className="rounded-lg px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:text-white"
+                className="rounded-lg px-3 py-1.5 text-xs text-text-muted transition-colors hover:text-text-primary"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving || !title.trim() || !body.trim()}
-                className="rounded-lg bg-white px-4 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-50"
+                className="rounded-lg bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Save changes"}
               </button>
@@ -607,20 +607,20 @@ export default function WorkDetailPage({
             <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
               <div className="space-y-6">
                 <section>
-                  <h2 className="text-sm font-semibold text-white">Work description</h2>
-                  <RichText text={issue.body} className="mt-3 whitespace-pre-line text-sm leading-relaxed text-zinc-300" />
+                  <h2 className="text-sm font-semibold text-text-primary">Work description</h2>
+                  <RichText text={issue.body} className="mt-3 whitespace-pre-line text-sm leading-relaxed text-text-secondary" />
                 </section>
 
                 {attachments.length ? (
                   <section>
-                    <h2 className="text-sm font-semibold text-white">Photos</h2>
+                    <h2 className="text-sm font-semibold text-text-primary">Photos</h2>
                     <div className="mt-3 grid gap-3 sm:grid-cols-2">
                       {attachments.map((attachment, index) => (
                         <button
                           key={attachment.id}
                           type="button"
                           onClick={() => setPreviewAttachmentIndex(index)}
-                          className="group overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 transition-colors hover:border-zinc-700"
+                          className="group overflow-hidden rounded-xl border border-border-default bg-surface transition-colors hover:border-border-strong"
                         >
                           <ExternalImage
                             src={attachment.url}
@@ -628,8 +628,8 @@ export default function WorkDetailPage({
                             className="aspect-video w-full object-cover transition-transform group-hover:scale-[1.02]"
                             fallbackClassName="aspect-video w-full"
                           />
-                          <div className="border-t border-zinc-800 px-3 py-2">
-                            <p className="truncate text-left text-xs font-medium text-zinc-300">{attachment.filename}</p>
+                          <div className="border-t border-border-default px-3 py-2">
+                            <p className="truncate text-left text-xs font-medium text-text-secondary">{attachment.filename}</p>
                           </div>
                         </button>
                       ))}
@@ -637,66 +637,66 @@ export default function WorkDetailPage({
                   </section>
                 ) : null}
 
-                <section className="grid gap-4 border-t border-zinc-800 pt-5 sm:grid-cols-2">
+                <section className="grid gap-4 border-t border-border-default pt-5 sm:grid-cols-2">
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Status</p>
+                    <p className="text-xs uppercase tracking-wide text-text-disabled">Status</p>
                     <div className="mt-2">
                       <IssueStatusBadge status={issue.status} />
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Priority</p>
+                    <p className="text-xs uppercase tracking-wide text-text-disabled">Priority</p>
                     <div className="mt-2">
                       <IssuePriorityBadge priority={issue.priority} />
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Assignee</p>
-                    <p className="mt-2 text-sm text-zinc-300">{issue.assignee?.name ?? "Unassigned"}</p>
+                    <p className="text-xs uppercase tracking-wide text-text-disabled">Assignee</p>
+                    <p className="mt-2 text-sm text-text-secondary">{issue.assignee?.name ?? "Unassigned"}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Type</p>
-                    <p className="mt-2 text-sm capitalize text-zinc-300">{issue.type}</p>
+                    <p className="text-xs uppercase tracking-wide text-text-disabled">Type</p>
+                    <p className="mt-2 text-sm capitalize text-text-secondary">{issue.type}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Repo</p>
-                    <p className="mt-2 text-sm text-zinc-300">{issue.repo?.name ?? "No linked repo"}</p>
+                    <p className="text-xs uppercase tracking-wide text-text-disabled">Repo</p>
+                    <p className="mt-2 text-sm text-text-secondary">{issue.repo?.name ?? "No linked repo"}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Milestone</p>
-                    <p className="mt-2 text-sm text-zinc-300">{issue.milestone?.title ?? "No milestone"}</p>
+                    <p className="text-xs uppercase tracking-wide text-text-disabled">Milestone</p>
+                    <p className="mt-2 text-sm text-text-secondary">{issue.milestone?.title ?? "No milestone"}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Needed skill</p>
-                    <p className="mt-2 text-sm text-zinc-300">{issue.needed_skill || "Not specified"}</p>
+                    <p className="text-xs uppercase tracking-wide text-text-disabled">Needed skill</p>
+                    <p className="mt-2 text-sm text-text-secondary">{issue.needed_skill || "Not specified"}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Estimate</p>
-                    <p className="mt-2 text-sm text-zinc-300">{issue.estimate || "Not set"}</p>
+                    <p className="text-xs uppercase tracking-wide text-text-disabled">Estimate</p>
+                    <p className="mt-2 text-sm text-text-secondary">{issue.estimate || "Not set"}</p>
                   </div>
                 </section>
 
-                <section className="grid gap-4 border-t border-zinc-800 pt-5 sm:grid-cols-3">
+                <section className="grid gap-4 border-t border-border-default pt-5 sm:grid-cols-3">
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Blocked reason</p>
-                    <p className="mt-2 text-sm text-zinc-300">{issue.blocked_reason || "None"}</p>
+                    <p className="text-xs uppercase tracking-wide text-text-disabled">Blocked reason</p>
+                    <p className="mt-2 text-sm text-text-secondary">{issue.blocked_reason || "None"}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Target date</p>
-                    <p className="mt-2 text-sm text-zinc-300">{issue.target_date ? new Date(issue.target_date).toLocaleDateString() : "Not set"}</p>
+                    <p className="text-xs uppercase tracking-wide text-text-disabled">Target date</p>
+                    <p className="mt-2 text-sm text-text-secondary">{issue.target_date ? new Date(issue.target_date).toLocaleDateString() : "Not set"}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-zinc-500">Close reason</p>
-                    <p className="mt-2 text-sm text-zinc-300">{issue.close_reason || "None"}</p>
+                    <p className="text-xs uppercase tracking-wide text-text-disabled">Close reason</p>
+                    <p className="mt-2 text-sm text-text-secondary">{issue.close_reason || "None"}</p>
                   </div>
                 </section>
               </div>
 
               <aside className="space-y-4">
                 {canManage ? (
-                  <section className="rounded-2xl border border-zinc-800 bg-zinc-950/40 p-4">
-                    <h3 className="text-sm font-semibold text-white">Status update</h3>
-                    <p className="mt-0.5 text-xs text-zinc-500">
+                  <section className="rounded-2xl border border-border-default bg-app/40 p-4">
+                    <h3 className="text-sm font-semibold text-text-primary">Status update</h3>
+                    <p className="mt-0.5 text-xs text-text-disabled">
                       Change only the work status without editing the full work item.
                     </p>
                     <div className="mt-3 flex items-center gap-2">
@@ -711,7 +711,7 @@ export default function WorkDetailPage({
                           }
                         }}
                         disabled={statusUpdating}
-                        className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none disabled:opacity-60"
+                        className="w-full rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none disabled:opacity-60"
                       >
                         {STATUS_OPTIONS.map((option) => (
                           <option key={option} value={option}>
@@ -723,7 +723,7 @@ export default function WorkDetailPage({
                         type="button"
                         onClick={handleQuickStatusUpdate}
                         disabled={statusUpdating || quickStatus === issue.status}
-                        className="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {statusUpdating ? "Updating..." : "Update"}
                       </button>
@@ -743,7 +743,7 @@ export default function WorkDetailPage({
                             setQuickCloseReason(nextValue);
                           }}
                           disabled={statusUpdating}
-                          className="mt-2 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none disabled:opacity-60"
+                          className="mt-2 w-full rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none disabled:opacity-60"
                         >
                           <option value="">Select close reason</option>
                           {CLOSE_REASON_OPTIONS.filter(Boolean).map((option) => (
@@ -760,7 +760,7 @@ export default function WorkDetailPage({
                             onChange={(event) => setQuickCloseReason(event.target.value)}
                             disabled={statusUpdating}
                             placeholder="Type close reason"
-                            className="mt-2 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none disabled:opacity-60"
+                            className="mt-2 w-full rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none disabled:opacity-60"
                           />
                         ) : null}
                       </>
@@ -771,14 +771,14 @@ export default function WorkDetailPage({
                   </section>
                 ) : null}
 
-                <section className="rounded-2xl border border-zinc-800 bg-zinc-950/40 p-4">
-                  <h3 className="text-sm font-semibold text-white">Linked updates</h3>
-                  <p className="mt-0.5 text-xs text-zinc-500">
+                <section className="rounded-2xl border border-border-default bg-app/40 p-4">
+                  <h3 className="text-sm font-semibold text-text-primary">Linked updates</h3>
+                  <p className="mt-0.5 text-xs text-text-disabled">
                     {updateCount} update(s) connected to this work item. Showing latest 2.
                   </p>
                   <div className="mt-3 space-y-3">
                     {linkedUpdatesPreview.length === 0 ? (
-                      <div className="rounded-2xl border border-dashed border-zinc-800 px-4 py-6 text-center text-sm text-zinc-500">
+                      <div className="rounded-2xl border border-dashed border-border-default px-4 py-6 text-center text-sm text-text-disabled">
                         No linked updates yet.
                       </div>
                     ) : (
@@ -790,7 +790,7 @@ export default function WorkDetailPage({
                   <div className="mt-3 flex flex-wrap items-center gap-3">
                     <Link
                       href={`/spaces/${spaceId}/updates?workItemId=${issue.id}`}
-                      className="inline-flex text-xs text-zinc-300 transition-colors hover:text-white"
+                      className="inline-flex text-xs text-text-secondary transition-colors hover:text-text-primary"
                     >
                       View all linked updates
                     </Link>
@@ -807,7 +807,7 @@ export default function WorkDetailPage({
               </aside>
             </div>
 
-            <div className="border-t border-zinc-800 pt-6">
+            <div className="border-t border-border-default pt-6">
               <div className="mx-auto w-full max-w-5xl">
                 <WorkCommentsPanel
                   spaceId={spaceId}
@@ -822,7 +822,7 @@ export default function WorkDetailPage({
               </div>
             </div>
 
-            <div className="border-t border-zinc-800 pt-6">
+            <div className="border-t border-border-default pt-6">
               <div className="mx-auto w-full max-w-5xl">
                 <WorkActivityTimeline
                   spaceId={spaceId}
@@ -846,7 +846,7 @@ export default function WorkDetailPage({
         <button
           type="button"
           onClick={() => setPreviewAttachmentIndex(null)}
-          className="absolute right-4 top-4 rounded-full bg-zinc-800/80 p-2 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+          className="absolute right-4 top-4 rounded-full bg-surface-hover/80 p-2 text-text-secondary transition-colors hover:bg-surface-active hover:text-text-primary"
           aria-label="Close image preview"
         >
           <XMarkIcon className="h-5 w-5" />
@@ -859,7 +859,7 @@ export default function WorkDetailPage({
             className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
             fallbackClassName="h-[50vh] w-[50vw] rounded-lg"
           />
-          <p className="mt-3 text-center text-sm text-zinc-400">{previewAttachment.filename}</p>
+          <p className="mt-3 text-center text-sm text-text-muted">{previewAttachment.filename}</p>
 
           {attachments.length > 1 ? (
             <div className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center justify-between">
@@ -871,7 +871,7 @@ export default function WorkDetailPage({
                     current === null ? 0 : (current - 1 + attachments.length) % attachments.length
                   ));
                 }}
-                className="pointer-events-auto -ml-12 rounded-full bg-zinc-800/80 p-2 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+                className="pointer-events-auto -ml-12 rounded-full bg-surface-hover/80 p-2 text-text-secondary transition-colors hover:bg-surface-active hover:text-text-primary"
                 aria-label="Previous photo"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -886,7 +886,7 @@ export default function WorkDetailPage({
                     current === null ? 0 : (current + 1) % attachments.length
                   ));
                 }}
-                className="pointer-events-auto -mr-12 rounded-full bg-zinc-800/80 p-2 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+                className="pointer-events-auto -mr-12 rounded-full bg-surface-hover/80 p-2 text-text-secondary transition-colors hover:bg-surface-active hover:text-text-primary"
                 aria-label="Next photo"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

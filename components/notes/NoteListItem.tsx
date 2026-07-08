@@ -16,21 +16,21 @@ export default function NoteListItem({ note, onChanged }: NoteListItemProps) {
     <li className="group relative">
       <Link
         href={`/notes/${note.id}`}
-        className="flex items-start gap-3 rounded-xl border border-transparent px-3 py-3 pr-11 transition-colors hover:border-zinc-800 hover:bg-zinc-900/60"
+        className="flex items-start gap-3 rounded-xl border border-transparent px-3 py-3 pr-11 transition-colors hover:border-border-default hover:bg-surface/60"
       >
-        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-800/80 text-base">
+        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-hover/80 text-base">
           {note.icon || "📝"}
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <h3 className="truncate text-[13.5px] font-semibold text-white">{note.title || "Untitled"}</h3>
+            <h3 className="truncate text-[13.5px] font-semibold text-text-primary">{note.title || "Untitled"}</h3>
             {note.is_pinned ? <PinIcon className="h-3 w-3 shrink-0 text-amber-400" /> : null}
             {note.is_favorite ? <StarIcon className="h-3 w-3 shrink-0 text-amber-400" filled /> : null}
           </div>
-          <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-zinc-500">
+          <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-text-disabled">
             {note.excerpt || "No content yet"}
           </p>
-          <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-[11px] text-zinc-600">
+          <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-[11px] text-text-disabled">
             <span>{formatRelativeTime(note.updated_at)}</span>
             {note.folder ? (
               <span className="inline-flex items-center gap-1">

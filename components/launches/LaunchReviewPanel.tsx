@@ -62,14 +62,14 @@ export default function LaunchReviewPanel({
       {currentUser ? (
         canReview ? (
           isComposing || myReview ? (
-            <form onSubmit={handleSubmit} className="rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-4">
+            <form onSubmit={handleSubmit} className="rounded-xl border border-border-default/60 bg-surface/40 p-4">
               <div className="space-y-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-medium text-text-primary">
                       {myReview ? "Update your review" : "Write a review"}
                     </p>
-                    <p className="mt-0.5 text-xs text-zinc-500">
+                    <p className="mt-0.5 text-xs text-text-disabled">
                       Share your honest experience
                     </p>
                   </div>
@@ -77,7 +77,7 @@ export default function LaunchReviewPanel({
                     <button
                       type="button"
                       onClick={() => setIsComposing(false)}
-                      className="text-xs text-zinc-500 hover:text-zinc-300"
+                      className="text-xs text-text-disabled hover:text-text-secondary"
                     >
                       Cancel
                     </button>
@@ -88,7 +88,7 @@ export default function LaunchReviewPanel({
                   value={headline}
                   onChange={(e) => setHeadline(e.target.value)}
                   placeholder="Summarize in one line"
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-950/50 px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+                  className="w-full rounded-lg border border-border-default bg-app/50 px-4 py-2.5 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
                 />
 
                 <RichComposer
@@ -96,8 +96,8 @@ export default function LaunchReviewPanel({
                   onChange={(value) => setBody(value)}
                   rows={3}
                   placeholder="What worked? What didn't? Would you recommend it?"
-                  previewClassName="w-full rounded-lg border border-zinc-800 bg-zinc-950/50 px-4 py-2.5 text-sm leading-relaxed text-white"
-                   className="w-full resize-y px-4 py-2.5 text-sm leading-relaxed text-transparent caret-white placeholder:text-zinc-600 focus:outline-none"
+                  previewClassName="w-full rounded-lg border border-border-default bg-app/50 px-4 py-2.5 text-sm leading-relaxed text-text-primary"
+                   className="w-full resize-y px-4 py-2.5 text-sm leading-relaxed text-transparent caret-white placeholder:text-text-disabled focus:outline-none"
                 />
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -108,13 +108,13 @@ export default function LaunchReviewPanel({
                         const colorClasses = {
                           emerald: isActive
                             ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-400"
-                            : "border-zinc-700 text-zinc-400 hover:border-zinc-600 hover:text-zinc-300",
+                            : "border-border-strong text-text-muted hover:border-border-strong hover:text-text-secondary",
                           amber: isActive
                             ? "border-amber-500/30 bg-amber-500/15 text-amber-400"
-                            : "border-zinc-700 text-zinc-400 hover:border-zinc-600 hover:text-zinc-300",
+                            : "border-border-strong text-text-muted hover:border-border-strong hover:text-text-secondary",
                           rose: isActive
                             ? "border-rose-500/30 bg-rose-500/15 text-rose-400"
-                            : "border-zinc-700 text-zinc-400 hover:border-zinc-600 hover:text-zinc-300",
+                            : "border-border-strong text-text-muted hover:border-border-strong hover:text-text-secondary",
                         };
                         return (
                           <button
@@ -143,7 +143,7 @@ export default function LaunchReviewPanel({
                     <button
                       type="submit"
                       disabled={loading || !headline.trim()}
-                      className="rounded-lg bg-white px-4 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-50"
+                      className="rounded-lg bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-50"
                     >
                       {loading ? "Saving..." : myReview ? "Update" : "Post review"}
                     </button>
@@ -157,25 +157,25 @@ export default function LaunchReviewPanel({
             <button
               type="button"
               onClick={() => setIsComposing(true)}
-              className="w-full rounded-xl border border-dashed border-zinc-700/60 bg-zinc-900/30 py-4 text-sm text-zinc-400 transition-colors hover:border-zinc-600 hover:bg-zinc-900/50 hover:text-zinc-300"
+              className="w-full rounded-xl border border-dashed border-border-strong/60 bg-surface/30 py-4 text-sm text-text-muted transition-colors hover:border-border-strong hover:bg-surface/50 hover:text-text-secondary"
             >
               Write a review...
             </button>
           )
         ) : (
-          <p className="rounded-xl border border-zinc-800/60 bg-zinc-900/30 px-4 py-3 text-sm text-zinc-500">
+          <p className="rounded-xl border border-border-default/60 bg-surface/30 px-4 py-3 text-sm text-text-disabled">
             {disabledMessage || "Reviews are not available right now."}
           </p>
         )
       ) : (
-        <p className="rounded-xl border border-zinc-800/60 bg-zinc-900/30 px-4 py-3 text-sm text-zinc-500">
+        <p className="rounded-xl border border-border-default/60 bg-surface/30 px-4 py-3 text-sm text-text-disabled">
           Sign in to leave a review.
         </p>
       )}
 
       {/* Reviews list */}
       {reviews.length === 0 ? (
-        <p className="py-8 text-center text-sm text-zinc-500">
+        <p className="py-8 text-center text-sm text-text-disabled">
           No reviews yet — be the first to share your thoughts.
         </p>
       ) : (
@@ -191,12 +191,12 @@ export default function LaunchReviewPanel({
             return (
               <article
                 key={review.id}
-                className="rounded-xl border border-zinc-800/60 bg-zinc-900/30 p-4"
+                className="rounded-xl border border-border-default/60 bg-surface/30 p-4"
               >
                 <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                   <div>
-                    <h4 className="text-sm font-medium text-white">{review.headline}</h4>
-                    <p className="mt-0.5 text-xs text-zinc-500">
+                    <h4 className="text-sm font-medium text-text-primary">{review.headline}</h4>
+                    <p className="mt-0.5 text-xs text-text-disabled">
                       {review.author?.name ?? "Community member"}
                     </p>
                   </div>
@@ -204,7 +204,7 @@ export default function LaunchReviewPanel({
                     {rec.short}
                   </span>
                 </div>
-                <RichText text={review.body} className="text-sm leading-relaxed text-zinc-400" />
+                <RichText text={review.body} className="text-sm leading-relaxed text-text-muted" />
               </article>
             );
           })}

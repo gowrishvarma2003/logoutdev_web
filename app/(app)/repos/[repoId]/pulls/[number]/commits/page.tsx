@@ -35,7 +35,7 @@ export default function PRCommitsPage({
 
   if (!commits || commits.length === 0) {
     return (
-      <div className="py-12 text-center text-zinc-500">
+      <div className="py-12 text-center text-text-disabled">
         No commits found for this pull request.
       </div>
     );
@@ -43,20 +43,20 @@ export default function PRCommitsPage({
 
   return (
     <div className="mb-8">
-      <div className="overflow-hidden rounded-md border border-zinc-800 bg-zinc-900/50">
-        <ul className="divide-y divide-zinc-800">
+      <div className="overflow-hidden rounded-md border border-border-default bg-surface/50">
+        <ul className="divide-y divide-border-default">
           {commits.map((commit) => (
-            <li key={commit.oid} className="p-4 hover:bg-zinc-800/50 transition-colors">
+            <li key={commit.oid} className="p-4 hover:bg-surface-hover/50 transition-colors">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <Link
                     href={`/repos/${repo.id}/commits/${commit.oid}`}
-                    className="font-semibold text-white hover:text-blue-500"
+                    className="font-semibold text-text-primary hover:text-blue-500"
                   >
                     {commit.message.split("\n")[0]}
                   </Link>
-                  <div className="mt-1 flex items-center gap-2 text-xs text-zinc-500">
-                    <span className="font-medium text-zinc-300">{commit.author_name}</span>
+                  <div className="mt-1 flex items-center gap-2 text-xs text-text-disabled">
+                    <span className="font-medium text-text-secondary">{commit.author_name}</span>
                     <span>committed</span>
                     <span>{formatRelativeTime(commit.authored_at)}</span>
                   </div>
@@ -65,14 +65,14 @@ export default function PRCommitsPage({
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => navigator.clipboard.writeText(commit.oid)}
-                    className="flex h-8 w-8 items-center justify-center rounded bg-zinc-800 text-zinc-400 hover:text-white"
+                    className="flex h-8 w-8 items-center justify-center rounded bg-surface-hover text-text-muted hover:text-text-primary"
                     title="Copy full SHA"
                   >
                     <DocumentDuplicateIcon className="h-4 w-4" />
                   </button>
                   <Link
                     href={`/repos/${repo.id}/commits/${commit.oid}`}
-                    className="flex h-8 items-center justify-center rounded border border-zinc-700 bg-zinc-800 px-3 font-mono text-xs text-blue-400 hover:bg-zinc-700"
+                    className="flex h-8 items-center justify-center rounded border border-border-strong bg-surface-hover px-3 font-mono text-xs text-blue-400 hover:bg-surface-active"
                   >
                     {commit.short_oid}
                   </Link>

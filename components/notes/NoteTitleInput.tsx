@@ -35,7 +35,7 @@ export default function NoteTitleInput({ value, onChange, onEnterPress, placehol
       aria-label="Note title"
       rows={1}
       maxLength={200}
-      className="w-full resize-none overflow-hidden bg-transparent text-2xl font-bold leading-tight text-white outline-none placeholder:text-zinc-700 sm:text-3xl"
+      className="w-full resize-none overflow-hidden bg-transparent text-2xl font-bold leading-tight text-text-primary outline-none placeholder:text-zinc-700 sm:text-3xl"
     />
   );
 }

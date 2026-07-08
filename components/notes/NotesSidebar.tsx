@@ -57,7 +57,7 @@ export default function NotesSidebar() {
       <button
         onClick={handleNewNote}
         disabled={creating}
-        className="mb-3 flex items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-60"
+        className="mb-3 flex items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-60"
       >
         {creating ? <Spinner size="sm" /> : <PlusIcon className="h-4 w-4" />}
         New note
@@ -73,7 +73,7 @@ export default function NotesSidebar() {
             key={item.key}
             href={notesViewHref({ view: item.key })}
             className={`flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors ${
-              isActive(item.key) ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-800/60 hover:text-white"
+              isActive(item.key) ? "bg-surface-hover text-text-primary" : "text-text-muted hover:bg-surface-hover/60 hover:text-text-primary"
             }`}
           >
             {item.icon}
@@ -82,7 +82,7 @@ export default function NotesSidebar() {
         ))}
       </div>
 
-      <div className="my-3 border-t border-zinc-800/60" />
+      <div className="my-3 border-t border-border-default/60" />
 
       <div className="flex flex-col gap-0.5">
         {SECONDARY_NAV.map((item) => (
@@ -90,7 +90,7 @@ export default function NotesSidebar() {
             key={item.key}
             href={notesViewHref({ view: item.key })}
             className={`flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors ${
-              isActive(item.key) ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-800/60 hover:text-white"
+              isActive(item.key) ? "bg-surface-hover text-text-primary" : "text-text-muted hover:bg-surface-hover/60 hover:text-text-primary"
             }`}
           >
             {item.icon}
@@ -99,11 +99,11 @@ export default function NotesSidebar() {
         ))}
       </div>
 
-      <div className="my-3 border-t border-zinc-800/60" />
+      <div className="my-3 border-t border-border-default/60" />
 
       <FolderList />
 
-      <div className="my-3 border-t border-zinc-800/60" />
+      <div className="my-3 border-t border-border-default/60" />
 
       <TagList />
 

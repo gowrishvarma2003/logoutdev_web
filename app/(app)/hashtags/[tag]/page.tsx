@@ -71,23 +71,23 @@ export default function HashtagPage({ params }: HashtagPageProps) {
 
   return (
     <div>
-      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-md">
+      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border-default bg-app/80 px-4 py-3 backdrop-blur-md">
         <button
           onClick={() => router.back()}
-          className="rounded-full p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800"
+          className="rounded-full p-1.5 text-text-muted transition-colors hover:bg-surface-hover"
           aria-label="Go back"
         >
           <ArrowLeftIcon className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-[17px] font-bold text-white">#{normalizedTag}</h1>
-          <p className="text-xs text-zinc-500">Hashtag feed</p>
+          <h1 className="text-[17px] font-bold text-text-primary">#{normalizedTag}</h1>
+          <p className="text-xs text-text-disabled">Hashtag feed</p>
         </div>
       </header>
 
       {relatedTags.length > 0 && (
-        <section className="border-b border-zinc-800 px-4 py-3">
-          <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-zinc-500">
+        <section className="border-b border-border-default px-4 py-3">
+          <p className="mb-2 text-[11px] uppercase tracking-[0.14em] text-text-disabled">
             Related tags
           </p>
           <div className="flex flex-wrap gap-2">
@@ -95,7 +95,7 @@ export default function HashtagPage({ params }: HashtagPageProps) {
               <Link
                 key={item.normalized_tag}
                 href={`/hashtags/${item.normalized_tag}`}
-                className="rounded-full border border-zinc-700 px-3 py-1 text-xs text-sky-300 transition-colors hover:bg-zinc-800"
+                className="rounded-full border border-border-strong px-3 py-1 text-xs text-sky-300 transition-colors hover:bg-surface-hover"
               >
                 #{item.tag}
               </Link>
@@ -112,13 +112,13 @@ export default function HashtagPage({ params }: HashtagPageProps) {
 
       {error && (
         <div className="px-4 py-16 text-center">
-          <p className="text-sm text-zinc-500">{error}</p>
+          <p className="text-sm text-text-disabled">{error}</p>
         </div>
       )}
 
       {!isLoading && !error && posts.length === 0 && (
         <div className="px-4 py-16 text-center">
-          <p className="text-sm text-zinc-500">No posts use this hashtag yet.</p>
+          <p className="text-sm text-text-disabled">No posts use this hashtag yet.</p>
         </div>
       )}
 
@@ -141,7 +141,7 @@ export default function HashtagPage({ params }: HashtagPageProps) {
               <button
                 onClick={loadMore}
                 disabled={isLoadingMore}
-                className="rounded-full border border-zinc-700 px-5 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800 disabled:opacity-60"
+                className="rounded-full border border-border-strong px-5 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-hover disabled:opacity-60"
               >
                 {isLoadingMore ? "Loading..." : "Load more"}
               </button>

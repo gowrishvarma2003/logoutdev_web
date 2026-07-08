@@ -60,7 +60,7 @@ function MenuItem({
     <button
       onClick={onClick}
       className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors ${
-        tone === "danger" ? "text-rose-400 hover:bg-rose-500/10" : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
+        tone === "danger" ? "text-rose-400 hover:bg-rose-500/10" : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
       }`}
     >
       {icon}
@@ -197,7 +197,7 @@ export default function NoteMoreMenu({ note, context = "list", align = "right", 
     <div className="relative" ref={containerRef}>
       <button
         onClick={() => setOpen((value) => !value)}
-        className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-white"
+        className="rounded-lg p-1.5 text-text-disabled transition-colors hover:bg-surface-hover hover:text-text-primary"
         aria-label="More actions"
       >
         <DotsIcon className="h-4 w-4" />
@@ -205,7 +205,7 @@ export default function NoteMoreMenu({ note, context = "list", align = "right", 
 
       {open ? (
         <div
-          className={`absolute top-full z-30 mt-1 w-52 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 py-1 shadow-2xl ${
+          className={`absolute top-full z-30 mt-1 w-52 overflow-hidden rounded-xl border border-border-default bg-surface py-1 shadow-2xl ${
             align === "right" ? "right-0" : "left-0"
           }`}
         >
@@ -219,7 +219,7 @@ export default function NoteMoreMenu({ note, context = "list", align = "right", 
                   handleRestore();
                 }}
               />
-              <div className="my-1 border-t border-zinc-800" />
+              <div className="my-1 border-t border-border-default" />
               <MenuItem
                 icon={<XCircleIcon className="h-4 w-4" />}
                 label="Delete permanently"
@@ -282,7 +282,7 @@ export default function NoteMoreMenu({ note, context = "list", align = "right", 
                   handleToggleArchived();
                 }}
               />
-              <div className="my-1 border-t border-zinc-800" />
+              <div className="my-1 border-t border-border-default" />
               <MenuItem
                 icon={<TrashIcon className="h-4 w-4" />}
                 label="Move to Trash"

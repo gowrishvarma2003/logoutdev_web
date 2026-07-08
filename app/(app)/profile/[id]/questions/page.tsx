@@ -19,7 +19,7 @@ interface ProfileQuestionsPageProps {
 
 const STATUS_STYLES = {
   open: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
-  closed: "bg-zinc-800 text-zinc-400 border-zinc-700",
+  closed: "bg-surface-hover text-text-muted border-border-strong",
 } as const;
 
 export default function ProfileQuestionsPage({ params }: ProfileQuestionsPageProps) {
@@ -49,7 +49,7 @@ export default function ProfileQuestionsPage({ params }: ProfileQuestionsPagePro
           description="Ask a focused technical question to start building a visible knowledge trail."
           tone="question"
           action={
-            <Link href="/questions/ask" className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+            <Link href="/questions/ask" className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover">
               Ask a question
             </Link>
           }
@@ -66,7 +66,7 @@ export default function ProfileQuestionsPage({ params }: ProfileQuestionsPagePro
         <Link
           key={question.id}
           href={`/questions/${question.id}`}
-          className="group flex items-start gap-3.5 px-5 py-4 border-b border-zinc-800 hover:bg-zinc-900/40 transition-colors"
+          className="group flex items-start gap-3.5 px-5 py-4 border-b border-border-default hover:bg-surface/40 transition-colors"
         >
           <div className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0 mt-0.5">
             <QuestionMarkCircleIcon className="w-4 h-4 text-violet-400" />
@@ -74,17 +74,17 @@ export default function ProfileQuestionsPage({ params }: ProfileQuestionsPagePro
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <h3 className="text-sm font-semibold text-white group-hover:text-sky-400 transition-colors line-clamp-1">
+              <h3 className="text-sm font-semibold text-text-primary group-hover:text-sky-400 transition-colors line-clamp-1">
                 {question.title}
               </h3>
               <span className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${STATUS_STYLES[question.status]}`}>
                 {question.status}
               </span>
             </div>
-            <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-text-disabled line-clamp-2 leading-relaxed">
               {question.body}
             </p>
-            <div className="flex items-center gap-3 mt-2 text-[11px] text-zinc-600">
+            <div className="flex items-center gap-3 mt-2 text-[11px] text-text-disabled">
               <span className="flex items-center gap-1">
                 <ChatIcon className="w-3 h-3" />
                 {question.answer_count} answer{question.answer_count !== 1 ? "s" : ""}
@@ -98,7 +98,7 @@ export default function ProfileQuestionsPage({ params }: ProfileQuestionsPagePro
             {question.tags.length > 0 ? (
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {question.tags.slice(0, 4).map((tag) => (
-                  <span key={tag.id} className="rounded-full border border-zinc-700/80 px-2 py-0.5 text-[10px] text-zinc-500">
+                  <span key={tag.id} className="rounded-full border border-border-strong/80 px-2 py-0.5 text-[10px] text-text-disabled">
                     {tag.tag}
                   </span>
                 ))}
@@ -113,17 +113,17 @@ export default function ProfileQuestionsPage({ params }: ProfileQuestionsPagePro
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-4 py-2 rounded-lg border border-zinc-700 text-sm text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded-lg border border-border-strong text-sm text-text-muted hover:text-text-primary hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Previous
           </button>
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-text-disabled">
             Page {page} of {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="px-4 py-2 rounded-lg border border-zinc-700 text-sm text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded-lg border border-border-strong text-sm text-text-muted hover:text-text-primary hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Next
           </button>

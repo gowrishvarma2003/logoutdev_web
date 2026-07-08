@@ -7,11 +7,11 @@ const STATUS_STYLES: Record<SpaceIssueStatus, { bg: string; text: string; dot: s
   triaged: { bg: "bg-amber-500/10", text: "text-amber-300", dot: "bg-amber-400", label: "Triaged" },
   "in-progress": { bg: "bg-sky-500/10", text: "text-sky-300", dot: "bg-sky-400", label: "In Progress" },
   resolved: { bg: "bg-emerald-500/10", text: "text-emerald-300", dot: "bg-emerald-400", label: "Resolved" },
-  closed: { bg: "bg-zinc-800", text: "text-zinc-400", dot: "bg-zinc-500", label: "Closed" },
+  closed: { bg: "bg-surface-hover", text: "text-text-muted", dot: "bg-zinc-500", label: "Closed" },
 };
 
 const PRIORITY_STYLES: Record<SpaceIssuePriority, { bg: string; text: string; label: string }> = {
-  low: { bg: "bg-zinc-800", text: "text-zinc-300", label: "Low" },
+  low: { bg: "bg-surface-hover", text: "text-text-secondary", label: "Low" },
   medium: { bg: "bg-sky-500/10", text: "text-sky-300", label: "Medium" },
   high: { bg: "bg-amber-500/10", text: "text-amber-300", label: "High" },
   critical: { bg: "bg-rose-500/10", text: "text-rose-300", label: "Critical" },

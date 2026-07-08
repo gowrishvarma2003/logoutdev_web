@@ -127,19 +127,19 @@ export default function RightPanel({ currentUser }: RightPanelProps) {
   function renderDiscoveryModule(module: DiscoveryRailModule) {
     return (
       <section key={module.key}>
-        <h2 className="mb-1 px-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+        <h2 className="mb-1 px-1 text-xs font-semibold uppercase tracking-wide text-text-disabled">
           {module.title}
         </h2>
-        <p className="mb-3 px-1 text-[11px] leading-relaxed text-zinc-600">{module.reason}</p>
+        <p className="mb-3 px-1 text-[11px] leading-relaxed text-text-disabled">{module.reason}</p>
         <ul className="flex flex-col gap-0.5">
           {module.items.map((item) => (
             <li key={`${module.key}:${item.href}`}>
               <Link
                 href={item.href}
-                className="group block rounded-xl px-3 py-2 transition-colors hover:bg-zinc-800/60"
+                className="group block rounded-xl px-3 py-2 transition-colors hover:bg-surface-hover/60"
               >
-                <p className="text-sm font-medium text-zinc-200 group-hover:text-white">{item.label}</p>
-                {item.meta ? <p className="text-xs text-zinc-500">{item.meta}</p> : null}
+                <p className="text-sm font-medium text-text-secondary group-hover:text-text-primary">{item.label}</p>
+                {item.meta ? <p className="text-xs text-text-disabled">{item.meta}</p> : null}
               </Link>
             </li>
           ))}
@@ -162,23 +162,23 @@ export default function RightPanel({ currentUser }: RightPanelProps) {
           </div>
         ) : (
           <>
-            <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+            <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-wide text-text-disabled">
               Trending topics
             </h2>
             <ul className="flex flex-col gap-0.5">
               {trending.length === 0 ? (
-                <li className="px-3 py-2 text-xs text-zinc-600">No hashtag activity yet.</li>
+                <li className="px-3 py-2 text-xs text-text-disabled">No hashtag activity yet.</li>
               ) : (
                 trending.map(({ normalized_tag, tag, recent_post_count, usage_count }) => (
                   <li key={normalized_tag}>
                     <Link
                       href={`/hashtags/${normalized_tag}`}
-                      className="group block rounded-xl px-3 py-2 text-left transition-colors hover:bg-zinc-800/60"
+                      className="group block rounded-xl px-3 py-2 text-left transition-colors hover:bg-surface-hover/60"
                     >
                       <p className="text-sm font-medium text-sky-400 group-hover:text-sky-300">
                         #{tag}
                       </p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-text-disabled">
                         {recent_post_count || usage_count} posts
                       </p>
                     </Link>
@@ -190,7 +190,7 @@ export default function RightPanel({ currentUser }: RightPanelProps) {
         )}
       </section>
 
-      <p className="mt-auto px-1 text-[11px] text-zinc-600">
+      <p className="mt-auto px-1 text-[11px] text-text-disabled">
         &copy; {new Date().getFullYear()} LogoutDev
       </p>
     </div>

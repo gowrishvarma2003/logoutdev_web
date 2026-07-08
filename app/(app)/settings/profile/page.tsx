@@ -49,35 +49,35 @@ export default function SettingsProfilePage() {
   return (
     <div>
       {/* ── Sticky header ── */}
-      <header className="sticky top-0 z-20 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800">
+      <header className="sticky top-0 z-20 bg-app/90 backdrop-blur-md border-b border-border-default">
         <div className="px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => router.back()}
-            className="p-1.5 -ml-1.5 rounded-full text-zinc-400 hover:bg-zinc-800 transition-colors"
+            className="p-1.5 -ml-1.5 rounded-full text-text-muted hover:bg-surface-hover transition-colors"
             aria-label="Go back"
           >
             <ArrowLeftIcon className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-2">
-            <UserIcon className="w-4 h-4 text-zinc-400" />
-            <h1 className="text-[15px] font-bold text-white">Edit Profile</h1>
+            <UserIcon className="w-4 h-4 text-text-muted" />
+            <h1 className="text-[15px] font-bold text-text-primary">Edit Profile</h1>
           </div>
         </div>
       </header>
 
       {/* ── Content ── */}
       <div className="px-5 py-6">
-        <div className="mb-5 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+        <div className="mb-5 rounded-2xl border border-border-default bg-surface/50 p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold text-white">Git Access Tokens</h2>
-              <p className="mt-1 text-sm text-zinc-500">
+              <h2 className="text-sm font-semibold text-text-primary">Git Access Tokens</h2>
+              <p className="mt-1 text-sm text-text-disabled">
                 Create tokens for cloning and pushing private space repositories over HTTPS.
               </p>
             </div>
             <Link
               href="/settings/tokens"
-              className="inline-flex items-center gap-1 rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-700 transition-colors"
+              className="inline-flex items-center gap-1 rounded-lg bg-surface-hover px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-active transition-colors"
             >
               <KeyIcon className="w-3.5 h-3.5" />
               Manage
@@ -94,7 +94,7 @@ export default function SettingsProfilePage() {
             <p className="text-rose-400 text-sm mb-3">{error}</p>
             <button
               onClick={refetch}
-              className="text-sm text-zinc-400 hover:text-white transition-colors"
+              className="text-sm text-text-muted hover:text-text-primary transition-colors"
             >
               Try again
             </button>

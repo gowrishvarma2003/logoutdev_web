@@ -14,7 +14,7 @@ interface SaveStatusIndicatorProps {
 export default function SaveStatusIndicator({ status, lastSavedAt, onRetry }: SaveStatusIndicatorProps) {
   if (status === "saving") {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs text-zinc-500">
+      <span className="inline-flex items-center gap-1.5 text-xs text-text-disabled">
         <Spinner size="sm" /> Saving…
       </span>
     );
@@ -43,7 +43,7 @@ export default function SaveStatusIndicator({ status, lastSavedAt, onRetry }: Sa
 
   if (status === "saved") {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs text-zinc-500">
+      <span className="inline-flex items-center gap-1.5 text-xs text-text-disabled">
         <CheckCircleIcon className="h-3.5 w-3.5 text-emerald-500" />
         Saved{lastSavedAt ? ` · ${formatRelativeTime(lastSavedAt)}` : ""}
       </span>

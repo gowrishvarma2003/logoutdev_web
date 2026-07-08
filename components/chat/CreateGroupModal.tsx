@@ -80,34 +80,34 @@ export default function CreateGroupModal({ open, onClose, onCreate, busy }: Prop
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-950 p-5 text-white shadow-xl">
+      <div className="w-full max-w-lg rounded-2xl border border-border-default bg-app p-5 text-text-primary shadow-xl">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">New group</h2>
-          <button onClick={onClose} className="rounded-full p-1 text-zinc-400 hover:text-white">
+          <button onClick={onClose} className="rounded-full p-1 text-text-muted hover:text-text-primary">
             <XIcon className="h-4 w-4" />
           </button>
         </div>
 
         <div className="mt-4 space-y-3">
           <label className="block">
-            <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Group name</span>
+            <span className="text-xs font-semibold uppercase tracking-wide text-text-disabled">Group name</span>
             <input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               maxLength={80}
               placeholder="My private group"
-              className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-600"
+              className="mt-1 w-full rounded-lg border border-border-default bg-surface px-3 py-2 text-sm outline-none focus:border-border-strong"
             />
           </label>
           <label className="block">
-            <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Description (optional)</span>
+            <span className="text-xs font-semibold uppercase tracking-wide text-text-disabled">Description (optional)</span>
             <textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               maxLength={500}
               rows={2}
               placeholder="What is this group about?"
-              className="mt-1 w-full resize-none rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-600"
+              className="mt-1 w-full resize-none rounded-lg border border-border-default bg-surface px-3 py-2 text-sm outline-none focus:border-border-strong"
             />
           </label>
         </div>
@@ -118,19 +118,19 @@ export default function CreateGroupModal({ open, onClose, onCreate, busy }: Prop
               <button
                 key={user.id}
                 onClick={() => toggle(user)}
-                className="flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900 px-2 py-1 text-xs"
+                className="flex items-center gap-2 rounded-full border border-border-default bg-surface px-2 py-1 text-xs"
               >
                 <Avatar user={{ id: user.id, name: user.name || user.username || "User", avatar_url: user.avatar_url }} size="xs" />
                 <span>@{user.username || user.name}</span>
-                <XIcon className="h-3 w-3 text-zinc-500" />
+                <XIcon className="h-3 w-3 text-text-disabled" />
               </button>
             ))}
           </div>
         ) : null}
 
         <div className="mt-4">
-          <div className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2">
-            <SearchIcon className="h-4 w-4 text-zinc-500" />
+          <div className="flex items-center gap-2 rounded-lg border border-border-default bg-surface px-3 py-2">
+            <SearchIcon className="h-4 w-4 text-text-disabled" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -143,28 +143,28 @@ export default function CreateGroupModal({ open, onClose, onCreate, busy }: Prop
               <button
                 key={user.id}
                 onClick={() => toggle(user)}
-                className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-zinc-900"
+                className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-surface"
               >
                 <Avatar user={{ id: user.id, name: user.name || user.username || "User", avatar_url: user.avatar_url }} size="sm" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium">@{user.username}</span>
-                  <span className="block truncate text-xs text-zinc-500">{user.headline || user.name}</span>
+                  <span className="block truncate text-xs text-text-disabled">{user.headline || user.name}</span>
                 </span>
-                {selectedIds.has(user.id) ? <CheckIcon className="h-4 w-4 text-emerald-400" /> : <PlusIcon className="h-4 w-4 text-zinc-500" />}
+                {selectedIds.has(user.id) ? <CheckIcon className="h-4 w-4 text-emerald-400" /> : <PlusIcon className="h-4 w-4 text-text-disabled" />}
               </button>
             ))}
-            {!visibleResults.length && searchTerm.length >= 2 ? <p className="p-3 text-sm text-zinc-500">No users found.</p> : null}
+            {!visibleResults.length && searchTerm.length >= 2 ? <p className="p-3 text-sm text-text-disabled">No users found.</p> : null}
           </div>
         </div>
 
         {error ? <p className="mt-3 text-sm text-rose-400">{error}</p> : null}
 
         <div className="mt-5 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-lg border border-zinc-800 px-4 py-2 text-sm">Cancel</button>
+          <button onClick={onClose} className="rounded-lg border border-border-default px-4 py-2 text-sm">Cancel</button>
           <button
             onClick={submit}
             disabled={busy || !title.trim()}
-            className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 disabled:opacity-40"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-40"
           >
             Create group
           </button>

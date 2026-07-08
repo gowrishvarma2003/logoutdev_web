@@ -25,9 +25,9 @@ const BAND_CONFIG: Record<
     bar: "bg-sky-500",
   },
   Early: {
-    ring: "border-zinc-600",
-    bg: "bg-zinc-800/60",
-    text: "text-zinc-400",
+    ring: "border-border-strong",
+    bg: "bg-surface-hover/60",
+    text: "text-text-muted",
     bar: "bg-zinc-500",
   },
 };
@@ -79,10 +79,10 @@ export default function ProofOfWorkScoreBadge({ signals }: ProofOfWorkScoreBadge
         <div className="flex min-w-0 items-center gap-2.5">
           <SparklesIcon className={`h-4 w-4 shrink-0 ${config.text}`} />
           <div className="min-w-0 text-left">
-            <p className="text-xs font-medium text-zinc-500">Proof-of-Work</p>
+            <p className="text-xs font-medium text-text-disabled">Proof-of-Work</p>
             <p className={`truncate text-sm font-bold leading-tight ${config.text}`}>
               {badge}
-              <span className="font-normal text-zinc-400"> · {formatScore(signals.score)} XP</span>
+              <span className="font-normal text-text-muted"> · {formatScore(signals.score)} XP</span>
             </p>
           </div>
         </div>
@@ -92,7 +92,7 @@ export default function ProofOfWorkScoreBadge({ signals }: ProofOfWorkScoreBadge
             <span className={`text-sm font-bold tabular-nums ${config.text}`}>{formatScore(signals.score)}</span>
           </div>
           <ChevronDownIcon
-            className={`h-3.5 w-3.5 text-zinc-500 transition-transform duration-200 ${
+            className={`h-3.5 w-3.5 text-text-disabled transition-transform duration-200 ${
               expanded ? "rotate-180" : ""
             }`}
           />
@@ -102,33 +102,33 @@ export default function ProofOfWorkScoreBadge({ signals }: ProofOfWorkScoreBadge
       {next ? (
         <div className="mt-4">
           <div className="mb-1 flex items-center justify-between gap-3 text-xs">
-            <span className="text-zinc-500">Next: {next.name}</span>
-            <span className="tabular-nums text-zinc-400">{formatScore(next.points_needed)} XP needed</span>
+            <span className="text-text-disabled">Next: {next.name}</span>
+            <span className="tabular-nums text-text-muted">{formatScore(next.points_needed)} XP needed</span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800">
+          <div className="h-1.5 overflow-hidden rounded-full bg-surface-hover">
             <div className={`h-full rounded-full ${config.bar}`} style={{ width: `${progress}%` }} />
           </div>
         </div>
       ) : (
-        <p className="mt-3 text-xs text-zinc-500">Peak badge reached · {peakBadge}</p>
+        <p className="mt-3 text-xs text-text-disabled">Peak badge reached · {peakBadge}</p>
       )}
 
       {expanded && (
-        <div className="mt-4 space-y-4 border-t border-zinc-700/50 pt-4">
-          <p className="text-xs text-zinc-500">Updates daily at 00:05 IST</p>
+        <div className="mt-4 space-y-4 border-t border-border-strong/50 pt-4">
+          <p className="text-xs text-text-disabled">Updates daily at 00:05 IST</p>
 
           <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
             <div>
-              <p className="text-zinc-500">Current</p>
+              <p className="text-text-disabled">Current</p>
               <p className={`font-semibold ${config.text}`}>{badge}</p>
             </div>
             <div>
-              <p className="text-zinc-500">Peak</p>
-              <p className="font-semibold text-zinc-300">{peakBadge}</p>
+              <p className="text-text-disabled">Peak</p>
+              <p className="font-semibold text-text-secondary">{peakBadge}</p>
             </div>
             <div>
-              <p className="text-zinc-500">Updated</p>
-              <p className="font-semibold text-zinc-300">{signals.last_scored_date || "Daily IST"}</p>
+              <p className="text-text-disabled">Updated</p>
+              <p className="font-semibold text-text-secondary">{signals.last_scored_date || "Daily IST"}</p>
             </div>
           </div>
 
@@ -138,10 +138,10 @@ export default function ProofOfWorkScoreBadge({ signals }: ProofOfWorkScoreBadge
               return (
                 <div key={key}>
                   <div className="mb-1 flex justify-between gap-3 text-xs">
-                    <span className="text-zinc-400">{FACTOR_LABELS[key] ?? key}</span>
-                    <span className="tabular-nums text-zinc-400">{formatScore(value)}</span>
+                    <span className="text-text-muted">{FACTOR_LABELS[key] ?? key}</span>
+                    <span className="tabular-nums text-text-muted">{formatScore(value)}</span>
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800">
+                  <div className="h-1.5 overflow-hidden rounded-full bg-surface-hover">
                     <div className={`h-full rounded-full ${config.bar}`} style={{ width: `${pct}%` }} />
                   </div>
                 </div>
@@ -150,7 +150,7 @@ export default function ProofOfWorkScoreBadge({ signals }: ProofOfWorkScoreBadge
           </div>
 
           {next?.blockers && next.blockers.length > 0 ? (
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900/70 p-3 text-xs text-zinc-400">
+            <div className="rounded-lg border border-border-default bg-surface/70 p-3 text-xs text-text-muted">
               {next.blockers.map((blocker, index) => (
                 <p key={`${blocker.type}-${index}`}>
                   {blocker.type === "category_diversity"
@@ -163,31 +163,31 @@ export default function ProofOfWorkScoreBadge({ signals }: ProofOfWorkScoreBadge
 
           {ownerLedgers.length > 0 ? (
             <div className="space-y-2">
-              <p className="text-xs font-medium text-zinc-500">Recent ledger</p>
+              <p className="text-xs font-medium text-text-disabled">Recent ledger</p>
               {ownerLedgers.slice(0, 5).map((ledger) => (
-                <div key={ledger.score_date} className="rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-xs">
+                <div key={ledger.score_date} className="rounded-lg border border-border-default bg-surface/60 px-3 py-2 text-xs">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-zinc-400">{ledger.score_date}</span>
+                    <span className="text-text-muted">{ledger.score_date}</span>
                     <span className={ledger.final_points >= 0 ? "text-emerald-400" : "text-rose-400"}>
                       {formatSigned(ledger.final_points)}
                     </span>
                   </div>
                   <div className="mt-2 grid grid-cols-4 gap-2 text-[11px]">
                     <div>
-                      <p className="text-zinc-600">Raw</p>
-                      <p className="tabular-nums text-zinc-400">{ledger.raw_points}</p>
+                      <p className="text-text-disabled">Raw</p>
+                      <p className="tabular-nums text-text-muted">{ledger.raw_points}</p>
                     </div>
                     <div>
-                      <p className="text-zinc-600">Capped</p>
-                      <p className="tabular-nums text-zinc-400">{ledger.capped_points}</p>
+                      <p className="text-text-disabled">Capped</p>
+                      <p className="tabular-nums text-text-muted">{ledger.capped_points}</p>
                     </div>
                     <div>
-                      <p className="text-zinc-600">Caps</p>
-                      <p className="tabular-nums text-zinc-400">-{Math.max(0, ledger.raw_points - ledger.positive_points)}</p>
+                      <p className="text-text-disabled">Caps</p>
+                      <p className="tabular-nums text-text-muted">-{Math.max(0, ledger.raw_points - ledger.positive_points)}</p>
                     </div>
                     <div>
-                      <p className="text-zinc-600">Penalty</p>
-                      <p className="tabular-nums text-zinc-400">-{sumPenaltyValues(ledger.penalties)}</p>
+                      <p className="text-text-disabled">Penalty</p>
+                      <p className="tabular-nums text-text-muted">-{sumPenaltyValues(ledger.penalties)}</p>
                     </div>
                   </div>
                   {sumPenaltyValues(ledger.penalties) > 0 ? (

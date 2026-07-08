@@ -44,22 +44,22 @@ export default function AnswerList({
             className={`rounded-2xl border p-5 transition-all duration-300 ${
               isAccepted
                 ? "border-emerald-500/25 bg-emerald-500/[0.02] shadow-[0_0_16px_rgba(16,185,129,0.02)]"
-                : "border-zinc-800/80 bg-zinc-950/40 hover:border-zinc-700"
+                : "border-border-default/80 bg-app/40 hover:border-border-strong"
             }`}
           >
             <div className="flex items-start gap-3.5">
-              <Avatar user={answer.author ?? null} size="sm" className="mt-0.5 ring-2 ring-zinc-900/50" />
+              <Avatar user={answer.author ?? null} size="sm" className="mt-0.5 ring-2 ring-border-subtle/50" />
               <div className="min-w-0 flex-1">
                 {/* Author & Header Metadata */}
                 <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="font-bold text-white hover:underline cursor-pointer">
+                    <span className="font-bold text-text-primary hover:underline cursor-pointer">
                       {answer.author?.name ?? "Unknown"}
                     </span>
                     <span className="text-zinc-700">·</span>
-                    <span className="text-zinc-500">{formatRelativeTime(answer.created_at)}</span>
+                    <span className="text-text-disabled">{formatRelativeTime(answer.created_at)}</span>
                     {isOwn && (
-                      <span className="rounded bg-zinc-800/60 border border-zinc-700/50 px-1.5 py-0.2 text-[10px] font-semibold text-zinc-300">
+                      <span className="rounded bg-surface-hover/60 border border-border-strong/50 px-1.5 py-px text-[10px] font-semibold text-text-secondary">
                         Your answer
                       </span>
                     )}
@@ -76,19 +76,19 @@ export default function AnswerList({
                 {/* Answer Content */}
                 <RichText
                   text={answer.body}
-                  className="whitespace-pre-line text-sm leading-relaxed text-zinc-300"
+                  className="whitespace-pre-line text-sm leading-relaxed text-text-secondary"
                 />
 
                 {/* Actions / Votes */}
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-zinc-900 pt-3">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle pt-3">
                   <div className="flex items-center gap-3 text-xs">
                     {!isOwn && currentUser ? (
                       <button
                         onClick={() => onToggleVote(answer)}
                         className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-300 ${
                           answer.is_upvoted_by_me
-                            ? "bg-sky-500 border-sky-500 text-zinc-950 font-bold shadow-[0_0_12px_rgba(56,189,248,0.1)]"
-                            : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:border-zinc-700 hover:text-white"
+                            ? "bg-sky-500 border-sky-500 text-primary-foreground font-bold shadow-[0_0_12px_rgba(56,189,248,0.1)]"
+                            : "border-border-default bg-surface/40 text-text-muted hover:border-border-strong hover:text-text-primary"
                         }`}
                       >
                         <ArrowUpIcon className="h-3.5 w-3.5" />
@@ -96,7 +96,7 @@ export default function AnswerList({
                         <span className="text-[11px] opacity-80">({answer.score})</span>
                       </button>
                     ) : (
-                      <span className="text-zinc-500 text-[11px] bg-zinc-900/20 border border-zinc-900 px-2 py-1 rounded-lg">
+                      <span className="text-text-disabled text-[11px] bg-surface/20 border border-border-subtle px-2 py-1 rounded-lg">
                         {answer.score} upvotes
                       </span>
                     )}

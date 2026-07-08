@@ -112,47 +112,47 @@ export default function FreelanceProjectForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Project Title</label>
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">Project Title</label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           />
         </div>
         <div className="sm:col-span-2">
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Summary</label>
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">Summary</label>
           <input
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           />
         </div>
         <div className="sm:col-span-2">
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Description</label>
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={8}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Pricing Model</label>
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">Pricing Model</label>
           <select
             value={pricingModel}
             onChange={(e) => setPricingModel(e.target.value as FreelancePricingModel)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           >
             <option value="fixed">Fixed</option>
             <option value="hourly">Hourly</option>
           </select>
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Experience Level</label>
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">Experience Level</label>
           <select
             value={experienceLevel}
             onChange={(e) => setExperienceLevel(e.target.value as FreelanceExperienceLevel)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           >
             <option value="any">Any</option>
             <option value="junior">Junior</option>
@@ -161,7 +161,7 @@ export default function FreelanceProjectForm({
           </select>
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">
             {pricingModel === "hourly" ? "Min Rate (USD/hr)" : "Min Budget (USD)"}
           </label>
           <input
@@ -170,11 +170,11 @@ export default function FreelanceProjectForm({
             step="1"
             value={budgetMin}
             onChange={(e) => setBudgetMin(e.target.value)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">
             {pricingModel === "hourly" ? "Max Rate (USD/hr)" : "Max Budget (USD)"}
           </label>
           <input
@@ -183,37 +183,37 @@ export default function FreelanceProjectForm({
             step="1"
             value={budgetMax}
             onChange={(e) => setBudgetMax(e.target.value)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Engagement</label>
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">Engagement</label>
           <select
             value={engagementType}
             onChange={(e) => setEngagementType(e.target.value as FreelanceEngagementType)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           >
             <option value="one_time">One-time</option>
             <option value="ongoing">Ongoing</option>
           </select>
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Duration (weeks)</label>
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">Duration (weeks)</label>
           <input
             type="number"
             min="1"
             max="52"
             value={durationWeeks}
             onChange={(e) => setDurationWeeks(e.target.value)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Location Mode</label>
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">Location Mode</label>
           <select
             value={locationMode}
             onChange={(e) => setLocationMode(e.target.value as FreelanceLocationMode)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           >
             <option value="remote">Remote</option>
             <option value="hybrid">Hybrid</option>
@@ -221,21 +221,21 @@ export default function FreelanceProjectForm({
           </select>
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Timezone Note</label>
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">Timezone Note</label>
           <input
             value={timezoneNote}
             onChange={(e) => setTimezoneNote(e.target.value)}
             placeholder="e.g. overlaps with EST mornings"
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           />
         </div>
         <div className="sm:col-span-2">
-          <label className="mb-1.5 block text-sm font-medium text-zinc-300">Required Skills</label>
+          <label className="mb-1.5 block text-sm font-medium text-text-secondary">Required Skills</label>
           <input
             value={skillsInput}
             onChange={(e) => setSkillsInput(e.target.value)}
             placeholder="React, Node.js, PostgreSQL"
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           />
         </div>
       </div>
@@ -249,7 +249,7 @@ export default function FreelanceProjectForm({
       <button
         type="submit"
         disabled={loading}
-        className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-60"
+        className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-60"
       >
         {loading ? "Saving..." : submitLabel}
       </button>

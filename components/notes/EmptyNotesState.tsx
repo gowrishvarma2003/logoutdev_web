@@ -58,7 +58,7 @@ export default function EmptyNotesState({ variant, onCreateNote }: EmptyNotesSta
           showAction ? (
             <button
               onClick={onCreateNote}
-              className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+              className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
             >
               New note
             </button>

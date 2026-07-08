@@ -6,13 +6,13 @@ const STATUS_STYLES: Record<string, string> = {
   open: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   in_review: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   awarded: "bg-sky-500/10 text-sky-400 border-sky-500/20",
-  completed: "bg-zinc-700/60 text-zinc-200 border-zinc-600",
+  completed: "bg-surface-active/60 text-text-secondary border-border-strong",
   cancelled: "bg-rose-500/10 text-rose-400 border-rose-500/20",
   submitted: "bg-sky-500/10 text-sky-400 border-sky-500/20",
   shortlisted: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   accepted: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   rejected: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-  withdrawn: "bg-zinc-800 text-zinc-400 border-zinc-700",
+  withdrawn: "bg-surface-hover text-text-muted border-border-strong",
 };
 
 function labelize(value: string): string {

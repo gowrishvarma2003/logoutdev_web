@@ -301,7 +301,7 @@ export default function ComposeBox({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`flex gap-3 ${compact ? "px-4 py-3" : "px-4 py-4 border-b border-zinc-800/60 bg-zinc-950/20"}`}
+      className={`flex gap-3 ${compact ? "px-4 py-3" : "px-4 py-4 border-b border-border-default/60 bg-app/20"}`}
     >
       <Avatar user={currentUser} size={compact ? "sm" : "md"} className="mt-0.5 shrink-0" />
 
@@ -319,7 +319,7 @@ export default function ComposeBox({
                       setSelectedEntities((items) => items.filter((item) => item !== entity));
                       if (initialLinkedEntity?.id === entity.id) onClearLinkedEntity?.();
                     }}
-                    className="absolute right-2 top-2 rounded-full bg-zinc-955/90 px-2 py-0.5 text-xs text-zinc-300 hover:text-white border border-zinc-800"
+                    className="absolute right-2 top-2 rounded-full bg-app/90 px-2 py-0.5 text-xs text-text-secondary hover:text-text-primary border border-border-default"
                   >
                     ×
                   </button>
@@ -339,13 +339,13 @@ export default function ComposeBox({
             maxLength={MAX_LENGTH + 10}
             rows={compact ? 1 : 3}
             clickablePreview
-            previewClassName="text-[15px] leading-relaxed text-white"
+            previewClassName="text-[15px] leading-relaxed text-text-primary"
             className="relative w-full resize-none overflow-hidden bg-transparent text-[15px] leading-relaxed text-transparent caret-white outline-none selection:bg-[#1d9bf0]/30"
           />
 
           {isSuggestionOpen && (
-            <div className="absolute left-0 top-full z-20 mt-2 w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-955/95 backdrop-blur-xl shadow-2xl p-1">
-              <div className="border-b border-zinc-900/65 px-3 py-2 text-[10px] uppercase tracking-wider text-zinc-500 font-bold">
+            <div className="absolute left-0 top-full z-20 mt-2 w-full overflow-hidden rounded-2xl border border-border-default bg-app/95 backdrop-blur-xl shadow-2xl p-1">
+              <div className="border-b border-border-subtle/65 px-3 py-2 text-[10px] uppercase tracking-wider text-text-disabled font-bold">
                 {activeToken?.type === "hashtag" ? "Hashtag suggestions" : "Mention people"}
               </div>
               <ul className="space-y-0.5 mt-1">
@@ -356,14 +356,14 @@ export default function ComposeBox({
                       onMouseDown={(event) => event.preventDefault()}
                       onClick={() => applySuggestion(item)}
                       className={`flex w-full items-center justify-between gap-4 px-3 py-2 rounded-xl text-left transition-all ${
-                        highlightedIndex === index ? "bg-zinc-900 text-white" : "hover:bg-zinc-900/40 text-zinc-400 hover:text-zinc-200"
+                        highlightedIndex === index ? "bg-surface text-text-primary" : "hover:bg-surface/40 text-text-muted hover:text-text-secondary"
                       }`}
                     >
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold">{item.title}</p>
-                        <p className="truncate text-xs text-zinc-500 font-mono mt-0.5">{item.subtitle}</p>
+                        <p className="truncate text-xs text-text-disabled font-mono mt-0.5">{item.subtitle}</p>
                       </div>
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-600">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-text-disabled">
                         {item.kind}
                       </span>
                     </button>
@@ -372,8 +372,8 @@ export default function ComposeBox({
               </ul>
 
               {activeToken?.type === "hashtag" && relatedTags.length > 0 && (
-                <div className="border-t border-zinc-900/65 px-3 py-2 mt-1">
-                  <p className="mb-2 text-[10px] uppercase tracking-wider text-zinc-500 font-bold">
+                <div className="border-t border-border-subtle/65 px-3 py-2 mt-1">
+                  <p className="mb-2 text-[10px] uppercase tracking-wider text-text-disabled font-bold">
                     Related tags
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -391,7 +391,7 @@ export default function ComposeBox({
                             insert_text: `#${tag.normalized_tag}`,
                           })
                         }
-                        className="rounded-full border border-zinc-800 bg-zinc-900/20 px-2.5 py-0.5 text-xs text-sky-400 hover:bg-zinc-800 transition-colors"
+                        className="rounded-full border border-border-default bg-surface/20 px-2.5 py-0.5 text-xs text-sky-400 hover:bg-surface-hover transition-colors"
                       >
                         #{tag.tag}
                       </button>
@@ -406,7 +406,7 @@ export default function ComposeBox({
         {selectedImages.length > 0 && (
           <div className="mt-3 grid grid-cols-2 gap-2">
             {selectedImages.map((image, index) => (
-              <div key={image.url} className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+              <div key={image.url} className="relative overflow-hidden rounded-xl border border-border-default bg-surface">
                 <img src={image.url} alt={`Selected image ${index + 1}`} className="h-32 w-full object-cover" />
                 <button
                   type="button"
@@ -415,7 +415,7 @@ export default function ComposeBox({
                     URL.revokeObjectURL(image.url);
                     setSelectedImages((items) => items.filter((item) => item !== image));
                   }}
-                  className="absolute right-2 top-2 rounded-full bg-black/75 px-2 py-0.5 text-xs text-white hover:bg-black/90 transition-colors"
+                  className="absolute right-2 top-2 rounded-full bg-black/75 px-2 py-0.5 text-xs text-text-primary hover:bg-black/90 transition-colors"
                 >
                   ×
                 </button>
@@ -425,8 +425,8 @@ export default function ComposeBox({
         )}
 
         {entityPickerOpen && (
-          <div className="mt-3 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-1.5 shadow-xl">
-            <div className="flex items-center justify-between border-b border-zinc-900/60 pb-2 px-2.5 pt-1.5">
+          <div className="mt-3 overflow-hidden rounded-2xl border border-border-default bg-app p-1.5 shadow-xl">
+            <div className="flex items-center justify-between border-b border-border-subtle/60 pb-2 px-2.5 pt-1.5">
               <div className="flex flex-wrap gap-1">
                 {[
                   ["", "All"],
@@ -441,7 +441,7 @@ export default function ComposeBox({
                     key={value}
                     onClick={() => setEntityType(value)}
                     className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold transition-all cursor-pointer ${
-                      entityType === value ? "bg-white text-black shadow-sm" : "bg-zinc-900/60 text-zinc-450 hover:bg-zinc-850"
+                      entityType === value ? "bg-primary text-primary-foreground shadow-sm" : "bg-surface/60 text-text-muted hover:bg-surface-hover"
                     }`}
                   >
                     {label}
@@ -451,7 +451,7 @@ export default function ComposeBox({
               <button
                 type="button"
                 onClick={() => setEntityPickerOpen(false)}
-                className="rounded-lg px-2 py-0.5 text-xs text-zinc-450 hover:text-white hover:bg-zinc-900 transition-all font-semibold cursor-pointer shrink-0 ml-2"
+                className="rounded-lg px-2 py-0.5 text-xs text-text-muted hover:text-text-primary hover:bg-surface transition-all font-semibold cursor-pointer shrink-0 ml-2"
                 aria-label="Close tagging component"
               >
                 Close
@@ -477,7 +477,7 @@ export default function ComposeBox({
                 if (event.key === "Escape") setEntityPickerOpen(false);
               }}
               placeholder="Search platform items..."
-              className="w-full border-b border-zinc-900 bg-transparent px-3 py-2 text-xs text-white outline-none focus:border-zinc-850"
+              className="w-full border-b border-border-subtle bg-transparent px-3 py-2 text-xs text-text-primary outline-none focus:border-border-default"
             />
             {entityLoading ? (
               <div className="flex items-center justify-center py-6">
@@ -491,12 +491,12 @@ export default function ComposeBox({
                     key={`${entity.type}:${entity.id}`}
                     onClick={() => setSelectedEntities((items) => [...items, entity].slice(0, 5))}
                     className={`flex w-full items-center justify-between gap-3 px-3 py-2 rounded-xl text-left cursor-pointer transition-all ${
-                      index === entityHighlight ? "bg-zinc-900" : "hover:bg-zinc-900/40"
+                      index === entityHighlight ? "bg-surface" : "hover:bg-surface/40"
                     }`}
                   >
                     <span className="min-w-0">
-                      <span className="block truncate text-xs font-semibold text-white">{entity.title}</span>
-                      <span className="block truncate text-[10px] text-zinc-500 mt-0.5">
+                      <span className="block truncate text-xs font-semibold text-text-primary">{entity.title}</span>
+                      <span className="block truncate text-[10px] text-text-disabled mt-0.5">
                         {entity.owner?.name || entity.type.replace("_", " ")}
                       </span>
                     </span>
@@ -512,7 +512,7 @@ export default function ComposeBox({
                   </button>
                 ))}
                 {!entityLoading && entityResults.length === 0 && (
-                  <p className="text-center text-xs text-zinc-500 py-8">No results found.</p>
+                  <p className="text-center text-xs text-text-disabled py-8">No results found.</p>
                 )}
               </div>
             )}
@@ -525,13 +525,13 @@ export default function ComposeBox({
           <p className="mt-2 text-xs text-amber-300 font-medium">Restricted: only people who can access every private tagged item can view this post.</p>
         )}
 
-        <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-800/60">
+        <div className="flex items-center justify-between mt-2 pt-2 border-t border-border-default/60">
           <div className="flex items-center gap-2">
             <button
               type="button"
               disabled={selectedEntities.length >= 5}
               onClick={() => setEntityPickerOpen((open) => !open)}
-              className="rounded-full border border-zinc-850 bg-zinc-900/30 px-3 py-1.5 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-40 cursor-pointer"
+              className="rounded-full border border-border-default bg-surface/30 px-3 py-1.5 text-xs text-text-muted hover:bg-surface-hover hover:text-text-primary transition-all disabled:opacity-40 cursor-pointer"
             >
               Tag item {selectedEntities.length}/5
             </button>
@@ -539,7 +539,7 @@ export default function ComposeBox({
               type="button"
               disabled={selectedImages.length >= 4}
               onClick={() => fileInputRef.current?.click()}
-              className="rounded-full border border-zinc-850 bg-zinc-900/30 px-3 py-1.5 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-40 cursor-pointer"
+              className="rounded-full border border-border-default bg-surface/30 px-3 py-1.5 text-xs text-text-muted hover:bg-surface-hover hover:text-text-primary transition-all disabled:opacity-40 cursor-pointer"
             >
               Add images {selectedImages.length}/4
             </button>
@@ -575,7 +575,7 @@ export default function ComposeBox({
                 ? "text-rose-400 font-medium"
                 : remaining <= 50
                   ? "text-amber-400"
-                  : "text-zinc-500"
+                  : "text-text-disabled"
             }`}
           >
             {remaining}
@@ -584,9 +584,9 @@ export default function ComposeBox({
           <button
             type="submit"
             disabled={isEmpty || isOverLimit || isLoading}
-            className="px-5 py-1.5 rounded-full bg-white text-black text-sm font-semibold
+            className="px-5 py-1.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold
               disabled:opacity-30 disabled:cursor-not-allowed
-              hover:bg-zinc-100 active:scale-95 transition-all cursor-pointer"
+              hover:bg-primary-hover active:scale-95 transition-all cursor-pointer"
           >
             {isLoading ? "Posting..." : "Post"}
           </button>

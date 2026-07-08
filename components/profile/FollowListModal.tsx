@@ -102,17 +102,17 @@ export default function FollowListModal({
       aria-label="Followers"
     >
       <div
-        className="w-full max-w-md max-h-[80vh] flex flex-col rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl overflow-hidden"
+        className="w-full max-w-md max-h-[80vh] flex flex-col rounded-2xl border border-border-default bg-app shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border-default">
           <div className="flex gap-1">
             <button
               type="button"
               onClick={() => setTab("followers")}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                tab === "followers" ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-300"
+                tab === "followers" ? "bg-surface-hover text-text-primary" : "text-text-disabled hover:text-text-secondary"
               }`}
             >
               Followers
@@ -121,7 +121,7 @@ export default function FollowListModal({
               type="button"
               onClick={() => setTab("following")}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                tab === "following" ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-zinc-300"
+                tab === "following" ? "bg-surface-hover text-text-primary" : "text-text-disabled hover:text-text-secondary"
               }`}
             >
               Following
@@ -130,7 +130,7 @@ export default function FollowListModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-zinc-500 hover:bg-zinc-800 hover:text-white transition-colors"
+            className="p-1.5 rounded-full text-text-disabled hover:bg-surface-hover hover:text-text-primary transition-colors"
             aria-label="Close"
           >
             <XIcon className="w-4 h-4" />
@@ -152,20 +152,20 @@ export default function FollowListModal({
               />
             </div>
           ) : (
-            <ul className="divide-y divide-zinc-900">
+            <ul className="divide-y divide-border-subtle">
               {items.map((user) => (
                 <li key={user.id} className="flex items-center gap-3 px-4 py-3">
                   <Link href={`/profile/${user.username || user.id}`} onClick={onClose} className="min-w-0 flex-1 flex items-center gap-3 group">
                     <Avatar user={user} size="md" />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white truncate group-hover:text-sky-400 transition-colors">
+                      <p className="text-sm font-semibold text-text-primary truncate group-hover:text-sky-400 transition-colors">
                         {user.name}
                       </p>
                       {user.username ? (
-                        <p className="text-xs text-zinc-500 truncate">@{user.username}</p>
+                        <p className="text-xs text-text-disabled truncate">@{user.username}</p>
                       ) : null}
                       {user.headline ? (
-                        <p className="text-xs text-zinc-600 truncate mt-0.5">{user.headline}</p>
+                        <p className="text-xs text-text-disabled truncate mt-0.5">{user.headline}</p>
                       ) : null}
                     </div>
                   </Link>
@@ -186,7 +186,7 @@ export default function FollowListModal({
               <button
                 type="button"
                 onClick={() => loadPage(tab, page + 1).then(() => setPage((p) => p + 1))}
-                className="px-4 py-2 rounded-lg border border-zinc-700 text-sm text-zinc-300 hover:border-zinc-500 hover:text-white transition-colors"
+                className="px-4 py-2 rounded-lg border border-border-strong text-sm text-text-secondary hover:border-zinc-500 hover:text-text-primary transition-colors"
               >
                 Show more
               </button>

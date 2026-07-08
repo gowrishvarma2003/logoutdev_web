@@ -56,10 +56,10 @@ function initialRepoIds(launch?: Partial<Launch> | null) {
 }
 
 const inputClass =
-  "w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none transition-colors";
+  "w-full rounded-xl border border-border-default bg-app px-3 py-2.5 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none transition-colors";
 
 const selectClass =
-  "w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none transition-colors";
+  "w-full rounded-xl border border-border-default bg-app px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none transition-colors";
 
 const MIN_LAUNCH_IMAGES = 4;
 const MAX_LAUNCH_IMAGES = 6;
@@ -68,8 +68,8 @@ const MAX_LAUNCH_REPOS = 6;
 function SectionHeader({ title, description }: { title: string; description?: string }) {
   return (
     <div className="mb-4">
-      <h3 className="text-sm font-semibold text-zinc-200">{title}</h3>
-      {description ? <p className="mt-0.5 text-xs text-zinc-500">{description}</p> : null}
+      <h3 className="text-sm font-semibold text-text-secondary">{title}</h3>
+      {description ? <p className="mt-0.5 text-xs text-text-disabled">{description}</p> : null}
     </div>
   );
 }
@@ -262,7 +262,7 @@ export default function LaunchForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
+      <div className="rounded-2xl border border-border-default bg-surface/50 p-5">
         <SectionHeader
           title="Source & workspace"
           description="Open source launches connect your repos and a workspace so contributors can jump in."
@@ -283,11 +283,11 @@ export default function LaunchForm({
                   className={`rounded-2xl border p-4 text-left transition-colors ${
                     active
                       ? "border-sky-500/40 bg-sky-500/10"
-                      : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
+                      : "border-border-default bg-app/60 hover:border-border-strong"
                   }`}
                 >
-                  <p className="text-sm font-semibold text-white">{option.label}</p>
-                  <p className="mt-1 text-xs leading-6 text-zinc-400">{option.hint}</p>
+                  <p className="text-sm font-semibold text-text-primary">{option.label}</p>
+                  <p className="mt-1 text-xs leading-6 text-text-muted">{option.hint}</p>
                 </button>
               );
             })}
@@ -295,15 +295,15 @@ export default function LaunchForm({
 
           {isOpenSource ? (
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-zinc-400">
-                Repos <span className="text-zinc-600">(required · up to {MAX_LAUNCH_REPOS})</span>
+              <label className="mb-1.5 block text-xs font-medium text-text-muted">
+                Repos <span className="text-text-disabled">(required · up to {MAX_LAUNCH_REPOS})</span>
               </label>
               {reposLoading ? (
-                <p className="rounded-xl border border-zinc-800 bg-zinc-950/70 px-3 py-3 text-xs text-zinc-500">
+                <p className="rounded-xl border border-border-default bg-app/70 px-3 py-3 text-xs text-text-disabled">
                   Loading your repos…
                 </p>
               ) : myRepos.length === 0 ? (
-                <p className="rounded-xl border border-zinc-800 bg-zinc-950/70 px-3 py-3 text-xs text-zinc-500">
+                <p className="rounded-xl border border-border-default bg-app/70 px-3 py-3 text-xs text-text-disabled">
                   You don&apos;t have any repos yet. Create a repo first, then link it here.
                 </p>
               ) : (
@@ -319,12 +319,12 @@ export default function LaunchForm({
                         disabled={disabled}
                         className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                           selected
-                            ? "border-sky-500/40 bg-sky-500/10 text-white"
-                            : "border-zinc-800 bg-zinc-950/60 text-zinc-300 hover:border-zinc-700"
+                            ? "border-sky-500/40 bg-sky-500/10 text-text-primary"
+                            : "border-border-default bg-app/60 text-text-secondary hover:border-border-strong"
                         }`}
                       >
                         <span className="truncate">{repo.name}</span>
-                        <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] uppercase ${repo.visibility === "public" ? "bg-emerald-500/10 text-emerald-400" : "bg-zinc-800 text-zinc-400"}`}>
+                        <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] uppercase ${repo.visibility === "public" ? "bg-emerald-500/10 text-emerald-400" : "bg-surface-hover text-text-muted"}`}>
                           {repo.visibility}
                         </span>
                       </button>
@@ -333,7 +333,7 @@ export default function LaunchForm({
                 </div>
               )}
               {selectedRepoIds.length > 0 ? (
-                <p className="mt-1.5 text-[11px] text-zinc-500">
+                <p className="mt-1.5 text-[11px] text-text-disabled">
                   {selectedRepoIds.length} repo{selectedRepoIds.length === 1 ? "" : "s"} selected.
                 </p>
               ) : null}
@@ -341,8 +341,8 @@ export default function LaunchForm({
           ) : null}
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-400">
-              Linked space {isOpenSource ? <span className="text-zinc-600">(required)</span> : null}
+            <label className="mb-1.5 block text-xs font-medium text-text-muted">
+              Linked space {isOpenSource ? <span className="text-text-disabled">(required)</span> : null}
             </label>
             <select
               value={linkedSpaceId}
@@ -357,7 +357,7 @@ export default function LaunchForm({
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-[11px] text-zinc-600">
+            <p className="mt-1 text-[11px] text-text-disabled">
               {spacesLoading
                 ? "Loading your spaces…"
                 : isOpenSource
@@ -368,7 +368,7 @@ export default function LaunchForm({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
+      <div className="rounded-2xl border border-border-default bg-surface/50 p-5">
         <SectionHeader
           title="Launch mode"
           description="Choose whether you are gathering beta users or shipping the public product."
@@ -385,11 +385,11 @@ export default function LaunchForm({
                 className={`rounded-2xl border p-4 text-left transition-colors ${
                   active
                     ? "border-sky-500/40 bg-sky-500/10"
-                    : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
+                    : "border-border-default bg-app/60 hover:border-border-strong"
                 }`}
               >
-                <p className="text-sm font-semibold text-white">{phase === "beta" ? "Beta launch" : "Live launch"}</p>
-                <p className="mt-1 text-xs leading-6 text-zinc-400">
+                <p className="text-sm font-semibold text-text-primary">{phase === "beta" ? "Beta launch" : "Live launch"}</p>
+                <p className="mt-1 text-xs leading-6 text-text-muted">
                   {phase === "beta"
                     ? "Public page, private beta access, and manual approvals."
                     : "Public product link, reviews, and open launch feedback."}
@@ -400,29 +400,29 @@ export default function LaunchForm({
         </div>
 
         {sourceHint ? (
-          <p className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950/70 px-3 py-2 text-xs text-zinc-400">
+          <p className="mt-4 rounded-xl border border-border-default bg-app/70 px-3 py-2 text-xs text-text-muted">
             {sourceHint}
           </p>
         ) : null}
       </div>
 
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
+      <div className="rounded-2xl border border-border-default bg-surface/50 p-5">
         <SectionHeader
           title="Product basics"
           description="The first screen should make the product and audience clear immediately."
         />
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-400">Product name</label>
+            <label className="mb-1.5 block text-xs font-medium text-text-muted">Product name</label>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Devboard" className={inputClass} />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-400">Tagline</label>
+            <label className="mb-1.5 block text-xs font-medium text-text-muted">Tagline</label>
             <input value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="One-sentence pitch" className={inputClass} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-zinc-400">Product type</label>
+              <label className="mb-1.5 block text-xs font-medium text-text-muted">Product type</label>
               <select value={productType} onChange={(e) => setProductType(e.target.value as LaunchProductType)} className={selectClass}>
                 <option value="web-app">Web App</option>
                 <option value="mobile-app">Mobile App</option>
@@ -435,7 +435,7 @@ export default function LaunchForm({
               </select>
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-zinc-400">Development stage</label>
+              <label className="mb-1.5 block text-xs font-medium text-text-muted">Development stage</label>
               <select value={developmentStage} onChange={(e) => setDevelopmentStage(e.target.value as LaunchDevelopmentStage)} className={selectClass}>
                 <option value="prototype">Prototype</option>
                 <option value="mvp">MVP</option>
@@ -447,13 +447,13 @@ export default function LaunchForm({
             </div>
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-400">Description</label>
+            <label className="mb-1.5 block text-xs font-medium text-text-muted">Description</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={7} className={inputClass} />
           </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
+      <div className="rounded-2xl border border-border-default bg-surface/50 p-5">
         <SectionHeader
           title={launchPhase === "beta" ? "Beta access" : "Live access"}
           description={launchPhase === "beta"
@@ -465,7 +465,7 @@ export default function LaunchForm({
           {launchPhase === "beta" ? (
             <>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-400">Beta seats</label>
+                <label className="mb-1.5 block text-xs font-medium text-text-muted">Beta seats</label>
                 <input
                   value={betaCapacity}
                   onChange={(e) => setBetaCapacity(e.target.value)}
@@ -475,7 +475,7 @@ export default function LaunchForm({
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-400">Beta access link</label>
+                <label className="mb-1.5 block text-xs font-medium text-text-muted">Beta access link</label>
                 <input
                   value={betaAccessUrl}
                   onChange={(e) => setBetaAccessUrl(e.target.value)}
@@ -486,7 +486,7 @@ export default function LaunchForm({
             </>
           ) : (
             <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-xs font-medium text-zinc-400">Public product link</label>
+              <label className="mb-1.5 block text-xs font-medium text-text-muted">Public product link</label>
               <input
                 value={liveUrl}
                 onChange={(e) => setLiveUrl(e.target.value)}
@@ -498,14 +498,14 @@ export default function LaunchForm({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
+      <div className="rounded-2xl border border-border-default bg-surface/50 p-5">
         <SectionHeader
           title="Media & stack"
           description="Keep the public page light, but include enough proof for people to decide quickly."
         />
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-400">Product images</label>
+            <label className="mb-1.5 block text-xs font-medium text-text-muted">Product images</label>
             <input
               ref={fileInputRef}
               type="file"
@@ -518,11 +518,11 @@ export default function LaunchForm({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={existingScreenshots.length + pendingImages.length >= MAX_LAUNCH_IMAGES}
-              className="flex w-full items-center justify-center rounded-xl border border-dashed border-zinc-700 bg-zinc-950/70 px-4 py-6 text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center rounded-xl border border-dashed border-border-strong bg-app/70 px-4 py-6 text-sm font-medium text-text-secondary transition-colors hover:border-zinc-500 hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-50"
             >
               Choose images from your device
             </button>
-            <p className="mt-1.5 text-[11px] text-zinc-500">PNG, JPG, WebP, or GIF. {MIN_LAUNCH_IMAGES}–{MAX_LAUNCH_IMAGES} images, 10MB each.</p>
+            <p className="mt-1.5 text-[11px] text-text-disabled">PNG, JPG, WebP, or GIF. {MIN_LAUNCH_IMAGES}–{MAX_LAUNCH_IMAGES} images, 10MB each.</p>
 
             {existingScreenshots.length + pendingImages.length > 0 ? (
               <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -530,14 +530,14 @@ export default function LaunchForm({
                   ...existingScreenshots,
                   ...pendingImages.map((image) => image.previewUrl),
                 ].map((url, index) => (
-                  <div key={`${url}-${index}`} className="group relative aspect-video overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
+                  <div key={`${url}-${index}`} className="group relative aspect-video overflow-hidden rounded-xl border border-border-default bg-app">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={url} alt={`Launch image ${index + 1}`} className="h-full w-full object-cover" />
                     <button
                       type="button"
                       onClick={() => removeScreenshot(index)}
                       aria-label={`Remove launch image ${index + 1}`}
-                      className="absolute right-1.5 top-1.5 rounded-lg bg-zinc-950/85 px-2 py-1 text-xs text-zinc-200 opacity-100 transition-opacity hover:bg-rose-600 sm:opacity-0 sm:group-hover:opacity-100"
+                      className="absolute right-1.5 top-1.5 rounded-lg bg-app/85 px-2 py-1 text-xs text-text-secondary opacity-100 transition-opacity hover:bg-rose-600 sm:opacity-0 sm:group-hover:opacity-100"
                     >
                       Remove
                     </button>
@@ -548,7 +548,7 @@ export default function LaunchForm({
 
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-400">Tech stack</label>
+            <label className="mb-1.5 block text-xs font-medium text-text-muted">Tech stack</label>
             <input
               value={techStack}
               onChange={(e) => setTechStack(e.target.value)}
@@ -559,23 +559,23 @@ export default function LaunchForm({
         </div>
       </div>
 
-      <details className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
-        <summary className="cursor-pointer list-none text-sm font-semibold text-zinc-200">Advanced details</summary>
+      <details className="rounded-2xl border border-border-default bg-surface/50 p-5">
+        <summary className="cursor-pointer list-none text-sm font-semibold text-text-secondary">Advanced details</summary>
 
         <div className="mt-5 space-y-8">
           <div>
             <SectionHeader title="Extra links" description="Add supporting links without crowding the first screen." />
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-400">Website URL</label>
+                <label className="mb-1.5 block text-xs font-medium text-text-muted">Website URL</label>
                 <input value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://example.com" className={inputClass} />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-400">GitHub URL</label>
+                <label className="mb-1.5 block text-xs font-medium text-text-muted">GitHub URL</label>
                 <input value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} placeholder="https://github.com/you/repo" className={inputClass} />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-xs font-medium text-zinc-400">Docs URL</label>
+                <label className="mb-1.5 block text-xs font-medium text-text-muted">Docs URL</label>
                 <input value={docsUrl} onChange={(e) => setDocsUrl(e.target.value)} placeholder="https://docs.example.com" className={inputClass} />
               </div>
             </div>
@@ -618,7 +618,7 @@ export default function LaunchForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-xl bg-white py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-60 sm:w-auto sm:px-8"
+        className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-60 sm:w-auto sm:px-8"
       >
         {loading ? "Saving…" : submitLabel}
       </button>

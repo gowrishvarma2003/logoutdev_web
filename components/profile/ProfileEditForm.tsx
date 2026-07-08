@@ -37,20 +37,20 @@ interface ProfileEditFormProps {
 }
 
 const INPUT_CLASS =
-  "w-full pl-3 pr-10 py-2.5 rounded-xl bg-zinc-800/60 border border-zinc-700/80 text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all";
+  "w-full pl-3 pr-10 py-2.5 rounded-xl bg-surface-hover/60 border border-border-strong/80 text-text-primary text-sm placeholder:text-text-disabled focus:outline-none focus:border-border-strong focus:bg-surface-hover transition-all";
 
 const INPUT_ICON_CLASS =
-  "w-full pl-9 pr-10 py-2.5 rounded-xl bg-zinc-800/60 border border-zinc-700/80 text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all";
+  "w-full pl-9 pr-10 py-2.5 rounded-xl bg-surface-hover/60 border border-border-strong/80 text-text-primary text-sm placeholder:text-text-disabled focus:outline-none focus:border-border-strong focus:bg-surface-hover transition-all";
 
 const TEXTAREA_CLASS =
-  "w-full px-3 py-2.5 rounded-xl bg-zinc-800/60 border border-zinc-700/80 text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all resize-none";
+  "w-full px-3 py-2.5 rounded-xl bg-surface-hover/60 border border-border-strong/80 text-text-primary text-sm placeholder:text-text-disabled focus:outline-none focus:border-border-strong focus:bg-surface-hover transition-all resize-none";
 
 function CharBadge({ current, max }: { current: number; max: number }) {
   const near = current > max * 0.8;
   return (
     <span
       className={`absolute right-3 top-1/2 -translate-y-1/2 text-[10px] tabular-nums pointer-events-none ${
-        near ? "text-amber-400" : "text-zinc-500"
+        near ? "text-amber-400" : "text-text-disabled"
       }`}
     >
       {current}/{max}
@@ -173,21 +173,21 @@ export default function ProfileEditForm({
       />
 
       {/* ── Profile Basics ── */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
-        <div className="px-5 py-4 border-b border-zinc-800/60">
+      <div className="rounded-2xl border border-border-default bg-surface/40 overflow-hidden">
+        <div className="px-5 py-4 border-b border-border-default/60">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
               <UserIcon className="w-4 h-4 text-violet-400" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-white">Profile Basics</h2>
-              <p className="text-xs text-zinc-500">Your public identity on the platform</p>
+              <h2 className="text-sm font-semibold text-text-primary">Profile Basics</h2>
+              <p className="text-xs text-text-disabled">Your public identity on the platform</p>
             </div>
           </div>
         </div>
         <div className="px-5 py-5 space-y-5">
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Display Name</label>
+            <label className="block text-xs font-medium text-text-muted mb-1.5">Display Name</label>
             <div className="relative">
               <input
                 className={INPUT_CLASS}
@@ -201,13 +201,13 @@ export default function ProfileEditForm({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Username</label>
+            <label className="block text-xs font-medium text-text-muted mb-1.5">Username</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm pointer-events-none font-medium">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-disabled text-sm pointer-events-none font-medium">
                 @
               </span>
               <input
-                className="w-full pl-7 pr-10 py-2.5 rounded-xl bg-zinc-800/60 border border-zinc-700/80 text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all"
+                className="w-full pl-7 pr-10 py-2.5 rounded-xl bg-surface-hover/60 border border-border-strong/80 text-text-primary text-sm placeholder:text-text-disabled focus:outline-none focus:border-border-strong focus:bg-surface-hover transition-all"
                 value={username}
                 onChange={(e) => setUsername(e.target.value.toLowerCase())}
                 placeholder="your_username"
@@ -216,13 +216,13 @@ export default function ProfileEditForm({
               />
               <CharBadge current={username.length} max={50} />
             </div>
-            <p className="text-[11px] text-zinc-600 mt-1.5">
-              3–50 lowercase letters, numbers, underscores. URL: /profile/<span className="text-zinc-400">{username || "..."}</span>
+            <p className="text-[11px] text-text-disabled mt-1.5">
+              3–50 lowercase letters, numbers, underscores. URL: /profile/<span className="text-text-muted">{username || "..."}</span>
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Headline</label>
+            <label className="block text-xs font-medium text-text-muted mb-1.5">Headline</label>
             <div className="relative">
               <input
                 className={INPUT_CLASS}
@@ -236,7 +236,7 @@ export default function ProfileEditForm({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Bio</label>
+            <label className="block text-xs font-medium text-text-muted mb-1.5">Bio</label>
             <div className="relative">
               <textarea
                 className={TEXTAREA_CLASS}
@@ -246,18 +246,18 @@ export default function ProfileEditForm({
                 placeholder="What do you work on? What excites you technically?"
                 maxLength={2000}
               />
-              <span className="absolute right-3 bottom-3 text-[10px] tabular-nums text-zinc-500 pointer-events-none">
+              <span className="absolute right-3 bottom-3 text-[10px] tabular-nums text-text-disabled pointer-events-none">
                 {bio.length}/2000
               </span>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Location</label>
+            <label className="block text-xs font-medium text-text-muted mb-1.5">Location</label>
             <div className="relative">
-              <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4 pointer-events-none" />
+              <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-text-disabled w-4 h-4 pointer-events-none" />
               <input
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-zinc-800/60 border border-zinc-700/80 text-white text-sm placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 focus:bg-zinc-800 transition-all"
+                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-surface-hover/60 border border-border-strong/80 text-text-primary text-sm placeholder:text-text-disabled focus:outline-none focus:border-border-strong focus:bg-surface-hover transition-all"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="San Francisco, CA"
@@ -267,7 +267,7 @@ export default function ProfileEditForm({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Pronouns</label>
+            <label className="block text-xs font-medium text-text-muted mb-1.5">Pronouns</label>
             <input
               className={INPUT_CLASS}
               value={pronouns}
@@ -275,7 +275,7 @@ export default function ProfileEditForm({
               placeholder="e.g. she/her, they/them"
               maxLength={40}
             />
-            <p className="text-[11px] text-zinc-600 mt-1.5">Shown on your profile. Optional.</p>
+            <p className="text-[11px] text-text-disabled mt-1.5">Shown on your profile. Optional.</p>
           </div>
 
           <div className="flex items-start justify-between gap-3 pt-1">
@@ -284,8 +284,8 @@ export default function ProfileEditForm({
                 <BriefcaseIcon className="w-4 h-4 text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-white">Open to work</p>
-                <p className="text-xs text-zinc-500 mt-0.5">Let others know you&apos;re available for opportunities.</p>
+                <p className="text-sm font-medium text-text-primary">Open to work</p>
+                <p className="text-xs text-text-disabled mt-0.5">Let others know you&apos;re available for opportunities.</p>
               </div>
             </div>
             <button
@@ -294,12 +294,12 @@ export default function ProfileEditForm({
               aria-checked={openToWork}
               onClick={() => setOpenToWork((v) => !v)}
               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border transition-colors ${
-                openToWork ? "bg-emerald-500/30 border-emerald-500/50" : "bg-zinc-800 border-zinc-700"
+                openToWork ? "bg-emerald-500/30 border-emerald-500/50" : "bg-surface-hover border-border-strong"
               }`}
               aria-label="Toggle open to work"
             >
               <span
-                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform mt-0.5 ${
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-primary shadow transition-transform mt-0.5 ${
                   openToWork ? "translate-x-5" : "translate-x-0.5"
                 }`}
               />
@@ -309,23 +309,23 @@ export default function ProfileEditForm({
       </div>
 
       {/* ── Links ── */}
-      <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
-        <div className="px-5 py-4 border-b border-zinc-800/60">
+      <div className="mt-5 rounded-2xl border border-border-default bg-surface/40 overflow-hidden">
+        <div className="px-5 py-4 border-b border-border-default/60">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center">
               <LinkIcon className="w-4 h-4 text-sky-400" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-white">Links</h2>
-              <p className="text-xs text-zinc-500">Connect your external presence</p>
+              <h2 className="text-sm font-semibold text-text-primary">Links</h2>
+              <p className="text-xs text-text-disabled">Connect your external presence</p>
             </div>
           </div>
         </div>
         <div className="px-5 py-5 space-y-5">
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Website</label>
+            <label className="block text-xs font-medium text-text-muted mb-1.5">Website</label>
             <div className="relative">
-              <GlobeIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4 pointer-events-none" />
+              <GlobeIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-text-disabled w-4 h-4 pointer-events-none" />
               <input
                 className={INPUT_ICON_CLASS}
                 type="url"
@@ -337,9 +337,9 @@ export default function ProfileEditForm({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1.5">GitHub</label>
+            <label className="block text-xs font-medium text-text-muted mb-1.5">GitHub</label>
             <div className="relative">
-              <GitHubIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4 pointer-events-none" />
+              <GitHubIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-text-disabled w-4 h-4 pointer-events-none" />
               <input
                 className={INPUT_ICON_CLASS}
                 type="url"
@@ -351,9 +351,9 @@ export default function ProfileEditForm({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1.5">LinkedIn</label>
+            <label className="block text-xs font-medium text-text-muted mb-1.5">LinkedIn</label>
             <div className="relative">
-              <LinkedInIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4 pointer-events-none" />
+              <LinkedInIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-text-disabled w-4 h-4 pointer-events-none" />
               <input
                 className={INPUT_ICON_CLASS}
                 type="url"
@@ -367,17 +367,17 @@ export default function ProfileEditForm({
       </div>
 
       {/* ── Tech Stack ── */}
-      <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
-        <div className="px-5 py-4 border-b border-zinc-800/60">
+      <div className="mt-5 rounded-2xl border border-border-default bg-surface/40 overflow-hidden">
+        <div className="px-5 py-4 border-b border-border-default/60">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
               <CodeBracketIcon className="w-4 h-4 text-amber-400" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-white">Tech Stack</h2>
-              <p className="text-xs text-zinc-500">Add up to 10 skills that represent your expertise</p>
+              <h2 className="text-sm font-semibold text-text-primary">Tech Stack</h2>
+              <p className="text-xs text-text-disabled">Add up to 10 skills that represent your expertise</p>
             </div>
-            <span className="ml-auto text-xs tabular-nums text-zinc-500">
+            <span className="ml-auto text-xs tabular-nums text-text-disabled">
               {skills.length}/10
             </span>
           </div>
@@ -402,7 +402,7 @@ export default function ProfileEditForm({
               type="button"
               onClick={addSkill}
               disabled={!skillInput.trim() || skills.length >= 10}
-              className="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              className="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-surface-hover border border-border-strong text-text-secondary hover:bg-surface-active hover:text-text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed"
               aria-label="Add skill"
             >
               <PlusIcon className="w-4 h-4" />
@@ -414,13 +414,13 @@ export default function ProfileEditForm({
               {skills.map((skill) => (
                 <span
                   key={skill}
-                  className="inline-flex items-center gap-2 pl-3.5 pr-2.5 py-2 rounded-full bg-zinc-800 border border-zinc-700/80 text-sm text-zinc-200 hover:border-zinc-600 transition-colors group"
+                  className="inline-flex items-center gap-2 pl-3.5 pr-2.5 py-2 rounded-full bg-surface-hover border border-border-strong/80 text-sm text-text-secondary hover:border-border-strong transition-colors group"
                 >
                   {skill}
                   <button
                     type="button"
                     onClick={() => removeSkill(skill)}
-                    className="text-zinc-500 hover:text-rose-400 hover:bg-rose-400/10 rounded-full p-0.5 transition-colors"
+                    className="text-text-disabled hover:text-rose-400 hover:bg-rose-400/10 rounded-full p-0.5 transition-colors"
                     aria-label={`Remove ${skill}`}
                   >
                     <XIcon className="w-3.5 h-3.5" />
@@ -429,7 +429,7 @@ export default function ProfileEditForm({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-zinc-600 italic py-2">
+            <p className="text-sm text-text-disabled italic py-2">
               No skills added yet. Add technologies, languages, and tools you work with.
             </p>
           )}
@@ -441,17 +441,17 @@ export default function ProfileEditForm({
       </div>
 
       {/* ── Featured Projects ── */}
-      <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
-        <div className="px-5 py-4 border-b border-zinc-800/60">
+      <div className="mt-5 rounded-2xl border border-border-default bg-surface/40 overflow-hidden">
+        <div className="px-5 py-4 border-b border-border-default/60">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
               <SparklesIcon className="w-4 h-4 text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-white">Featured Projects</h2>
-              <p className="text-xs text-zinc-500">Pin up to 3 projects to your profile</p>
+              <h2 className="text-sm font-semibold text-text-primary">Featured Projects</h2>
+              <p className="text-xs text-text-disabled">Pin up to 3 projects to your profile</p>
             </div>
-            <span className="ml-auto text-xs tabular-nums text-zinc-500">
+            <span className="ml-auto text-xs tabular-nums text-text-disabled">
               {featuredIds.length}/3
             </span>
           </div>
@@ -462,13 +462,13 @@ export default function ProfileEditForm({
               <Spinner size="sm" />
             </div>
           ) : mySpaces.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-zinc-800 px-4 py-8 text-center">
-              <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-3">
-                <RocketIcon className="w-5 h-5 text-zinc-500" />
+            <div className="rounded-xl border border-dashed border-border-default px-4 py-8 text-center">
+              <div className="w-10 h-10 rounded-full bg-surface-hover flex items-center justify-center mx-auto mb-3">
+                <RocketIcon className="w-5 h-5 text-text-disabled" />
               </div>
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-text-disabled">
                 No spaces yet.{" "}
-                <span className="text-zinc-400">Create or join a space first.</span>
+                <span className="text-text-muted">Create or join a space first.</span>
               </p>
             </div>
           ) : (
@@ -486,25 +486,25 @@ export default function ProfileEditForm({
                       selected
                         ? "border-emerald-500/40 bg-emerald-500/5"
                         : disabled
-                        ? "border-zinc-800/50 bg-zinc-900/20 opacity-40 cursor-not-allowed"
-                        : "border-zinc-800 bg-zinc-900/30 hover:border-zinc-700 hover:bg-zinc-900/60"
+                        ? "border-border-default/50 bg-surface/20 opacity-40 cursor-not-allowed"
+                        : "border-border-default bg-surface/30 hover:border-border-strong hover:bg-surface/60"
                     }`}
                     aria-pressed={selected}
                   >
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500/20 to-violet-500/20 border border-zinc-700/60 flex items-center justify-center text-sm font-bold text-white shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500/20 to-violet-500/20 border border-border-strong/60 flex items-center justify-center text-sm font-bold text-text-primary shrink-0">
                       {space.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate">{space.name}</p>
-                      <p className="text-xs text-zinc-500 truncate mt-0.5">{space.summary || "No summary"}</p>
+                      <p className="text-sm font-medium text-text-primary truncate">{space.name}</p>
+                      <p className="text-xs text-text-disabled truncate mt-0.5">{space.summary || "No summary"}</p>
                     </div>
                     {selected ? (
                       <span className="shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
                         <CheckIcon className="w-3.5 h-3.5 text-emerald-400" />
                       </span>
                     ) : (
-                      <span className="shrink-0 w-6 h-6 rounded-full border border-zinc-700 flex items-center justify-center">
-                        <PlusIcon className="w-3 h-3 text-zinc-500" />
+                      <span className="shrink-0 w-6 h-6 rounded-full border border-border-strong flex items-center justify-center">
+                        <PlusIcon className="w-3 h-3 text-text-disabled" />
                       </span>
                     )}
                   </button>
@@ -533,7 +533,7 @@ export default function ProfileEditForm({
       <button
         type="submit"
         disabled={loading}
-        className="mt-6 w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-zinc-950 text-sm font-semibold hover:bg-zinc-100 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+        className="mt-6 w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
       >
         {loading ? (
           <>
@@ -620,15 +620,15 @@ function ProfileImageUploader({
   };
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
-      <div className="px-5 py-4 border-b border-zinc-800/60">
+    <div className="rounded-2xl border border-border-default bg-surface/40 overflow-hidden">
+      <div className="px-5 py-4 border-b border-border-default/60">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
             <CameraIcon className="w-4 h-4 text-violet-400" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-white">Profile Images</h2>
-            <p className="text-xs text-zinc-500">Your avatar and banner appear at the top of your profile</p>
+            <h2 className="text-sm font-semibold text-text-primary">Profile Images</h2>
+            <p className="text-xs text-text-disabled">Your avatar and banner appear at the top of your profile</p>
           </div>
         </div>
       </div>
@@ -640,9 +640,9 @@ function ProfileImageUploader({
             onClick={() => setShowLightbox(true)}
             className="group relative cursor-pointer rounded-full overflow-hidden shrink-0"
           >
-            <Avatar user={profile} size="xl" className="ring-2 ring-zinc-800" />
+            <Avatar user={profile} size="xl" className="ring-2 ring-border-default" />
             <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200">
-              <EyeIcon className="w-5 h-5 text-white/90" />
+              <EyeIcon className="w-5 h-5 text-text-primary/90" />
             </div>
           </div>
           <div className="flex-1 min-w-0">
@@ -651,7 +651,7 @@ function ProfileImageUploader({
                 type="button"
                 onClick={triggerAvatar}
                 disabled={avatarLoading}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-700 text-sm font-medium text-zinc-200 hover:border-zinc-500 hover:text-white transition-colors disabled:opacity-60 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border-strong text-sm font-medium text-text-secondary hover:border-zinc-500 hover:text-text-primary transition-colors disabled:opacity-60 cursor-pointer"
               >
                 {avatarLoading ? <Spinner size="sm" /> : <CameraIcon className="w-3.5 h-3.5" />}
                 {profile.avatar_url ? "Change" : "Upload"} avatar
@@ -661,14 +661,14 @@ function ProfileImageUploader({
                   type="button"
                   onClick={onAvatarRemove}
                   disabled={avatarLoading}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-800 text-sm font-medium text-zinc-400 hover:text-rose-300 hover:border-rose-500/40 transition-colors disabled:opacity-60 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border-default text-sm font-medium text-text-muted hover:text-rose-300 hover:border-rose-500/40 transition-colors disabled:opacity-60 cursor-pointer"
                 >
                   <XIcon className="w-3.5 h-3.5" />
                   Remove
                 </button>
               ) : null}
             </div>
-            <p className="text-[11px] text-zinc-600 mt-2">PNG, JPG, or WebP. Max 5MB.</p>
+            <p className="text-[11px] text-text-disabled mt-2">PNG, JPG, or WebP. Max 5MB.</p>
             {avatarError ? <p className="text-[11px] text-rose-400 mt-1">{avatarError}</p> : null}
             <input
               id="profile-avatar-input"
@@ -686,7 +686,7 @@ function ProfileImageUploader({
 
         {/* Banner */}
         <div>
-          <div className="relative w-full h-24 sm:h-28 rounded-xl overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-zinc-800">
+          <div className="relative w-full h-24 sm:h-28 rounded-xl overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-border-default">
             {profile.banner_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -710,7 +710,7 @@ function ProfileImageUploader({
               type="button"
               onClick={triggerBanner}
               disabled={bannerLoading}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-700 text-sm font-medium text-zinc-200 hover:border-zinc-500 hover:text-white transition-colors disabled:opacity-60 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border-strong text-sm font-medium text-text-secondary hover:border-zinc-500 hover:text-text-primary transition-colors disabled:opacity-60 cursor-pointer"
             >
               {bannerLoading ? <Spinner size="sm" /> : <CameraIcon className="w-3.5 h-3.5" />}
               {profile.banner_url ? "Change" : "Upload"} banner
@@ -720,14 +720,14 @@ function ProfileImageUploader({
                 type="button"
                 onClick={onBannerRemove}
                 disabled={bannerLoading}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-800 text-sm font-medium text-zinc-400 hover:text-rose-300 hover:border-rose-500/40 transition-colors disabled:opacity-60 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border-default text-sm font-medium text-text-muted hover:text-rose-300 hover:border-rose-500/40 transition-colors disabled:opacity-60 cursor-pointer"
               >
                 <XIcon className="w-3.5 h-3.5" />
                 Remove
               </button>
             ) : null}
           </div>
-          <p className="text-[11px] text-zinc-600 mt-2">Recommended 1500×500. PNG, JPG, or WebP. Max 8MB.</p>
+          <p className="text-[11px] text-text-disabled mt-2">Recommended 1500×500. PNG, JPG, or WebP. Max 8MB.</p>
           {bannerError ? <p className="text-[11px] text-rose-400 mt-1">{bannerError}</p> : null}
           <input
             id="profile-banner-input"
@@ -746,14 +746,14 @@ function ProfileImageUploader({
       {/* Lightbox Modal */}
       {showLightbox && (
         <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 bg-zinc-950/95 backdrop-blur-md animate-fade-in animate-duration-200"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 bg-app/95 backdrop-blur-md animate-fade-in animate-duration-200"
           onClick={() => setShowLightbox(false)}
         >
           <div className="absolute top-4 right-4">
             <button
               type="button"
               onClick={() => setShowLightbox(false)}
-              className="p-2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors cursor-pointer"
+              className="p-2 rounded-full bg-surface border border-border-default text-text-muted hover:text-text-primary hover:border-border-strong transition-colors cursor-pointer"
               aria-label="Close photo view"
             >
               <XIcon className="w-5 h-5" />
@@ -764,7 +764,7 @@ function ProfileImageUploader({
             className="relative max-w-md w-full flex flex-col items-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full overflow-hidden border-4 border-zinc-800 shadow-2xl bg-zinc-900 flex items-center justify-center relative">
+            <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full overflow-hidden border-4 border-border-default shadow-2xl bg-surface flex items-center justify-center relative">
               {profile.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -773,13 +773,13 @@ function ProfileImageUploader({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="text-5xl font-bold text-zinc-500 select-none">
+                <div className="text-5xl font-bold text-text-disabled select-none">
                   {getInitials(profile.name)}
                 </div>
               )}
             </div>
-            <p className="mt-4 text-base font-bold text-white leading-tight">{profile.name}</p>
-            {profile.username && <p className="text-xs text-zinc-500 mt-1">@{profile.username}</p>}
+            <p className="mt-4 text-base font-bold text-text-primary leading-tight">{profile.name}</p>
+            {profile.username && <p className="text-xs text-text-disabled mt-1">@{profile.username}</p>}
           </div>
         </div>
       )}

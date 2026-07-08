@@ -42,20 +42,20 @@ export default function OpenAnswerForm({
   const remaining = MAX_LENGTH - body.length;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
+    <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-border-default bg-surface/40 p-4">
       <RichComposer
         value={body}
         onChange={(value) => setBody(value)}
         rows={5}
         placeholder={placeholder}
-        previewClassName="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm leading-relaxed text-white"
+        previewClassName="rounded-xl border border-border-default bg-app px-3 py-3 text-sm leading-relaxed text-text-primary"
          className="w-full px-3 py-3 text-sm leading-relaxed text-transparent caret-white outline-none selection:bg-[#1d9bf0]/30"
       />
 
       <div className="flex items-center justify-between">
         <span
           className={`text-xs ${
-            remaining < 0 ? "text-rose-400" : remaining < 120 ? "text-amber-400" : "text-zinc-500"
+            remaining < 0 ? "text-rose-400" : remaining < 120 ? "text-amber-400" : "text-text-disabled"
           }`}
         >
           {remaining}
@@ -63,7 +63,7 @@ export default function OpenAnswerForm({
         <button
           type="submit"
           disabled={submitting || body.trim().length < 20 || remaining < 0}
-          className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
         >
           {submitting ? "Saving…" : submitLabel}
         </button>

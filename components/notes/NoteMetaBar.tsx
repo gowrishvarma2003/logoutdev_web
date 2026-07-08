@@ -21,8 +21,8 @@ function CoverPickerPopover({
   onClose: () => void;
 }) {
   return (
-    <div className="absolute left-0 top-full z-30 mt-1 w-56 rounded-xl border border-zinc-800 bg-zinc-900 p-3 shadow-2xl">
-      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Cover color</p>
+    <div className="absolute left-0 top-full z-30 mt-1 w-56 rounded-xl border border-border-default bg-surface p-3 shadow-2xl">
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-text-disabled">Cover color</p>
       <div className="flex flex-wrap gap-2">
         {COVER_COLORS.map((color) => (
           <button
@@ -32,7 +32,7 @@ function CoverPickerPopover({
               onClose();
             }}
             className={`h-7 w-7 rounded-full transition-transform hover:scale-105 ${
-              cover === color ? "ring-2 ring-white ring-offset-2 ring-offset-zinc-950" : ""
+              cover === color ? "ring-2 ring-white ring-offset-2 ring-offset-app" : ""
             }`}
             style={{ backgroundColor: color }}
           />
@@ -44,7 +44,7 @@ function CoverPickerPopover({
             onChangeCover(null);
             onClose();
           }}
-          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white"
+          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium text-text-muted transition-colors hover:bg-surface-hover hover:text-text-primary"
         >
           <XIcon className="h-3 w-3" /> Remove cover
         </button>
@@ -84,7 +84,7 @@ export default function NoteMetaBar({ icon, cover, onChangeIcon, onChangeCover }
           <div ref={coverRef} className="absolute bottom-2 right-2 sm:right-4">
             <button
               onClick={() => setCoverPickerOpen((value) => !value)}
-              className="rounded-lg bg-black/30 px-2.5 py-1 text-xs font-medium text-white backdrop-blur transition-colors hover:bg-black/50"
+              className="rounded-lg bg-black/30 px-2.5 py-1 text-xs font-medium text-text-primary backdrop-blur transition-colors hover:bg-black/50"
             >
               Change cover
             </button>
@@ -99,14 +99,14 @@ export default function NoteMetaBar({ icon, cover, onChangeIcon, onChangeCover }
         <div className="relative" ref={iconRef}>
           <button
             onClick={() => setIconPickerOpen((value) => !value)}
-            className="flex h-11 w-11 items-center justify-center rounded-xl text-3xl transition-colors hover:bg-zinc-900"
+            className="flex h-11 w-11 items-center justify-center rounded-xl text-3xl transition-colors hover:bg-surface"
             aria-label="Change icon"
             title="Change icon"
           >
             {icon || <span className="text-lg text-zinc-700">+</span>}
           </button>
           {iconPickerOpen ? (
-            <div className="absolute left-0 top-full z-30 mt-1 w-64 rounded-xl border border-zinc-800 bg-zinc-900 p-2.5 shadow-2xl">
+            <div className="absolute left-0 top-full z-30 mt-1 w-64 rounded-xl border border-border-default bg-surface p-2.5 shadow-2xl">
               <div className="grid grid-cols-8 gap-1">
                 {EMOJI_OPTIONS.map((emoji) => (
                   <button
@@ -115,7 +115,7 @@ export default function NoteMetaBar({ icon, cover, onChangeIcon, onChangeCover }
                       onChangeIcon(emoji);
                       setIconPickerOpen(false);
                     }}
-                    className="rounded-lg p-1.5 text-lg transition-colors hover:bg-zinc-800"
+                    className="rounded-lg p-1.5 text-lg transition-colors hover:bg-surface-hover"
                   >
                     {emoji}
                   </button>
@@ -127,7 +127,7 @@ export default function NoteMetaBar({ icon, cover, onChangeIcon, onChangeCover }
                     onChangeIcon(null);
                     setIconPickerOpen(false);
                   }}
-                  className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white"
+                  className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium text-text-muted transition-colors hover:bg-surface-hover hover:text-text-primary"
                 >
                   <XIcon className="h-3 w-3" /> Remove icon
                 </button>
@@ -140,7 +140,7 @@ export default function NoteMetaBar({ icon, cover, onChangeIcon, onChangeCover }
           <div className="relative" ref={coverRef}>
             <button
               onClick={() => setCoverPickerOpen((value) => !value)}
-              className="text-xs font-medium text-zinc-600 opacity-0 transition-opacity hover:text-zinc-300 focus:opacity-100 group-hover/meta:opacity-100"
+              className="text-xs font-medium text-text-disabled opacity-0 transition-opacity hover:text-text-secondary focus:opacity-100 group-hover/meta:opacity-100"
             >
               Add cover
             </button>

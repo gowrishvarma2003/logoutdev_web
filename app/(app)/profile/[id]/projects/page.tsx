@@ -44,7 +44,7 @@ export default function ProfileProjectsPage({ params }: ProfileProjectsPageProps
           description="Create a space to collect teammates, repos, updates, and proof of work in one place."
           tone="project"
           action={
-            <Link href="/spaces/create" className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+            <Link href="/spaces/create" className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover">
               Create project
             </Link>
           }
@@ -61,33 +61,33 @@ export default function ProfileProjectsPage({ params }: ProfileProjectsPageProps
         <Link
           key={space.id}
           href={`/spaces/${space.id}`}
-          className="group flex items-start gap-4 px-5 py-4 border-b border-zinc-800 hover:bg-zinc-900/40 transition-colors"
+          className="group flex items-start gap-4 px-5 py-4 border-b border-border-default hover:bg-surface/40 transition-colors"
         >
           {/* Project initial */}
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-sky-500/20 border border-zinc-700 flex items-center justify-center text-sm font-bold text-white shrink-0 mt-0.5">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-sky-500/20 border border-border-strong flex items-center justify-center text-sm font-bold text-text-primary shrink-0 mt-0.5">
             {space.name.charAt(0).toUpperCase()}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <h3 className="text-sm font-semibold text-white group-hover:text-sky-400 transition-colors truncate">
+              <h3 className="text-sm font-semibold text-text-primary group-hover:text-sky-400 transition-colors truncate">
                 {space.name}
               </h3>
               <StatusBadge status={space.status} />
               <VisibilityBadge visibility={space.visibility} />
             </div>
-            <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-text-disabled line-clamp-2 leading-relaxed">
               {space.summary}
             </p>
             {space.members && space.members.length > 0 && (
-              <p className="text-xs text-zinc-600 mt-1 flex items-center gap-1">
+              <p className="text-xs text-text-disabled mt-1 flex items-center gap-1">
                 <UsersIcon className="w-3 h-3" />
                 {space.members.length} contributor{space.members.length !== 1 ? "s" : ""}
               </p>
             )}
           </div>
 
-          <ChevronRightIcon className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors mt-1 shrink-0" />
+          <ChevronRightIcon className="w-4 h-4 text-text-disabled group-hover:text-text-muted transition-colors mt-1 shrink-0" />
         </Link>
       ))}
 
@@ -97,17 +97,17 @@ export default function ProfileProjectsPage({ params }: ProfileProjectsPageProps
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-4 py-2 rounded-lg border border-zinc-700 text-sm text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded-lg border border-border-strong text-sm text-text-muted hover:text-text-primary hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Previous
           </button>
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-text-disabled">
             Page {page} of {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="px-4 py-2 rounded-lg border border-zinc-700 text-sm text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded-lg border border-border-strong text-sm text-text-muted hover:text-text-primary hover:border-zinc-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Next
           </button>

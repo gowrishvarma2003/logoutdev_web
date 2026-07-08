@@ -18,10 +18,10 @@ export default function MyFreelanceProjectsPage() {
     <div className="mx-auto max-w-4xl p-4">
       <div className="mb-6 flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">My Posted Projects</h1>
-          <p className="mt-1 text-sm text-zinc-500">Manage your freelance listings and award flow.</p>
+          <h1 className="text-2xl font-bold text-text-primary">My Posted Projects</h1>
+          <p className="mt-1 text-sm text-text-disabled">Manage your freelance listings and award flow.</p>
         </div>
-        <Link href="/freelance/create" className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-zinc-100">
+        <Link href="/freelance/create" className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover">
           Post Project
         </Link>
       </div>
@@ -39,10 +39,10 @@ export default function MyFreelanceProjectsPage() {
           <div key={project.id} className="space-y-3">
             <FreelanceProjectCard project={project} />
             <div className="flex flex-wrap gap-2 px-1">
-              <Link href={`/freelance/${project.id}/edit`} className="rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800">
+              <Link href={`/freelance/${project.id}/edit`} className="rounded-xl border border-border-strong px-3 py-2 text-sm text-text-secondary hover:bg-surface-hover">
                 Edit
               </Link>
-              <Link href={`/freelance/${project.id}/proposals`} className="rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800">
+              <Link href={`/freelance/${project.id}/proposals`} className="rounded-xl border border-border-strong px-3 py-2 text-sm text-text-secondary hover:bg-surface-hover">
                 Proposal Inbox
               </Link>
               {project.linked_space_id && (
@@ -56,7 +56,7 @@ export default function MyFreelanceProjectsPage() {
                 </button>
               )}
               {project.status === "in_review" && (
-                <button onClick={() => updateStatus(project.id, "open")} className="rounded-xl bg-zinc-800 px-3 py-2 text-sm font-semibold text-zinc-200 hover:bg-zinc-700">
+                <button onClick={() => updateStatus(project.id, "open")} className="rounded-xl bg-surface-hover px-3 py-2 text-sm font-semibold text-text-secondary hover:bg-surface-active">
                   Reopen
                 </button>
               )}

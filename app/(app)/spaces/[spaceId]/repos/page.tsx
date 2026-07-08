@@ -195,21 +195,21 @@ export default function ReposPage({
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={() => setShowCreate((value) => !value)}
-                className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+                className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
               >
                 <PlusIcon className="h-3.5 w-3.5" />
                 New repo
               </button>
               <button
                 onClick={() => setShowAttachExisting((value) => !value)}
-                className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-800"
+                className="inline-flex items-center gap-1 rounded-lg border border-border-strong px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-hover"
               >
                 <LinkIcon className="h-3.5 w-3.5" />
                 Attach repo
               </button>
               <button
                 onClick={() => setShowAttachExternal((value) => !value)}
-                className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-800"
+                className="inline-flex items-center gap-1 rounded-lg border border-border-strong px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-hover"
               >
                 <ExternalLinkIcon className="h-3.5 w-3.5" />
                 Attach link
@@ -220,21 +220,21 @@ export default function ReposPage({
       />
 
       {showCreate ? (
-        <form onSubmit={handleCreateRepo} className="space-y-3 border-b border-zinc-800 px-4 py-4">
+        <form onSubmit={handleCreateRepo} className="space-y-3 border-b border-border-default px-4 py-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <input
               type="text"
               value={name}
               onChange={(event) => setName(event.target.value)}
               placeholder="Repository name"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+              className="w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
             />
             <input
               type="text"
               value={defaultBranch}
               onChange={(event) => setDefaultBranch(event.target.value)}
               placeholder="main"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+              className="w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
             />
           </div>
           <textarea
@@ -242,12 +242,12 @@ export default function ReposPage({
             onChange={(event) => setDescription(event.target.value)}
             placeholder="Optional description"
             rows={3}
-            className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+            className="w-full resize-none rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
           />
           <select
             value={visibility}
             onChange={(event) => setVisibility(event.target.value as RepositoryVisibility)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           >
             <option value="private">Private</option>
             <option value="public">Public</option>
@@ -257,14 +257,14 @@ export default function ReposPage({
             <button
               type="button"
               onClick={() => setShowCreate(false)}
-              className="rounded-lg px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:text-white"
+              className="rounded-lg px-3 py-1.5 text-xs text-text-muted transition-colors hover:text-text-primary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={creating}
-              className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-50"
+              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-50"
             >
               {creating ? "Creating..." : "Create & attach"}
             </button>
@@ -273,11 +273,11 @@ export default function ReposPage({
       ) : null}
 
       {showAttachExisting ? (
-        <form onSubmit={handleAttachExisting} className="space-y-3 border-b border-zinc-800 px-4 py-4">
+        <form onSubmit={handleAttachExisting} className="space-y-3 border-b border-border-default px-4 py-4">
           <select
             value={selectedRepoId}
             onChange={(event) => setSelectedRepoId(event.target.value)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           >
             <option value="">Select an existing repo</option>
             {availableRepos.map((repo) => (
@@ -291,14 +291,14 @@ export default function ReposPage({
             <button
               type="button"
               onClick={() => setShowAttachExisting(false)}
-              className="rounded-lg px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:text-white"
+              className="rounded-lg px-3 py-1.5 text-xs text-text-muted transition-colors hover:text-text-primary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={creating || !selectedRepoId}
-              className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-50"
+              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-50"
             >
               {creating ? "Attaching..." : "Attach repo"}
             </button>
@@ -307,34 +307,34 @@ export default function ReposPage({
       ) : null}
 
       {showAttachExternal ? (
-        <form onSubmit={handleAttachExternal} className="space-y-3 border-b border-zinc-800 px-4 py-4">
+        <form onSubmit={handleAttachExternal} className="space-y-3 border-b border-border-default px-4 py-4">
           <input
             type="url"
             value={externalUrl}
             onChange={(event) => setExternalUrl(event.target.value)}
             placeholder="https://github.com/org/repo or docs link"
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
           />
           <input
             type="text"
             value={externalLabel}
             onChange={(event) => setExternalLabel(event.target.value)}
             placeholder="Optional label"
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
           />
           {formError ? <p className="text-sm text-rose-400">{formError}</p> : null}
           <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setShowAttachExternal(false)}
-              className="rounded-lg px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:text-white"
+              className="rounded-lg px-3 py-1.5 text-xs text-text-muted transition-colors hover:text-text-primary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={creating || !externalUrl.trim()}
-              className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-50"
+              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:opacity-50"
             >
               {creating ? "Attaching..." : "Attach link"}
             </button>
@@ -363,15 +363,15 @@ export default function ReposPage({
       ) : null}
 
       {!loading && !error && attachments.length > 0 ? (
-        <div className="divide-y divide-zinc-800/60">
+        <div className="divide-y divide-border-default/60">
           {attachments.map((attachment, index) => (
-            <div key={attachment.id} className="px-4 py-4 transition-colors hover:bg-zinc-900/30">
+            <div key={attachment.id} className="px-4 py-4 transition-colors hover:bg-surface/30">
               {attachment.repo ? (
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="truncate text-sm font-semibold text-white">{attachment.repo.name}</h3>
-                      <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-400">
+                      <h3 className="truncate text-sm font-semibold text-text-primary">{attachment.repo.name}</h3>
+                      <span className="rounded-full bg-surface-hover px-2 py-0.5 text-[11px] text-text-muted">
                         {attachment.repo.default_branch}
                       </span>
                       <span className="rounded-full bg-sky-500/10 px-2 py-0.5 text-[11px] font-medium uppercase text-sky-400">
@@ -384,11 +384,11 @@ export default function ReposPage({
                       ) : null}
                     </div>
                     {attachment.repo.description ? (
-                      <p className="mt-1 text-sm text-zinc-400">{attachment.repo.description}</p>
+                      <p className="mt-1 text-sm text-text-muted">{attachment.repo.description}</p>
                     ) : null}
-                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-550">
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-disabled">
                       {attachment.repo.language ? (
-                        <span className="inline-flex items-center gap-1.5 font-semibold text-zinc-400">
+                        <span className="inline-flex items-center gap-1.5 font-semibold text-text-muted">
                           <span
                             className="h-2.5 w-2.5 rounded-full"
                             style={{ backgroundColor: LANGUAGE_COLORS[attachment.repo.language] || "#8b949e" }}
@@ -399,7 +399,7 @@ export default function ReposPage({
                       <span>
                         Created {new Date(attachment.repo.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       </span>
-                      <span className="rounded-full border border-zinc-800 px-2 py-0.5 text-[11px] uppercase tracking-wide text-zinc-400">
+                      <span className="rounded-full border border-border-default px-2 py-0.5 text-[11px] uppercase tracking-wide text-text-muted">
                         Role {attachment.repo.my_role ?? "read"}
                       </span>
                     </div>
@@ -408,21 +408,21 @@ export default function ReposPage({
                   <div className="flex shrink-0 flex-wrap items-center gap-2">
                     <Link
                       href={`/repos/${attachment.repo.id}`}
-                      className="inline-flex items-center gap-1 rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-700"
+                      className="inline-flex items-center gap-1 rounded-lg bg-surface-hover px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-active"
                     >
                       <CodeBracketIcon className="h-3.5 w-3.5" />
                       Code
                     </Link>
                     <Link
                       href={`/repos/${attachment.repo.id}/commits`}
-                      className="inline-flex items-center gap-1 rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-700"
+                      className="inline-flex items-center gap-1 rounded-lg bg-surface-hover px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-active"
                     >
                       <ClockIcon className="h-3.5 w-3.5" />
                       Commits
                     </Link>
                     <Link
                       href={`/repos/${attachment.repo.id}/pulls`}
-                      className="inline-flex items-center gap-1 rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-700"
+                      className="inline-flex items-center gap-1 rounded-lg bg-surface-hover px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-active"
                     >
                       <LinkIcon className="h-3.5 w-3.5" />
                       Pull Requests
@@ -431,7 +431,7 @@ export default function ReposPage({
                       <>
                         <Link
                           href={`/repos/${attachment.repo.id}/settings`}
-                          className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white"
+                          className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:bg-surface-hover hover:text-text-primary"
                         >
                           <CogIcon className="h-3.5 w-3.5" />
                           Settings
@@ -449,7 +449,7 @@ export default function ReposPage({
                           <button
                             onClick={() => handleAttachmentUpdate(attachment.id, { position: index - 1 })}
                             disabled={actioningAttachment === attachment.id}
-                            className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white disabled:opacity-50"
+                            className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:bg-surface-hover hover:text-text-primary disabled:opacity-50"
                           >
                             <ArrowUpIcon className="h-3.5 w-3.5" />
                             Move up
@@ -470,14 +470,14 @@ export default function ReposPage({
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="truncate text-sm font-semibold text-white">{attachment.label || attachment.external_url}</h3>
+                      <h3 className="truncate text-sm font-semibold text-text-primary">{attachment.label || attachment.external_url}</h3>
                       {attachment.is_primary ? (
                         <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
                           Primary
                         </span>
                       ) : null}
                     </div>
-                    <p className="mt-1 truncate text-sm text-zinc-400">{attachment.external_url}</p>
+                    <p className="mt-1 truncate text-sm text-text-muted">{attachment.external_url}</p>
                   </div>
 
                   <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -485,7 +485,7 @@ export default function ReposPage({
                       href={attachment.external_url ?? "#"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-700"
+                      className="inline-flex items-center gap-1 rounded-lg bg-surface-hover px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-active"
                     >
                       <ExternalLinkIcon className="h-3.5 w-3.5" />
                       Open
@@ -505,7 +505,7 @@ export default function ReposPage({
                           <button
                             onClick={() => handleAttachmentUpdate(attachment.id, { position: index - 1 })}
                             disabled={actioningAttachment === attachment.id}
-                            className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white disabled:opacity-50"
+                            className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:bg-surface-hover hover:text-text-primary disabled:opacity-50"
                           >
                             <ArrowUpIcon className="h-3.5 w-3.5" />
                             Move up

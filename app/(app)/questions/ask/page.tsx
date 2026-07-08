@@ -13,21 +13,21 @@ export default function AskQuestionPage() {
   if (!user) {
     return (
       <div className="px-4 py-12">
-        <div className="mx-auto max-w-xl rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 text-center">
-          <h1 className="text-xl font-semibold text-white">Sign in to ask a question</h1>
-          <p className="mt-2 text-sm text-zinc-500">
+        <div className="mx-auto max-w-xl rounded-2xl border border-border-default bg-surface/40 p-6 text-center">
+          <h1 className="text-xl font-semibold text-text-primary">Sign in to ask a question</h1>
+          <p className="mt-2 text-sm text-text-disabled">
             Questions are public to browse, but only authenticated users can ask, answer, and join discussion.
           </p>
           <div className="mt-5 flex justify-center gap-3">
             <Link
               href="/login"
-              className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+              className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
             >
               Sign in
             </Link>
             <Link
               href="/questions"
-              className="rounded-xl border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-800"
+              className="rounded-xl border border-border-strong px-4 py-2 text-sm font-semibold text-text-secondary transition-colors hover:bg-surface-hover"
             >
               Back to Questions
             </Link>
@@ -39,17 +39,17 @@ export default function AskQuestionPage() {
 
   return (
     <div>
-      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-zinc-800 bg-zinc-950/80 px-4 py-3 backdrop-blur-md">
+      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border-default bg-app/80 px-4 py-3 backdrop-blur-md">
         <button
           onClick={() => router.back()}
-          className="rounded-full p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800"
+          className="rounded-full p-1.5 text-text-muted transition-colors hover:bg-surface-hover"
           aria-label="Go back"
         >
           <ArrowLeftIcon className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-[17px] font-bold text-white">Ask Question</h1>
-          <p className="text-sm text-zinc-500">Open-ended or MCQ, with gated discussion.</p>
+          <h1 className="text-[17px] font-bold text-text-primary">Ask Question</h1>
+          <p className="text-sm text-text-disabled">Open-ended or MCQ, with gated discussion.</p>
         </div>
       </header>
 

@@ -30,14 +30,14 @@ export default function LaunchCollaboratePage({ params }: { params: Promise<{ la
 
   return (
     <div className="mx-auto max-w-3xl p-4">
-      <Link href={`/launches/${launchId}`} className="mb-4 inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300">
+      <Link href={`/launches/${launchId}`} className="mb-4 inline-flex items-center gap-1.5 text-xs text-text-disabled hover:text-text-secondary">
         <ArrowLeftIcon className="h-4 w-4" />
         Back to launch
       </Link>
 
-      <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <h1 className="text-2xl font-bold text-white">Request collaboration</h1>
-        <p className="mt-1 text-sm text-zinc-500">Apply directly from the launch without exposing the linked private space.</p>
+      <div className="rounded-3xl border border-border-default bg-surface/50 p-6">
+        <h1 className="text-2xl font-bold text-text-primary">Request collaboration</h1>
+        <p className="mt-1 text-sm text-text-disabled">Apply directly from the launch without exposing the linked private space.</p>
 
         <form
           onSubmit={async (event) => {
@@ -61,25 +61,25 @@ export default function LaunchCollaboratePage({ params }: { params: Promise<{ la
           className="mt-6 space-y-4"
         >
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-zinc-300">Why do you want to help?</label>
-             <RichComposer value={message} onChange={(value) => setMessage(value)} rows={6} previewClassName="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm leading-relaxed text-white" className="w-full px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:outline-none selection:bg-[#1d9bf0]/30" />
+            <label className="mb-1.5 block text-sm font-medium text-text-secondary">Why do you want to help?</label>
+             <RichComposer value={message} onChange={(value) => setMessage(value)} rows={6} previewClassName="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm leading-relaxed text-text-primary" className="w-full px-3 py-2.5 text-sm leading-relaxed text-transparent caret-white focus:outline-none selection:bg-[#1d9bf0]/30" />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-zinc-300">Relevant skills</label>
-            <input value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="React, Product Design, Growth" className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none" />
+            <label className="mb-1.5 block text-sm font-medium text-text-secondary">Relevant skills</label>
+            <input value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="React, Product Design, Growth" className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none" />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-zinc-300">Availability (hours/week)</label>
-            <input value={availabilityHours} onChange={(e) => setAvailabilityHours(e.target.value)} type="number" min="1" max="80" className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-600 focus:outline-none" />
+            <label className="mb-1.5 block text-sm font-medium text-text-secondary">Availability (hours/week)</label>
+            <input value={availabilityHours} onChange={(e) => setAvailabilityHours(e.target.value)} type="number" min="1" max="80" className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none" />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-zinc-300">Proof links</label>
-            <textarea value={proofLinks} onChange={(e) => setProofLinks(e.target.value)} rows={3} placeholder={"https://github.com/you/project\nhttps://portfolio.example.com"} className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none" />
+            <label className="mb-1.5 block text-sm font-medium text-text-secondary">Proof links</label>
+            <textarea value={proofLinks} onChange={(e) => setProofLinks(e.target.value)} rows={3} placeholder={"https://github.com/you/project\nhttps://portfolio.example.com"} className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none" />
           </div>
 
           {saveError ? <p className="text-sm text-rose-400">{saveError}</p> : null}
 
-          <button type="submit" disabled={saving} className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-zinc-950 hover:bg-zinc-100 disabled:opacity-60">
+          <button type="submit" disabled={saving} className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-60">
             {saving ? "Submitting..." : "Submit collaboration request"}
           </button>
         </form>

@@ -63,16 +63,16 @@ export default function PullRequestLayout({
       {/* Header */}
       <div className="mb-4 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-white sm:text-3xl">
-            {pr.title} <span className="font-light text-zinc-500">#{pr.number}</span>
+          <h1 className="text-2xl font-semibold text-text-primary sm:text-3xl">
+            {pr.title} <span className="font-light text-text-disabled">#{pr.number}</span>
           </h1>
         </div>
         {/* Actions like Edit or Close could go here */}
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-3 text-sm text-zinc-400">
+      <div className="mb-6 flex flex-wrap items-center gap-3 text-sm text-text-muted">
         <span
-          className={`flex items-center gap-1.5 rounded-full px-3 py-1 font-medium text-white ${
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1 font-medium text-text-primary ${
             isMerged ? "bg-purple-600" : isClosed ? "bg-red-600" : pr.is_draft ? "bg-zinc-600" : "bg-green-600"
           }`}
         >
@@ -87,10 +87,10 @@ export default function PullRequestLayout({
         </span>
 
         <p>
-          <span className="font-semibold text-zinc-200">{pr.author?.username}</span> wants to merge{" "}
+          <span className="font-semibold text-text-secondary">{pr.author?.username}</span> wants to merge{" "}
           {pr.commits_count || 0} commits into{" "}
-          <span className="font-mono rounded bg-zinc-800 px-1.5 py-0.5 text-blue-400">{pr.base_label || pr.target_branch}</span> from{" "}
-          <span className="font-mono rounded bg-zinc-800 px-1.5 py-0.5 text-blue-400">{pr.head_label || pr.source_branch}</span>
+          <span className="font-mono rounded bg-surface-hover px-1.5 py-0.5 text-blue-400">{pr.base_label || pr.target_branch}</span> from{" "}
+          <span className="font-mono rounded bg-surface-hover px-1.5 py-0.5 text-blue-400">{pr.head_label || pr.source_branch}</span>
         </p>
         {pr.is_cross_repo ? (
           <span className="rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-300">
@@ -105,9 +105,9 @@ export default function PullRequestLayout({
       </div>
 
       {pr.rule_evaluation?.blocking_reasons?.length ? (
-        <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-          <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">Merge status</p>
-          <div className="mt-3 space-y-1 text-sm text-zinc-300">
+        <div className="mb-6 rounded-xl border border-border-default bg-surface/50 p-4">
+          <p className="text-xs uppercase tracking-[0.16em] text-text-disabled">Merge status</p>
+          <div className="mt-3 space-y-1 text-sm text-text-secondary">
             {pr.rule_evaluation.blocking_reasons.map((reason) => (
               <p key={reason}>{reason}</p>
             ))}
@@ -116,7 +116,7 @@ export default function PullRequestLayout({
       ) : null}
 
       {/* Tabs */}
-      <div className="mb-6 flex overflow-x-auto border-b border-zinc-800 scrollbar-none">
+      <div className="mb-6 flex overflow-x-auto border-b border-border-default scrollbar-none">
         <nav className="-mb-px flex space-x-6" aria-label="Tabs">
           {tabs.map((tab) => {
             // Active if exact match for conversation, or starts with href for others
@@ -129,14 +129,14 @@ export default function PullRequestLayout({
                 href={tab.href}
                 className={`flex items-center gap-2 whitespace-nowrap border-b-2 py-3 px-1 text-sm font-medium transition-colors ${
                   isActive
-                    ? "border-blue-500 text-white"
-                    : "border-transparent text-zinc-400 hover:border-zinc-700 hover:text-zinc-300"
+                    ? "border-blue-500 text-text-primary"
+                    : "border-transparent text-text-muted hover:border-border-strong hover:text-text-secondary"
                 }`}
               >
                 <tab.icon className="h-4 w-4" />
                 {tab.name}
                 {tab.count !== undefined && (
-                  <span className="ml-1 rounded-full bg-zinc-800 px-2 py-0.5 text-xs text-zinc-300">
+                  <span className="ml-1 rounded-full bg-surface-hover px-2 py-0.5 text-xs text-text-secondary">
                     {tab.count}
                   </span>
                 )}

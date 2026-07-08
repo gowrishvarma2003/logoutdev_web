@@ -63,22 +63,22 @@ export default function FreelanceProjectDetailPage({
     <div className="mx-auto max-w-4xl p-4">
       <Link
         href="/explore"
-        className="mb-4 inline-flex items-center gap-1.5 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+        className="mb-4 inline-flex items-center gap-1.5 text-xs text-text-disabled transition-colors hover:text-text-secondary"
       >
         <ArrowLeftIcon className="h-4 w-4" />
         Back to Explore
       </Link>
 
-      <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6">
+      <div className="rounded-3xl border border-border-default bg-surface/50 p-6">
         <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-bold text-white">{project.title}</h1>
+              <h1 className="text-2xl font-bold text-text-primary">{project.title}</h1>
               <ProposalStatusBadge status={project.status} />
             </div>
-            <p className="text-sm text-zinc-400">{project.summary}</p>
+            <p className="text-sm text-text-muted">{project.summary}</p>
             {project.client && (
-              <p className="mt-2 text-xs text-zinc-500">
+              <p className="mt-2 text-xs text-text-disabled">
                 Client: {project.client.name}
                 {project.client.headline ? ` • ${project.client.headline}` : ""}
               </p>
@@ -88,10 +88,10 @@ export default function FreelanceProjectDetailPage({
           <div className="flex flex-wrap gap-2">
             {project.viewer_state?.is_owner && (
               <>
-                <Link href={`/freelance/${project.id}/edit`} className="rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800">
+                <Link href={`/freelance/${project.id}/edit`} className="rounded-xl border border-border-strong px-3 py-2 text-sm text-text-secondary hover:bg-surface-hover">
                   Edit Project
                 </Link>
-                <Link href={`/freelance/${project.id}/proposals`} className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-zinc-950 hover:bg-zinc-100">
+                <Link href={`/freelance/${project.id}/proposals`} className="rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover">
                   View Proposals
                 </Link>
               </>
@@ -104,26 +104,26 @@ export default function FreelanceProjectDetailPage({
           </div>
         </div>
 
-        <div className="mb-6 grid gap-3 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4 sm:grid-cols-3">
-          <div className="text-sm text-zinc-400">
-            <p className="mb-1 text-xs uppercase tracking-wide text-zinc-600">Budget</p>
-            <p className="inline-flex items-center gap-1.5 text-white">
-              <BoltIcon className="h-4 w-4 text-zinc-500" />
+        <div className="mb-6 grid gap-3 rounded-2xl border border-border-default bg-app/60 p-4 sm:grid-cols-3">
+          <div className="text-sm text-text-muted">
+            <p className="mb-1 text-xs uppercase tracking-wide text-text-disabled">Budget</p>
+            <p className="inline-flex items-center gap-1.5 text-text-primary">
+              <BoltIcon className="h-4 w-4 text-text-disabled" />
               {formatCurrencyFromCents(project.budget_min_cents, project.currency_code)} - {formatCurrencyFromCents(project.budget_max_cents, project.currency_code)}
               {project.pricing_model === "hourly" ? "/hr" : ""}
             </p>
           </div>
-          <div className="text-sm text-zinc-400">
-            <p className="mb-1 text-xs uppercase tracking-wide text-zinc-600">Engagement</p>
-            <p className="inline-flex items-center gap-1.5 text-white">
-              <CalendarIcon className="h-4 w-4 text-zinc-500" />
+          <div className="text-sm text-text-muted">
+            <p className="mb-1 text-xs uppercase tracking-wide text-text-disabled">Engagement</p>
+            <p className="inline-flex items-center gap-1.5 text-text-primary">
+              <CalendarIcon className="h-4 w-4 text-text-disabled" />
               {project.engagement_type === "ongoing" ? "Ongoing" : `${project.duration_weeks || "Flexible"} weeks`}
             </p>
           </div>
-          <div className="text-sm text-zinc-400">
-            <p className="mb-1 text-xs uppercase tracking-wide text-zinc-600">Location</p>
-            <p className="inline-flex items-center gap-1.5 text-white">
-              <MapPinIcon className="h-4 w-4 text-zinc-500" />
+          <div className="text-sm text-text-muted">
+            <p className="mb-1 text-xs uppercase tracking-wide text-text-disabled">Location</p>
+            <p className="inline-flex items-center gap-1.5 text-text-primary">
+              <MapPinIcon className="h-4 w-4 text-text-disabled" />
               {project.location_mode}{project.timezone_note ? ` • ${project.timezone_note}` : ""}
             </p>
           </div>
@@ -133,14 +133,14 @@ export default function FreelanceProjectDetailPage({
           {(project.skills ?? []).map((skill) => (
             <span
               key={skill.id}
-              className="rounded-md bg-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-300"
+              className="rounded-md bg-surface-hover px-2.5 py-1 text-xs font-medium text-text-secondary"
             >
               {skill.skill}
             </span>
           ))}
         </div>
 
-        <div className="prose prose-invert max-w-none prose-p:text-zinc-300">
+        <div className="prose prose-invert max-w-none prose-p:text-text-secondary">
           <p>{project.description}</p>
         </div>
       </div>
@@ -157,17 +157,17 @@ export default function FreelanceProjectDetailPage({
         </div>
       ) : null}
 
-      <div id="apply" className="mt-6 rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <h2 className="text-lg font-bold text-white">Apply to this project</h2>
+      <div id="apply" className="mt-6 rounded-3xl border border-border-default bg-surface/50 p-6">
+        <h2 className="text-lg font-bold text-text-primary">Apply to this project</h2>
 
         {!user && (
           <div className="mt-3">
-            <p className="text-sm text-zinc-400">Sign in to submit a proposal and track your application.</p>
+            <p className="text-sm text-text-muted">Sign in to submit a proposal and track your application.</p>
             <div className="mt-4 flex gap-2">
-              <Link href="/login" className="rounded-xl border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800">
+              <Link href="/login" className="rounded-xl border border-border-strong px-4 py-2 text-sm text-text-secondary hover:bg-surface-hover">
                 Sign in
               </Link>
-              <Link href="/signup" className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-zinc-100">
+              <Link href="/signup" className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover">
                 Create account
               </Link>
             </div>
@@ -175,21 +175,21 @@ export default function FreelanceProjectDetailPage({
         )}
 
         {user && project.viewer_state?.is_owner && (
-          <p className="mt-3 text-sm text-zinc-400">
+          <p className="mt-3 text-sm text-text-muted">
             You posted this project. Use the proposal inbox to shortlist or award a freelancer.
           </p>
         )}
 
         {user && !project.viewer_state?.is_owner && project.viewer_state?.has_submitted_proposal && (
-          <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
+          <div className="mt-4 rounded-2xl border border-border-default bg-app/60 p-4">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-sm font-semibold text-white">Your proposal is in.</p>
+              <p className="text-sm font-semibold text-text-primary">Your proposal is in.</p>
               {project.viewer_state.my_proposal_status ? (
                 <ProposalStatusBadge status={project.viewer_state.my_proposal_status} />
               ) : null}
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link href="/freelance/my-proposals" className="rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800">
+              <Link href="/freelance/my-proposals" className="rounded-xl border border-border-strong px-3 py-2 text-sm text-text-secondary hover:bg-surface-hover">
                 View my proposals
               </Link>
               {project.viewer_state.can_open_workspace && (
@@ -214,13 +214,13 @@ export default function FreelanceProjectDetailPage({
         )}
 
         {user && !project.viewer_state?.is_owner && !project.viewer_state?.can_submit_proposal && !project.viewer_state?.has_submitted_proposal && (
-          <p className="mt-3 text-sm text-zinc-400">This project is not accepting new proposals right now.</p>
+          <p className="mt-3 text-sm text-text-muted">This project is not accepting new proposals right now.</p>
         )}
 
         <div className="mt-4">
           <Link
             href={`/feed?shareType=freelance_project&shareId=${project.id}&shareTitle=${encodeURIComponent(project.title)}&shareSubtitle=${encodeURIComponent(project.summary || "")}&shareHref=${encodeURIComponent(`/freelance/${project.id}`)}`}
-            className="inline-flex rounded-xl border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-800"
+            className="inline-flex rounded-xl border border-border-strong px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface-hover"
           >
             Share update
           </Link>

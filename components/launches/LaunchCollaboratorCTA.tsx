@@ -23,8 +23,8 @@ export default function LaunchCollaboratorCTA({
           <UsersIcon className="h-5 w-5" />
         </div>
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-white">Looking for Collaborators</h3>
-          <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">
+          <h3 className="text-sm font-semibold text-text-primary">Looking for Collaborators</h3>
+          <p className="mt-1.5 text-xs leading-relaxed text-text-muted">
             {launch.collaboration_note ||
               "This launch is open to new developers. Apply to build next features together."}
           </p>
@@ -33,7 +33,7 @@ export default function LaunchCollaboratorCTA({
 
       {roles.length > 0 && (
         <div className="mb-4">
-          <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 mb-2">Target Roles</p>
+          <p className="text-[10px] font-medium uppercase tracking-wider text-text-disabled mb-2">Target Roles</p>
           <div className="flex flex-wrap gap-1.5">
             {roles.map((role) => (
               <span
@@ -51,7 +51,7 @@ export default function LaunchCollaboratorCTA({
         launch.viewer_state?.can_request_collaboration ? (
           <Link
             href={`/launches/${launch.id}/collaborate`}
-            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition-colors shadow-lg shadow-emerald-500/10"
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors shadow-lg shadow-emerald-500/10"
           >
             Request to Collaborate
           </Link>
@@ -64,14 +64,14 @@ export default function LaunchCollaboratorCTA({
             ⏳ Your request to collaborate is currently under review by the builder.
           </p>
         ) : (
-          <p className="text-xs text-zinc-500 bg-zinc-900/50 rounded-lg p-3 border border-zinc-800 text-center">
+          <p className="text-xs text-text-disabled bg-surface/50 rounded-lg p-3 border border-border-default text-center">
             Collaboration applications are currently closed or already handled.
           </p>
         )
       ) : (
         <Link
           href="/login"
-          className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-zinc-800 hover:border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors"
+          className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-border-default hover:border-border-strong bg-surface px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors"
         >
           Sign in to collaborate
         </Link>

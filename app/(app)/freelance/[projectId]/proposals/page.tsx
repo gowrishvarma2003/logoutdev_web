@@ -35,14 +35,14 @@ export default function FreelanceProjectProposalsPage({
   }
 
   if (!project.viewer_state?.can_view_proposals) {
-    return <p className="p-4 text-sm text-zinc-400">Only the client can access this proposal inbox.</p>;
+    return <p className="p-4 text-sm text-text-muted">Only the client can access this proposal inbox.</p>;
   }
 
   return (
     <div className="mx-auto max-w-4xl p-4">
       <Link
         href={`/freelance/${projectId}`}
-        className="mb-4 inline-flex items-center gap-1.5 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+        className="mb-4 inline-flex items-center gap-1.5 text-xs text-text-disabled transition-colors hover:text-text-secondary"
       >
         <ArrowLeftIcon className="h-4 w-4" />
         Back to Project
@@ -50,8 +50,8 @@ export default function FreelanceProjectProposalsPage({
 
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">Proposal Inbox</h1>
-          <p className="mt-1 text-sm text-zinc-500">{project.title}</p>
+          <h1 className="text-2xl font-bold text-text-primary">Proposal Inbox</h1>
+          <p className="mt-1 text-sm text-text-disabled">{project.title}</p>
         </div>
         {project.linked_space_id && (
           <Link href={`/spaces/${project.linked_space_id}`} className="rounded-xl bg-sky-500/15 px-3 py-2 text-sm font-semibold text-sky-300 hover:bg-sky-500/20">
@@ -69,8 +69,8 @@ export default function FreelanceProjectProposalsPage({
       {error && <p className="text-sm text-rose-400">{error}</p>}
 
       {!loading && !error && proposals.length === 0 && (
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 text-center">
-          <p className="text-sm text-zinc-400">No proposals have been submitted yet.</p>
+        <div className="rounded-2xl border border-border-default bg-surface/50 p-6 text-center">
+          <p className="text-sm text-text-muted">No proposals have been submitted yet.</p>
         </div>
       )}
 

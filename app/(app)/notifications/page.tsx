@@ -158,17 +158,17 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-20 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-md">
+      <header className="sticky top-0 z-20 border-b border-border-default bg-app/90 backdrop-blur-md">
         <div className="px-4 py-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/70 text-sky-300">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-border-default bg-surface/70 text-sky-300">
                   <BellIcon className="h-4 w-4" />
                 </span>
                 <div>
-                  <h1 className="text-[18px] font-bold text-white">Notifications</h1>
-                  <p className="mt-0.5 text-sm text-zinc-500">
+                  <h1 className="text-[18px] font-bold text-text-primary">Notifications</h1>
+                  <p className="mt-0.5 text-sm text-text-disabled">
                     {summary.needs_action_count} actions pending · {summary.unread_count} unread · {latestLabel}
                   </p>
                 </div>
@@ -179,7 +179,7 @@ export default function NotificationsPage() {
               type="button"
               onClick={() => void markVisibleRead()}
               disabled={summary.unread_count === 0}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-700 px-3 py-2 text-xs font-semibold text-zinc-300 transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border-strong px-3 py-2 text-xs font-semibold text-text-secondary transition-colors hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-40"
             >
               <CheckIcon className="h-3.5 w-3.5" />
               Mark visible read
@@ -187,7 +187,7 @@ export default function NotificationsPage() {
             <button
               type="button"
               onClick={() => setSettingsOpen((current) => !current)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-400 transition-colors hover:bg-zinc-900 hover:text-white"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border-default px-3 py-2 text-xs font-semibold text-text-muted transition-colors hover:bg-surface hover:text-text-primary"
             >
               <FilterIcon className="h-3.5 w-3.5" />
               Preferences
@@ -201,7 +201,7 @@ export default function NotificationsPage() {
           </div>
         </div>
 
-        <div className="flex overflow-x-auto border-t border-zinc-800 px-2">
+        <div className="flex overflow-x-auto border-t border-border-default px-2">
           {TABS.map((tab) => (
             <button
               key={tab.key}
@@ -214,7 +214,7 @@ export default function NotificationsPage() {
                 setSelectedId(null);
               }}
               className={`relative min-w-fit px-3 py-3 text-sm font-semibold transition-colors sm:flex-1 ${
-                activeTab === tab.key ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                activeTab === tab.key ? "text-text-primary" : "text-text-disabled hover:text-text-secondary"
               }`}
             >
               {tab.label}
@@ -227,11 +227,11 @@ export default function NotificationsPage() {
       </header>
 
       {settingsOpen ? (
-        <section className="border-b border-zinc-800 bg-zinc-950/70 px-4 py-4">
+        <section className="border-b border-border-default bg-app/70 px-4 py-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-semibold text-white">Notification preferences</p>
-              <p className="mt-1 text-xs text-zinc-500">Muted categories hide non-action updates on this device.</p>
+              <p className="text-sm font-semibold text-text-primary">Notification preferences</p>
+              <p className="mt-1 text-xs text-text-disabled">Muted categories hide non-action updates on this device.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {CATEGORY_OPTIONS.map((category) => {
@@ -243,7 +243,7 @@ export default function NotificationsPage() {
                     onClick={() => toggleMutedCategory(category.key)}
                     className={`rounded-xl border px-3 py-2 text-xs font-semibold transition-colors ${
                       muted
-                        ? "border-zinc-700 bg-zinc-900 text-zinc-500"
+                        ? "border-border-strong bg-surface text-text-disabled"
                         : "border-sky-400/30 bg-sky-400/10 text-sky-200"
                     }`}
                   >
@@ -258,13 +258,13 @@ export default function NotificationsPage() {
       ) : null}
 
       {activeTab === "priority" && (suggestedActions.length > 0 || pendingItems.length > 0) ? (
-        <section className="border-b border-zinc-800 px-4 py-4">
+        <section className="border-b border-border-default px-4 py-4">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-text-disabled">
               <SparklesIcon className="h-4 w-4 text-sky-300" />
               Needs attention
             </div>
-            <span className="text-xs text-zinc-600">{pendingItems.length + suggestedActions.length} open</span>
+            <span className="text-xs text-text-disabled">{pendingItems.length + suggestedActions.length} open</span>
           </div>
           <div className="grid gap-3 xl:grid-cols-2">
             {pendingItems.map((item) => (
@@ -282,19 +282,19 @@ export default function NotificationsPage() {
         </section>
       ) : null}
 
-      <section className="border-b border-zinc-800 px-4 py-3">
+      <section className="border-b border-border-default px-4 py-3">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <label className="relative flex-1">
-            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-disabled" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search actor, project, repo, question, or update"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 py-2.5 pl-9 pr-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-600"
+              className="w-full rounded-xl border border-border-default bg-surface/50 py-2.5 pl-9 pr-3 text-sm text-text-primary outline-none placeholder:text-text-disabled focus:border-border-strong"
             />
           </label>
           <div className="flex items-center gap-2 overflow-x-auto">
-            <FilterIcon className="h-4 w-4 shrink-0 text-zinc-600" />
+            <FilterIcon className="h-4 w-4 shrink-0 text-text-disabled" />
             {FILTERS.map((item) => (
               <button
                 key={item.key}
@@ -303,7 +303,7 @@ export default function NotificationsPage() {
                 className={`shrink-0 rounded-xl border px-3 py-2 text-xs font-semibold transition-colors ${
                   filter === item.key
                     ? "border-sky-400/40 bg-sky-400/10 text-sky-200"
-                    : "border-zinc-800 bg-zinc-900/30 text-zinc-400 hover:text-zinc-200"
+                    : "border-border-default bg-surface/30 text-text-muted hover:text-text-secondary"
                 }`}
               >
                 {item.label}
@@ -341,12 +341,12 @@ export default function NotificationsPage() {
             ))}
 
             {nextCursor ? (
-              <div className="border-t border-zinc-800 px-4 py-4">
+              <div className="border-t border-border-default px-4 py-4">
                 <button
                   type="button"
                   onClick={loadMore}
                   disabled={loadingMore}
-                  className="w-full rounded-xl border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-200 transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full rounded-xl border border-border-strong px-4 py-3 text-sm font-semibold text-text-secondary transition-colors hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loadingMore ? "Loading..." : "Load more"}
                 </button>
@@ -354,7 +354,7 @@ export default function NotificationsPage() {
             ) : null}
           </div>
 
-          <aside className="hidden border-l border-zinc-800 bg-zinc-950/70 xl:block">
+          <aside className="hidden border-l border-border-default bg-app/70 xl:block">
             {selectedItem ? (
               <NotificationDetail item={selectedItem} onRead={() => void handleMarkRead(selectedItem)} />
             ) : null}
@@ -369,13 +369,13 @@ function Metric({ label, value, tone }: { label: string; value: number; tone: "a
   const toneClass = {
     action: "border-amber-400/20 bg-amber-400/10 text-amber-200",
     unread: "border-sky-400/20 bg-sky-400/10 text-sky-200",
-    recent: "border-zinc-700 bg-zinc-900/50 text-zinc-200",
+    recent: "border-border-strong bg-surface/50 text-text-secondary",
   }[tone];
 
   return (
     <div className={`rounded-xl border px-3 py-2 ${toneClass}`}>
       <p className="text-lg font-bold leading-none">{value > 99 ? "99+" : value}</p>
-      <p className="mt-1 text-[11px] font-medium text-zinc-500">{label}</p>
+      <p className="mt-1 text-[11px] font-medium text-text-disabled">{label}</p>
     </div>
   );
 }
@@ -385,15 +385,15 @@ function SuggestedActionCard({ action }: { action: SuggestedAction }) {
     <article className="rounded-xl border border-sky-400/20 bg-sky-400/10 p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-white">{action.title}</p>
-          <p className="mt-1 line-clamp-2 text-sm text-zinc-400">{action.description}</p>
+          <p className="text-sm font-semibold text-text-primary">{action.title}</p>
+          <p className="mt-1 line-clamp-2 text-sm text-text-muted">{action.description}</p>
           {action.entity_ref?.title ? (
             <EntityMeta entity={action.entity_ref} className="mt-3" />
           ) : null}
         </div>
         <Link
           href={action.primary_cta.href}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
         >
           {action.primary_cta.label}
           <ExternalLinkIcon className="h-3.5 w-3.5" />
@@ -416,20 +416,20 @@ function ActionNotificationCard({
     <div className="rounded-xl border border-amber-400/20 bg-amber-400/10 p-4 transition-colors hover:border-amber-300/30">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-white">{buildNotificationSentence(item)}</p>
+          <p className="text-sm font-semibold text-text-primary">{buildNotificationSentence(item)}</p>
           <EntityMeta entity={item.entity_ref} className="mt-3" />
           {item.secondary_entity_ref?.subtitle ? (
-            <p className="mt-2 line-clamp-2 text-sm text-zinc-400">{item.secondary_entity_ref.subtitle}</p>
+            <p className="mt-2 line-clamp-2 text-sm text-text-muted">{item.secondary_entity_ref.subtitle}</p>
           ) : null}
         </div>
-        <span className="shrink-0 text-xs text-zinc-500">{formatRelativeTime(item.created_at)}</span>
+        <span className="shrink-0 text-xs text-text-disabled">{formatRelativeTime(item.created_at)}</span>
       </div>
       <div className="mt-4 flex items-center gap-2">
-        <span className="rounded-full bg-amber-300 px-2.5 py-1 text-[11px] font-bold text-zinc-950">Action</span>
+        <span className="rounded-full bg-amber-300 px-2.5 py-1 text-[11px] font-bold text-primary-foreground">Action</span>
         {item.can_open && item.action_url ? (
-          <span className="text-xs font-medium text-zinc-400">Open to resolve</span>
+          <span className="text-xs font-medium text-text-muted">Open to resolve</span>
         ) : (
-          <span className="text-xs font-medium text-zinc-500">Context only</span>
+          <span className="text-xs font-medium text-text-disabled">Context only</span>
         )}
       </div>
     </div>
@@ -472,8 +472,8 @@ function NotificationRow({
 
   return (
     <article
-      className={`border-b border-zinc-800/80 transition-colors ${
-        selected ? "bg-zinc-900/60" : "hover:bg-zinc-900/35"
+      className={`border-b border-border-default/80 transition-colors ${
+        selected ? "bg-surface/60" : "hover:bg-surface/35"
       } ${unread ? "" : "opacity-80"}`}
     >
       <div
@@ -502,29 +502,29 @@ function NotificationRow({
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="line-clamp-2 text-sm text-zinc-200">
-                  <span className="font-semibold text-white">{buildActorName(item)}</span>{" "}
+                <p className="line-clamp-2 text-sm text-text-secondary">
+                  <span className="font-semibold text-text-primary">{buildActorName(item)}</span>{" "}
                   <span>{buildNotificationSentence(item, false)}</span>
                 </p>
                 <EntityMeta entity={item.entity_ref} className="mt-2" />
                 {item.secondary_entity_ref?.subtitle ? (
-                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-zinc-500">
+                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-text-disabled">
                     {item.secondary_entity_ref.subtitle}
                   </p>
                 ) : null}
               </div>
 
               <div className="shrink-0 text-right">
-                <p className="text-xs text-zinc-500">{formatRelativeTime(item.created_at)}</p>
+                <p className="text-xs text-text-disabled">{formatRelativeTime(item.created_at)}</p>
                 {item.group_count > 1 ? (
-                  <p className="mt-1 text-[11px] text-zinc-600">{item.group_count} updates</p>
+                  <p className="mt-1 text-[11px] text-text-disabled">{item.group_count} updates</p>
                 ) : null}
               </div>
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <PriorityBadge priority={item.priority} />
-              <span className="rounded-full border border-zinc-800 px-2 py-0.5 text-[11px] font-medium text-zinc-500">
+              <span className="rounded-full border border-border-default px-2 py-0.5 text-[11px] font-medium text-text-disabled">
                 {CATEGORY_LABELS[item.category] ?? item.category}
               </span>
               {unread ? (
@@ -534,7 +534,7 @@ function NotificationRow({
                     event.stopPropagation();
                     onRead();
                   }}
-                  className="rounded-full border border-zinc-800 px-2 py-0.5 text-[11px] font-semibold text-zinc-400 transition-colors hover:border-zinc-700 hover:text-white"
+                  className="rounded-full border border-border-default px-2 py-0.5 text-[11px] font-semibold text-text-muted transition-colors hover:border-border-strong hover:text-text-primary"
                 >
                   Mark read
                 </button>
@@ -546,7 +546,7 @@ function NotificationRow({
                     event.stopPropagation();
                     onRead();
                   }}
-                  className="rounded-full border border-zinc-800 px-2 py-0.5 text-[11px] font-semibold text-zinc-300 transition-colors hover:border-zinc-700 hover:text-white"
+                  className="rounded-full border border-border-default px-2 py-0.5 text-[11px] font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary"
                 >
                   Open
                 </Link>
@@ -564,22 +564,22 @@ function NotificationDetail({ item, onRead }: { item: NotificationItem; onRead: 
     <div className="sticky top-[162px] p-5">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-600">Selected update</p>
-          <h2 className="mt-1 text-base font-semibold text-white">{CATEGORY_LABELS[item.category] ?? item.category}</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-text-disabled">Selected update</p>
+          <h2 className="mt-1 text-base font-semibold text-text-primary">{CATEGORY_LABELS[item.category] ?? item.category}</h2>
         </div>
         <PriorityBadge priority={item.priority} />
       </div>
 
-      <div className="mt-5 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-        <p className="text-sm leading-relaxed text-zinc-200">{buildNotificationSentence(item)}</p>
-        <p className="mt-2 text-xs text-zinc-500">{formatRelativeTime(item.created_at)} ago</p>
+      <div className="mt-5 rounded-xl border border-border-default bg-surface/40 p-4">
+        <p className="text-sm leading-relaxed text-text-secondary">{buildNotificationSentence(item)}</p>
+        <p className="mt-2 text-xs text-text-disabled">{formatRelativeTime(item.created_at)} ago</p>
       </div>
 
-      <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950/50 p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-600">Context</p>
+      <div className="mt-4 rounded-xl border border-border-default bg-app/50 p-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-text-disabled">Context</p>
         <EntityMeta entity={item.entity_ref} className="mt-3" expanded />
         {item.secondary_entity_ref ? (
-          <div className="mt-4 border-t border-zinc-800 pt-4">
+          <div className="mt-4 border-t border-border-default pt-4">
             <EntityMeta entity={item.secondary_entity_ref} expanded />
           </div>
         ) : null}
@@ -590,7 +590,7 @@ function NotificationDetail({ item, onRead }: { item: NotificationItem; onRead: 
           <Link
             href={item.action_url}
             onClick={onRead}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
           >
             Open notification
             <ExternalLinkIcon className="h-4 w-4" />
@@ -600,7 +600,7 @@ function NotificationDetail({ item, onRead }: { item: NotificationItem; onRead: 
           <button
             type="button"
             onClick={onRead}
-            className="rounded-xl border border-zinc-800 px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
+            className="rounded-xl border border-border-default px-4 py-3 text-sm font-semibold text-text-secondary transition-colors hover:bg-surface hover:text-text-primary"
           >
             Mark as read
           </button>
@@ -623,18 +623,18 @@ function EntityMeta({
 
   return (
     <div className={`min-w-0 ${className}`}>
-      <div className="flex min-w-0 items-center gap-2 text-xs font-medium text-zinc-500">
+      <div className="flex min-w-0 items-center gap-2 text-xs font-medium text-text-disabled">
         <span className="shrink-0">{CATEGORY_LABELS[entity.type] ?? entity.type}</span>
-        <span className="h-1 w-1 shrink-0 rounded-full bg-zinc-700" />
-        <span className="truncate text-zinc-300">{entity.title}</span>
+        <span className="h-1 w-1 shrink-0 rounded-full bg-surface-active" />
+        <span className="truncate text-text-secondary">{entity.title}</span>
       </div>
       {expanded && entity.subtitle ? (
-        <p className="mt-2 text-sm leading-relaxed text-zinc-500">{entity.subtitle}</p>
+        <p className="mt-2 text-sm leading-relaxed text-text-disabled">{entity.subtitle}</p>
       ) : null}
       {expanded && entity.tags?.length ? (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {entity.tags.map((tag) => (
-            <span key={tag} className="rounded-full border border-zinc-800 px-2 py-0.5 text-[11px] text-zinc-500">
+            <span key={tag} className="rounded-full border border-border-default px-2 py-0.5 text-[11px] text-text-disabled">
               {tag}
             </span>
           ))}
@@ -648,7 +648,7 @@ function PriorityBadge({ priority }: { priority: NotificationItem["priority"] })
   const className = {
     action: "border-amber-300/30 bg-amber-300/10 text-amber-200",
     important: "border-sky-300/30 bg-sky-300/10 text-sky-200",
-    activity: "border-zinc-800 bg-zinc-900/40 text-zinc-500",
+    activity: "border-border-default bg-surface/40 text-text-disabled",
   }[priority];
 
   return (
@@ -662,14 +662,14 @@ function NotificationSkeleton() {
   return (
     <div>
       {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="flex gap-3 border-b border-zinc-800 px-4 py-4">
-          <div className="h-9 w-9 rounded-full bg-zinc-900" />
+        <div key={index} className="flex gap-3 border-b border-border-default px-4 py-4">
+          <div className="h-9 w-9 rounded-full bg-surface" />
           <div className="flex-1 space-y-3">
-            <div className="h-3 w-3/4 rounded bg-zinc-900" />
-            <div className="h-3 w-1/2 rounded bg-zinc-900" />
+            <div className="h-3 w-3/4 rounded bg-surface" />
+            <div className="h-3 w-1/2 rounded bg-surface" />
             <div className="flex gap-2">
-              <div className="h-5 w-20 rounded-full bg-zinc-900" />
-              <div className="h-5 w-16 rounded-full bg-zinc-900" />
+              <div className="h-5 w-20 rounded-full bg-surface" />
+              <div className="h-5 w-16 rounded-full bg-surface" />
             </div>
           </div>
         </div>
@@ -705,7 +705,7 @@ function getCategoryTone(category: string) {
   if (category === "question") return "bg-amber-500/20 text-amber-300";
   if (category === "launch") return "bg-fuchsia-500/20 text-fuchsia-300";
   if (category === "calls") return "bg-rose-500/20 text-rose-300";
-  return "bg-zinc-800 text-zinc-400";
+  return "bg-surface-hover text-text-muted";
 }
 
 function getCategoryIcon(category: string): ReactNode {

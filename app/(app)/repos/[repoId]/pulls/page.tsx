@@ -17,11 +17,11 @@ export default function RepoPullRequestsPage() {
   return (
     <div className="mx-auto max-w-[1280px] p-4 md:p-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div className="flex border border-zinc-700 rounded-md overflow-hidden text-sm">
+        <div className="flex border border-border-strong rounded-md overflow-hidden text-sm">
           <button
             onClick={() => setFilterState("open")}
-            className={`flex items-center gap-2 px-4 py-2 hover:bg-zinc-800 transition-colors ${
-              filterState === "open" ? "bg-zinc-800 text-white font-medium shadow-inner" : "text-zinc-400 bg-zinc-900"
+            className={`flex items-center gap-2 px-4 py-2 hover:bg-surface-hover transition-colors ${
+              filterState === "open" ? "bg-surface-hover text-text-primary font-medium shadow-inner" : "text-text-muted bg-surface"
             }`}
           >
             <ExclamationCircleIcon className="h-4 w-4 text-green-500" />
@@ -29,8 +29,8 @@ export default function RepoPullRequestsPage() {
           </button>
           <button
             onClick={() => setFilterState("closed")}
-            className={`flex items-center gap-2 px-4 py-2 hover:bg-zinc-800 transition-colors border-l border-zinc-700 ${
-              filterState === "closed" ? "bg-zinc-800 text-white font-medium shadow-inner" : "text-zinc-400 bg-zinc-900"
+            className={`flex items-center gap-2 px-4 py-2 hover:bg-surface-hover transition-colors border-l border-border-strong ${
+              filterState === "closed" ? "bg-surface-hover text-text-primary font-medium shadow-inner" : "text-text-muted bg-surface"
             }`}
           >
             <CheckCircleIcon className="h-4 w-4 text-purple-500" />
@@ -40,7 +40,7 @@ export default function RepoPullRequestsPage() {
         {repo.can_open_pr ? (
           <Link
             href={`/repos/${repo.id}/pulls/new`}
-            className="flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-500 transition-colors"
+            className="flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-sm font-semibold text-text-primary hover:bg-green-500 transition-colors"
           >
             <PlusIcon className="h-4 w-4" />
             New pull request
@@ -61,9 +61,9 @@ export default function RepoPullRequestsPage() {
       )}
 
       {!loading && !error && pullRequests.length === 0 ? (
-        <div className="mt-8 border border-zinc-800 rounded-lg bg-zinc-900/50 py-16">
+        <div className="mt-8 border border-border-default rounded-lg bg-surface/50 py-16">
           <EmptyState
-            icon={<QueueListIcon className="h-10 w-10 text-zinc-500" />}
+            icon={<QueueListIcon className="h-10 w-10 text-text-disabled" />}
             title="No pull requests found"
             description={`There are no ${filterState} pull requests in this repository.`}
           />
@@ -71,10 +71,10 @@ export default function RepoPullRequestsPage() {
       ) : null}
 
       {!loading && !error && pullRequests.length > 0 && (
-        <div className="border border-zinc-800 rounded-lg bg-zinc-900/50 overflow-hidden text-sm">
-          <div className="divide-y divide-zinc-800">
+        <div className="border border-border-default rounded-lg bg-surface/50 overflow-hidden text-sm">
+          <div className="divide-y divide-border-default">
             {pullRequests.map((pr) => (
-              <div key={pr.id} className="p-4 hover:bg-zinc-800/50 transition-colors flex gap-3 group">
+              <div key={pr.id} className="p-4 hover:bg-surface-hover/50 transition-colors flex gap-3 group">
                 <div className="mt-0.5 shrink-0">
                   {pr.status === "open" ? (
                     <ExclamationCircleIcon className="h-5 w-5 text-green-500" />
@@ -87,7 +87,7 @@ export default function RepoPullRequestsPage() {
                 <div className="flex-1 min-w-0">
                   <Link
                     href={`/repos/${repo.id}/pulls/${pr.number}`}
-                    className="text-base font-semibold text-white hover:text-blue-500 transition-colors truncate"
+                    className="text-base font-semibold text-text-primary hover:text-blue-500 transition-colors truncate"
                   >
                     {pr.title}
                   </Link>
@@ -108,19 +108,19 @@ export default function RepoPullRequestsPage() {
                           ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
                           : pr.mergeable_state === "dirty"
                             ? "border-rose-500/20 bg-rose-500/10 text-rose-300"
-                            : "border-zinc-700 bg-zinc-800 text-zinc-300"
+                            : "border-border-strong bg-surface-hover text-text-secondary"
                       }`}
                     >
                       {pr.mergeable_state || "unknown"}
                     </span>
-                    <span className="rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-zinc-300">
+                    <span className="rounded-full border border-border-strong bg-surface-hover px-2 py-0.5 text-text-secondary">
                       {pr.review_summary?.approvals_count || 0} approvals
                     </span>
-                    <span className="rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-zinc-300">
+                    <span className="rounded-full border border-border-strong bg-surface-hover px-2 py-0.5 text-text-secondary">
                       {pr.review_summary?.changes_requested_count || 0} changes requested
                     </span>
                   </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-zinc-500">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-text-disabled">
                     <span>
                       #{pr.number} opened {formatRelativeTime(pr.created_at)} by{" "}
                       <Link href={`/`} className="hover:text-blue-500 hover:underline">

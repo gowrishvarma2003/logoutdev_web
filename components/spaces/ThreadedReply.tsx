@@ -81,12 +81,12 @@ export function InlineComposer({
             }}
             placeholder={placeholder}
             maxLength={REPLY_LIMIT}
-            className="flex-1 px-3 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
+            className="flex-1 px-3 py-2 rounded-full bg-surface border border-border-default text-sm text-text-primary placeholder:text-text-disabled focus:outline-none focus:border-border-strong transition-colors"
           />
           <button
             onClick={submit}
             disabled={posting || !body.trim()}
-            className="shrink-0 px-3.5 py-1.5 rounded-full bg-sky-500 text-white text-xs font-bold hover:bg-sky-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="shrink-0 px-3.5 py-1.5 rounded-full bg-sky-500 text-text-primary text-xs font-bold hover:bg-sky-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             {posting ? "…" : "Reply"}
           </button>
@@ -141,7 +141,7 @@ export default function ThreadedReply({
         />
         {/* Vertical connector to children */}
         {hasChildren && canNest && (
-          <div className="w-0.5 bg-zinc-700/50 flex-1 mt-1.5 rounded-full min-h-[12px]" />
+          <div className="w-0.5 bg-surface-active/50 flex-1 mt-1.5 rounded-full min-h-[12px]" />
         )}
       </div>
 
@@ -149,17 +149,17 @@ export default function ThreadedReply({
       <div className="flex-1 min-w-0 pb-3">
         {/* Author row */}
         <div className="flex items-center gap-2 text-xs mb-1">
-          <span className="font-semibold text-white">
+          <span className="font-semibold text-text-primary">
             {reply.author?.name ?? "Unknown"}
           </span>
           <span className="text-zinc-700">·</span>
-          <span className="text-zinc-500">
+          <span className="text-text-disabled">
             {formatRelativeTime(reply.created_at)}
           </span>
         </div>
 
         {/* Reply body */}
-        <RichText text={reply.body} className="text-sm text-zinc-300 whitespace-pre-line leading-relaxed" />
+        <RichText text={reply.body} className="text-sm text-text-secondary whitespace-pre-line leading-relaxed" />
 
         {/* Action bar */}
         <div className="flex items-center gap-4 mt-2 text-xs">
@@ -169,7 +169,7 @@ export default function ThreadedReply({
               className={`inline-flex items-center gap-1.5 transition-colors ${
                 showComposer
                   ? "text-sky-400"
-                  : "text-zinc-500 hover:text-sky-400"
+                  : "text-text-disabled hover:text-sky-400"
               }`}
             >
               <ChatIcon className="w-3.5 h-3.5" />
@@ -177,7 +177,7 @@ export default function ThreadedReply({
             </button>
           ) : (
             children.length > 0 && (
-              <span className="inline-flex items-center gap-1.5 text-zinc-500">
+              <span className="inline-flex items-center gap-1.5 text-text-disabled">
                 <ChatIcon className="w-3.5 h-3.5" />
                 <span>{children.length}</span>
               </span>
@@ -222,7 +222,7 @@ export default function ThreadedReply({
 
         {/* Depth limit indicator */}
         {hasChildren && !canNest && (
-          <p className="text-[11px] text-zinc-600 mt-2 italic">
+          <p className="text-[11px] text-text-disabled mt-2 italic">
             {children.length} more{" "}
             {children.length === 1 ? "reply" : "replies"} in this thread
           </p>

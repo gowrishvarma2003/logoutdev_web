@@ -49,7 +49,7 @@ function ExternalLink({
       rel="noopener noreferrer"
       title={label}
       aria-label={label}
-      className="flex items-center gap-1.5 text-zinc-400 hover:text-sky-400 transition-colors text-sm group"
+      className="flex items-center gap-1.5 text-text-muted hover:text-sky-400 transition-colors text-sm group"
     >
       <span className="shrink-0">{icon}</span>
       <span className="truncate max-w-[140px] group-hover:underline underline-offset-2">
@@ -92,7 +92,7 @@ export default function ProfileHeader({
     : `/profile/${profile.id}`;
 
   return (
-    <div className="border-b border-zinc-800">
+    <div className="border-b border-border-default">
       <ProfileBanner
         bannerUrl={profile.banner_url}
         isMe={is_me}
@@ -114,7 +114,7 @@ export default function ProfileHeader({
             {is_me ? (
               <Link
                 href="/settings/profile"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-zinc-950 text-sm font-semibold hover:bg-zinc-100 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover transition-colors"
               >
                 <EditIcon className="w-3.5 h-3.5" />
                 Edit profile
@@ -133,23 +133,23 @@ export default function ProfileHeader({
 
         {/* ── Name + handle + band ── */}
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-text-primary leading-tight">
             {profile.name}
           </h1>
           {band || badge ? <ProfileBandChip band={band} badge={badge} score={score ?? undefined} /> : null}
         </div>
         {profile.username ? (
-          <p className="text-sm text-zinc-500 mt-0.5">@{profile.username}</p>
+          <p className="text-sm text-text-disabled mt-0.5">@{profile.username}</p>
         ) : null}
 
         {/* ── Pronouns ── */}
         {profile.pronouns ? (
-          <p className="text-xs text-zinc-500 mt-1">{profile.pronouns}</p>
+          <p className="text-xs text-text-disabled mt-1">{profile.pronouns}</p>
         ) : null}
 
         {/* ── Headline ── */}
         {profile.headline ? (
-          <p className="mt-2 text-sm text-zinc-300 font-medium leading-snug">
+          <p className="mt-2 text-sm text-text-secondary font-medium leading-snug">
             {profile.headline}
           </p>
         ) : null}
@@ -177,20 +177,20 @@ export default function ProfileHeader({
           <RichText
             text={profile.bio}
             as="p"
-            className="mt-3 text-sm text-zinc-400 leading-relaxed whitespace-pre-line"
+            className="mt-3 text-sm text-text-muted leading-relaxed whitespace-pre-line"
           />
         ) : null}
 
         {/* ── Meta row ── */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3">
           {profile.location ? (
-            <span className="flex items-center gap-1 text-sm text-zinc-500">
+            <span className="flex items-center gap-1 text-sm text-text-disabled">
               <MapPinIcon className="w-3.5 h-3.5 shrink-0" />
               {profile.location}
             </span>
           ) : null}
           {formattedJoin ? (
-            <span className="flex items-center gap-1 text-sm text-zinc-500">
+            <span className="flex items-center gap-1 text-sm text-text-disabled">
               <CalendarIcon className="w-3.5 h-3.5 shrink-0" />
               Joined {formattedJoin}
             </span>

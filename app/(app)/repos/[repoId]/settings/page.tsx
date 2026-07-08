@@ -320,7 +320,7 @@ export default function RepoSettingsPage({
   if (!repo) {
     return (
       <EmptyState
-        icon={<LockClosedIcon className="w-10 h-10 text-zinc-500" />}
+        icon={<LockClosedIcon className="w-10 h-10 text-text-disabled" />}
         title="Repo settings unavailable"
         description={error || "You do not have access to this repository."}
       />
@@ -330,7 +330,7 @@ export default function RepoSettingsPage({
   if (!repo.can_manage_general && !repo.can_manage_access && !repo.can_manage_rules) {
     return (
       <EmptyState
-        icon={<LockClosedIcon className="w-10 h-10 text-zinc-500" />}
+        icon={<LockClosedIcon className="w-10 h-10 text-text-disabled" />}
         title="Settings unavailable"
         description="You need repository admin or maintainer access to manage this repo."
       />
@@ -348,19 +348,19 @@ export default function RepoSettingsPage({
   return (
     <div className="space-y-6">
       {/* Repository Settings Header Card */}
-      <div className="rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-zinc-850/10 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32"></div>
+      <div className="rounded-2xl border border-border-default bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-surface-hover/10 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32"></div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-3 min-w-0 flex-1">
             <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-zinc-850 p-2.5 border border-zinc-700/50">
-                <Cog6ToothIcon className="h-6 w-6 text-zinc-300 animate-spin-slow" />
+              <div className="rounded-xl bg-surface-hover p-2.5 border border-border-strong/50">
+                <Cog6ToothIcon className="h-6 w-6 text-text-secondary animate-spin-slow" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white tracking-tight flex flex-wrap items-center gap-2">
+                <h1 className="text-xl font-bold text-text-primary tracking-tight flex flex-wrap items-center gap-2">
                   <span>{repo.name} Settings</span>
                 </h1>
-                <p className="text-xs text-zinc-500 font-mono mt-0.5">ID: {repo.id}</p>
+                <p className="text-xs text-text-disabled font-mono mt-0.5">ID: {repo.id}</p>
               </div>
             </div>
 
@@ -376,8 +376,8 @@ export default function RepoSettingsPage({
               </span>
 
               {/* Default Branch Badge */}
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-medium bg-zinc-900 text-zinc-300 border border-zinc-800 font-mono">
-                <span className="text-zinc-500">branch:</span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-medium bg-surface text-text-secondary border border-border-default font-mono">
+                <span className="text-text-disabled">branch:</span>
                 {repo.default_branch}
               </span>
 
@@ -394,23 +394,23 @@ export default function RepoSettingsPage({
 
               {/* Inherited Role Info Badge */}
               {repo.inherited_role && repo.attached_space ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-medium bg-zinc-900/80 text-zinc-400 border border-zinc-800">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-medium bg-surface/80 text-text-muted border border-border-default">
                   Inherited via <span className="text-sky-400 font-semibold">{repo.attached_space.name}</span>
                 </span>
               ) : null}
             </div>
 
             {repo.description ? (
-              <p className="text-sm text-zinc-400 max-w-2xl">{repo.description}</p>
+              <p className="text-sm text-text-muted max-w-2xl">{repo.description}</p>
             ) : (
-              <p className="text-sm text-zinc-500 italic">No description provided for this repository.</p>
+              <p className="text-sm text-text-disabled italic">No description provided for this repository.</p>
             )}
           </div>
           
           <div className="flex shrink-0">
             <Link
               href={`/repos/${repo.id}`}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-2.5 text-xs font-semibold text-zinc-200 transition-all hover:bg-zinc-800 hover:text-white"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface/60 px-4 py-2.5 text-xs font-semibold text-text-secondary transition-all hover:bg-surface-hover hover:text-text-primary"
             >
               <span>View Repository</span>
               <ArrowRightIcon className="h-4 w-4" />
@@ -424,7 +424,7 @@ export default function RepoSettingsPage({
         {/* Left Column: Sidebar Settings Navigation */}
         <div className="lg:col-span-3 space-y-4">
           {/* Mobile responsive navigation scroll */}
-          <div className="block lg:hidden border-b border-zinc-800 pb-1 overflow-x-auto no-scrollbar">
+          <div className="block lg:hidden border-b border-border-default pb-1 overflow-x-auto no-scrollbar">
             <div className="flex gap-4 pb-1 whitespace-nowrap">
               {navItems.map((item) => {
                 const isActive = activeTab === item.id;
@@ -437,14 +437,14 @@ export default function RepoSettingsPage({
                       isActive
                         ? item.isDanger
                           ? "border-rose-500 text-rose-400 font-semibold"
-                          : "border-[#f78166] text-white font-semibold"
-                        : "border-transparent text-zinc-400 hover:text-zinc-200"
+                          : "border-[#f78166] text-text-primary font-semibold"
+                        : "border-transparent text-text-muted hover:text-text-secondary"
                     }`}
                   >
                     <item.icon className="h-4 w-4 shrink-0" />
                     <span>{item.label.split(" ")[0]}</span>
                     {item.badgeCount !== undefined && item.badgeCount > 0 ? (
-                      <span className="rounded-full bg-zinc-850 px-1.5 py-0.5 text-[10px] text-zinc-400 border border-zinc-800 font-bold">
+                      <span className="rounded-full bg-surface-hover px-1.5 py-0.5 text-[10px] text-text-muted border border-border-default font-bold">
                         {item.badgeCount}
                       </span>
                     ) : null}
@@ -455,7 +455,7 @@ export default function RepoSettingsPage({
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex flex-col gap-1 rounded-2xl border border-zinc-800 bg-zinc-900/10 p-2">
+          <nav className="hidden lg:flex flex-col gap-1 rounded-2xl border border-border-default bg-surface/10 p-2">
             {navItems.map((item) => {
               const isActive = activeTab === item.id;
               return (
@@ -467,21 +467,21 @@ export default function RepoSettingsPage({
                     isActive
                       ? item.isDanger
                         ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                        : "bg-[#f78166]/10 text-white border border-[#f78166]/20 font-semibold"
+                        : "bg-[#f78166]/10 text-text-primary border border-[#f78166]/20 font-semibold"
                       : item.isDanger
-                      ? "text-zinc-500 hover:bg-rose-500/5 hover:text-rose-400 border border-transparent"
-                      : "text-zinc-400 hover:bg-zinc-800/40 hover:text-zinc-200 border border-transparent"
+                      ? "text-text-disabled hover:bg-rose-500/5 hover:text-rose-400 border border-transparent"
+                      : "text-text-muted hover:bg-surface-hover/40 hover:text-text-secondary border border-transparent"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <item.icon className={`h-5 w-5 ${isActive ? (item.isDanger ? "text-rose-400" : "text-[#f78166]") : "text-zinc-500"}`} />
+                    <item.icon className={`h-5 w-5 ${isActive ? (item.isDanger ? "text-rose-400" : "text-[#f78166]") : "text-text-disabled"}`} />
                     <span>{item.label}</span>
                   </div>
                   {item.badgeCount !== undefined && item.badgeCount > 0 ? (
                     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                       isActive
                         ? item.isDanger ? "bg-rose-500/20 text-rose-300" : "bg-[#f78166]/20 text-[#f78166]"
-                        : "bg-zinc-800 text-zinc-500"
+                        : "bg-surface-hover text-text-disabled"
                     }`}>
                       {item.badgeCount}
                     </span>
@@ -496,10 +496,10 @@ export default function RepoSettingsPage({
         <div className="lg:col-span-9">
           {/* GENERAL TAB */}
           {activeTab === "general" && (
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 shadow-sm p-6 space-y-6">
+            <div className="rounded-2xl border border-border-default bg-surface/20 shadow-sm p-6 space-y-6">
               <div>
-                <h2 className="text-base font-bold text-white">General Settings</h2>
-                <p className="text-xs text-zinc-500 mt-1">Configure your repository metadata, defaults, and visibility states.</p>
+                <h2 className="text-base font-bold text-text-primary">General Settings</h2>
+                <p className="text-xs text-text-disabled mt-1">Configure your repository metadata, defaults, and visibility states.</p>
               </div>
 
               <form onSubmit={handleSave} className="space-y-6">
@@ -518,7 +518,7 @@ export default function RepoSettingsPage({
 
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Repository Name</label>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-text-disabled mb-2">Repository Name</label>
                     <input
                       type="text"
                       value={name}
@@ -528,11 +528,11 @@ export default function RepoSettingsPage({
                         setSaveSuccess(null);
                       }}
                       disabled={!repo.can_manage_general || saving}
-                      className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-sm text-white focus:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-750 disabled:opacity-50"
+                      className="w-full rounded-xl border border-border-default bg-app px-4 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none focus:ring-1 focus:ring-focus/35 disabled:opacity-50"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">URL Slug</label>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-text-disabled mb-2">URL Slug</label>
                     <input
                       type="text"
                       value={slug}
@@ -542,16 +542,16 @@ export default function RepoSettingsPage({
                         setSaveSuccess(null);
                       }}
                       disabled={!repo.can_manage_general || saving}
-                      className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-sm text-white focus:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-750 disabled:opacity-50 font-mono"
+                      className="w-full rounded-xl border border-border-default bg-app px-4 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none focus:ring-1 focus:ring-focus/35 disabled:opacity-50 font-mono"
                     />
-                    <p className="mt-1.5 text-[11px] text-zinc-500 font-mono truncate">
-                      URL preview: <span className="text-zinc-400">logoutdev.com/repos/{slug || "..."}</span>
+                    <p className="mt-1.5 text-[11px] text-text-disabled font-mono truncate">
+                      URL preview: <span className="text-text-muted">logoutdev.com/repos/{slug || "..."}</span>
                     </p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Description</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-text-disabled mb-2">Description</label>
                   <textarea
                     value={description}
                     onChange={(event) => {
@@ -561,14 +561,14 @@ export default function RepoSettingsPage({
                     }}
                     rows={3}
                     disabled={!repo.can_manage_general || saving}
-                    className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-sm text-white focus:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-750 disabled:opacity-50"
+                    className="w-full resize-none rounded-xl border border-border-default bg-app px-4 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none focus:ring-1 focus:ring-focus/35 disabled:opacity-50"
                     placeholder="Provide a brief description of the code or project..."
                   />
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Default Branch</label>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-text-disabled mb-2">Default Branch</label>
                     <select
                       value={defaultBranch}
                       onChange={(event) => {
@@ -577,7 +577,7 @@ export default function RepoSettingsPage({
                         setSaveSuccess(null);
                       }}
                       disabled={!repo.can_manage_general || branches.length === 0 || saving}
-                      className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-sm text-white focus:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-750 disabled:opacity-50"
+                      className="w-full rounded-xl border border-border-default bg-app px-4 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none focus:ring-1 focus:ring-focus/35 disabled:opacity-50"
                     >
                       {branches.length === 0 ? (
                         <option value={defaultBranch}>{defaultBranch}</option>
@@ -592,7 +592,7 @@ export default function RepoSettingsPage({
                   </div>
                   
                   <div>
-                    <span className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Visibility</span>
+                    <span className="block text-xs font-semibold uppercase tracking-wider text-text-disabled mb-2">Visibility</span>
                     <div className="grid grid-cols-2 gap-4">
                       {/* Private option card */}
                       <button
@@ -607,14 +607,14 @@ export default function RepoSettingsPage({
                         className={`flex flex-col items-start text-left p-3 rounded-xl border transition-all ${
                           visibility === "private"
                             ? "border-amber-500 bg-amber-500/5 text-amber-100"
-                            : "border-zinc-800 bg-zinc-955/40 text-zinc-400 hover:border-zinc-700"
+                            : "border-border-default bg-app/40 text-text-muted hover:border-border-strong"
                         }`}
                       >
-                        <span className="flex items-center gap-1.5 font-semibold text-xs text-white">
-                          <LockClosedIcon className={`w-4 h-4 ${visibility === "private" ? "text-amber-400" : "text-zinc-500"}`} />
+                        <span className="flex items-center gap-1.5 font-semibold text-xs text-text-primary">
+                          <LockClosedIcon className={`w-4 h-4 ${visibility === "private" ? "text-amber-400" : "text-text-disabled"}`} />
                           Private
                         </span>
-                        <span className="text-[10px] text-zinc-500 mt-1 leading-normal">Visible only to explicitly added collaborators.</span>
+                        <span className="text-[10px] text-text-disabled mt-1 leading-normal">Visible only to explicitly added collaborators.</span>
                       </button>
                       
                       {/* Public option card */}
@@ -630,38 +630,38 @@ export default function RepoSettingsPage({
                         className={`flex flex-col items-start text-left p-3 rounded-xl border transition-all ${
                           visibility === "public"
                             ? "border-sky-500 bg-sky-500/5 text-sky-100"
-                            : "border-zinc-800 bg-zinc-955/40 text-zinc-400 hover:border-zinc-700"
+                            : "border-border-default bg-app/40 text-text-muted hover:border-border-strong"
                         }`}
                       >
-                        <span className="flex items-center gap-1.5 font-semibold text-xs text-white">
-                          <GlobeAltIcon className={`w-4 h-4 ${visibility === "public" ? "text-sky-400" : "text-zinc-500"}`} />
+                        <span className="flex items-center gap-1.5 font-semibold text-xs text-text-primary">
+                          <GlobeAltIcon className={`w-4 h-4 ${visibility === "public" ? "text-sky-400" : "text-text-disabled"}`} />
                           Public
                         </span>
-                        <span className="text-[10px] text-zinc-500 mt-1 leading-normal">Visible to any user on the platform.</span>
+                        <span className="text-[10px] text-text-disabled mt-1 leading-normal">Visible to any user on the platform.</span>
                       </button>
                     </div>
                   </div>
                 </div>
 
                 {!repo.can_manage_general && (
-                  <div className="flex items-start gap-3 rounded-xl border border-zinc-850 bg-zinc-950/40 px-4 py-3 text-xs text-zinc-500">
-                    <InformationCircleIcon className="h-5 w-5 text-zinc-550 shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-3 rounded-xl border border-border-default bg-app/40 px-4 py-3 text-xs text-text-disabled">
+                    <InformationCircleIcon className="h-5 w-5 text-text-disabled shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-zinc-400">Admin access required</p>
+                      <p className="font-semibold text-text-muted">Admin access required</p>
                       <p className="mt-0.5">Only repository administrators can change settings like name, slug, visibility, and defaults.</p>
                     </div>
                   </div>
                 )}
 
-                <div className="flex justify-end pt-4 border-t border-zinc-800/60">
+                <div className="flex justify-end pt-4 border-t border-border-default/60">
                   <button
                     type="submit"
                     disabled={saving || !repo.can_manage_general || !isGeneralDirty}
-                    className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-semibold text-black transition-all hover:bg-zinc-100 disabled:opacity-45 cursor-pointer disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground transition-all hover:bg-primary-hover disabled:opacity-45 cursor-pointer disabled:cursor-not-allowed"
                   >
                     {saving ? (
                       <>
-                        <Spinner size="sm" className="text-black border-black" />
+                        <Spinner size="sm" className="text-primary-foreground border-black" />
                         <span>Saving...</span>
                       </>
                     ) : (
@@ -675,45 +675,45 @@ export default function RepoSettingsPage({
 
           {/* ACCESS TAB */}
           {activeTab === "access" && (
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 shadow-sm p-6 space-y-6">
+            <div className="rounded-2xl border border-border-default bg-surface/20 shadow-sm p-6 space-y-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-base font-bold text-white">Access Management</h2>
-                  <p className="text-xs text-zinc-500 mt-1">Manage direct invites and review inherited organization permissions.</p>
+                  <h2 className="text-base font-bold text-text-primary">Access Management</h2>
+                  <p className="text-xs text-text-disabled mt-1">Manage direct invites and review inherited organization permissions.</p>
                 </div>
                 {/* Metrics Dashboard */}
                 <div className="grid grid-cols-3 gap-2 shrink-0">
-                  <div className="border border-zinc-800 bg-zinc-950/50 rounded-xl px-3 py-2 text-center min-w-[70px]">
-                    <span className="block text-lg font-bold text-white font-mono">{metrics.total}</span>
-                    <span className="text-[9px] uppercase tracking-wider text-zinc-500">Total</span>
+                  <div className="border border-border-default bg-app/50 rounded-xl px-3 py-2 text-center min-w-[70px]">
+                    <span className="block text-lg font-bold text-text-primary font-mono">{metrics.total}</span>
+                    <span className="text-[9px] uppercase tracking-wider text-text-disabled">Total</span>
                   </div>
-                  <div className="border border-zinc-800 bg-zinc-950/50 rounded-xl px-3 py-2 text-center min-w-[70px]">
+                  <div className="border border-border-default bg-app/50 rounded-xl px-3 py-2 text-center min-w-[70px]">
                     <span className="block text-lg font-bold text-sky-400 font-mono">{metrics.direct}</span>
-                    <span className="text-[9px] uppercase tracking-wider text-zinc-500">Direct</span>
+                    <span className="text-[9px] uppercase tracking-wider text-text-disabled">Direct</span>
                   </div>
-                  <div className="border border-zinc-800 bg-zinc-950/50 rounded-xl px-3 py-2 text-center min-w-[70px]">
+                  <div className="border border-border-default bg-app/50 rounded-xl px-3 py-2 text-center min-w-[70px]">
                     <span className="block text-lg font-bold text-emerald-400 font-mono">{metrics.inherited}</span>
-                    <span className="text-[9px] uppercase tracking-wider text-zinc-500">Inherited</span>
+                    <span className="text-[9px] uppercase tracking-wider text-text-disabled">Inherited</span>
                   </div>
                 </div>
               </div>
 
               {/* Add Collaborator Card */}
-              <div className="rounded-xl border border-zinc-800 bg-zinc-950/40 p-4 space-y-4">
-                <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <PlusIcon className="w-4 h-4 text-zinc-400 stroke-[2.5]" />
+              <div className="rounded-xl border border-border-default bg-app/40 p-4 space-y-4">
+                <h3 className="text-xs font-bold text-text-primary flex items-center gap-1.5">
+                  <PlusIcon className="w-4 h-4 text-text-muted stroke-[2.5]" />
                   Invite Collaborator
                 </h3>
 
                 {memberError && (
-                  <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 px-3.5 py-2.5 text-xs text-rose-450 flex items-center gap-2">
-                    <ExclamationTriangleIcon className="w-4.5 h-4.5 shrink-0" />
+                  <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 px-3.5 py-2.5 text-xs text-rose-400 flex items-center gap-2">
+                    <ExclamationTriangleIcon className="w-4 h-4 shrink-0" />
                     <span>{memberError}</span>
                   </div>
                 )}
                 {memberSuccess && (
-                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3.5 py-2.5 text-xs text-emerald-450 flex items-center gap-2">
-                    <CheckCircleIcon className="w-4.5 h-4.5 shrink-0" />
+                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3.5 py-2.5 text-xs text-emerald-400 flex items-center gap-2">
+                    <CheckCircleIcon className="w-4 h-4 shrink-0" />
                     <span>{memberSuccess}</span>
                   </div>
                 )}
@@ -731,7 +731,7 @@ export default function RepoSettingsPage({
                       }}
                       placeholder="Search by username, name, or email..."
                       disabled={!repo.can_manage_access}
-                      className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm text-white placeholder:text-zinc-650 focus:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-750 disabled:opacity-50"
+                      className="w-full rounded-xl border border-border-default bg-surface px-4 py-2.5 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none focus:ring-1 focus:ring-focus/35 disabled:opacity-50"
                     />
                     
                     {searching && (
@@ -742,7 +742,7 @@ export default function RepoSettingsPage({
 
                     {/* Results Dropdown */}
                     {!searching && results.length > 0 && !selectedUser && (
-                      <div className="absolute left-0 right-0 top-full z-20 mt-2 max-h-60 overflow-y-auto rounded-xl border border-zinc-800 bg-zinc-950 p-2 shadow-2xl space-y-1">
+                      <div className="absolute left-0 right-0 top-full z-20 mt-2 max-h-60 overflow-y-auto rounded-xl border border-border-default bg-app p-2 shadow-2xl space-y-1">
                         {results.map((candidate) => (
                           <button
                             key={candidate.id}
@@ -751,14 +751,14 @@ export default function RepoSettingsPage({
                               setSelectedUser(candidate);
                               setSearch(candidate.username || candidate.email || candidate.name);
                             }}
-                            className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors hover:bg-zinc-900"
+                            className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors hover:bg-surface"
                           >
                             <div>
-                              <p className="text-sm font-semibold text-white">{candidate.name}</p>
-                              <p className="text-xs text-zinc-500 font-mono">@{candidate.username || candidate.email}</p>
+                              <p className="text-sm font-semibold text-text-primary">{candidate.name}</p>
+                              <p className="text-xs text-text-disabled font-mono">@{candidate.username || candidate.email}</p>
                             </div>
                             {candidate.effective_role && (
-                              <span className="rounded bg-zinc-800 px-2 py-0.5 text-[10px] font-semibold text-zinc-400 capitalize">
+                              <span className="rounded bg-surface-hover px-2 py-0.5 text-[10px] font-semibold text-text-muted capitalize">
                                 {candidate.effective_role}
                               </span>
                             )}
@@ -770,12 +770,12 @@ export default function RepoSettingsPage({
 
                   {/* Selected Indicator */}
                   {selectedUser && (
-                    <div className="flex items-center justify-between rounded-xl border border-zinc-850 bg-zinc-950/80 p-3">
+                    <div className="flex items-center justify-between rounded-xl border border-border-default bg-app/80 p-3">
                       <div className="flex items-center gap-3">
                         <Avatar user={{ id: selectedUser.id, name: selectedUser.name, email: selectedUser.email }} size="sm" />
                         <div>
-                          <p className="text-sm font-semibold text-white">{selectedUser.name}</p>
-                          <p className="text-xs text-zinc-500 font-mono">@{selectedUser.username || selectedUser.email}</p>
+                          <p className="text-sm font-semibold text-text-primary">{selectedUser.name}</p>
+                          <p className="text-xs text-text-disabled font-mono">@{selectedUser.username || selectedUser.email}</p>
                         </div>
                       </div>
                       <button
@@ -784,7 +784,7 @@ export default function RepoSettingsPage({
                           setSelectedUser(null);
                           setSearch("");
                         }}
-                        className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-900 hover:text-zinc-350"
+                        className="rounded-lg p-1.5 text-text-disabled hover:bg-surface hover:text-text-secondary"
                       >
                         <XMarkIcon className="w-4 h-4" />
                       </button>
@@ -793,7 +793,7 @@ export default function RepoSettingsPage({
 
                   {/* Role and Submit Button Row */}
                   <div className="grid gap-3 md:grid-cols-[1fr_160px_auto]">
-                    <div className="rounded-xl border border-zinc-850 bg-zinc-950/50 px-4 py-2.5 text-xs text-zinc-500 flex items-center">
+                    <div className="rounded-xl border border-border-default bg-app/50 px-4 py-2.5 text-xs text-text-disabled flex items-center">
                       {selectedUser 
                         ? `Target: ${selectedUser.name} (@${selectedUser.username || selectedUser.email})`
                         : "Select a user from the search dropdown results above"}
@@ -802,7 +802,7 @@ export default function RepoSettingsPage({
                       value={candidateRole}
                       onChange={(event) => setCandidateRole(event.target.value as RepoRole)}
                       disabled={!repo.can_manage_access}
-                      className="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white focus:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-750 disabled:opacity-50"
+                      className="rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none focus:ring-1 focus:ring-focus/35 disabled:opacity-50"
                     >
                       {availableRoles.map((role) => (
                         <option key={role} value={role}>
@@ -814,11 +814,11 @@ export default function RepoSettingsPage({
                       type="button"
                       onClick={handleAddMember}
                       disabled={!selectedUser || memberSaving || !repo.can_manage_access}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-bold text-black transition-all hover:bg-zinc-100 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed whitespace-nowrap"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground transition-all hover:bg-primary-hover disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed whitespace-nowrap"
                     >
                       {memberSaving ? (
                         <>
-                          <Spinner size="sm" className="text-black border-black" />
+                          <Spinner size="sm" className="text-primary-foreground border-black" />
                           <span>Inviting...</span>
                         </>
                       ) : (
@@ -828,24 +828,24 @@ export default function RepoSettingsPage({
                   </div>
 
                   {/* Role Meanings Tooltip row */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px] text-zinc-500 bg-zinc-950/20 p-2.5 rounded-lg border border-zinc-850/40">
-                    <div><span className="font-semibold text-zinc-400">READ:</span> View repo codebase & PRs.</div>
-                    <div><span className="font-semibold text-zinc-400">TRIAGE:</span> Manage issues & reviews.</div>
-                    <div><span className="font-semibold text-zinc-400">WRITE:</span> Read, triage, & push code.</div>
-                    <div><span className="font-semibold text-zinc-400">MAINTAIN:</span> Modify branch protection.</div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px] text-text-disabled bg-app/20 p-2.5 rounded-lg border border-border-default/40">
+                    <div><span className="font-semibold text-text-muted">READ:</span> View repo codebase & PRs.</div>
+                    <div><span className="font-semibold text-text-muted">TRIAGE:</span> Manage issues & reviews.</div>
+                    <div><span className="font-semibold text-text-muted">WRITE:</span> Read, triage, & push code.</div>
+                    <div><span className="font-semibold text-text-muted">MAINTAIN:</span> Modify branch protection.</div>
                   </div>
                 </div>
               </div>
 
               {/* Collaborator List */}
               <div className="space-y-3">
-                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Collaborators List</h3>
+                <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">Collaborators List</h3>
                 {collaborators.length === 0 ? (
-                  <div className="border border-zinc-800 border-dashed rounded-xl p-8 text-center text-zinc-500 text-sm">
+                  <div className="border border-border-default border-dashed rounded-xl p-8 text-center text-text-disabled text-sm">
                     No collaborators found. Ensure Space binding is active to inherit organization members.
                   </div>
                 ) : (
-                  <div className="divide-y divide-zinc-800/60 rounded-xl border border-zinc-800 bg-zinc-950/20 overflow-hidden">
+                  <div className="divide-y divide-border-default/60 rounded-xl border border-border-default bg-app/20 overflow-hidden">
                     {collaborators.map((member) => (
                       <div key={member.id} className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 hover:bg-zinc-905/10 transition-colors">
                         {/* Identity */}
@@ -853,25 +853,25 @@ export default function RepoSettingsPage({
                           <Avatar user={member.user ? { id: member.user_id, name: member.user.name, email: member.user.email } : null} size="md" />
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-semibold text-white truncate">{member.user?.name ?? member.user_id}</span>
+                              <span className="text-sm font-semibold text-text-primary truncate">{member.user?.name ?? member.user_id}</span>
                               {member.status === "pending" && (
                                 <span className="rounded-full bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[9px] font-semibold text-amber-400 uppercase tracking-wide">
                                   Pending Invite
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-zinc-500 font-mono truncate">@{member.user?.username || member.user?.email || member.user_id}</p>
+                            <p className="text-xs text-text-disabled font-mono truncate">@{member.user?.username || member.user?.email || member.user_id}</p>
                             <div className="flex flex-wrap gap-1.5 mt-1.5">
                               {/* Source badge */}
                               <span className={`inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
                                 member.source === "space_owner" || member.source === "repo_owner"
                                   ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                  : "bg-zinc-800 text-zinc-400 border-zinc-700"
+                                  : "bg-surface-hover text-text-muted border-border-strong"
                               }`}>
                                 {member.source?.replaceAll("_", " ") || "collaborator"}
                               </span>
                               {member.is_outside_collaborator && (
-                                <span className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700">
+                                <span className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full bg-surface-hover text-text-muted border border-border-strong">
                                   Outside Collaborator
                                 </span>
                               )}
@@ -881,12 +881,12 @@ export default function RepoSettingsPage({
 
                         {/* Access metrics display */}
                         <div className="flex flex-wrap items-center gap-4">
-                          <div className="rounded-xl border border-zinc-850 bg-zinc-950/70 px-3.5 py-2 text-xs text-zinc-400 flex flex-col justify-center min-w-[170px] shadow-sm">
+                          <div className="rounded-xl border border-border-default bg-app/70 px-3.5 py-2 text-xs text-text-muted flex flex-col justify-center min-w-[170px] shadow-sm">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Effective:</span>
-                              <span className="font-bold text-white uppercase text-[11px]">{member.effective_role || "none"}</span>
+                              <span className="text-[10px] text-text-disabled uppercase tracking-wider">Effective:</span>
+                              <span className="font-bold text-text-primary uppercase text-[11px]">{member.effective_role || "none"}</span>
                             </div>
-                            <div className="text-[9px] text-zinc-550 mt-1 flex justify-between gap-3 border-t border-zinc-850 pt-1 font-mono">
+                            <div className="text-[9px] text-text-disabled mt-1 flex justify-between gap-3 border-t border-border-default pt-1 font-mono">
                               <span>Direct: {member.direct_role || "none"}</span>
                               <span>Inherited: {member.inherited_role || "none"}</span>
                             </div>
@@ -899,7 +899,7 @@ export default function RepoSettingsPage({
                                 value={member.direct_role}
                                 onChange={(event) => handleRoleChange(member.user_id, event.target.value as RepoRole)}
                                 disabled={!repo.can_manage_access}
-                                className="rounded-lg border border-zinc-800 bg-zinc-900 px-2 py-2 text-xs text-white focus:border-zinc-700 focus:outline-none disabled:opacity-60 font-medium"
+                                className="rounded-lg border border-border-default bg-surface px-2 py-2 text-xs text-text-primary focus:border-border-strong focus:outline-none disabled:opacity-60 font-medium"
                               >
                                 {availableRoles.map((role) => (
                                   <option key={role} value={role}>
@@ -910,14 +910,14 @@ export default function RepoSettingsPage({
                               <button
                                 onClick={() => handleRemove(member.user_id)}
                                 disabled={!repo.can_manage_access}
-                                className="inline-flex items-center gap-1 rounded-lg border border-zinc-850 px-2.5 py-2 text-xs text-rose-400 transition-colors hover:bg-rose-500/10 disabled:opacity-50 font-bold"
+                                className="inline-flex items-center gap-1 rounded-lg border border-border-default px-2.5 py-2 text-xs text-rose-400 transition-colors hover:bg-rose-500/10 disabled:opacity-50 font-bold"
                               >
                                 <TrashIcon className="h-4 w-4" />
                                 <span>Remove</span>
                               </button>
                             </div>
                           ) : (
-                            <div className="rounded-xl border border-zinc-855 bg-zinc-955/30 px-3 py-2 text-[11px] text-zinc-500 max-w-[240px] leading-relaxed shadow-sm">
+                            <div className="rounded-xl border border-border-default bg-app/30 px-3 py-2 text-[11px] text-text-disabled max-w-[240px] leading-relaxed shadow-sm">
                               <span>This access comes from the attached Space and cannot be removed here.</span>
                               {repo.attached_space && (
                                 <div className="mt-1">
@@ -940,9 +940,9 @@ export default function RepoSettingsPage({
               </div>
 
               {/* Explanatory Info Card */}
-              <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/10 p-4 text-xs text-zinc-400 space-y-2">
-                <div className="flex items-center gap-2 text-zinc-300 font-semibold">
-                  <InformationCircleIcon className="h-4.5 w-4.5 text-zinc-500" />
+              <div className="rounded-xl border border-border-default/60 bg-surface/10 p-4 text-xs text-text-muted space-y-2">
+                <div className="flex items-center gap-2 text-text-secondary font-semibold">
+                  <InformationCircleIcon className="h-4 w-4 text-text-disabled" />
                   <span>How effective permissions are computed</span>
                 </div>
                 <p className="leading-relaxed">
@@ -954,43 +954,43 @@ export default function RepoSettingsPage({
 
           {/* SPACE BINDING TAB */}
           {activeTab === "binding" && (
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 shadow-sm p-6 space-y-6">
+            <div className="rounded-2xl border border-border-default bg-surface/20 shadow-sm p-6 space-y-6">
               <div>
-                <h2 className="text-base font-bold text-white">Space Binding</h2>
-                <p className="text-xs text-zinc-500 mt-1">Bind this repository to a space. Spaces provide team organization and permissions inheritance.</p>
+                <h2 className="text-base font-bold text-text-primary">Space Binding</h2>
+                <p className="text-xs text-text-disabled mt-1">Bind this repository to a space. Spaces provide team organization and permissions inheritance.</p>
               </div>
 
               {attachmentError && (
-                <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 px-4 py-3 text-xs text-rose-450 flex items-center gap-2">
+                <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 px-4 py-3 text-xs text-rose-400 flex items-center gap-2">
                   <ExclamationTriangleIcon className="w-5 h-5 shrink-0" />
                   <span>{attachmentError}</span>
                 </div>
               )}
               {attachmentSuccess && (
-                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-xs text-emerald-450 flex items-center gap-2">
+                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-xs text-emerald-400 flex items-center gap-2">
                   <CheckCircleIcon className="w-5 h-5 shrink-0" />
                   <span>{attachmentSuccess}</span>
                 </div>
               )}
 
               {/* Visual Connector Layout */}
-              <div className="flex flex-col items-center justify-center p-8 border border-zinc-800/80 bg-zinc-950/30 rounded-2xl relative overflow-hidden">
+              <div className="flex flex-col items-center justify-center p-8 border border-border-default/80 bg-app/30 rounded-2xl relative overflow-hidden">
                 <div className="flex items-center justify-between w-full max-w-md gap-4 relative">
                   {/* Dotted Connection line */}
-                  <div className="absolute left-1/4 right-1/4 top-1/2 border-t border-dashed border-zinc-800 -translate-y-1/2 z-0"></div>
+                  <div className="absolute left-1/4 right-1/4 top-1/2 border-t border-dashed border-border-default -translate-y-1/2 z-0"></div>
                   
                   {/* Repo Box */}
-                  <div className="flex flex-col items-center p-4 rounded-xl border border-zinc-800 bg-zinc-900 z-10 w-32 text-center shadow-lg">
-                    <div className="rounded-full bg-zinc-850 p-2 text-zinc-400 mb-2 border border-zinc-800">
+                  <div className="flex flex-col items-center p-4 rounded-xl border border-border-default bg-surface z-10 w-32 text-center shadow-lg">
+                    <div className="rounded-full bg-surface-hover p-2 text-text-muted mb-2 border border-border-default">
                       <Cog6ToothIcon className="w-5 h-5" />
                     </div>
-                    <span className="text-[11px] font-bold text-white truncate max-w-full">{repo.name}</span>
-                    <span className="text-[9px] text-zinc-500 uppercase tracking-wider mt-1">Repo</span>
+                    <span className="text-[11px] font-bold text-text-primary truncate max-w-full">{repo.name}</span>
+                    <span className="text-[9px] text-text-disabled uppercase tracking-wider mt-1">Repo</span>
                   </div>
                   
                   {/* Status Badge */}
-                  <div className="rounded-full bg-zinc-900 border border-zinc-850 px-3 py-1 text-[10px] font-semibold text-zinc-300 z-10 shadow-sm flex items-center gap-1">
-                    <LinkIcon className="w-3.5 h-3.5 text-zinc-500" />
+                  <div className="rounded-full bg-surface border border-border-default px-3 py-1 text-[10px] font-semibold text-text-secondary z-10 shadow-sm flex items-center gap-1">
+                    <LinkIcon className="w-3.5 h-3.5 text-text-disabled" />
                     <span>{repo.attached_space ? "Bound" : "Unattached"}</span>
                   </div>
 
@@ -998,15 +998,15 @@ export default function RepoSettingsPage({
                   <div className={`flex flex-col items-center p-4 rounded-xl border z-10 w-32 text-center shadow-lg transition-colors ${
                     repo.attached_space 
                       ? "border-sky-500/20 bg-sky-950/20 text-sky-200" 
-                      : "border-zinc-800 border-dashed bg-zinc-900/30 text-zinc-500"
+                      : "border-border-default border-dashed bg-surface/30 text-text-disabled"
                   }`}>
-                    <div className={`rounded-full p-2 mb-2 border ${repo.attached_space ? "bg-sky-900/50 text-sky-400 border-sky-800/40" : "bg-zinc-800/30 text-zinc-500 border-zinc-850"}`}>
+                    <div className={`rounded-full p-2 mb-2 border ${repo.attached_space ? "bg-sky-900/50 text-sky-400 border-sky-800/40" : "bg-surface-hover/30 text-text-disabled border-border-default"}`}>
                       <UserGroupIcon className="w-5 h-5" />
                     </div>
                     <span className="text-[11px] font-bold truncate max-w-full">
                       {repo.attached_space ? repo.attached_space.name : "Unbound"}
                     </span>
-                    <span className="text-[9px] text-zinc-500 uppercase tracking-wider mt-1">Space Layer</span>
+                    <span className="text-[9px] text-text-disabled uppercase tracking-wider mt-1">Space Layer</span>
                   </div>
                 </div>
               </div>
@@ -1014,7 +1014,7 @@ export default function RepoSettingsPage({
               {/* Selection & Controls */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2">Attached space Layer</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-text-disabled mb-2">Attached space Layer</label>
                   <select
                     value={selectedSpaceId}
                     onChange={(event) => {
@@ -1023,7 +1023,7 @@ export default function RepoSettingsPage({
                       setAttachmentSuccess(null);
                     }}
                     disabled={spacesLoading || attachmentSaving || !repo.can_manage_general}
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-955 px-4 py-2.5 text-sm text-white focus:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-750 disabled:opacity-50"
+                    className="w-full rounded-xl border border-border-default bg-app px-4 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none focus:ring-1 focus:ring-focus/35 disabled:opacity-50"
                   >
                     <option value="">No attached space (Standalone Repository)</option>
                     {spacesLoading && <option value="" disabled>Loading available spaces...</option>}
@@ -1038,19 +1038,19 @@ export default function RepoSettingsPage({
                 </div>
 
                 {/* Explanation details */}
-                <div className="p-4 rounded-xl border border-zinc-850 bg-zinc-955/30 text-xs text-zinc-450 space-y-2">
-                  <p className="font-semibold text-zinc-300">Organization Space Integration</p>
+                <div className="p-4 rounded-xl border border-border-default bg-app/30 text-xs text-text-muted space-y-2">
+                  <p className="font-semibold text-text-secondary">Organization Space Integration</p>
                   <p className="leading-relaxed">
                     Spaces are LogoutDev's organization boundary. Attaching a repository to a Space transfers permissions control to that Space's owner and maintainer lists:
                   </p>
-                  <ul className="list-disc list-inside space-y-1 text-zinc-500 pl-2">
+                  <ul className="list-disc list-inside space-y-1 text-text-disabled pl-2">
                     <li>Space Owners automatically obtain full administrator options.</li>
                     <li>Space Maintainers inherit write access and branch-protection options.</li>
                     <li>Removing a Space binding revokes these inherited access roles immediately.</li>
                   </ul>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 pt-4 border-t border-zinc-800/60">
+                <div className="flex items-center justify-between gap-3 pt-4 border-t border-border-default/60">
                   <div>
                     {repo.attached_space ? (
                       <Link
@@ -1061,7 +1061,7 @@ export default function RepoSettingsPage({
                         <ArrowRightIcon className="h-3.5 w-3.5 stroke-[2.5]" />
                       </Link>
                     ) : (
-                      <span className="text-xs text-zinc-500 italic">Repository is not attached to any space layer.</span>
+                      <span className="text-xs text-text-disabled italic">Repository is not attached to any space layer.</span>
                     )}
                   </div>
                   
@@ -1069,11 +1069,11 @@ export default function RepoSettingsPage({
                     type="button"
                     onClick={handleAttachmentSave}
                     disabled={spacesLoading || attachmentSaving || !repo.can_manage_general || !isAttachmentDirty}
-                    className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-bold text-black transition-all hover:bg-zinc-100 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground transition-all hover:bg-primary-hover disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
                   >
                     {attachmentSaving ? (
                       <>
-                        <Spinner size="sm" className="text-black border-black" />
+                        <Spinner size="sm" className="text-primary-foreground border-black" />
                         <span>Saving...</span>
                       </>
                     ) : (
@@ -1087,19 +1087,19 @@ export default function RepoSettingsPage({
 
           {/* BRANCH RULES TAB */}
           {activeTab === "branches" && (
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 shadow-sm p-6 space-y-6">
+            <div className="rounded-2xl border border-border-default bg-surface/20 shadow-sm p-6 space-y-6">
               <div>
-                <h2 className="text-base font-bold text-white">Branch Rules</h2>
-                <p className="text-xs text-zinc-500 mt-1">Configure protection rules to safeguard production branch history and verify quality checks.</p>
+                <h2 className="text-base font-bold text-text-primary">Branch Rules</h2>
+                <p className="text-xs text-text-disabled mt-1">Configure protection rules to safeguard production branch history and verify quality checks.</p>
               </div>
 
-              <div className="rounded-xl border border-zinc-800 bg-zinc-950/40 p-5 space-y-4">
+              <div className="rounded-xl border border-border-default bg-app/40 p-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider text-zinc-400">Branch protection status</h3>
-                    <p className="text-[11px] text-zinc-550">Active configuration rules for protected branch references.</p>
+                    <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider text-text-muted">Branch protection status</h3>
+                    <p className="text-[11px] text-text-disabled">Active configuration rules for protected branch references.</p>
                   </div>
-                  <span className="rounded-full bg-zinc-900 border border-zinc-800 px-3 py-1 text-xs font-mono font-bold text-zinc-400">
+                  <span className="rounded-full bg-surface border border-border-default px-3 py-1 text-xs font-mono font-bold text-text-muted">
                     {rulesLoading ? "..." : `${rules.length} Rules Active`}
                   </span>
                 </div>
@@ -1109,34 +1109,34 @@ export default function RepoSettingsPage({
                     <Spinner />
                   </div>
                 ) : rules.length === 0 ? (
-                  <div className="border border-zinc-850 border-dashed rounded-xl p-6 text-center text-zinc-500 text-xs">
+                  <div className="border border-border-default border-dashed rounded-xl p-6 text-center text-text-disabled text-xs">
                     No active rules found. Branch pushes can be made directly by any collaborator with write access.
                   </div>
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-2 text-xs">
-                    <div className="flex items-center gap-2 p-3 rounded-lg border border-zinc-850 bg-zinc-900/30">
-                      <CheckCircleIcon className={`h-4.5 w-4.5 ${rulesSummary?.requirePr ? "text-emerald-400" : "text-zinc-650"}`} />
-                      <span className={rulesSummary?.requirePr ? "text-zinc-200 font-medium" : "text-zinc-500"}>Pull Request Requirement</span>
+                    <div className="flex items-center gap-2 p-3 rounded-lg border border-border-default bg-surface/30">
+                      <CheckCircleIcon className={`h-4 w-4 ${rulesSummary?.requirePr ? "text-emerald-400" : "text-text-disabled"}`} />
+                      <span className={rulesSummary?.requirePr ? "text-text-secondary font-medium" : "text-text-disabled"}>Pull Request Requirement</span>
                     </div>
-                    <div className="flex items-center gap-2 p-3 rounded-lg border border-zinc-850 bg-zinc-900/30">
-                      <CheckCircleIcon className={`h-4.5 w-4.5 ${rulesSummary?.requireApprovals ? "text-emerald-400" : "text-zinc-650"}`} />
-                      <span className={rulesSummary?.requireApprovals ? "text-zinc-200 font-medium" : "text-zinc-500"}>Approvals review count</span>
+                    <div className="flex items-center gap-2 p-3 rounded-lg border border-border-default bg-surface/30">
+                      <CheckCircleIcon className={`h-4 w-4 ${rulesSummary?.requireApprovals ? "text-emerald-400" : "text-text-disabled"}`} />
+                      <span className={rulesSummary?.requireApprovals ? "text-text-secondary font-medium" : "text-text-disabled"}>Approvals review count</span>
                     </div>
-                    <div className="flex items-center gap-2 p-3 rounded-lg border border-zinc-850 bg-zinc-900/30">
-                      <CheckCircleIcon className={`h-4.5 w-4.5 ${rulesSummary?.requireStatusChecks ? "text-emerald-400" : "text-zinc-650"}`} />
-                      <span className={rulesSummary?.requireStatusChecks ? "text-zinc-200 font-medium" : "text-zinc-500"}>Status checks context verification</span>
+                    <div className="flex items-center gap-2 p-3 rounded-lg border border-border-default bg-surface/30">
+                      <CheckCircleIcon className={`h-4 w-4 ${rulesSummary?.requireStatusChecks ? "text-emerald-400" : "text-text-disabled"}`} />
+                      <span className={rulesSummary?.requireStatusChecks ? "text-text-secondary font-medium" : "text-text-disabled"}>Status checks context verification</span>
                     </div>
-                    <div className="flex items-center gap-2 p-3 rounded-lg border border-zinc-850 bg-zinc-900/30">
-                      <CheckCircleIcon className={`h-4.5 w-4.5 ${rulesSummary?.allowForcePush ? "text-emerald-400" : "text-zinc-650"}`} />
-                      <span className={rulesSummary?.allowForcePush ? "text-zinc-200 font-medium" : "text-zinc-500"}>Blocks forced branch push</span>
+                    <div className="flex items-center gap-2 p-3 rounded-lg border border-border-default bg-surface/30">
+                      <CheckCircleIcon className={`h-4 w-4 ${rulesSummary?.allowForcePush ? "text-emerald-400" : "text-text-disabled"}`} />
+                      <span className={rulesSummary?.allowForcePush ? "text-text-secondary font-medium" : "text-text-disabled"}>Blocks forced branch push</span>
                     </div>
                   </div>
                 )}
 
-                <div className="flex justify-end pt-2 border-t border-zinc-850/60">
+                <div className="flex justify-end pt-2 border-t border-border-default/60">
                   <Link
                     href={`/repos/${repo.id}/settings/branches`}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-white px-5 py-2.5 text-xs font-bold text-black transition-all hover:bg-zinc-100"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground transition-all hover:bg-primary-hover"
                   >
                     <span>Manage Branch Protection Rules</span>
                     <ArrowRightIcon className="h-4 w-4" />
@@ -1148,7 +1148,7 @@ export default function RepoSettingsPage({
 
           {/* DANGER ZONE TAB */}
           {activeTab === "danger" && (
-            <div className="rounded-2xl border border-rose-500/20 bg-rose-955/5 overflow-hidden shadow-lg p-6 space-y-6">
+            <div className="rounded-2xl border border-rose-500/20 bg-rose-950/5 overflow-hidden shadow-lg p-6 space-y-6">
               <div>
                 <h2 className="text-base font-bold text-rose-400 flex items-center gap-2">
                   <ExclamationTriangleIcon className="h-5 w-5 stroke-[2] text-rose-400" />
@@ -1158,13 +1158,13 @@ export default function RepoSettingsPage({
               </div>
 
               {deleteError && (
-                <div className="rounded-xl border border-rose-500/25 bg-rose-500/5 px-4 py-3 text-xs text-rose-450 flex items-center gap-2">
+                <div className="rounded-xl border border-rose-500/25 bg-rose-500/5 px-4 py-3 text-xs text-rose-400 flex items-center gap-2">
                   <ExclamationTriangleIcon className="w-5 h-5 shrink-0" />
                   <span>{deleteError}</span>
                 </div>
               )}
 
-              <div className="rounded-xl border border-rose-500/10 bg-rose-955/20 p-5 space-y-5">
+              <div className="rounded-xl border border-rose-500/10 bg-rose-950/20 p-5 space-y-5">
                 <div>
                   <h3 className="text-sm font-bold text-rose-200">Delete this repository</h3>
                   <p className="text-xs text-rose-400/60 mt-1 leading-normal">
@@ -1174,7 +1174,7 @@ export default function RepoSettingsPage({
 
                 {/* Grouped lists of deletion impact */}
                 <div className="grid gap-4 md:grid-cols-2 text-xs">
-                  <div className="p-3.5 rounded-xl border border-rose-500/10 bg-rose-955/25 space-y-1.5 text-rose-300">
+                  <div className="p-3.5 rounded-xl border border-rose-500/10 bg-rose-950/25 space-y-1.5 text-rose-300">
                     <p className="font-bold">What will be permanently deleted:</p>
                     <ul className="list-disc list-inside space-y-1 text-rose-400/70">
                       <li>Git repository storage and history</li>
@@ -1183,9 +1183,9 @@ export default function RepoSettingsPage({
                       <li>Stars, watchers, & custom roles</li>
                     </ul>
                   </div>
-                  <div className="p-3.5 rounded-xl border border-zinc-850 bg-zinc-900/10 space-y-1.5 text-zinc-400">
-                    <p className="font-bold text-zinc-300">What will remain:</p>
-                    <ul className="list-disc list-inside space-y-1 text-zinc-500">
+                  <div className="p-3.5 rounded-xl border border-border-default bg-surface/10 space-y-1.5 text-text-muted">
+                    <p className="font-bold text-text-secondary">What will remain:</p>
+                    <ul className="list-disc list-inside space-y-1 text-text-disabled">
                       <li>Space work planning updates</li>
                       <li>Discussion posts outside this repository</li>
                     </ul>
@@ -1195,8 +1195,8 @@ export default function RepoSettingsPage({
                 {/* Input verification */}
                 {repo.can_delete ? (
                   <div className="space-y-3 pt-3 border-t border-rose-500/10">
-                    <label className="block text-xs font-semibold text-zinc-400">
-                      To confirm deletion, please type <span className="font-mono text-white bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">{repo.name}</span>:
+                    <label className="block text-xs font-semibold text-text-muted">
+                      To confirm deletion, please type <span className="font-mono text-text-primary bg-surface px-1.5 py-0.5 rounded border border-border-default">{repo.name}</span>:
                     </label>
                     <div className="flex flex-col sm:flex-row gap-3">
                       <input
@@ -1208,7 +1208,7 @@ export default function RepoSettingsPage({
                         }}
                         placeholder={`Type "${repo.name}"`}
                         disabled={deleting}
-                        className="flex-1 rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-sm text-white focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-550 disabled:opacity-50 font-mono"
+                        className="flex-1 rounded-xl border border-border-default bg-app px-4 py-2.5 text-sm text-text-primary focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:opacity-50 font-mono"
                       />
                       <button
                         type="button"
@@ -1218,12 +1218,12 @@ export default function RepoSettingsPage({
                       >
                         {deleting ? (
                           <>
-                            <Spinner size="sm" className="text-rose-450 border-rose-450" />
+                            <Spinner size="sm" className="text-rose-400 border-rose-400" />
                             <span>Deleting...</span>
                           </>
                         ) : (
                           <>
-                            <TrashIcon className="h-4.5 w-4.5" />
+                            <TrashIcon className="h-4 w-4" />
                             <span>Delete Repository</span>
                           </>
                         )}
@@ -1231,7 +1231,7 @@ export default function RepoSettingsPage({
                     </div>
                   </div>
                 ) : (
-                  <div className="p-3.5 rounded-xl border border-zinc-850 bg-zinc-900/25 text-xs text-zinc-500 pl-3">
+                  <div className="p-3.5 rounded-xl border border-border-default bg-surface/25 text-xs text-text-disabled pl-3">
                     Only the repository owner can delete this repository.
                   </div>
                 )}

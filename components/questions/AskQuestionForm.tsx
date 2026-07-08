@@ -104,19 +104,19 @@ export default function AskQuestionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5 px-4 py-5">
       <div className="space-y-1">
-        <label className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+        <label className="text-[11px] font-semibold uppercase tracking-wide text-text-disabled">
           Title
         </label>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="What is the cleanest way to share auth state across Next.js layouts?"
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-600"
+          className="w-full rounded-xl border border-border-default bg-surface px-4 py-3 text-sm text-text-primary outline-none placeholder:text-text-disabled focus:border-border-strong"
         />
       </div>
 
       <div className="space-y-1">
-        <label className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+        <label className="text-[11px] font-semibold uppercase tracking-wide text-text-disabled">
           Details
         </label>
         <RichComposer
@@ -124,20 +124,20 @@ export default function AskQuestionForm({
           onChange={(value) => setBody(value)}
           rows={7}
           placeholder="Add context, what you tried, constraints, and what kind of answer would help."
-          previewClassName="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 text-sm leading-relaxed text-white"
+          previewClassName="rounded-xl border border-border-default bg-surface px-4 py-3 text-sm leading-relaxed text-text-primary"
            className="w-full px-4 py-3 text-sm leading-relaxed text-transparent caret-white outline-none selection:bg-[#1d9bf0]/30"
         />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-1">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-text-disabled">
             Question Type
           </span>
           <select
             value={type}
             onChange={(e) => setType(e.target.value as QuestionType)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white outline-none focus:border-zinc-600"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary outline-none focus:border-border-strong"
           >
             <option value="open">Open question</option>
             <option value="mcq">MCQ question</option>
@@ -146,13 +146,13 @@ export default function AskQuestionForm({
 
         {type === "mcq" && (
           <label className="space-y-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-text-disabled">
               MCQ Mode
             </span>
             <select
               value={mcqMode}
               onChange={(e) => setMcqMode(e.target.value as McqMode)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white outline-none focus:border-zinc-600"
+              className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary outline-none focus:border-border-strong"
             >
               <option value="single">Single choice</option>
               <option value="multi">Multi-select</option>
@@ -162,9 +162,9 @@ export default function AskQuestionForm({
       </div>
 
       {type === "mcq" && (
-        <div className="space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
+        <div className="space-y-3 rounded-2xl border border-border-default bg-surface/30 p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-white">Options</h3>
+            <h3 className="text-sm font-semibold text-text-primary">Options</h3>
             {options.length < 4 && (
               <button
                 type="button"
@@ -179,13 +179,13 @@ export default function AskQuestionForm({
           <div className="space-y-2">
             {options.map((option, index) => (
               <div key={index} className="flex items-center gap-2">
-                <label className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-medium text-zinc-300">
+                <label className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-border-default bg-app px-3 py-2 text-xs font-medium text-text-secondary">
                   <input
                     type="radio"
                     name="correct-option"
                     checked={correctOptionIndex === index}
                     onChange={() => setCorrectOptionIndex(index)}
-                    className="h-4 w-4 border-zinc-700 bg-zinc-900 text-white"
+                    className="h-4 w-4 border-border-strong bg-surface text-text-primary"
                   />
                   Correct
                 </label>
@@ -193,13 +193,13 @@ export default function AskQuestionForm({
                   value={option}
                   onChange={(e) => updateOption(index, e.target.value)}
                   placeholder={`Option ${index + 1}`}
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-600"
+                  className="w-full rounded-xl border border-border-default bg-app px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-disabled focus:border-border-strong"
                 />
                 {options.length > 2 && (
                   <button
                     type="button"
                     onClick={() => removeOption(index)}
-                    className="rounded-xl border border-zinc-700 px-3 py-2 text-xs font-semibold text-zinc-300 transition-colors hover:bg-zinc-800"
+                    className="rounded-xl border border-border-strong px-3 py-2 text-xs font-semibold text-text-secondary transition-colors hover:bg-surface-hover"
                   >
                     Remove
                   </button>
@@ -207,16 +207,16 @@ export default function AskQuestionForm({
               </div>
             ))}
           </div>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-text-disabled">
             Mark exactly one option as the correct answer. Responders will see it after they submit.
           </p>
         </div>
       )}
 
-      <div className="space-y-3 rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
+      <div className="space-y-3 rounded-2xl border border-border-default bg-surface/30 p-4">
         <div>
-          <h3 className="text-sm font-semibold text-white">Role Tags</h3>
-          <p className="mt-0.5 text-xs text-zinc-500">Choose up to 2 role tags.</p>
+          <h3 className="text-sm font-semibold text-text-primary">Role Tags</h3>
+          <p className="mt-0.5 text-xs text-text-disabled">Choose up to 2 role tags.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {ROLE_OPTIONS.map((role) => {
@@ -228,8 +228,8 @@ export default function AskQuestionForm({
                 onClick={() => toggleRole(role)}
                 className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
                   selected
-                    ? "bg-white text-zinc-950"
-                    : "border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                    ? "bg-primary text-primary-foreground"
+                    : "border border-border-strong text-text-secondary hover:bg-surface-hover"
                 }`}
               >
                 {role}
@@ -241,26 +241,26 @@ export default function AskQuestionForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-1">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-text-disabled">
             Stack Tags
           </span>
           <input
             value={stackTagsInput}
             onChange={(e) => setStackTagsInput(e.target.value)}
             placeholder="react,nodejs,postgresql"
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-600"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-disabled focus:border-border-strong"
           />
         </label>
 
         <label className="space-y-1">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-text-disabled">
             Topic Tags
           </span>
           <input
             value={topicTagsInput}
             onChange={(e) => setTopicTagsInput(e.target.value)}
             placeholder="testing,system-design,interview"
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-600"
+            className="w-full rounded-xl border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-disabled focus:border-border-strong"
           />
         </label>
       </div>
@@ -271,7 +271,7 @@ export default function AskQuestionForm({
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
         >
           {submitting ? "Publishing…" : "Publish question"}
         </button>

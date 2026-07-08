@@ -35,14 +35,14 @@ export default function NewLaunchPage() {
 
   return (
     <div className="mx-auto max-w-4xl p-4">
-      <Link href="/launches" className="mb-4 inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300">
+      <Link href="/launches" className="mb-4 inline-flex items-center gap-1.5 text-xs text-text-disabled hover:text-text-secondary">
         <ArrowLeftIcon className="h-4 w-4" />
         Back to Launches
       </Link>
 
-      <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <h1 className="text-2xl font-bold text-white">Create a launch</h1>
-        <p className="mt-1 text-sm text-zinc-500">Ship a canonical launch page for your product and publish it immediately.</p>
+      <div className="rounded-3xl border border-border-default bg-surface/50 p-6">
+        <h1 className="text-2xl font-bold text-text-primary">Create a launch</h1>
+        <p className="mt-1 text-sm text-text-disabled">Ship a canonical launch page for your product and publish it immediately.</p>
 
         <div className="mt-6">
           <LaunchForm

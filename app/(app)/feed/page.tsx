@@ -59,13 +59,13 @@ export default function FeedPage() {
   return (
     <div>
       {/* ── Page Header with Pill segmented control ── */}
-      <header className="sticky top-0 z-20 bg-zinc-950/70 backdrop-blur-xl border-b border-zinc-800/50 px-4 py-3 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-20 bg-app/70 backdrop-blur-xl border-b border-border-default/50 px-4 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <h1 className="text-base font-extrabold tracking-tight text-white">Developer Feed</h1>
+          <h1 className="text-base font-extrabold tracking-tight text-text-primary">Developer Feed</h1>
         </div>
 
         {/* Tab Buttons (Pill Control) */}
-        <div className="flex items-center gap-1 bg-zinc-900/60 border border-zinc-800/80 p-1 rounded-full shadow-inner">
+        <div className="flex items-center gap-1 bg-surface/60 border border-border-default/80 p-1 rounded-full shadow-inner">
           <TabButton
             label="For You"
             active={activeTab === "foryou"}
@@ -90,7 +90,7 @@ export default function FeedPage() {
       />
 
       {/* ── Post List ── */}
-      <div className="divide-y divide-zinc-800/60">
+      <div className="divide-y divide-border-default/60">
         <PostList
           posts={activeFeed.posts}
           currentUser={user}
@@ -122,8 +122,8 @@ function TabButton({
       onClick={onClick}
       className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wide transition-all cursor-pointer select-none ${
         active
-          ? "bg-zinc-800 text-white shadow-sm"
-          : "text-zinc-500 hover:text-zinc-300"
+          ? "bg-surface-hover text-text-primary shadow-sm"
+          : "text-text-disabled hover:text-text-secondary"
       }`}
     >
       {label}

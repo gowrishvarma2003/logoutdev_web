@@ -233,14 +233,14 @@ export default function RepoCodePage() {
       {!repo.attached_space && isRepoOwner ? (
         <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300">Space Recommended</p>
-          <h2 className="mt-2 text-lg font-semibold text-white">Attach this repo to a Space to enable collaboration</h2>
+          <h2 className="mt-2 text-lg font-semibold text-text-primary">Attach this repo to a Space to enable collaboration</h2>
           <p className="mt-1 text-sm text-amber-100/90">
             Spaces are where discussions, work planning, updates, and contributor coordination happen. This repo stays focused on code.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               href={`/repos/${repo.id}/settings`}
-              className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-amber-950 transition-colors hover:bg-amber-50"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-amber-950 transition-colors hover:bg-amber-50"
             >
               Attach to a Space
             </Link>
@@ -264,24 +264,24 @@ export default function RepoCodePage() {
                 <button
                   type="button"
                   onClick={() => setShowBranchMenu((current) => !current)}
-                  className="flex min-w-0 items-center gap-2 rounded-md bg-zinc-800 px-3 py-1.5 text-sm font-medium text-zinc-200 hover:bg-zinc-700"
+                  className="flex min-w-0 items-center gap-2 rounded-md bg-surface-hover px-3 py-1.5 text-sm font-medium text-text-secondary hover:bg-surface-active"
                   aria-expanded={showBranchMenu}
                   aria-haspopup="menu"
                 >
-                  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="shrink-0 fill-current text-zinc-400">
+                  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="shrink-0 fill-current text-text-muted">
                     <path d="M11.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.493 2.493 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25ZM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM3.5 3.25a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0Z"></path>
                   </svg>
                   <span className="max-w-[150px] truncate">{activeRef}</span>
-                  <ChevronDownIcon className={`h-4 w-4 shrink-0 text-zinc-500 transition-transform ${showBranchMenu ? "rotate-180" : ""}`} />
+                  <ChevronDownIcon className={`h-4 w-4 shrink-0 text-text-disabled transition-transform ${showBranchMenu ? "rotate-180" : ""}`} />
                 </button>
 
                 {showBranchMenu ? (
                   <div
-                    className="absolute left-0 top-full z-30 mt-2 w-72 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/40"
+                    className="absolute left-0 top-full z-30 mt-2 w-72 overflow-hidden rounded-xl border border-border-default bg-app shadow-2xl shadow-black/40"
                     role="menu"
                   >
-                    <div className="border-b border-zinc-800 px-3 py-2">
-                      <p className="text-xs font-semibold text-zinc-300">Switch branches</p>
+                    <div className="border-b border-border-default px-3 py-2">
+                      <p className="text-xs font-semibold text-text-secondary">Switch branches</p>
                     </div>
                     <div className="max-h-80 overflow-y-auto py-1">
                       {branchOptions.map((branch) => {
@@ -294,12 +294,12 @@ export default function RepoCodePage() {
                             href={branchHref(branch.name)}
                             onClick={() => setShowBranchMenu(false)}
                             role="menuitem"
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface hover:text-text-primary"
                           >
                             <CheckIcon className={`h-4 w-4 shrink-0 ${isActive ? "text-blue-400" : "text-transparent"}`} />
                             <span className="min-w-0 flex-1 truncate">{branch.name}</span>
                             {isDefault ? (
-                              <span className="shrink-0 rounded-full border border-zinc-700 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                              <span className="shrink-0 rounded-full border border-border-strong px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-text-disabled">
                                 Default
                               </span>
                             ) : null}
@@ -311,12 +311,12 @@ export default function RepoCodePage() {
                 ) : null}
               </div>
               
-              <div className="flex items-center gap-3 text-sm text-zinc-400 ml-2 border-l border-zinc-800 pl-4 hidden sm:flex">
-                <span className="font-semibold flex items-center gap-1 text-zinc-400">
-                  <span className="text-zinc-200">{branches.length}</span> Branches
+              <div className="flex items-center gap-3 text-sm text-text-muted ml-2 border-l border-border-default pl-4 hidden sm:flex">
+                <span className="font-semibold flex items-center gap-1 text-text-muted">
+                  <span className="text-text-secondary">{branches.length}</span> Branches
                 </span>
-                <span className="font-semibold flex items-center gap-1 text-zinc-400">
-                  <span className="text-zinc-200">{tags.length}</span> Tags
+                <span className="font-semibold flex items-center gap-1 text-text-muted">
+                  <span className="text-text-secondary">{tags.length}</span> Tags
                 </span>
               </div>
             </div>
@@ -327,12 +327,12 @@ export default function RepoCodePage() {
                   {repo.can_push ? (
                     <Link
                       href={`/repos/${repo.id}/new?ref=${encodeURIComponent(activeRef)}&path=${encodeURIComponent(directoryPath)}`}
-                      className="hidden sm:block rounded-md px-3 py-1.5 text-sm font-medium text-zinc-300 hover:bg-zinc-800"
+                      className="hidden sm:block rounded-md px-3 py-1.5 text-sm font-medium text-text-secondary hover:bg-surface-hover"
                     >
                       Add file
                     </Link>
                   ) : (
-                    <span className="hidden rounded-md border border-zinc-800 px-3 py-1.5 text-xs font-medium uppercase tracking-[0.16em] text-zinc-500 sm:block">
+                    <span className="hidden rounded-md border border-border-default px-3 py-1.5 text-xs font-medium uppercase tracking-[0.16em] text-text-disabled sm:block">
                       Read only
                     </span>
                   )}
@@ -340,7 +340,7 @@ export default function RepoCodePage() {
                     type="button"
                     id="code-button-trigger"
                     onClick={() => setShowCodePanel((current) => !current)}
-                    className="inline-flex items-center rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 shadow-sm transition-colors"
+                    className="inline-flex items-center rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-text-primary hover:bg-green-700 shadow-sm transition-colors"
                   >
                     <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="mr-1.5 fill-current">
                       <path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L13.94 8l-3.72-3.72a.75.75 0 0 1 1.06-1.06ZM4.72 3.22 0.47 7.47a.75.75 0 0 0 0 1.06l4.25 4.25a.75.75 0 1 0 1.06-1.06L2.06 8l3.72-3.72a.75.75 0 0 0-1.06-1.06Z"></path>
@@ -353,24 +353,24 @@ export default function RepoCodePage() {
                   {showCodePanel ? (
                     <div
                       ref={codePanelRef}
-                      className="absolute right-0 top-full z-20 mt-2 w-80 sm:w-[360px] rounded-xl border border-zinc-800 bg-zinc-950 p-4 shadow-2xl shadow-black/40"
+                      className="absolute right-0 top-full z-20 mt-2 w-80 sm:w-[360px] rounded-xl border border-border-default bg-app p-4 shadow-2xl shadow-black/40"
                     >
-                      <div className="flex border-b border-zinc-800/80 mb-3 text-xs font-semibold text-zinc-400">
-                        <div className="relative pb-2 px-1 text-zinc-100 font-medium">
+                      <div className="flex border-b border-border-default/80 mb-3 text-xs font-semibold text-text-muted">
+                        <div className="relative pb-2 px-1 text-text-primary font-medium">
                           Local
                           <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500 rounded-full" />
                         </div>
                       </div>
 
                       <div className="space-y-3">
-                        <div className="flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/50 p-2 text-xs">
-                          <code className="flex-1 overflow-x-auto whitespace-nowrap scrollbar-none font-mono text-zinc-300">
+                        <div className="flex items-center gap-2 rounded-md border border-border-default bg-surface/50 p-2 text-xs">
+                          <code className="flex-1 overflow-x-auto whitespace-nowrap scrollbar-none font-mono text-text-secondary">
                             {gitRemoteUrl}
                           </code>
                           <button
                             type="button"
                             onClick={() => handleCopy(gitRemoteUrl, "url")}
-                            className="text-zinc-400 hover:text-zinc-200 active:text-white shrink-0"
+                            className="text-text-muted hover:text-text-secondary active:text-text-primary shrink-0"
                             title="Copy to clipboard"
                           >
                             {copiedField === "url" ? (
@@ -384,26 +384,26 @@ export default function RepoCodePage() {
                           </button>
                         </div>
 
-                        <p className="text-[11px] text-zinc-500 leading-normal">
+                        <p className="text-[11px] text-text-disabled leading-normal">
                           {repo.can_push
                             ? "Use this remote URL from your local Git repo."
                             : "You can clone this repo, but you need write access before you can push."}
                         </p>
                         <Link
                           href="/settings/tokens"
-                          className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-semibold text-zinc-200 transition-colors hover:border-zinc-700 hover:bg-zinc-800 hover:text-white"
+                          className="inline-flex items-center gap-2 rounded-lg border border-border-default bg-surface px-3 py-2 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:bg-surface-hover hover:text-text-primary"
                         >
                           <KeyIcon className="h-3.5 w-3.5" />
                           Manage Git access tokens
                         </Link>
                       </div>
 
-                      <div className="mt-4 border-t border-zinc-800/80 pt-3 space-y-1">
+                      <div className="mt-4 border-t border-border-default/80 pt-3 space-y-1">
                         <a
                           href={`x-github-client://openRepo/${encodeURIComponent(gitRemoteUrl)}`}
-                          className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm text-zinc-300 hover:bg-zinc-900/60 hover:text-white transition-colors"
+                          className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm text-text-secondary hover:bg-surface/60 hover:text-text-primary transition-colors"
                         >
-                          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="fill-current text-zinc-400">
+                          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="fill-current text-text-muted">
                             <path d="M4 11.25a.75.75 0 0 1 .75-.75h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1-.75-.75Z"></path>
                             <path d="M10.125 1.5a1.875 1.875 0 1 1 0 3.75h-4.25a1.875 1.875 0 0 1 0-3.75h4.25ZM5.875 3a.375 0 1 0 0 .75h4.25a.375 0 1 0 0-.75h-4.25ZM1.5 6.75C1.5 5.784 2.284 5 3.25 5h9.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 12.75 14H3.25A1.75 1.75 0 0 1 1.5 12.25v-5.5Zm1.75-.25a.25 0 0 0-.25.25v5.5c0 .138.112.25.25.25h9.5a.25 0 0 0 .25-.25v-5.5a.25 0 0 0-.25-.25H3.25Z"></path>
                           </svg>
@@ -414,9 +414,9 @@ export default function RepoCodePage() {
                           type="button"
                           onClick={handleDownloadZip}
                           disabled={downloadingZip}
-                          className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-zinc-300 hover:bg-zinc-900/60 hover:text-white transition-colors text-left disabled:opacity-50"
+                          className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-text-secondary hover:bg-surface/60 hover:text-text-primary transition-colors text-left disabled:opacity-50"
                         >
-                          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="fill-current text-zinc-400">
+                          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="fill-current text-text-muted">
                             <path d="M3.5 1.75a.25.25 0 0 1 .25-.25h3v2.25a.75.75 0 0 0 .75.75h2.25v2.75H3.75a.25.25 0 0 1-.25-.25V1.75Zm4.75 0v1.5h1.5a.25.25 0 0 0-.25-.25h-1.25ZM2 1.75C2 .784 2.784 0 3.75 0h4.5c.464 0 .91.184 1.237.513l3 3c.329.328.513.773.513 1.237v7.5A1.75 1.75 0 0 1 11.25 14h-7.5A1.75 1.75 0 0 1 2 12.25V1.75Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5H9.5a1.75 1.75 0 0 1-1.75-1.75V1.5H3.75Z"></path>
                           </svg>
                           <span>{downloadingZip ? "Downloading ZIP..." : "Download ZIP"}</span>
@@ -434,30 +434,30 @@ export default function RepoCodePage() {
               <Spinner />
             </div>
           ) : entries.length === 0 && currentView !== "blob" ? (
-            <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
+            <div className="overflow-hidden rounded-xl border border-border-default bg-app">
               <EmptyState
                 icon={<CodeBracketIcon className="h-10 w-10" />}
                 title="Empty repository"
                 description="Push your first commit to start browsing files, commits, and branches here."
               />
-              <div className="border-t border-zinc-800 bg-zinc-900/40 px-4 py-5 sm:px-6">
+              <div className="border-t border-border-default bg-surface/40 px-4 py-5 sm:px-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h4 className="text-sm font-semibold text-white">
+                    <h4 className="text-sm font-semibold text-text-primary">
                       {repo.can_push ? "Push code from your local project" : "Clone this repository"}
                     </h4>
-                    <p className="mt-1 text-xs text-zinc-500">
-                      Remote URL: <span className="font-mono text-zinc-300">{gitRemoteUrl}</span>
+                    <p className="mt-1 text-xs text-text-disabled">
+                      Remote URL: <span className="font-mono text-text-secondary">{gitRemoteUrl}</span>
                     </p>
                   </div>
                 </div>
                 {repo.can_push ? (
-                  <pre className="mt-4 overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-950 p-4 text-sm text-zinc-200">
+                  <pre className="mt-4 overflow-x-auto rounded-lg border border-border-default bg-app p-4 text-sm text-text-secondary">
                     <code>{pushCommands}</code>
                   </pre>
                 ) : null}
                 {repo.can_push && repo.visibility === "private" ? (
-                  <p className="mt-3 text-xs text-zinc-500">
+                  <p className="mt-3 text-xs text-text-disabled">
                     Use your LogoutDev username when Git asks for a username, and use an access token from{" "}
                     <Link href="/settings/tokens" className="text-blue-400 hover:text-blue-300 hover:underline">
                       Settings / Tokens
@@ -465,11 +465,11 @@ export default function RepoCodePage() {
                     {" "}as the password.
                   </p>
                 ) : repo.can_push ? (
-                  <p className="mt-3 text-xs text-zinc-500">
+                  <p className="mt-3 text-xs text-text-disabled">
                     Public repositories can be cloned without a token, but pushing still requires your username and an access token.
                   </p>
                 ) : (
-                  <p className="mt-3 text-xs text-zinc-500">
+                  <p className="mt-3 text-xs text-text-disabled">
                     You have read access here. Cloning is available, but creating commits or pushing from the web editor is limited to users with write access.
                   </p>
                 )}
@@ -478,31 +478,31 @@ export default function RepoCodePage() {
           ) : (
             <>
               {/* File Browser / Code View */}
-              <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
+              <div className="overflow-hidden rounded-xl border border-border-default bg-app">
                 {currentView === "tree" ? (
                   <>
                     {/* Latest commit header */}
                     {latestCommit && (
-                      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 bg-zinc-900/50 px-4 py-3">
+                      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-default bg-surface/50 px-4 py-3">
                         <div className="flex min-w-0 items-center gap-3">
                           <div className="h-6 w-6 shrink-0 rounded-full bg-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400">
                             {latestCommit.author_name.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
-                            <Link href={`/repos/${repo.id}/commits?author=${latestCommit.author_name}`} className="font-medium text-zinc-200 hover:text-blue-500 hover:underline truncate text-sm">
+                            <Link href={`/repos/${repo.id}/commits?author=${latestCommit.author_name}`} className="font-medium text-text-secondary hover:text-blue-500 hover:underline truncate text-sm">
                               {latestCommit.author_name}
                             </Link>
-                            <Link href={`/repos/${repo.id}/commits/${latestCommit.oid}`} className="text-zinc-400 hover:text-blue-500 hover:underline truncate text-sm">
+                            <Link href={`/repos/${repo.id}/commits/${latestCommit.oid}`} className="text-text-muted hover:text-blue-500 hover:underline truncate text-sm">
                               {latestCommit.message}
                             </Link>
                           </div>
                         </div>
-                        <div className="hidden sm:flex shrink-0 items-center gap-4 text-xs text-zinc-500">
+                        <div className="hidden sm:flex shrink-0 items-center gap-4 text-xs text-text-disabled">
                           <Link href={`/repos/${repo.id}/commits/${latestCommit.oid}`} className="font-mono hover:text-blue-400">
                             {latestCommit.short_oid}
                           </Link>
                           <span>{formatRelativeTime(latestCommit.authored_at)}</span>
-                          <Link href={`/repos/${repo.id}/commits`} className="flex items-center gap-1 font-semibold text-zinc-300 hover:text-blue-400">
+                          <Link href={`/repos/${repo.id}/commits`} className="flex items-center gap-1 font-semibold text-text-secondary hover:text-blue-400">
                             <ClockIcon className="h-4 w-4" />
                             <span className="hidden md:inline">History</span>
                           </Link>
@@ -511,16 +511,16 @@ export default function RepoCodePage() {
                     )}
 
                     {/* File List */}
-                    <div className="divide-y divide-zinc-800/50">
+                    <div className="divide-y divide-border-default/50">
                       {breadcrumb.length > 0 && (
                         <Link
                           href={`/repos/${repo.id}?ref=${encodeURIComponent(activeRef)}&path=${encodeURIComponent(
                             breadcrumb.length > 1 ? breadcrumb[breadcrumb.length - 2].path : ""
                           )}`}
-                          className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-zinc-900/50"
+                          className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface/50"
                         >
-                          <div className="w-5 text-zinc-500">..</div>
-                          <span className="text-sm text-zinc-300"></span>
+                          <div className="w-5 text-text-disabled">..</div>
+                          <span className="text-sm text-text-secondary"></span>
                         </Link>
                       )}
                       {sortedEntries.map((entry) => {
@@ -530,15 +530,15 @@ export default function RepoCodePage() {
                           <Link
                             key={entry.path}
                             href={href}
-                            className="group flex items-center justify-between gap-4 px-4 py-2.5 transition-colors hover:bg-zinc-900/50"
+                            className="group flex items-center justify-between gap-4 px-4 py-2.5 transition-colors hover:bg-surface/50"
                           >
                             <div className="flex min-w-0 flex-1 items-center gap-3">
                               {isTree ? (
-                                <FolderIcon className="h-5 w-5 text-zinc-400" />
+                                <FolderIcon className="h-5 w-5 text-text-muted" />
                               ) : (
-                                <DocumentIcon className="h-5 w-5 text-zinc-500" />
+                                <DocumentIcon className="h-5 w-5 text-text-disabled" />
                               )}
-                              <span className={`${isTree ? "text-zinc-200" : "text-zinc-300"} truncate text-sm group-hover:text-blue-400`}>
+                              <span className={`${isTree ? "text-text-secondary" : "text-text-secondary"} truncate text-sm group-hover:text-blue-400`}>
                                 {entry.name}
                               </span>
                             </div>
@@ -550,17 +550,17 @@ export default function RepoCodePage() {
                 ) : (
                   // Blob View
                   <div>
-                    <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900/50 px-4 py-3">
-                      <div className="flex items-center gap-3 text-sm text-zinc-400">
-                        <span className="font-mono font-medium text-zinc-300">{currentPath.split("/").pop()}</span>
-                        <span className="w-px h-4 bg-zinc-700"></span>
+                    <div className="flex items-center justify-between border-b border-border-default bg-surface/50 px-4 py-3">
+                      <div className="flex items-center gap-3 text-sm text-text-muted">
+                        <span className="font-mono font-medium text-text-secondary">{currentPath.split("/").pop()}</span>
+                        <span className="w-px h-4 bg-surface-active"></span>
                         <span>{blob ? formatFileSize(blob.size) : "..."}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {repo.can_push ? (
                           <Link
                             href={`/repos/${repo.id}/edit?ref=${encodeURIComponent(activeRef)}&path=${encodeURIComponent(currentPath)}`}
-                            className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                            className="rounded-md p-1.5 text-text-muted hover:bg-surface-hover hover:text-text-primary"
                             title="Edit file"
                           >
                             <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="fill-current">
@@ -568,7 +568,7 @@ export default function RepoCodePage() {
                             </svg>
                           </Link>
                         ) : (
-                          <span className="rounded-md border border-zinc-800 px-2 py-1 text-[11px] uppercase tracking-[0.16em] text-zinc-500">
+                          <span className="rounded-md border border-border-default px-2 py-1 text-[11px] uppercase tracking-[0.16em] text-text-disabled">
                             Read only
                           </span>
                         )}
@@ -577,9 +577,9 @@ export default function RepoCodePage() {
                     {blobLoading ? (
                       <div className="flex justify-center py-12"><Spinner /></div>
                     ) : blob?.is_binary ? (
-                      <div className="flex justify-center p-12 text-sm text-zinc-500">Binary file viewing is not supported.</div>
+                      <div className="flex justify-center p-12 text-sm text-text-disabled">Binary file viewing is not supported.</div>
                     ) : (
-                      <pre className="overflow-x-auto p-4 text-sm font-mono text-zinc-300">
+                      <pre className="overflow-x-auto p-4 text-sm font-mono text-text-secondary">
                         <code>{blob?.content}</code>
                       </pre>
                     )}
@@ -591,27 +591,27 @@ export default function RepoCodePage() {
               {currentView === "tree" && directoryPath === "" && (
                 <>
                   {readme && !readme.is_binary ? (
-                    <div className="mt-6 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
-                      <div className="flex items-center gap-2 border-b border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm font-semibold text-white">
-                        <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="fill-current text-zinc-500">
+                    <div className="mt-6 overflow-hidden rounded-xl border border-border-default bg-app">
+                      <div className="flex items-center gap-2 border-b border-border-default bg-surface/50 px-4 py-3 text-sm font-semibold text-text-primary">
+                        <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" className="fill-current text-text-disabled">
                           <path d="M2 1.75A.75.75 0 0 1 2.75 1h10.5a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75H2.75a.75.75 0 0 1-.75-.75Zm1.5.75v11h9V2.5Z"></path>
                           <path d="M4.5 4.25a.75.75 0 0 1 .75-.75h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1-.75-.75Zm0 3a.75.75 0 0 1 .75-.75h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1-.75-.75Zm0 3a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 0 1.5h-3.5a.75.75 0 0 1-.75-.75Z"></path>
                         </svg>
                         {"README.md"}
                       </div>
-                      <article className="prose prose-invert max-w-none p-6 text-zinc-300">
+                      <article className="prose prose-invert max-w-none p-6 text-text-secondary">
                         <pre className="font-sans whitespace-pre-wrap">{readme.content}</pre>
                       </article>
                     </div>
                   ) : !readmeLoading ? (
-                    <div className="mt-6 flex flex-col items-center justify-center border border-zinc-800 rounded-xl bg-zinc-950 p-8 text-center">
-                      <BookOpenIcon className="h-8 w-8 text-zinc-500 mb-3" />
-                      <h3 className="text-base font-semibold text-white">Add a README</h3>
-                      <p className="mt-1 text-sm text-zinc-500 max-w-sm">Help people interested in this repository understand your project.</p>
+                    <div className="mt-6 flex flex-col items-center justify-center border border-border-default rounded-xl bg-app p-8 text-center">
+                      <BookOpenIcon className="h-8 w-8 text-text-disabled mb-3" />
+                      <h3 className="text-base font-semibold text-text-primary">Add a README</h3>
+                      <p className="mt-1 text-sm text-text-disabled max-w-sm">Help people interested in this repository understand your project.</p>
                       {repo.can_push ? (
                         <Link
                           href={`/repos/${repo.id}/new?ref=${encodeURIComponent(activeRef)}&path=README.md`}
-                          className="mt-4 rounded-lg bg-green-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-700 transition-colors"
+                          className="mt-4 rounded-lg bg-green-600 px-4 py-2 text-xs font-semibold text-text-primary hover:bg-green-700 transition-colors"
                         >
                           Add a README
                         </Link>
@@ -625,38 +625,38 @@ export default function RepoCodePage() {
         </div>
 
         {/* Right Column: Sidebar */}
-        <div className="space-y-8 lg:col-span-1 border-t border-zinc-900 pt-6 lg:border-t-0 lg:pt-0">
+        <div className="space-y-8 lg:col-span-1 border-t border-border-subtle pt-6 lg:border-t-0 lg:pt-0">
           {/* About widget */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-zinc-900 pb-2 mb-3">
-              <h3 className="text-sm font-semibold text-white">About</h3>
+            <div className="flex items-center justify-between border-b border-border-subtle pb-2 mb-3">
+              <h3 className="text-sm font-semibold text-text-primary">About</h3>
               {repo.can_push && (
-                <Link href={`/repos/${repo.id}/settings`} className="text-zinc-500 hover:text-zinc-300">
-                  <Cog6ToothIcon className="h-4.5 w-4.5" />
+                <Link href={`/repos/${repo.id}/settings`} className="text-text-disabled hover:text-text-secondary">
+                  <Cog6ToothIcon className="h-4 w-4" />
                 </Link>
               )}
             </div>
             {repo.description ? (
               <p className="text-sm leading-relaxed text-zinc-355">{repo.description}</p>
             ) : (
-              <p className="text-sm italic text-zinc-500">No description, website, or topics provided.</p>
+              <p className="text-sm italic text-text-disabled">No description, website, or topics provided.</p>
             )}
 
-            <div className="space-y-3.5 text-sm text-zinc-400 pt-2">
+            <div className="space-y-3.5 text-sm text-text-muted pt-2">
               <Link href={`/repos/${repo.id}/commits`} className="flex items-center gap-2 hover:text-sky-400 transition-colors">
-                <ArrowPathIcon className="h-4.5 w-4.5 text-zinc-500" />
+                <ArrowPathIcon className="h-4 w-4 text-text-disabled" />
                 <span>Activity</span>
               </Link>
               <Link href={`/repos/${repo.id}/insights`} className="flex items-center gap-2 hover:text-sky-400 transition-colors">
-                <StarIcon className="h-4.5 w-4.5 text-zinc-500" />
+                <StarIcon className="h-4 w-4 text-text-disabled" />
                 <span>{repo.star_count || 0} stars</span>
               </Link>
               <Link href={`/repos/${repo.id}/insights`} className="flex items-center gap-2 hover:text-sky-400 transition-colors">
-                <EyeIcon className="h-4.5 w-4.5 text-zinc-500" />
+                <EyeIcon className="h-4 w-4 text-text-disabled" />
                 <span>{repo.watcher_count || 0} watching</span>
               </Link>
               <Link href={`/repos/${repo.id}/forks`} className="flex items-center gap-2 hover:text-sky-400 transition-colors">
-                <ArrowsRightLeftIcon className="h-4.5 w-4.5 text-zinc-500" />
+                <ArrowsRightLeftIcon className="h-4 w-4 text-text-disabled" />
                 <span>{repo.fork_count || 0} forks</span>
               </Link>
             </div>
@@ -664,7 +664,7 @@ export default function RepoCodePage() {
 
           {/* Releases widget */}
           <div>
-            <h3 className="border-b border-zinc-900 pb-2 mb-3 text-sm font-semibold text-white">Releases</h3>
+            <h3 className="border-b border-border-subtle pb-2 mb-3 text-sm font-semibold text-text-primary">Releases</h3>
             {releases && releases.length > 0 ? (
               <div className="space-y-3">
                 <div className="flex items-start gap-2.5">
@@ -673,14 +673,14 @@ export default function RepoCodePage() {
                     <Link href={`/repos/${repo.id}/releases`} className="text-sm font-medium text-sky-400 hover:text-sky-350 hover:underline truncate block">
                       {releases[0].title || releases[0].tag_name}
                     </Link>
-                    <span className="text-xs text-zinc-500 block mt-0.5">
+                    <span className="text-xs text-text-disabled block mt-0.5">
                       Latest • {formatRelativeTime(releases[0].created_at)}
                     </span>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="text-xs text-zinc-500 space-y-2">
+              <div className="text-xs text-text-disabled space-y-2">
                 <p>No releases published</p>
                 {repo.can_push && (
                   <Link href={`/repos/${repo.id}/releases`} className="inline-block text-xs font-semibold text-sky-400 hover:text-sky-350 hover:underline">
@@ -693,8 +693,8 @@ export default function RepoCodePage() {
 
           {/* Packages widget */}
           <div>
-            <h3 className="border-b border-zinc-900 pb-2 mb-3 text-sm font-semibold text-white">Packages</h3>
-            <div className="text-xs text-zinc-500 space-y-2">
+            <h3 className="border-b border-border-subtle pb-2 mb-3 text-sm font-semibold text-text-primary">Packages</h3>
+            <div className="text-xs text-text-disabled space-y-2">
               <p>No packages published</p>
               {repo.can_push && (
                 <a href="#" className="inline-block text-xs font-semibold text-sky-400 hover:text-sky-350 hover:underline">
@@ -706,10 +706,10 @@ export default function RepoCodePage() {
 
           {/* Contributors widget */}
           <div>
-            <div className="flex items-center gap-2 border-b border-zinc-900 pb-2 mb-3">
-              <h3 className="text-sm font-semibold text-white">Contributors</h3>
+            <div className="flex items-center gap-2 border-b border-border-subtle pb-2 mb-3">
+              <h3 className="text-sm font-semibold text-text-primary">Contributors</h3>
               {insights?.contributors && insights.contributors.length > 0 && (
-                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-semibold text-zinc-400">
+                <span className="rounded-full bg-surface-hover px-2 py-0.5 text-xs font-semibold text-text-muted">
                   {insights.contributors.length}
                 </span>
               )}
@@ -718,14 +718,14 @@ export default function RepoCodePage() {
               <div className="space-y-3">
                 {insights.contributors.slice(0, 5).map((contributor) => (
                   <div key={`${contributor.author_email}-${contributor.author_name}`} className="flex items-center gap-2.5">
-                    <div className="h-6 w-6 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[10px] font-bold text-zinc-300">
+                    <div className="h-6 w-6 shrink-0 rounded-full bg-surface-hover border border-border-strong flex items-center justify-center text-[10px] font-bold text-text-secondary">
                       {contributor.author_name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1 flex flex-wrap items-baseline gap-1.5">
-                      <span className="text-xs font-semibold text-zinc-200 truncate">
+                      <span className="text-xs font-semibold text-text-secondary truncate">
                         {contributor.author_name}
                       </span>
-                      <span className="text-[10px] text-zinc-500 truncate">
+                      <span className="text-[10px] text-text-disabled truncate">
                         {contributor.commit_count} {contributor.commit_count === 1 ? "commit" : "commits"}
                       </span>
                     </div>
@@ -733,16 +733,16 @@ export default function RepoCodePage() {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-zinc-500">No contributors detected yet.</p>
+              <p className="text-xs text-text-disabled">No contributors detected yet.</p>
             )}
           </div>
 
           {/* Languages widget */}
           <div>
-            <h3 className="border-b border-zinc-900 pb-2 mb-3 text-sm font-semibold text-white">Languages</h3>
+            <h3 className="border-b border-border-subtle pb-2 mb-3 text-sm font-semibold text-text-primary">Languages</h3>
             {repo.language ? (
               <div className="space-y-4">
-                <div className="h-2 w-full rounded-full overflow-hidden flex bg-zinc-800">
+                <div className="h-2 w-full rounded-full overflow-hidden flex bg-surface-hover">
                   {repo.languages && repo.languages.length > 0 ? (
                     repo.languages.map((lang) => (
                       <div
@@ -772,8 +772,8 @@ export default function RepoCodePage() {
                           className="h-2 w-2 rounded-full"
                           style={{ backgroundColor: LANGUAGE_COLORS[lang.name] || "#8b949e" }}
                         />
-                        <span className="text-zinc-200">{lang.name}</span>
-                        <span className="text-zinc-500 font-normal">{lang.percentage.toFixed(1)}%</span>
+                        <span className="text-text-secondary">{lang.name}</span>
+                        <span className="text-text-disabled font-normal">{lang.percentage.toFixed(1)}%</span>
                       </span>
                     ))
                   ) : (
@@ -782,14 +782,14 @@ export default function RepoCodePage() {
                         className="h-2 w-2 rounded-full"
                         style={{ backgroundColor: LANGUAGE_COLORS[repo.language] || "#8b949e" }}
                       />
-                      <span className="text-zinc-200">{repo.language}</span>
-                      <span className="text-zinc-500 font-normal">100.0%</span>
+                      <span className="text-text-secondary">{repo.language}</span>
+                      <span className="text-text-disabled font-normal">100.0%</span>
                     </span>
                   )}
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-zinc-500">No language data detected.</p>
+              <p className="text-xs text-text-disabled">No language data detected.</p>
             )}
           </div>
         </div>

@@ -963,14 +963,14 @@ function VideoPane({
   }, [stream, hasVideo]);
 
   return (
-    <div className={`relative min-h-44 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 ${className}`}>
+    <div className={`relative min-h-44 overflow-hidden rounded-xl border border-border-default bg-app ${className}`}>
       {hasVideo ? (
         <video ref={videoRef} autoPlay playsInline muted={playbackMuted} className={`h-full min-h-44 w-full ${screen ? "object-contain bg-black" : "object-cover"}`} />
       ) : (
-        <div className="grid h-full min-h-44 place-items-center text-center text-sm text-zinc-500">
+        <div className="grid h-full min-h-44 place-items-center text-center text-sm text-text-disabled">
           <div className="grid place-items-center gap-3 px-4">
-            <div className="grid h-16 w-16 place-items-center rounded-full bg-zinc-800 text-xl font-semibold text-zinc-200">
-              {label.replace(/^@/, "").trim()[0]?.toUpperCase() || <SpeakerWaveIcon className="h-8 w-8 text-zinc-600" />}
+            <div className="grid h-16 w-16 place-items-center rounded-full bg-surface-hover text-xl font-semibold text-text-secondary">
+              {label.replace(/^@/, "").trim()[0]?.toUpperCase() || <SpeakerWaveIcon className="h-8 w-8 text-text-disabled" />}
             </div>
             <span>{cameraOff ? "Camera is off" : label}</span>
           </div>
@@ -980,12 +980,12 @@ function VideoPane({
         </div>
       )}
       <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-black/75 via-black/25 to-transparent p-3">
-        <span className="min-w-0 truncate rounded-md bg-black/55 px-2 py-1 text-xs font-medium text-white">
+        <span className="min-w-0 truncate rounded-md bg-black/55 px-2 py-1 text-xs font-medium text-text-primary">
           {label}
         </span>
         <span className="flex shrink-0 items-center gap-1">
-          {micMuted ? <span title="Microphone muted" className="grid h-7 w-7 place-items-center rounded-full bg-black/60 text-zinc-200"><NoSymbolIcon className="h-4 w-4" /></span> : null}
-          {screen ? <span title="Screen sharing" className="grid h-7 w-7 place-items-center rounded-full bg-emerald-500 text-zinc-950"><ComputerDesktopIcon className="h-4 w-4" /></span> : null}
+          {micMuted ? <span title="Microphone muted" className="grid h-7 w-7 place-items-center rounded-full bg-black/60 text-text-secondary"><NoSymbolIcon className="h-4 w-4" /></span> : null}
+          {screen ? <span title="Screen sharing" className="grid h-7 w-7 place-items-center rounded-full bg-emerald-500 text-primary-foreground"><ComputerDesktopIcon className="h-4 w-4" /></span> : null}
         </span>
       </div>
       {actions ? <div className="absolute right-3 top-3 flex items-center gap-2">{actions}</div> : null}
@@ -1043,7 +1043,7 @@ export function ParticipantTile({ participant, stream }: { participant?: CallPar
 }
 
 export function NetworkQualityIndicator({ state }: { state: CallUiState }) {
-  const color = state === "connected" ? "text-emerald-400" : state === "reconnecting" ? "text-amber-400" : "text-zinc-500";
+  const color = state === "connected" ? "text-emerald-400" : state === "reconnecting" ? "text-amber-400" : "text-text-disabled";
   return (
     <span className={`inline-flex items-center gap-1 text-xs ${color}`}>
       <SignalIcon className="h-4 w-4" />
@@ -1067,28 +1067,28 @@ export function CallControls({
   const cameraOff = callType.includes("audio") || !localStream?.getVideoTracks().some((track) => track.enabled);
   const mediaControlsDisabled = !activeCall || isEnding;
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-wrap items-center justify-center gap-3 rounded-2xl border border-zinc-800/80 bg-zinc-900/80 px-4 py-3 shadow-lg backdrop-blur-md">
-      <button title={muted ? "Unmute microphone" : "Mute microphone"} onClick={toggleMute} disabled={mediaControlsDisabled} className="grid h-12 w-12 place-items-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800 transition-colors disabled:cursor-not-allowed disabled:opacity-30">
-        {muted ? <NoSymbolIcon className="h-5 w-5 text-zinc-400" /> : <MicrophoneIcon className="h-5 w-5 text-emerald-400" />}
+    <div className="mx-auto flex w-full max-w-xl flex-wrap items-center justify-center gap-3 rounded-2xl border border-border-default/80 bg-surface/80 px-4 py-3 shadow-lg backdrop-blur-md">
+      <button title={muted ? "Unmute microphone" : "Mute microphone"} onClick={toggleMute} disabled={mediaControlsDisabled} className="grid h-12 w-12 place-items-center rounded-full border border-border-strong bg-surface text-text-primary hover:bg-surface-hover transition-colors disabled:cursor-not-allowed disabled:opacity-30">
+        {muted ? <NoSymbolIcon className="h-5 w-5 text-text-muted" /> : <MicrophoneIcon className="h-5 w-5 text-emerald-400" />}
       </button>
-      <button title={cameraOff ? "Enable camera" : "Disable camera"} onClick={toggleCamera} disabled={mediaControlsDisabled || callType.includes("audio")} className="grid h-12 w-12 place-items-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
-        {cameraOff ? <VideoCameraSlashIcon className="h-5 w-5 text-zinc-400" /> : <VideoCameraIcon className="h-5 w-5 text-sky-400" />}
+      <button title={cameraOff ? "Enable camera" : "Disable camera"} onClick={toggleCamera} disabled={mediaControlsDisabled || callType.includes("audio")} className="grid h-12 w-12 place-items-center rounded-full border border-border-strong bg-surface text-text-primary hover:bg-surface-hover transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+        {cameraOff ? <VideoCameraSlashIcon className="h-5 w-5 text-text-muted" /> : <VideoCameraIcon className="h-5 w-5 text-sky-400" />}
       </button>
-      <button title={isScreenSharing ? "Stop sharing" : "Share screen"} onClick={toggleScreenShare} disabled={mediaControlsDisabled} className={`grid h-12 w-12 place-items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-30 ${isScreenSharing ? "border-emerald-500 bg-emerald-500 text-zinc-950" : "border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800"}`}>
+      <button title={isScreenSharing ? "Stop sharing" : "Share screen"} onClick={toggleScreenShare} disabled={mediaControlsDisabled} className={`grid h-12 w-12 place-items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-30 ${isScreenSharing ? "border-emerald-500 bg-emerald-500 text-primary-foreground" : "border-border-strong bg-surface text-text-primary hover:bg-surface-hover"}`}>
         <ComputerDesktopIcon className="h-5 w-5" />
       </button>
       {onToggleLayout ? (
-        <button title="Switch layout" onClick={onToggleLayout} disabled={mediaControlsDisabled} className="grid h-12 w-12 place-items-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-100 transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-30">
+        <button title="Switch layout" onClick={onToggleLayout} disabled={mediaControlsDisabled} className="grid h-12 w-12 place-items-center rounded-full border border-border-strong bg-surface text-text-primary transition-colors hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-30">
           <Squares2X2Icon className="h-5 w-5" />
         </button>
       ) : null}
       {onToggleParticipants ? (
-        <button title={participantsOpen ? "Hide participants" : "Show participants"} onClick={onToggleParticipants} disabled={mediaControlsDisabled} className={`grid h-12 w-12 place-items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-30 ${participantsOpen ? "border-sky-500 bg-sky-500 text-zinc-950" : "border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800"}`}>
+        <button title={participantsOpen ? "Hide participants" : "Show participants"} onClick={onToggleParticipants} disabled={mediaControlsDisabled} className={`grid h-12 w-12 place-items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-30 ${participantsOpen ? "border-sky-500 bg-sky-500 text-primary-foreground" : "border-border-strong bg-surface text-text-primary hover:bg-surface-hover"}`}>
           <UserGroupIcon className="h-5 w-5" />
         </button>
       ) : null}
-      <span className="mx-1 h-8 w-px bg-zinc-800" />
-      <button title={activeCall ? "Leave call" : "Cancel call"} onClick={endActiveCall} disabled={isEnding} className="grid h-12 w-12 place-items-center rounded-full bg-rose-600 text-white hover:bg-rose-500 transition-all hover:scale-105 shadow-md shadow-rose-900/30 disabled:cursor-not-allowed disabled:opacity-60">
+      <span className="mx-1 h-8 w-px bg-surface-hover" />
+      <button title={activeCall ? "Leave call" : "Cancel call"} onClick={endActiveCall} disabled={isEnding} className="grid h-12 w-12 place-items-center rounded-full bg-rose-600 text-text-primary hover:bg-rose-500 transition-all hover:scale-105 shadow-md shadow-rose-900/30 disabled:cursor-not-allowed disabled:opacity-60">
         <PhoneArrowDownLeftIcon className="h-5 w-5" />
       </button>
     </div>
@@ -1104,14 +1104,14 @@ function IncomingCallModal() {
   if (!incomingCall) return null;
   const title = incomingCall.call_mode === "group" ? "Group call" : "Incoming call";
   return (
-    <div className="fixed inset-x-4 top-5 z-[70] mx-auto max-w-sm rounded-lg border border-zinc-800 bg-zinc-950 p-4 shadow-2xl shadow-black/40">
-      <p className="text-sm font-semibold text-white">{title}</p>
-      <p className="mt-1 text-xs text-zinc-500">{incomingCall.call_type.includes("video") ? "Video" : "Audio"} call</p>
+    <div className="fixed inset-x-4 top-5 z-modal mx-auto max-w-sm rounded-lg border border-border-default bg-app p-4 shadow-2xl shadow-black/40">
+      <p className="text-sm font-semibold text-text-primary">{title}</p>
+      <p className="mt-1 text-xs text-text-disabled">{incomingCall.call_type.includes("video") ? "Video" : "Audio"} call</p>
       <div className="mt-4 flex justify-end gap-2">
-        <button onClick={rejectIncoming} className="inline-flex items-center gap-1 rounded-lg border border-zinc-800 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-900">
+        <button onClick={rejectIncoming} className="inline-flex items-center gap-1 rounded-lg border border-border-default px-3 py-2 text-sm text-text-secondary hover:bg-surface">
           <XMarkIcon className="h-4 w-4" /> Reject
         </button>
-        <button onClick={acceptIncoming} className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-zinc-950">
+        <button onClick={acceptIncoming} className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground">
           <PhoneArrowUpRightIcon className="h-4 w-4" /> Accept
         </button>
       </div>
@@ -1123,9 +1123,9 @@ export function OutgoingCallModal() {
   const { activeCall, endActiveCall, pendingCallIntent, state } = useCalls();
   if ((!activeCall && !pendingCallIntent) || !["starting", "requesting_permissions", "dialing", "outgoing_ringing"].includes(state)) return null;
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-4">
-      <p className="text-sm font-semibold text-white">Calling…</p>
-      <button onClick={endActiveCall} className="mt-3 rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white">Cancel</button>
+    <div className="rounded-lg border border-border-default bg-app p-4">
+      <p className="text-sm font-semibold text-text-primary">Calling…</p>
+      <button onClick={endActiveCall} className="mt-3 rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-text-primary">Cancel</button>
     </div>
   );
 }
@@ -1171,7 +1171,7 @@ function CallTileView({
           type="button"
           onClick={onPin}
           title={pinned ? "Unpin tile" : "Pin tile"}
-          className={`grid h-9 w-9 place-items-center rounded-full border text-white backdrop-blur transition-colors ${pinned ? "border-sky-400 bg-sky-500/90" : "border-white/15 bg-black/45 hover:bg-black/70"}`}
+          className={`grid h-9 w-9 place-items-center rounded-full border text-text-primary backdrop-blur transition-colors ${pinned ? "border-sky-400 bg-sky-500/90" : "border-white/15 bg-black/45 hover:bg-black/70"}`}
         >
           <ArrowsPointingOutIcon className="h-4 w-4" />
         </button>
@@ -1183,24 +1183,24 @@ function CallTileView({
 function ParticipantsPanel({ call, currentUserId }: { call: CallRecord | null; currentUserId: string }) {
   const participants = call?.participants || [];
   return (
-    <aside className="h-full w-full border-l border-zinc-800 bg-zinc-950/95 text-white lg:w-80">
-      <div className="border-b border-zinc-800 px-4 py-3">
+    <aside className="h-full w-full border-l border-border-default bg-app/95 text-text-primary lg:w-80">
+      <div className="border-b border-border-default px-4 py-3">
         <p className="text-sm font-semibold">Participants</p>
-        <p className="mt-1 text-xs text-zinc-500">{participants.length} in this call</p>
+        <p className="mt-1 text-xs text-text-disabled">{participants.length} in this call</p>
       </div>
       <div className="max-h-[calc(100vh-10rem)] overflow-y-auto px-2 py-2">
         {participants.map((participant) => {
           const name = participant.user_id === currentUserId ? "You" : nameForParticipant(participant);
           return (
-            <div key={participant.id || participant.user_id} className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-zinc-900">
-              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-zinc-800 text-sm font-semibold text-zinc-200">
+            <div key={participant.id || participant.user_id} className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-surface">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-surface-hover text-sm font-semibold text-text-secondary">
                 {name.replace(/^@/, "")[0]?.toUpperCase() || "U"}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-zinc-100">{name}</p>
-                <p className="truncate text-xs text-zinc-500">{participant.status.replace(/_/g, " ")}</p>
+                <p className="truncate text-sm font-medium text-text-primary">{name}</p>
+                <p className="truncate text-xs text-text-disabled">{participant.status.replace(/_/g, " ")}</p>
               </div>
-              <div className="flex shrink-0 items-center gap-1 text-zinc-400">
+              <div className="flex shrink-0 items-center gap-1 text-text-muted">
                 {participant.is_muted ? <NoSymbolIcon title="Muted" className="h-4 w-4" /> : <MicrophoneIcon title="Mic on" className="h-4 w-4 text-emerald-400" />}
                 {participant.is_camera_off ? <VideoCameraSlashIcon title="Camera off" className="h-4 w-4" /> : <VideoCameraIcon title="Camera on" className="h-4 w-4 text-sky-400" />}
                 {participant.is_screen_sharing ? <ComputerDesktopIcon title="Screen sharing" className="h-4 w-4 text-emerald-400" /> : null}
@@ -1250,13 +1250,13 @@ function CallScreen() {
   const title = mode === "group" ? "Group call" : "Direct call";
   const statusCopy = callStatusCopy(state, activeCall, pendingCallIntent, isEnding);
   return (
-    <div className="fixed inset-0 z-[60] bg-zinc-950 text-white">
+    <div className="fixed inset-0 z-drawer bg-app text-text-primary">
       <div className="flex h-full min-h-0">
         <main className="flex min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center justify-between border-b border-zinc-800 px-4 py-3">
+        <header className="flex shrink-0 items-center justify-between border-b border-border-default px-4 py-3">
           <div>
             <p className="text-sm font-semibold">{title}</p>
-            <p className="mt-1 text-xs text-zinc-500">{statusCopy} · {formatDuration(durationSeconds)}</p>
+            <p className="mt-1 text-xs text-text-disabled">{statusCopy} · {formatDuration(durationSeconds)}</p>
           </div>
           <NetworkQualityIndicator state={state} />
         </header>
@@ -1264,7 +1264,7 @@ function CallScreen() {
         {audioPlaybackBlocked ? (
           <div className="mx-4 mt-3 flex shrink-0 items-center justify-between gap-3 rounded-lg border border-amber-700/70 bg-amber-950/40 px-3 py-2 text-sm text-amber-100">
             <span>Audio playback is blocked by the browser.</span>
-            <button type="button" onClick={() => void enableRemoteAudio()} className="shrink-0 rounded-md bg-amber-300 px-3 py-1 text-xs font-semibold text-zinc-950">
+            <button type="button" onClick={() => void enableRemoteAudio()} className="shrink-0 rounded-md bg-amber-300 px-3 py-1 text-xs font-semibold text-primary-foreground">
               Enable audio
             </button>
           </div>
@@ -1302,7 +1302,7 @@ function CallScreen() {
               ))}
             </div>
           ) : (
-            <div className="grid h-full place-items-center rounded-xl border border-zinc-800 bg-zinc-950 text-sm text-zinc-500">
+            <div className="grid h-full place-items-center rounded-xl border border-border-default bg-app text-sm text-text-disabled">
               <div className="grid place-items-center gap-3 text-center">
                 <PhoneIcon className="h-10 w-10 text-zinc-700" />
                 <span>{statusCopy}</span>
@@ -1337,7 +1337,7 @@ function CallNotice() {
   const { activeCall, error, pendingCallIntent } = useCalls();
   if (!error || activeCall || pendingCallIntent) return null;
   return (
-    <div className="fixed bottom-5 left-1/2 z-[75] max-w-sm -translate-x-1/2 rounded-lg border border-rose-900 bg-rose-950 px-4 py-3 text-sm text-rose-100 shadow-xl">
+    <div className="fixed bottom-5 left-1/2 z-toast max-w-sm -translate-x-1/2 rounded-lg border border-rose-900 bg-rose-950 px-4 py-3 text-sm text-rose-100 shadow-xl">
       {error}
     </div>
   );
@@ -1347,8 +1347,8 @@ export function MiniCallWindow() {
   const { activeCall, durationSeconds, endActiveCall } = useCalls();
   if (!activeCall) return null;
   return (
-    <div className="fixed bottom-5 right-5 z-[55] rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-white shadow-xl">
-      <p className="text-xs text-zinc-500">{formatDuration(durationSeconds)}</p>
+    <div className="fixed bottom-5 right-5 z-drawer rounded-lg border border-border-default bg-app p-3 text-text-primary shadow-xl">
+      <p className="text-xs text-text-disabled">{formatDuration(durationSeconds)}</p>
       <button onClick={endActiveCall} className="mt-2 rounded bg-rose-600 px-2 py-1 text-xs font-semibold">End</button>
     </div>
   );
@@ -1363,14 +1363,14 @@ export function ConversationCallControls({ conversation }: { conversation: ChatC
       <button
         title="Start audio call"
         onClick={() => start(conversation, "audio")}
-        className="grid h-9 w-9 place-items-center rounded-lg border border-zinc-800 text-zinc-200 hover:bg-zinc-900"
+        className="grid h-9 w-9 place-items-center rounded-lg border border-border-default text-text-secondary hover:bg-surface"
       >
         <PhoneIcon className="h-4 w-4" />
       </button>
       <button
         title="Start video call"
         onClick={() => start(conversation, "video")}
-        className="grid h-9 w-9 place-items-center rounded-lg border border-zinc-800 text-zinc-200 hover:bg-zinc-900"
+        className="grid h-9 w-9 place-items-center rounded-lg border border-border-default text-text-secondary hover:bg-surface"
       >
         <VideoCameraIcon className="h-4 w-4" />
       </button>

@@ -42,7 +42,7 @@ export default function PostList({
   if (error) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 px-6 text-center">
-        <p className="text-sm text-zinc-500">{error}</p>
+        <p className="text-sm text-text-disabled">{error}</p>
         <button
           onClick={() => window.location.reload()}
           className="text-sm font-medium text-sky-400 hover:underline"
@@ -85,7 +85,7 @@ export default function PostList({
           <button
             onClick={onLoadMore}
             disabled={isLoadingMore}
-            className="flex items-center gap-2 px-5 py-2 rounded-full border border-zinc-700 text-sm font-medium text-zinc-300 hover:bg-zinc-800 transition-colors disabled:opacity-60"
+            className="flex items-center gap-2 px-5 py-2 rounded-full border border-border-strong text-sm font-medium text-text-secondary hover:bg-surface-hover transition-colors disabled:opacity-60"
           >
             {isLoadingMore ? (
               <>

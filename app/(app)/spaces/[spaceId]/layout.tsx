@@ -33,8 +33,8 @@ export default function SpaceLayout({ children, params }: SpaceLayoutProps) {
   if (error || !space) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center px-4">
-        <h2 className="text-lg font-semibold text-white mb-2">Space not found</h2>
-        <p className="text-sm text-zinc-500">{error || "This space doesn't exist or is private."}</p>
+        <h2 className="text-lg font-semibold text-text-primary mb-2">Space not found</h2>
+        <p className="text-sm text-text-disabled">{error || "This space doesn't exist or is private."}</p>
       </div>
     );
   }

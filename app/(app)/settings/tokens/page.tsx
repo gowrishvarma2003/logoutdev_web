@@ -91,32 +91,32 @@ export default function SettingsTokensPage() {
 
   return (
     <div>
-      <header className="sticky top-0 z-20 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-md">
+      <header className="sticky top-0 z-20 border-b border-border-default bg-app/90 backdrop-blur-md">
         <div className="flex items-center gap-3 px-4 py-3">
           <Link
             href="/settings/profile"
-            className="rounded-full p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
+            className="rounded-full p-1.5 text-text-muted hover:bg-surface-hover hover:text-text-primary transition-colors"
             aria-label="Go back"
           >
             <ArrowLeftIcon className="w-5 h-5" />
           </Link>
           <div className="flex items-center gap-2">
-            <KeyIcon className="w-4 h-4 text-zinc-400" />
-            <h1 className="text-[15px] font-bold text-white">Git Access Tokens</h1>
+            <KeyIcon className="w-4 h-4 text-text-muted" />
+            <h1 className="text-[15px] font-bold text-text-primary">Git Access Tokens</h1>
           </div>
         </div>
       </header>
 
       <div className="space-y-6 px-5 py-6">
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
-          <h2 className="text-sm font-semibold text-white">Create a repo access token</h2>
-          <p className="mt-1 text-sm text-zinc-500">
+        <section className="rounded-2xl border border-border-default bg-surface/50 p-4">
+          <h2 className="text-sm font-semibold text-text-primary">Create a repo access token</h2>
+          <p className="mt-1 text-sm text-text-disabled">
             Use this token as your Git password when cloning or pushing LogoutDev repositories over HTTPS.
           </p>
-          <p className="mt-1 text-xs text-zinc-600">
+          <p className="mt-1 text-xs text-text-disabled">
             Username: your LogoutDev username. Password: the token you create here.
           </p>
-          <p className="mt-1 text-xs text-zinc-600">
+          <p className="mt-1 text-xs text-text-disabled">
             If you set an expiry date, the token will remain valid until the end of that day.
           </p>
 
@@ -126,16 +126,16 @@ export default function SettingsTokensPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Laptop Git token"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+              className="w-full rounded-xl border border-border-default bg-app px-3 py-2 text-sm text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
             />
             <input
               type="date"
               value={expiresAt}
               onChange={(e) => setExpiresAt(e.target.value)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="w-full rounded-xl border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             />
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-zinc-300">
-              <p className="font-medium text-white">Scopes</p>
+            <div className="rounded-xl border border-border-default bg-app px-4 py-3 text-sm text-text-secondary">
+              <p className="font-medium text-text-primary">Scopes</p>
               <label className="mt-3 flex items-center gap-2">
                 <input type="checkbox" checked={readScope} onChange={(e) => setReadScope(e.target.checked)} />
                 <span>git:read</span>
@@ -149,7 +149,7 @@ export default function SettingsTokensPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-zinc-100 disabled:opacity-50 transition-colors"
+              className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover disabled:opacity-50 transition-colors"
             >
               {submitting ? "Creating..." : "Create token"}
             </button>
@@ -173,12 +173,12 @@ export default function SettingsTokensPage() {
                 {copied ? "Copied!" : "Copy"}
               </button>
             </div>
-            <pre className="mt-3 overflow-x-auto rounded-xl bg-zinc-950 p-3 text-sm text-white select-all">{plaintext}</pre>
+            <pre className="mt-3 overflow-x-auto rounded-xl bg-app p-3 text-sm text-text-primary select-all">{plaintext}</pre>
           </section>
         )}
 
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
-          <h2 className="text-sm font-semibold text-white">Existing tokens</h2>
+        <section className="rounded-2xl border border-border-default bg-surface/50 p-4">
+          <h2 className="text-sm font-semibold text-text-primary">Existing tokens</h2>
 
           {successMessage && (
             <div className="mt-3 flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3">
@@ -200,9 +200,9 @@ export default function SettingsTokensPage() {
           ) : error ? (
             <p className="mt-4 text-sm text-rose-400">{error}</p>
           ) : tokens.length === 0 ? (
-            <p className="mt-3 text-sm text-zinc-500">No tokens created yet.</p>
+            <p className="mt-3 text-sm text-text-disabled">No tokens created yet.</p>
           ) : (
-            <div className="mt-4 divide-y divide-zinc-800/60">
+            <div className="mt-4 divide-y divide-border-default/60">
               {tokens.map((token) => {
                 const isRevoked = Boolean(token.revoked_at);
 
@@ -210,22 +210,22 @@ export default function SettingsTokensPage() {
                   <div key={token.id} className="flex items-center gap-3 py-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className={`truncate text-sm font-medium ${isRevoked ? "text-zinc-500" : "text-white"}`}>{token.name}</p>
+                        <p className={`truncate text-sm font-medium ${isRevoked ? "text-text-disabled" : "text-text-primary"}`}>{token.name}</p>
                         {isRevoked && (
-                          <span className="rounded-full border border-zinc-700 bg-zinc-800/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+                          <span className="rounded-full border border-border-strong bg-surface-hover/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-text-muted">
                             Token revoked
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-text-disabled">
                         {isRevoked ? "Token revoked" : `Prefix: ${token.token_prefix}`}
                         {token.last_used_at ? ` · Last used ${new Date(token.last_used_at).toLocaleString()}` : " · Never used"}
                         {isRevoked && token.revoked_at ? ` · Revoked ${new Date(token.revoked_at).toLocaleString()}` : ""}
                       </p>
-                      <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-zinc-500">{token.scopes.join(" · ")}</p>
+                      <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-text-disabled">{token.scopes.join(" · ")}</p>
                     </div>
                     {isRevoked ? (
-                      <span className="rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-500">Revoked</span>
+                      <span className="rounded-lg px-3 py-1.5 text-xs font-medium text-text-disabled">Revoked</span>
                     ) : (
                       <button
                         onClick={() => confirmRevoke(token.id, token.name)}
@@ -243,17 +243,17 @@ export default function SettingsTokensPage() {
 
           {tokenToRevoke && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-              <div className="mx-4 w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
-                <p className="text-sm font-semibold text-white">Revoke access token?</p>
-                <p className="mt-2 text-sm text-zinc-400">
-                  Any scripts or Git clients using <span className="font-medium text-white">{tokenToRevoke.name}</span> will stop working immediately.
+              <div className="mx-4 w-full max-w-sm rounded-2xl border border-border-default bg-app p-6 shadow-2xl">
+                <p className="text-sm font-semibold text-text-primary">Revoke access token?</p>
+                <p className="mt-2 text-sm text-text-muted">
+                  Any scripts or Git clients using <span className="font-medium text-text-primary">{tokenToRevoke.name}</span> will stop working immediately.
                 </p>
                 <div className="mt-5 flex items-center justify-end gap-3">
                   <button
                     type="button"
                     onClick={cancelRevoke}
                     disabled={Boolean(revokingId)}
-                    className="rounded-xl px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-xl px-4 py-2 text-sm font-medium text-text-muted hover:text-text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -261,7 +261,7 @@ export default function SettingsTokensPage() {
                     type="button"
                     onClick={handleRevoke}
                     disabled={Boolean(revokingId)}
-                    className="inline-flex min-w-32 items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 transition-colors disabled:cursor-not-allowed disabled:opacity-70"
+                    className="inline-flex min-w-32 items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-text-primary hover:bg-rose-500 transition-colors disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {revokingId ? (
                       <>

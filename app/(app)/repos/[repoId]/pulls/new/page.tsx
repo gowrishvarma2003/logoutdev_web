@@ -124,9 +124,9 @@ export default function NewPullRequestPage() {
 
   if (options.length === 0) {
     return (
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <h1 className="text-xl font-semibold text-white">No writable branches available</h1>
-        <p className="mt-2 text-sm text-zinc-400">
+      <div className="rounded-2xl border border-border-default bg-surface/50 p-6">
+        <h1 className="text-xl font-semibold text-text-primary">No writable branches available</h1>
+        <p className="mt-2 text-sm text-text-muted">
           To open a pull request, you need write access to this repository or a writable fork of it.
         </p>
       </div>
@@ -136,21 +136,21 @@ export default function NewPullRequestPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-white">Open a pull request</h1>
-        <p className="mt-1 text-sm text-zinc-400">
+        <h1 className="text-2xl font-semibold text-text-primary">Open a pull request</h1>
+        <p className="mt-1 text-sm text-text-muted">
           Compare a writable head branch against this repository and preview the diff before you open the PR.
         </p>
       </div>
 
-      <div className="grid gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="grid gap-4 rounded-2xl border border-border-default bg-surface/50 p-4 lg:grid-cols-[1fr_auto_1fr]">
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">Base</p>
-          <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-            <p className="text-sm font-medium text-white">{repo.owner?.username || repo.name}</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-text-disabled">Base</p>
+          <div className="rounded-xl border border-border-default bg-app p-3">
+            <p className="text-sm font-medium text-text-primary">{repo.owner?.username || repo.name}</p>
             <select
               value={selectedBaseBranch}
               onChange={(event) => setBaseBranch(event.target.value)}
-              className="mt-2 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="mt-2 w-full rounded-lg border border-border-default bg-surface px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               {(branches.length > 0 ? branches.map((branch) => branch.name) : [repo.default_branch]).map((branch) => (
                 <option key={branch} value={branch}>
@@ -162,16 +162,16 @@ export default function NewPullRequestPage() {
         </div>
 
         <div className="flex items-center justify-center">
-          <ArrowsRightLeftIcon className="h-5 w-5 text-zinc-500" />
+          <ArrowsRightLeftIcon className="h-5 w-5 text-text-disabled" />
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">Head</p>
-          <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
+          <p className="text-xs uppercase tracking-[0.16em] text-text-disabled">Head</p>
+          <div className="rounded-xl border border-border-default bg-app p-3">
             <select
               value={selectedHeadRepoId}
               onChange={(event) => setHeadRepoId(event.target.value)}
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="w-full rounded-lg border border-border-default bg-surface px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               {options.map((option) => (
                 <option key={option.repo_id} value={option.repo_id}>
@@ -182,7 +182,7 @@ export default function NewPullRequestPage() {
             <select
               value={selectedHeadBranch}
               onChange={(event) => setHeadBranch(event.target.value)}
-              className="mt-2 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="mt-2 w-full rounded-lg border border-border-default bg-surface px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             >
               {(selectedHeadOption?.writable_branches || []).map((branch) => (
                 <option key={branch} value={branch}>
@@ -195,11 +195,11 @@ export default function NewPullRequestPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
+        <section className="rounded-2xl border border-border-default bg-surface/50 p-5">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-semibold text-white">Compare preview</h2>
-              <p className="mt-1 text-sm text-zinc-500">
+              <h2 className="text-lg font-semibold text-text-primary">Compare preview</h2>
+              <p className="mt-1 text-sm text-text-disabled">
                 {comparison ? `${comparison.head_label} -> ${comparison.base_label}` : "Choose branches to compare"}
               </p>
             </div>
@@ -215,21 +215,21 @@ export default function NewPullRequestPage() {
           {comparison ? (
             <div className="mt-4 space-y-4">
               <div className="grid gap-3 sm:grid-cols-4">
-                <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-                  <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">Ahead</p>
-                  <p className="mt-2 text-xl font-semibold text-white">{comparison.ahead_by}</p>
+                <div className="rounded-xl border border-border-default bg-app p-3">
+                  <p className="text-xs uppercase tracking-[0.16em] text-text-disabled">Ahead</p>
+                  <p className="mt-2 text-xl font-semibold text-text-primary">{comparison.ahead_by}</p>
                 </div>
-                <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-                  <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">Behind</p>
-                  <p className="mt-2 text-xl font-semibold text-white">{comparison.behind_by}</p>
+                <div className="rounded-xl border border-border-default bg-app p-3">
+                  <p className="text-xs uppercase tracking-[0.16em] text-text-disabled">Behind</p>
+                  <p className="mt-2 text-xl font-semibold text-text-primary">{comparison.behind_by}</p>
                 </div>
-                <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-                  <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">Commits</p>
-                  <p className="mt-2 text-xl font-semibold text-white">{comparison.commits.length}</p>
+                <div className="rounded-xl border border-border-default bg-app p-3">
+                  <p className="text-xs uppercase tracking-[0.16em] text-text-disabled">Commits</p>
+                  <p className="mt-2 text-xl font-semibold text-text-primary">{comparison.commits.length}</p>
                 </div>
-                <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-                  <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">Files</p>
-                  <p className="mt-2 text-xl font-semibold text-white">{comparison.diff.stats.files_changed}</p>
+                <div className="rounded-xl border border-border-default bg-app p-3">
+                  <p className="text-xs uppercase tracking-[0.16em] text-text-disabled">Files</p>
+                  <p className="mt-2 text-xl font-semibold text-text-primary">{comparison.diff.stats.files_changed}</p>
                 </div>
               </div>
 
@@ -257,18 +257,18 @@ export default function NewPullRequestPage() {
                 </div>
               )}
 
-              <div className="rounded-xl border border-zinc-800 bg-zinc-950">
-                <div className="border-b border-zinc-800 px-4 py-3 text-sm font-medium text-zinc-200">
+              <div className="rounded-xl border border-border-default bg-app">
+                <div className="border-b border-border-default px-4 py-3 text-sm font-medium text-text-secondary">
                   Commits preview
                 </div>
-                <div className="divide-y divide-zinc-800">
+                <div className="divide-y divide-border-default">
                   {comparison.commits.length === 0 ? (
-                    <p className="px-4 py-4 text-sm text-zinc-500">No new commits in this comparison yet.</p>
+                    <p className="px-4 py-4 text-sm text-text-disabled">No new commits in this comparison yet.</p>
                   ) : (
                     comparison.commits.slice(0, 5).map((commit) => (
                       <div key={commit.oid} className="px-4 py-3">
-                        <p className="text-sm font-medium text-white">{commit.message}</p>
-                        <p className="mt-1 text-xs text-zinc-500">
+                        <p className="text-sm font-medium text-text-primary">{commit.message}</p>
+                        <p className="mt-1 text-xs text-text-disabled">
                           {commit.author_name} / {commit.short_oid}
                         </p>
                       </div>
@@ -278,14 +278,14 @@ export default function NewPullRequestPage() {
               </div>
             </div>
           ) : (
-            <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 p-6 text-sm text-zinc-500">
+            <div className="mt-4 rounded-xl border border-border-default bg-app p-6 text-sm text-text-disabled">
               Select a base branch and a writable head branch to preview the pull request.
             </div>
           )}
         </section>
 
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
-          <h2 className="text-lg font-semibold text-white">Pull request details</h2>
+        <section className="rounded-2xl border border-border-default bg-surface/50 p-5">
+          <h2 className="text-lg font-semibold text-text-primary">Pull request details</h2>
           {submitError ? (
             <div className="mt-4 rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-300">
               {submitError}
@@ -297,16 +297,16 @@ export default function NewPullRequestPage() {
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               placeholder="Title"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="w-full rounded-xl border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             />
             <textarea
               rows={10}
               value={body}
               onChange={(event) => setBody(event.target.value)}
               placeholder="Describe the changes, context, and anything reviewers should focus on."
-              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+              className="w-full resize-y rounded-xl border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
             />
-            <label className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm text-zinc-300">
+            <label className="flex items-center gap-3 rounded-xl border border-border-default bg-app px-3 py-3 text-sm text-text-secondary">
               <input
                 type="checkbox"
                 checked={isDraft}
@@ -317,7 +317,7 @@ export default function NewPullRequestPage() {
             <button
               type="submit"
               disabled={!canCreate || isSubmitting}
-              className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-text-primary hover:bg-green-500 disabled:opacity-50"
             >
               {isSubmitting ? <Spinner size="sm" /> : null}
               {isDraft ? "Create draft pull request" : "Create pull request"}

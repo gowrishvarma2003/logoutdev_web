@@ -114,16 +114,16 @@ export default function BranchProtectionSettingsPage() {
   return (
     <div className="mx-auto max-w-[1000px] p-4 md:p-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-white">
+        <h1 className="flex items-center gap-2 text-2xl font-bold text-text-primary">
           <ShieldCheckIcon className="h-6 w-6 text-green-500" />
           Branch protection rules
         </h1>
-        <div className="rounded-full border border-zinc-800 px-3 py-1 text-xs font-medium text-zinc-400">
+        <div className="rounded-full border border-border-default px-3 py-1 text-xs font-medium text-text-muted">
           {rules.length} active {rules.length === 1 ? "rule" : "rules"}
         </div>
       </div>
 
-      <p className="mb-8 text-sm text-zinc-400">
+      <p className="mb-8 text-sm text-text-muted">
         Protect important branches by requiring pull requests, reviews, status checks, or stricter push rules before code can change protected refs.
       </p>
 
@@ -133,8 +133,8 @@ export default function BranchProtectionSettingsPage() {
         </div>
       ) : null}
 
-      <h2 className="mb-4 text-xl font-semibold text-white">Active rules</h2>
-      <div className="mb-10 overflow-hidden rounded-md border border-zinc-800 bg-zinc-900/50">
+      <h2 className="mb-4 text-xl font-semibold text-text-primary">Active rules</h2>
+      <div className="mb-10 overflow-hidden rounded-md border border-border-default bg-surface/50">
         {loading ? (
           <div className="flex h-32 items-center justify-center">
             <Spinner size="lg" />
@@ -152,14 +152,14 @@ export default function BranchProtectionSettingsPage() {
             />
           </div>
         ) : (
-          <ul className="divide-y divide-zinc-800">
+          <ul className="divide-y divide-border-default">
             {rules.map((rule) => (
-              <li key={rule.id} className="flex flex-col gap-4 p-4 hover:bg-zinc-800/50 md:flex-row md:items-center md:justify-between">
+              <li key={rule.id} className="flex flex-col gap-4 p-4 hover:bg-surface-hover/50 md:flex-row md:items-center md:justify-between">
                 <div className="min-w-0">
                   <div className="mb-2 inline-block rounded border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 font-mono font-semibold text-blue-400">
                     {rule.branch_pattern}
                   </div>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-400">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-text-muted">
                     {summarizeRule(rule).map((item) => (
                       <span key={item} className="flex items-center gap-1">
                         <CheckIcon className="h-4 w-4 text-green-500" />
@@ -168,7 +168,7 @@ export default function BranchProtectionSettingsPage() {
                     ))}
                   </div>
                   {rule.required_status_contexts?.length > 0 ? (
-                    <div className="mt-2 text-xs text-zinc-500">
+                    <div className="mt-2 text-xs text-text-disabled">
                       Required checks: {rule.required_status_contexts.join(", ")}
                     </div>
                   ) : null}
@@ -188,9 +188,9 @@ export default function BranchProtectionSettingsPage() {
         )}
       </div>
 
-      <div className="rounded-md border border-zinc-700 bg-zinc-900 shadow-sm">
-        <div className="border-b border-zinc-800 bg-zinc-800/50 px-6 py-4">
-          <h2 className="text-lg font-medium text-white">Add or update protection rule</h2>
+      <div className="rounded-md border border-border-strong bg-surface shadow-sm">
+        <div className="border-b border-border-default bg-surface-hover/50 px-6 py-4">
+          <h2 className="text-lg font-medium text-text-primary">Add or update protection rule</h2>
         </div>
 
         <form onSubmit={handleCreate} className="p-6">
@@ -206,7 +206,7 @@ export default function BranchProtectionSettingsPage() {
           ) : null}
 
           <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-zinc-200">
+            <label className="mb-2 block text-sm font-medium text-text-secondary">
               Branch name pattern <span className="text-red-500">*</span>
             </label>
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
@@ -218,7 +218,7 @@ export default function BranchProtectionSettingsPage() {
                 onChange={(event) => updateForm("pattern", event.target.value)}
                 placeholder="e.g. main or release/*"
                 disabled={!repo.can_manage_rules}
-                className="w-full max-w-md rounded border border-zinc-700 bg-zinc-950 px-3 py-2 font-mono text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
+                className="w-full max-w-md rounded border border-border-strong bg-app px-3 py-2 font-mono text-sm text-text-primary focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
               />
               <datalist id="branch-pattern-options">
                 {branches.map((branch) => (
@@ -234,7 +234,7 @@ export default function BranchProtectionSettingsPage() {
                     type="button"
                     onClick={() => updateForm("pattern", branch.name)}
                     disabled={!repo.can_manage_rules}
-                    className="rounded-full border border-zinc-700 px-3 py-1 text-xs font-medium text-zinc-300 hover:bg-zinc-800 disabled:opacity-60"
+                    className="rounded-full border border-border-strong px-3 py-1 text-xs font-medium text-text-secondary hover:bg-surface-hover disabled:opacity-60"
                   >
                     {branch.name}
                     {branch.name === default_branch ? " (default)" : ""}
@@ -242,7 +242,7 @@ export default function BranchProtectionSettingsPage() {
                 ))}
               </div>
             </div>
-            <p className="mt-2 text-xs text-zinc-500">Use an exact branch name or a wildcard pattern like release/*.</p>
+            <p className="mt-2 text-xs text-text-disabled">Use an exact branch name or a wildcard pattern like release/*.</p>
           </div>
 
           <div className="mb-6 space-y-4">
@@ -252,25 +252,25 @@ export default function BranchProtectionSettingsPage() {
                 checked={form.requirePr}
                 onChange={(event) => updateForm("requirePr", event.target.checked)}
                 disabled={!repo.can_manage_rules}
-                className="mt-1 h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-blue-600 focus:ring-blue-500"
+                className="mt-1 h-4 w-4 rounded border-border-strong bg-surface text-blue-600 focus:ring-blue-500"
               />
               <div>
-                <span className="block text-sm font-medium text-zinc-200">Require a pull request before merging</span>
-                <span className="mt-0.5 block text-sm text-zinc-400">
+                <span className="block text-sm font-medium text-text-secondary">Require a pull request before merging</span>
+                <span className="mt-0.5 block text-sm text-text-muted">
                   Direct commits to matching branches are blocked; changes must go through a pull request.
                 </span>
               </div>
             </label>
 
             {form.requirePr ? (
-              <div className="ml-7 space-y-4 border-l-2 border-zinc-800 pl-4">
+              <div className="ml-7 space-y-4 border-l-2 border-border-default pl-4">
                 <div className="flex items-center gap-3">
-                  <label className="text-sm text-zinc-300">Required approving reviews:</label>
+                  <label className="text-sm text-text-secondary">Required approving reviews:</label>
                   <select
                     value={form.approvals}
                     onChange={(event) => updateForm("approvals", Number(event.target.value))}
                     disabled={!repo.can_manage_rules}
-                    className="rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-sm text-white"
+                    className="rounded border border-border-strong bg-app px-2 py-1 text-sm text-text-primary"
                   >
                     {[0, 1, 2, 3, 4, 5, 6].map((num) => (
                       <option key={num} value={num}>
@@ -285,9 +285,9 @@ export default function BranchProtectionSettingsPage() {
                     checked={form.dismissStaleReviews}
                     onChange={(event) => updateForm("dismissStaleReviews", event.target.checked)}
                     disabled={!repo.can_manage_rules}
-                    className="mt-1 h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-blue-600 focus:ring-blue-500"
+                    className="mt-1 h-4 w-4 rounded border-border-strong bg-surface text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-zinc-300">Dismiss stale approvals when new commits are pushed</span>
+                  <span className="text-sm text-text-secondary">Dismiss stale approvals when new commits are pushed</span>
                 </label>
               </div>
             ) : null}
@@ -298,11 +298,11 @@ export default function BranchProtectionSettingsPage() {
                 checked={form.requireStatusChecks}
                 onChange={(event) => updateForm("requireStatusChecks", event.target.checked)}
                 disabled={!repo.can_manage_rules}
-                className="mt-1 h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-blue-600 focus:ring-blue-500"
+                className="mt-1 h-4 w-4 rounded border-border-strong bg-surface text-blue-600 focus:ring-blue-500"
               />
               <div>
-                <span className="block text-sm font-medium text-zinc-200">Require status checks to pass before merging</span>
-                <span className="mt-0.5 block text-sm text-zinc-400">Provide a comma-separated list of required check contexts.</span>
+                <span className="block text-sm font-medium text-text-secondary">Require status checks to pass before merging</span>
+                <span className="mt-0.5 block text-sm text-text-muted">Provide a comma-separated list of required check contexts.</span>
               </div>
             </label>
             {form.requireStatusChecks ? (
@@ -311,7 +311,7 @@ export default function BranchProtectionSettingsPage() {
                 onChange={(event) => updateForm("requiredStatusContexts", event.target.value)}
                 placeholder="build, lint, tests"
                 disabled={!repo.can_manage_rules}
-                className="ml-7 w-full max-w-md rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
+                className="ml-7 w-full max-w-md rounded border border-border-strong bg-app px-3 py-2 text-sm text-text-primary focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
               />
             ) : null}
 
@@ -321,11 +321,11 @@ export default function BranchProtectionSettingsPage() {
                 checked={form.restrictPushes}
                 onChange={(event) => updateForm("restrictPushes", event.target.checked)}
                 disabled={!repo.can_manage_rules}
-                className="mt-1 h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-blue-600 focus:ring-blue-500"
+                className="mt-1 h-4 w-4 rounded border-border-strong bg-surface text-blue-600 focus:ring-blue-500"
               />
               <div>
-                <span className="block text-sm font-medium text-zinc-200">Restrict who can push</span>
-                <span className="mt-0.5 block text-sm text-zinc-400">Use a minimum repo role for direct pushes to this branch.</span>
+                <span className="block text-sm font-medium text-text-secondary">Restrict who can push</span>
+                <span className="mt-0.5 block text-sm text-text-muted">Use a minimum repo role for direct pushes to this branch.</span>
               </div>
             </label>
             {form.restrictPushes ? (
@@ -333,7 +333,7 @@ export default function BranchProtectionSettingsPage() {
                 value={form.pushRoleMin}
                 onChange={(event) => updateForm("pushRoleMin", event.target.value as "write" | "maintain" | "admin")}
                 disabled={!repo.can_manage_rules}
-                className="ml-7 w-full max-w-xs rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
+                className="ml-7 w-full max-w-xs rounded border border-border-strong bg-app px-3 py-2 text-sm text-text-primary focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
               >
                 <option value="write">write</option>
                 <option value="maintain">maintain</option>
@@ -347,11 +347,11 @@ export default function BranchProtectionSettingsPage() {
                 checked={form.requireLinearHistory}
                 onChange={(event) => updateForm("requireLinearHistory", event.target.checked)}
                 disabled={!repo.can_manage_rules}
-                className="mt-1 h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-blue-600 focus:ring-blue-500"
+                className="mt-1 h-4 w-4 rounded border-border-strong bg-surface text-blue-600 focus:ring-blue-500"
               />
               <div>
-                <span className="block text-sm font-medium text-zinc-200">Require linear history</span>
-                <span className="mt-0.5 block text-sm text-zinc-400">Reject merge commits on direct updates to the protected branch.</span>
+                <span className="block text-sm font-medium text-text-secondary">Require linear history</span>
+                <span className="mt-0.5 block text-sm text-text-muted">Reject merge commits on direct updates to the protected branch.</span>
               </div>
             </label>
 
@@ -361,11 +361,11 @@ export default function BranchProtectionSettingsPage() {
                 checked={form.allowForcePush}
                 onChange={(event) => updateForm("allowForcePush", event.target.checked)}
                 disabled={!repo.can_manage_rules}
-                className="mt-1 h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-blue-600 focus:ring-blue-500"
+                className="mt-1 h-4 w-4 rounded border-border-strong bg-surface text-blue-600 focus:ring-blue-500"
               />
               <div>
-                <span className="block text-sm font-medium text-zinc-200">Allow force pushes</span>
-                <span className="mt-0.5 block text-sm text-zinc-400">Permit non-fast-forward updates to the protected branch.</span>
+                <span className="block text-sm font-medium text-text-secondary">Allow force pushes</span>
+                <span className="mt-0.5 block text-sm text-text-muted">Permit non-fast-forward updates to the protected branch.</span>
               </div>
             </label>
 
@@ -375,20 +375,20 @@ export default function BranchProtectionSettingsPage() {
                 checked={form.allowDeletions}
                 onChange={(event) => updateForm("allowDeletions", event.target.checked)}
                 disabled={!repo.can_manage_rules}
-                className="mt-1 h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-blue-600 focus:ring-blue-500"
+                className="mt-1 h-4 w-4 rounded border-border-strong bg-surface text-blue-600 focus:ring-blue-500"
               />
               <div>
-                <span className="block text-sm font-medium text-zinc-200">Allow deletions</span>
-                <span className="mt-0.5 block text-sm text-zinc-400">Permit deleting the protected branch.</span>
+                <span className="block text-sm font-medium text-text-secondary">Allow deletions</span>
+                <span className="mt-0.5 block text-sm text-text-muted">Permit deleting the protected branch.</span>
               </div>
             </label>
           </div>
 
-          <div className="border-t border-zinc-800 pt-5">
+          <div className="border-t border-border-default pt-5">
             <button
               type="submit"
               disabled={isSubmitting || !form.pattern.trim() || !repo.can_manage_rules}
-              className="flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-500 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-green-500 disabled:opacity-50"
             >
               {isSubmitting ? <Spinner size="sm" /> : null}
               Create rule

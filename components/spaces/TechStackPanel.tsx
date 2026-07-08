@@ -8,7 +8,7 @@ const CATEGORY_LABEL_COLORS: Record<StackCategory, string> = {
   database: "text-emerald-400 bg-emerald-500/10 border-emerald-500/10",
   infra: "text-orange-400 bg-orange-500/10 border-orange-500/10",
   tooling: "text-amber-400 bg-amber-500/10 border-amber-500/10",
-  other: "text-zinc-400 bg-zinc-800 border-zinc-700/50",
+  other: "text-text-muted bg-surface-hover border-border-strong/50",
 };
 
 /**
@@ -18,8 +18,8 @@ const CATEGORY_LABEL_COLORS: Record<StackCategory, string> = {
 export default function TechStackPanel({ stack }: { stack: StackEntry[] }) {
   if (!stack.length) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center rounded-2xl border border-zinc-800 bg-zinc-900/20">
-        <p className="text-sm text-zinc-500">No tech stack defined yet.</p>
+      <div className="flex flex-col items-center justify-center py-12 text-center rounded-2xl border border-border-default bg-surface/20">
+        <p className="text-sm text-text-disabled">No tech stack defined yet.</p>
       </div>
     );
   }
@@ -54,7 +54,7 @@ export default function TechStackPanel({ stack }: { stack: StackEntry[] }) {
       dotColor: "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]",
       bgColor: "bg-rose-500/[0.02]",
       borderColor: "border-rose-500/10",
-      textColor: "text-rose-450",
+      textColor: "text-rose-400",
     },
   ];
 
@@ -65,14 +65,14 @@ export default function TechStackPanel({ stack }: { stack: StackEntry[] }) {
         return (
           <div
             key={sec.key}
-            className={`rounded-xl border ${sec.borderColor} ${sec.bgColor} p-4 transition-all duration-200 hover:border-zinc-700/50`}
+            className={`rounded-xl border ${sec.borderColor} ${sec.bgColor} p-4 transition-all duration-200 hover:border-border-strong/50`}
           >
             <div className="flex items-center gap-2 mb-3">
               <span className={`w-2 h-2 rounded-full ${sec.dotColor}`} />
               <span className={`text-xs font-bold uppercase tracking-wider ${sec.textColor}`}>
                 {sec.label}
               </span>
-              <span className="text-[10px] text-zinc-400 bg-zinc-900/60 border border-zinc-800 px-1.5 py-0.5 rounded-md">
+              <span className="text-[10px] text-text-muted bg-surface/60 border border-border-default px-1.5 py-0.5 rounded-md">
                 {sec.items.length}
               </span>
             </div>
@@ -83,7 +83,7 @@ export default function TechStackPanel({ stack }: { stack: StackEntry[] }) {
                 return (
                   <span
                     key={entry.id}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-800/80 bg-zinc-950/40 text-xs font-medium text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900/40 hover:text-white transition-all duration-200"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-default/80 bg-app/40 text-xs font-medium text-text-secondary hover:border-border-strong hover:bg-surface/40 hover:text-text-primary transition-all duration-200"
                   >
                     <span>{entry.technology}</span>
                     <span className={`text-[9px] px-1 py-0.5 rounded font-bold uppercase ${catStyle}`}>

@@ -188,17 +188,17 @@ export default function AvatarCropModal({
   const previewRatio = previewSize / cropDiameter;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/90 backdrop-blur-xl animate-fade-in animate-duration-200">
-      <div className="relative w-full max-w-2xl bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl flex flex-col md:grid md:grid-cols-[1fr_220px] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-app/90 backdrop-blur-xl animate-fade-in animate-duration-200">
+      <div className="relative w-full max-w-2xl bg-surface border border-border-default rounded-2xl shadow-2xl flex flex-col md:grid md:grid-cols-[1fr_220px] overflow-hidden">
         
         {/* Left pane: Cropper Workspace */}
-        <div className="p-6 border-b border-zinc-800 md:border-b-0 md:border-r border-zinc-800 flex flex-col items-center">
+        <div className="p-6 border-b border-border-default md:border-b-0 md:border-r border-border-default flex flex-col items-center">
           <div className="flex items-center justify-between w-full mb-4">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Crop Profile Photo</h3>
+            <h3 className="text-sm font-bold text-text-primary uppercase tracking-wider">Crop Profile Photo</h3>
             <button
               type="button"
               onClick={onCancel}
-              className="p-1 rounded-full text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+              className="p-1 rounded-full text-text-muted hover:bg-surface-hover hover:text-text-primary transition-colors cursor-pointer"
             >
               <XIcon className="w-4 h-4" />
             </button>
@@ -208,7 +208,7 @@ export default function AvatarCropModal({
           <div
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
-            className="relative w-72 h-72 rounded-xl bg-zinc-950 border border-zinc-800 overflow-hidden flex items-center justify-center cursor-move"
+            className="relative w-72 h-72 rounded-xl bg-app border border-border-default overflow-hidden flex items-center justify-center cursor-move"
           >
             {/* Source Image */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -245,9 +245,9 @@ export default function AvatarCropModal({
 
           {/* Zoom controls */}
           <div className="w-full mt-5 space-y-2">
-            <div className="flex justify-between text-xs text-zinc-400">
+            <div className="flex justify-between text-xs text-text-muted">
               <span>Zoom</span>
-              <span className="font-semibold text-white">{Math.round(zoom * 100)}%</span>
+              <span className="font-semibold text-text-primary">{Math.round(zoom * 100)}%</span>
             </div>
             <input
               type="range"
@@ -257,18 +257,18 @@ export default function AvatarCropModal({
               value={zoom}
               onChange={(e) => setZoom(parseFloat(e.target.value))}
               disabled={!imageLoaded || submitting}
-              className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-white"
+              className="w-full h-1 bg-surface-hover rounded-lg appearance-none cursor-pointer accent-white"
             />
           </div>
         </div>
 
         {/* Right pane: Preview & CTAs */}
-        <div className="p-6 bg-zinc-900/50 flex flex-col items-center justify-between gap-6">
+        <div className="p-6 bg-surface/50 flex flex-col items-center justify-between gap-6">
           <div className="flex flex-col items-center text-center space-y-4 w-full">
-            <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Preview</h4>
+            <h4 className="text-xs font-bold text-text-disabled uppercase tracking-wider">Preview</h4>
             
             {/* Live circular preview container */}
-            <div className="w-24 h-24 rounded-full overflow-hidden border border-zinc-800 bg-zinc-950 relative shadow-inner">
+            <div className="w-24 h-24 rounded-full overflow-hidden border border-border-default bg-app relative shadow-inner">
               {imageLoaded && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -285,7 +285,7 @@ export default function AvatarCropModal({
                 />
               )}
             </div>
-            <p className="text-[10px] text-zinc-500 max-w-[160px] leading-relaxed">
+            <p className="text-[10px] text-text-disabled max-w-[160px] leading-relaxed">
               This circular frame shows exactly how your photo appears to others across LogoutDev.
             </p>
           </div>
@@ -297,7 +297,7 @@ export default function AvatarCropModal({
               type="button"
               onClick={handleConfirm}
               disabled={!imageLoaded || submitting}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white text-zinc-950 text-xs font-bold hover:bg-zinc-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
               {submitting ? (
                 <>
@@ -316,7 +316,7 @@ export default function AvatarCropModal({
               type="button"
               onClick={onCancel}
               disabled={submitting}
-              className="w-full py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/30 text-zinc-400 hover:text-white hover:border-zinc-700 text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer"
+              className="w-full py-2.5 rounded-xl border border-border-default bg-surface/30 text-text-muted hover:text-text-primary hover:border-border-strong text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer"
             >
               Cancel
             </button>

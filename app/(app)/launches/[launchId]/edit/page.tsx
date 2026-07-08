@@ -25,19 +25,19 @@ export default function EditLaunchPage({ params }: { params: Promise<{ launchId:
   }
 
   if (!launch.viewer_state?.is_owner) {
-    return <p className="p-4 text-sm text-zinc-400">Only the builder can edit this launch.</p>;
+    return <p className="p-4 text-sm text-text-muted">Only the builder can edit this launch.</p>;
   }
 
   return (
     <div className="mx-auto max-w-4xl p-4">
-      <Link href={`/launches/${launchId}`} className="mb-4 inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300">
+      <Link href={`/launches/${launchId}`} className="mb-4 inline-flex items-center gap-1.5 text-xs text-text-disabled hover:text-text-secondary">
         <ArrowLeftIcon className="h-4 w-4" />
         Back to launch
       </Link>
 
-      <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <h1 className="text-2xl font-bold text-white">Edit launch</h1>
-        <p className="mt-1 text-sm text-zinc-500">Refine positioning, screenshots, links, or collaborator settings.</p>
+      <div className="rounded-3xl border border-border-default bg-surface/50 p-6">
+        <h1 className="text-2xl font-bold text-text-primary">Edit launch</h1>
+        <p className="mt-1 text-sm text-text-disabled">Refine positioning, screenshots, links, or collaborator settings.</p>
 
         <div className="mt-6">
           <LaunchForm

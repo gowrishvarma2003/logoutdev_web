@@ -219,31 +219,31 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white selection:bg-white/10 overflow-x-hidden">
+    <div className="min-h-screen bg-app text-text-primary selection:bg-primary/10 overflow-x-hidden">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/70 backdrop-blur-xl border-b border-zinc-900/40">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-app/70 backdrop-blur-xl border-b border-border-subtle/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2.5 cursor-pointer">
               <img src="/logo.jpeg" alt="LogoutDev" className="h-9 w-9 rounded-full object-cover" />
             </div>
             
-            <div className="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              <a href="#features" className="hover:text-white transition-colors">Features</a>
-              <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
-              <a href="#why" className="hover:text-white transition-colors">Why LogoutDev</a>
+            <div className="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-wider text-text-muted">
+              <a href="#features" className="hover:text-text-primary transition-colors">Features</a>
+              <a href="#how-it-works" className="hover:text-text-primary transition-colors">How it works</a>
+              <a href="#why" className="hover:text-text-primary transition-colors">Why LogoutDev</a>
             </div>
 
             <div className="flex items-center gap-4">
               <Link
                 href="/login"
-                className="text-xs font-bold uppercase tracking-wider text-zinc-450 hover:text-white transition-colors"
+                className="text-xs font-bold uppercase tracking-wider text-text-muted hover:text-text-primary transition-colors"
               >
                 Sign in
               </Link>
               <Link
                 href="/signup"
-                className="rounded-xl bg-white px-4 py-2 text-xs font-bold text-black hover:bg-zinc-150 transition-all shadow-md shadow-white/5 hover:scale-[1.03] cursor-pointer"
+                className="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-zinc-150 transition-all shadow-md shadow-white/5 hover:scale-[1.03] cursor-pointer"
               >
                 Get started
               </Link>
@@ -263,15 +263,15 @@ export default function Home() {
 
         <div className="relative max-w-5xl mx-auto text-center space-y-6">
           {/* Pulsing Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/60 border border-zinc-800/80 mb-4 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface/60 border border-border-default/80 mb-4 shadow-sm">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-450 opacity-75"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span className="text-[11px] font-semibold text-zinc-400 font-sans tracking-wide">The proof-of-work network for builders</span>
+            <span className="text-[11px] font-semibold text-text-muted font-sans tracking-wide">The proof-of-work network for builders</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-white">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-text-primary">
             Where developers
             <br />
             <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">
@@ -279,52 +279,52 @@ export default function Home() {
             </span>
           </h1>
 
-          <p className="mt-6 text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-6 text-sm sm:text-base text-text-muted max-w-2xl mx-auto leading-relaxed">
             LogoutDev is a collaborative workspace where developers showcase actual contributions, host Git repos, launch products, and connect based on verified code.
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/signup"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-xs font-bold text-black hover:bg-zinc-150 transition-all hover:scale-[1.03] shadow-md shadow-white/5 cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-xs font-bold text-primary-foreground hover:bg-zinc-150 transition-all hover:scale-[1.03] shadow-md shadow-white/5 cursor-pointer"
             >
               <span>Start building today</span>
               <ArrowRightIcon className="w-4 h-4 stroke-[2.5]" />
             </Link>
             <a
               href="#features"
-              className="inline-flex items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/30 px-7 py-3.5 text-xs font-bold text-zinc-300 hover:bg-zinc-850 hover:text-white transition-all cursor-pointer"
+              className="inline-flex items-center justify-center rounded-xl border border-border-default bg-surface/30 px-7 py-3.5 text-xs font-bold text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-all cursor-pointer"
             >
               Explore features
             </a>
           </div>
 
           {/* INTERACTIVE MOCK DASHBOARD PLAYGROUND */}
-          <div className="mt-16 relative rounded-2xl border border-zinc-800 bg-zinc-900/20 p-1.5 backdrop-blur-md shadow-2xl max-w-4xl mx-auto overflow-hidden">
+          <div className="mt-16 relative rounded-2xl border border-border-default bg-surface/20 p-1.5 backdrop-blur-md shadow-2xl max-w-4xl mx-auto overflow-hidden">
             {/* Top window bar */}
-            <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-850/80 bg-zinc-950/40">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-border-default/80 bg-app/40">
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-full bg-rose-500/80 block"></span>
                 <span className="w-3 h-3 rounded-full bg-amber-500/80 block"></span>
                 <span className="w-3 h-3 rounded-full bg-emerald-500/80 block"></span>
               </div>
-              <div className="text-[10px] text-zinc-550 font-mono flex items-center gap-1.5">
+              <div className="text-[10px] text-text-disabled font-mono flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
                 <span>dev_workspace@logoutdev:~</span>
               </div>
               <div className="w-12"></div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 min-h-[380px] bg-zinc-950/70 text-left">
+            <div className="grid grid-cols-1 md:grid-cols-12 min-h-[380px] bg-app/70 text-left">
               {/* Mock Sidebar */}
-              <div className="md:col-span-3 border-r border-zinc-850/60 p-4 space-y-4 bg-zinc-950/20 flex flex-col justify-between">
+              <div className="md:col-span-3 border-r border-border-default/60 p-4 space-y-4 bg-app/20 flex flex-col justify-between">
                 <div className="space-y-1">
-                  <p className="text-[9px] uppercase tracking-wider font-bold text-zinc-500 px-2.5 mb-2">Workspace</p>
+                  <p className="text-[9px] uppercase tracking-wider font-bold text-text-disabled px-2.5 mb-2">Workspace</p>
                   
                   <button
                     onClick={() => setPlayTab("feed")}
                     className={`w-full text-left text-xs px-3 py-2 rounded-xl flex items-center gap-2.5 transition-all ${
-                      playTab === "feed" ? "bg-zinc-900 text-white font-semibold border border-zinc-850" : "text-zinc-400 hover:text-white"
+                      playTab === "feed" ? "bg-surface text-text-primary font-semibold border border-border-default" : "text-text-muted hover:text-text-primary"
                     }`}
                   >
                     <ChatBubbleLeftRightIcon className="w-4 h-4 shrink-0" />
@@ -334,7 +334,7 @@ export default function Home() {
                   <button
                     onClick={() => setPlayTab("repos")}
                     className={`w-full text-left text-xs px-3 py-2 rounded-xl flex items-center gap-2.5 transition-all ${
-                      playTab === "repos" ? "bg-zinc-900 text-white font-semibold border border-zinc-850" : "text-zinc-400 hover:text-white"
+                      playTab === "repos" ? "bg-surface text-text-primary font-semibold border border-border-default" : "text-text-muted hover:text-text-primary"
                     }`}
                   >
                     <FolderIcon className="w-4 h-4 shrink-0" />
@@ -344,7 +344,7 @@ export default function Home() {
                   <button
                     onClick={() => setPlayTab("launches")}
                     className={`w-full text-left text-xs px-3 py-2 rounded-xl flex items-center gap-2.5 transition-all ${
-                      playTab === "launches" ? "bg-zinc-900 text-white font-semibold border border-zinc-850" : "text-zinc-400 hover:text-white"
+                      playTab === "launches" ? "bg-surface text-text-primary font-semibold border border-border-default" : "text-text-muted hover:text-text-primary"
                     }`}
                   >
                     <RocketIcon className="w-4 h-4 shrink-0" />
@@ -353,16 +353,16 @@ export default function Home() {
                 </div>
 
                 {/* Simulated Push Commits Action Widget */}
-                <div className="p-3 border border-zinc-850/60 rounded-xl bg-zinc-900/10 space-y-2">
-                  <span className="block text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Commit Simulator</span>
+                <div className="p-3 border border-border-default/60 rounded-xl bg-surface/10 space-y-2">
+                  <span className="block text-[9px] text-text-disabled font-bold uppercase tracking-wider">Commit Simulator</span>
                   <button
                     onClick={triggerSimulatePush}
                     disabled={isSimulatingPush}
-                    className="w-full bg-white text-black font-bold text-xs py-2 rounded-lg hover:bg-zinc-150 transition-all flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+                    className="w-full bg-primary text-primary-foreground font-bold text-xs py-2 rounded-lg hover:bg-zinc-150 transition-all flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
                   >
                     {isSimulatingPush ? (
                       <>
-                        <Spinner size="sm" className="text-black border-black" />
+                        <Spinner size="sm" className="text-primary-foreground border-black" />
                         <span>Pushing...</span>
                       </>
                     ) : (
@@ -381,24 +381,24 @@ export default function Home() {
                   {/* Tab Content: Feed */}
                   {playTab === "feed" && (
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-450">Global Activity</h4>
-                        <span className="text-[9px] text-zinc-550 font-mono">Live updates</span>
+                      <div className="flex items-center justify-between border-b border-border-default pb-2">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-text-muted">Global Activity</h4>
+                        <span className="text-[9px] text-text-disabled font-mono">Live updates</span>
                       </div>
                       
                       <div className="space-y-3">
                         {feedLogs.map((log) => (
-                          <div key={log.id} className="flex gap-3 text-xs border border-zinc-850/30 bg-zinc-900/10 p-3 rounded-xl hover:border-zinc-800 transition-all">
+                          <div key={log.id} className="flex gap-3 text-xs border border-border-default/30 bg-surface/10 p-3 rounded-xl hover:border-border-default transition-all">
                             <Avatar user={{ id: log.id, name: log.name }} size="sm" />
                             <div className="space-y-0.5 min-w-0">
                               <div className="flex items-center gap-1.5">
-                                <span className="font-semibold text-white">{log.name}</span>
-                                <span className="text-zinc-500 truncate text-[10px]">@{log.username}</span>
-                                <span className="text-[9px] text-zinc-600 shrink-0">• {log.time}</span>
+                                <span className="font-semibold text-text-primary">{log.name}</span>
+                                <span className="text-text-disabled truncate text-[10px]">@{log.username}</span>
+                                <span className="text-[9px] text-text-disabled shrink-0">• {log.time}</span>
                               </div>
-                              <p className="text-zinc-400 text-xs leading-normal">{log.message}</p>
+                              <p className="text-text-muted text-xs leading-normal">{log.message}</p>
                               {log.commitLink && (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-850 text-[9px] font-mono text-zinc-500 mt-1">
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface border border-border-default text-[9px] font-mono text-text-disabled mt-1">
                                   commit: {log.commitLink}
                                 </span>
                               )}
@@ -412,35 +412,35 @@ export default function Home() {
                   {/* Tab Content: Repos */}
                   {playTab === "repos" && (
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-450">Connected Repositories</h4>
-                        <span className="text-[9px] text-zinc-550 font-mono">2 Active</span>
+                      <div className="flex items-center justify-between border-b border-border-default pb-2">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-text-muted">Connected Repositories</h4>
+                        <span className="text-[9px] text-text-disabled font-mono">2 Active</span>
                       </div>
 
                       <div className="grid gap-3 sm:grid-cols-2">
-                        <div className="border border-zinc-850 bg-zinc-900/20 p-3.5 rounded-xl hover:border-zinc-750 transition-all space-y-2 flex flex-col justify-between">
+                        <div className="border border-border-default bg-surface/20 p-3.5 rounded-xl hover:border-border-strong transition-all space-y-2 flex flex-col justify-between">
                           <div>
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-white">logoutdev-web</span>
+                              <span className="text-xs font-bold text-text-primary">logoutdev-web</span>
                               <span className="text-[9px] border border-sky-500/20 bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded-full">Public</span>
                             </div>
-                            <p className="text-[11px] text-zinc-500 leading-normal mt-1.5">Web frontend platform for proof-of-work dashboard and launches.</p>
+                            <p className="text-[11px] text-text-disabled leading-normal mt-1.5">Web frontend platform for proof-of-work dashboard and launches.</p>
                           </div>
-                          <div className="flex items-center justify-between text-[9px] text-zinc-500 pt-3 border-t border-zinc-900 font-mono">
+                          <div className="flex items-center justify-between text-[9px] text-text-disabled pt-3 border-t border-border-subtle font-mono">
                             <span>TypeScript</span>
                             <span>Updated 2m ago</span>
                           </div>
                         </div>
 
-                        <div className="border border-zinc-850 bg-zinc-900/20 p-3.5 rounded-xl hover:border-zinc-750 transition-all space-y-2 flex flex-col justify-between">
+                        <div className="border border-border-default bg-surface/20 p-3.5 rounded-xl hover:border-border-strong transition-all space-y-2 flex flex-col justify-between">
                           <div>
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-white">dev-ops-configs</span>
+                              <span className="text-xs font-bold text-text-primary">dev-ops-configs</span>
                               <span className="text-[9px] border border-amber-500/20 bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-full">Private</span>
                             </div>
-                            <p className="text-[11px] text-zinc-500 leading-normal mt-1.5">Kubernetes deployments, Terraform variables, and secrets binding setup.</p>
+                            <p className="text-[11px] text-text-disabled leading-normal mt-1.5">Kubernetes deployments, Terraform variables, and secrets binding setup.</p>
                           </div>
-                          <div className="flex items-center justify-between text-[9px] text-zinc-500 pt-3 border-t border-zinc-900 font-mono">
+                          <div className="flex items-center justify-between text-[9px] text-text-disabled pt-3 border-t border-border-subtle font-mono">
                             <span>Terraform</span>
                             <span>Updated 1h ago</span>
                           </div>
@@ -452,37 +452,37 @@ export default function Home() {
                   {/* Tab Content: Launches */}
                   {playTab === "launches" && (
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-450">Products Showcased</h4>
-                        <span className="text-[9px] text-zinc-550 font-mono">Launches</span>
+                      <div className="flex items-center justify-between border-b border-border-default pb-2">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-text-muted">Products Showcased</h4>
+                        <span className="text-[9px] text-text-disabled font-mono">Launches</span>
                       </div>
 
                       <div className="space-y-2">
-                        <div className="border border-zinc-850 bg-zinc-900/20 p-3 rounded-xl flex items-center justify-between gap-4">
+                        <div className="border border-border-default bg-surface/20 p-3 rounded-xl flex items-center justify-between gap-4">
                           <div className="space-y-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold text-white">DevTools Pro v1.2</span>
+                              <span className="text-xs font-bold text-text-primary">DevTools Pro v1.2</span>
                               <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">Live</span>
                             </div>
-                            <p className="text-[11px] text-zinc-500 truncate">Advanced browser tools for React debugging and profiling.</p>
+                            <p className="text-[11px] text-text-disabled truncate">Advanced browser tools for React debugging and profiling.</p>
                           </div>
                           <div className="text-right shrink-0">
-                            <span className="text-xs font-bold text-white block">18 reviews</span>
-                            <span className="text-[9px] text-zinc-500 font-mono">4.9 Rating</span>
+                            <span className="text-xs font-bold text-text-primary block">18 reviews</span>
+                            <span className="text-[9px] text-text-disabled font-mono">4.9 Rating</span>
                           </div>
                         </div>
 
-                        <div className="border border-zinc-850 bg-zinc-900/20 p-3 rounded-xl flex items-center justify-between gap-4">
+                        <div className="border border-border-default bg-surface/20 p-3 rounded-xl flex items-center justify-between gap-4">
                           <div className="space-y-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold text-white">DeployFlow AI</span>
+                              <span className="text-xs font-bold text-text-primary">DeployFlow AI</span>
                               <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-400 border border-sky-500/20">Beta</span>
                             </div>
-                            <p className="text-[11px] text-zinc-500 truncate">Self-healing server deployment agent integrated with Git pushes.</p>
+                            <p className="text-[11px] text-text-disabled truncate">Self-healing server deployment agent integrated with Git pushes.</p>
                           </div>
                           <div className="text-right shrink-0">
                             <span className="text-xs font-bold text-sky-350 block">12 / 50</span>
-                            <span className="text-[9px] text-zinc-550 font-mono">Approved</span>
+                            <span className="text-[9px] text-text-disabled font-mono">Approved</span>
                           </div>
                         </div>
                       </div>
@@ -491,16 +491,16 @@ export default function Home() {
                 </div>
 
                 {/* Simulated Terminal logs */}
-                <div className="mt-4 border-t border-zinc-850/60 pt-3.5">
-                  <div className="bg-zinc-950 rounded-xl p-2.5 border border-zinc-850/80 font-mono text-[10px] text-zinc-500 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="mt-4 border-t border-border-default/60 pt-3.5">
+                  <div className="bg-app rounded-xl p-2.5 border border-border-default/80 font-mono text-[10px] text-text-disabled flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center gap-2 overflow-hidden">
-                      <CommandLineIcon className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                      <CommandLineIcon className="w-3.5 h-3.5 text-text-disabled shrink-0" />
                       <span className="text-emerald-400 font-bold shrink-0">git_events:</span>
-                      <span className="truncate text-zinc-400">{terminalLog}</span>
+                      <span className="truncate text-text-muted">{terminalLog}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 font-sans text-zinc-400 text-[10px] shrink-0 font-semibold pl-3 border-t sm:border-t-0 sm:border-l border-zinc-850 pt-2 sm:pt-0">
+                    <div className="flex items-center gap-1.5 font-sans text-text-muted text-[10px] shrink-0 font-semibold pl-3 border-t sm:border-t-0 sm:border-l border-border-default pt-2 sm:pt-0">
                       <span>Jane's Score:</span>
-                      <span className="text-white font-bold font-mono bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">{contributionCount} commits</span>
+                      <span className="text-text-primary font-bold font-mono bg-surface px-1.5 py-0.5 rounded border border-border-default">{contributionCount} commits</span>
                     </div>
                   </div>
                 </div>
@@ -511,12 +511,12 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 border-y border-zinc-800/40 bg-zinc-900/10">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 border-y border-border-default/40 bg-surface/10">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
           {stats.map((stat, i) => (
-            <div key={i} className="text-center border border-zinc-805 bg-zinc-950/40 p-6 rounded-2xl shadow-sm hover:border-zinc-700 transition-all">
-              <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">{stat.value}</div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 mt-2">{stat.label}</div>
+            <div key={i} className="text-center border border-border-default bg-app/40 p-6 rounded-2xl shadow-sm hover:border-border-strong transition-all">
+              <div className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">{stat.value}</div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-text-disabled mt-2">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -525,17 +525,17 @@ export default function Home() {
       {/* Launches Section */}
       <section className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto space-y-12">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b border-zinc-800/60 pb-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b border-border-default/60 pb-6">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Community Releases</p>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">Beta first, then live</h2>
-              <p className="mt-2 max-w-2xl text-xs text-zinc-400 leading-normal">
+              <p className="text-xs font-semibold uppercase tracking-widest text-text-disabled">Community Releases</p>
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Beta first, then live</h2>
+              <p className="mt-2 max-w-2xl text-xs text-text-muted leading-normal">
                 Builders gather direct feedback from beta users before transitioning to public releases.
               </p>
             </div>
             <Link
               href="/launches"
-              className="inline-flex items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-2 text-xs font-bold text-zinc-350 transition-colors hover:bg-zinc-800 hover:text-white"
+              className="inline-flex items-center justify-center rounded-xl border border-border-default bg-surface/40 px-4 py-2 text-xs font-bold text-zinc-350 transition-colors hover:bg-surface-hover hover:text-text-primary"
             >
               Explore Launches
             </Link>
@@ -543,17 +543,17 @@ export default function Home() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Beta Card */}
-            <div className="rounded-3xl border border-zinc-850 bg-zinc-900/10 p-6 space-y-4 shadow-sm">
-              <div className="flex items-center justify-between gap-3 border-b border-zinc-850/60 pb-3">
+            <div className="rounded-3xl border border-border-default bg-surface/10 p-6 space-y-4 shadow-sm">
+              <div className="flex items-center justify-between gap-3 border-b border-border-default/60 pb-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-sky-400">Beta Releases</p>
-                  <p className="mt-0.5 text-[11px] text-zinc-500">Early access request queues.</p>
+                  <p className="mt-0.5 text-[11px] text-text-disabled">Early access request queues.</p>
                 </div>
-                <Link href="/launches" className="text-xs text-zinc-500 hover:text-zinc-300 font-semibold">View all &rarr;</Link>
+                <Link href="/launches" className="text-xs text-text-disabled hover:text-text-secondary font-semibold">View all &rarr;</Link>
               </div>
               <div className="space-y-3">
                 {betaLaunches.length === 0 ? (
-                  <div className="py-8 text-center text-zinc-650 text-xs font-mono">No active beta releases</div>
+                  <div className="py-8 text-center text-text-disabled text-xs font-mono">No active beta releases</div>
                 ) : (
                   betaLaunches.slice(0, 3).map((launch) => {
                     const approved = launch.beta_summary?.approved_count ?? 0;
@@ -563,16 +563,16 @@ export default function Home() {
                       <Link
                         key={launch.id}
                         href={`/launches/${launch.id}`}
-                        className="block rounded-2xl border border-zinc-800/80 bg-zinc-950/70 p-4 transition-all hover:border-zinc-700 hover:bg-zinc-900/20"
+                        className="block rounded-2xl border border-border-default/80 bg-app/70 p-4 transition-all hover:border-border-strong hover:bg-surface/20"
                       >
                         <div className="flex items-center justify-between gap-3">
-                          <span className="text-xs font-bold text-white">{launch.name}</span>
+                          <span className="text-xs font-bold text-text-primary">{launch.name}</span>
                           <span className="rounded-full bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 text-[9px] font-bold text-sky-300 font-mono">
                             {approved} / {capacity} approved
                           </span>
                         </div>
-                        <p className="mt-2 text-xs text-zinc-400 line-clamp-2 leading-relaxed">{launch.tagline}</p>
-                        <div className="mt-3.5 w-full bg-zinc-900 border border-zinc-850 h-1.5 rounded-full overflow-hidden">
+                        <p className="mt-2 text-xs text-text-muted line-clamp-2 leading-relaxed">{launch.tagline}</p>
+                        <div className="mt-3.5 w-full bg-surface border border-border-default h-1.5 rounded-full overflow-hidden">
                           <div className="bg-sky-500 h-full transition-all duration-500" style={{ width: `${percent}%` }}></div>
                         </div>
                       </Link>
@@ -583,32 +583,32 @@ export default function Home() {
             </div>
 
             {/* Live Card */}
-            <div className="rounded-3xl border border-zinc-850 bg-zinc-900/10 p-6 space-y-4 shadow-sm">
-              <div className="flex items-center justify-between gap-3 border-b border-zinc-850/60 pb-3">
+            <div className="rounded-3xl border border-border-default bg-surface/10 p-6 space-y-4 shadow-sm">
+              <div className="flex items-center justify-between gap-3 border-b border-border-default/60 pb-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-emerald-400">Live Showcases</p>
-                  <p className="mt-0.5 text-[11px] text-zinc-500">Public products with code feedback.</p>
+                  <p className="mt-0.5 text-[11px] text-text-disabled">Public products with code feedback.</p>
                 </div>
-                <Link href="/launches" className="text-xs text-zinc-500 hover:text-zinc-300 font-semibold">View all &rarr;</Link>
+                <Link href="/launches" className="text-xs text-text-disabled hover:text-text-secondary font-semibold">View all &rarr;</Link>
               </div>
               <div className="space-y-3">
                 {liveLaunches.length === 0 ? (
-                  <div className="py-8 text-center text-zinc-650 text-xs font-mono">No active public releases</div>
+                  <div className="py-8 text-center text-text-disabled text-xs font-mono">No active public releases</div>
                 ) : (
                   liveLaunches.slice(0, 3).map((launch) => (
                     <Link
                       key={launch.id}
                       href={`/launches/${launch.id}`}
-                      className="block rounded-2xl border border-zinc-800/80 bg-zinc-950/70 p-4 transition-all hover:border-zinc-700 hover:bg-zinc-900/20"
+                      className="block rounded-2xl border border-border-default/80 bg-app/70 p-4 transition-all hover:border-border-strong hover:bg-surface/20"
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <span className="text-xs font-bold text-white">{launch.name}</span>
+                        <span className="text-xs font-bold text-text-primary">{launch.name}</span>
                         <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[9px] font-bold text-emerald-300 font-mono flex items-center gap-1.5">
                           <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping"></span>
                           <span>{launch.review_count} reviews</span>
                         </span>
                       </div>
-                      <p className="mt-2 text-xs text-zinc-400 line-clamp-2 leading-relaxed">{launch.tagline}</p>
+                      <p className="mt-2 text-xs text-text-muted line-clamp-2 leading-relaxed">{launch.tagline}</p>
                     </Link>
                   ))
                 )}
@@ -619,11 +619,11 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 border-t border-zinc-900/40 bg-zinc-950">
+      <section id="features" className="py-24 px-4 sm:px-6 lg:px-8 border-t border-border-subtle/40 bg-app">
         <div className="max-w-5xl mx-auto space-y-16">
           <div className="text-center space-y-4">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Everything you need to ship</h2>
-            <p className="max-w-2xl text-xs sm:text-sm text-zinc-400 mx-auto leading-relaxed">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-text-primary">Everything you need to ship</h2>
+            <p className="max-w-2xl text-xs sm:text-sm text-text-muted mx-auto leading-relaxed">
               LogoutDev integrates code updates, spaces, and profile metrics to map real developer capabilities.
             </p>
           </div>
@@ -632,14 +632,14 @@ export default function Home() {
             {features.map((feature, i) => (
               <div
                 key={i}
-                className="group p-6 rounded-2xl bg-zinc-900/20 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/40 transition-all shadow-sm flex flex-col justify-between min-h-[160px]"
+                className="group p-6 rounded-2xl bg-surface/20 border border-border-default hover:border-border-strong hover:bg-surface/40 transition-all shadow-sm flex flex-col justify-between min-h-[160px]"
               >
                 <div>
                   <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500/10 to-blue-500/10 flex items-center justify-center text-violet-400 mb-4 border border-violet-500/10 group-hover:scale-105 transition-all">
                     {feature.icon}
                   </div>
-                  <h3 className="text-sm font-bold text-white mb-1.5">{feature.title}</h3>
-                  <p className="text-xs text-zinc-400 leading-normal">{feature.description}</p>
+                  <h3 className="text-sm font-bold text-text-primary mb-1.5">{feature.title}</h3>
+                  <p className="text-xs text-text-muted leading-normal">{feature.description}</p>
                 </div>
               </div>
             ))}
@@ -648,21 +648,21 @@ export default function Home() {
       </section>
 
       {/* Onboarding Timeline Section */}
-      <section id="how-it-works" className="py-24 px-4 sm:px-6 lg:px-8 bg-zinc-900/10 border-y border-zinc-800/40">
+      <section id="how-it-works" className="py-24 px-4 sm:px-6 lg:px-8 bg-surface/10 border-y border-border-default/40">
         <div className="max-w-5xl mx-auto space-y-16">
           <div className="text-center space-y-4">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">How it works</h2>
-            <p className="max-w-2xl text-xs sm:text-sm text-zinc-400 mx-auto leading-relaxed">
+            <h2 className="text-3xl sm:text-4xl font-bold text-text-primary">How it works</h2>
+            <p className="max-w-2xl text-xs sm:text-sm text-text-muted mx-auto leading-relaxed">
               Register, code, ship, and get verified in four simple steps.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {steps.map((step, i) => (
-              <div key={i} className="relative p-5 rounded-2xl border border-zinc-850 bg-zinc-950/40 hover:border-zinc-750 transition-all shadow-sm">
-                <div className="text-3xl font-extrabold text-zinc-800 font-mono mb-3">{step.step}</div>
-                <h3 className="text-sm font-bold text-white mb-2">{step.title}</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">{step.description}</p>
+              <div key={i} className="relative p-5 rounded-2xl border border-border-default bg-app/40 hover:border-border-strong transition-all shadow-sm">
+                <div className="text-3xl font-extrabold text-text-disabled font-mono mb-3">{step.step}</div>
+                <h3 className="text-sm font-bold text-text-primary mb-2">{step.title}</h3>
+                <p className="text-xs text-text-muted leading-relaxed">{step.description}</p>
               </div>
             ))}
           </div>
@@ -675,11 +675,11 @@ export default function Home() {
           <div className="grid lg:grid-cols-12 gap-12 items-center">
             {/* Left Copy Column */}
             <div className="lg:col-span-6 space-y-6">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary">
                 Why <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">LogoutDev</span>?
               </h2>
               
-              <p className="text-sm text-zinc-400 leading-relaxed">
+              <p className="text-sm text-text-muted leading-relaxed">
                 Developer verification is fragmented. Code lives on Github, discussions on social threads, and resumes on recruitment platforms. LogoutDev unites them all in one proof-of-work container.
               </p>
               
@@ -704,25 +704,25 @@ export default function Home() {
             <div className="lg:col-span-6 relative">
               <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-indigo-500/10 rounded-3xl blur-3xl pointer-events-none" />
               
-              <div className="relative rounded-2xl border border-zinc-800 bg-zinc-900/20 p-6 space-y-6 shadow-2xl backdrop-blur-sm">
+              <div className="relative rounded-2xl border border-border-default bg-surface/20 p-6 space-y-6 shadow-2xl backdrop-blur-sm">
                 {/* Profile header */}
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white font-extrabold text-sm shadow-md shadow-violet-500/25">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-text-primary font-extrabold text-sm shadow-md shadow-violet-500/25">
                     JD
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">Jane Developer</h3>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">Full-Stack Architect · dev_lead</p>
+                    <h3 className="text-sm font-bold text-text-primary">Jane Developer</h3>
+                    <p className="text-[11px] text-text-disabled mt-0.5">Full-Stack Architect · dev_lead</p>
                   </div>
                 </div>
 
                 {/* Github-style Green Contribution Grid built in CSS */}
                 <div>
-                  <div className="text-[10px] text-zinc-500 mb-2 font-mono uppercase tracking-wider">Proof of Work Activity Grid</div>
-                  <div className="grid grid-flow-col grid-rows-7 gap-1 bg-zinc-950 p-3 rounded-xl border border-zinc-850">
+                  <div className="text-[10px] text-text-disabled mb-2 font-mono uppercase tracking-wider">Proof of Work Activity Grid</div>
+                  <div className="grid grid-flow-col grid-rows-7 gap-1 bg-app p-3 rounded-xl border border-border-default">
                     {contributionBlocks.map((density, idx) => {
                       const colors = [
-                        "bg-zinc-900 hover:bg-zinc-800",
+                        "bg-surface hover:bg-surface-hover",
                         "bg-emerald-950 hover:bg-emerald-900",
                         "bg-emerald-800 hover:bg-emerald-700",
                         "bg-emerald-600 hover:bg-emerald-500",
@@ -737,10 +737,10 @@ export default function Home() {
                       );
                     })}
                   </div>
-                  <div className="flex justify-between items-center text-[9px] text-zinc-550 mt-2 font-mono px-1">
+                  <div className="flex justify-between items-center text-[9px] text-text-disabled mt-2 font-mono px-1">
                     <span>Less</span>
                     <div className="flex gap-1">
-                      <div className="w-2.5 h-2.5 rounded-sm bg-zinc-900" />
+                      <div className="w-2.5 h-2.5 rounded-sm bg-surface" />
                       <div className="w-2.5 h-2.5 rounded-sm bg-emerald-950" />
                       <div className="w-2.5 h-2.5 rounded-sm bg-emerald-800" />
                       <div className="w-2.5 h-2.5 rounded-sm bg-emerald-600" />
@@ -752,23 +752,23 @@ export default function Home() {
 
                 {/* Tech stack badge row */}
                 <div className="space-y-2">
-                  <span className="text-[10px] text-zinc-550 font-mono uppercase tracking-wider block">Tech Stack Capabilities</span>
+                  <span className="text-[10px] text-text-disabled font-mono uppercase tracking-wider block">Tech Stack Capabilities</span>
                   <div className="flex flex-wrap gap-1.5">
                     {["Next.js", "TypeScript", "Tailwind", "Kubernetes", "PostgreSQL"].map((tech) => (
-                      <span key={tech} className="px-2.5 py-0.5 rounded bg-zinc-950 border border-zinc-850 text-[10px] font-semibold text-zinc-400">{tech}</span>
+                      <span key={tech} className="px-2.5 py-0.5 rounded bg-app border border-border-default text-[10px] font-semibold text-text-muted">{tech}</span>
                     ))}
                   </div>
                 </div>
 
                 {/* Proposal states */}
-                <div className="grid grid-cols-2 gap-3 border-t border-zinc-850/60 pt-4 text-center">
-                  <div className="bg-zinc-950/40 border border-zinc-850 p-2.5 rounded-xl">
-                    <span className="block text-sm font-extrabold text-white font-mono">14</span>
-                    <span className="text-[9px] text-zinc-550 uppercase tracking-wider font-bold">Shipped Repos</span>
+                <div className="grid grid-cols-2 gap-3 border-t border-border-default/60 pt-4 text-center">
+                  <div className="bg-app/40 border border-border-default p-2.5 rounded-xl">
+                    <span className="block text-sm font-extrabold text-text-primary font-mono">14</span>
+                    <span className="text-[9px] text-text-disabled uppercase tracking-wider font-bold">Shipped Repos</span>
                   </div>
-                  <div className="bg-zinc-950/40 border border-zinc-850 p-2.5 rounded-xl">
+                  <div className="bg-app/40 border border-border-default p-2.5 rounded-xl">
                     <span className="block text-sm font-extrabold text-emerald-400 font-mono">128</span>
-                    <span className="text-[9px] text-zinc-550 uppercase tracking-wider font-bold">Rep Points</span>
+                    <span className="text-[9px] text-text-disabled uppercase tracking-wider font-bold">Rep Points</span>
                   </div>
                 </div>
               </div>
@@ -782,17 +782,17 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center relative">
           <div className="absolute inset-0 bg-gradient-to-r from-violet-600/10 via-indigo-600/10 to-cyan-600/10 rounded-3xl blur-3xl pointer-events-none" />
           
-          <div className="relative rounded-3xl border border-zinc-800 bg-zinc-900/40 p-12 sm:p-16 space-y-6">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Ready to build in public?</h2>
+          <div className="relative rounded-3xl border border-border-default bg-surface/40 p-12 sm:p-16 space-y-6">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-text-primary">Ready to build in public?</h2>
             
-            <p className="text-xs sm:text-sm text-zinc-400 max-w-lg mx-auto leading-relaxed">
+            <p className="text-xs sm:text-sm text-text-muted max-w-lg mx-auto leading-relaxed">
               Create your profile today, host code repos, launch products, and discover developer collaboration networks.
             </p>
 
             <form onSubmit={handleNewsletterSubmit} className="max-w-md mx-auto space-y-3">
               <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
-                  <EnvelopeIcon className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <EnvelopeIcon className="w-4 h-4 text-text-disabled absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="email"
                     placeholder="Enter email to get updates"
@@ -802,26 +802,26 @@ export default function Home() {
                       setNewsError("");
                       setNewsSuccess(false);
                     }}
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-950 pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-zinc-650 focus:border-zinc-750 focus:outline-none focus:ring-1 focus:ring-zinc-750"
+                    className="w-full rounded-xl border border-border-default bg-app pl-10 pr-4 py-2.5 text-xs text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none focus:ring-1 focus:ring-focus/35"
                   />
                 </div>
                 
                 <button
                   type="submit"
-                  className="rounded-xl bg-white px-5 py-2.5 text-xs font-bold text-black hover:bg-zinc-150 transition-all cursor-pointer whitespace-nowrap"
+                  className="rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground hover:bg-zinc-150 transition-all cursor-pointer whitespace-nowrap"
                 >
                   Join Newsletter
                 </button>
               </div>
 
               {newsError && (
-                <div className="text-rose-455 text-[11px] font-mono flex items-center justify-center gap-1.5">
+                <div className="text-rose-400 text-[11px] font-mono flex items-center justify-center gap-1.5">
                   <ExclamationTriangleIcon className="w-3.5 h-3.5" />
                   <span>{newsError}</span>
                 </div>
               )}
               {newsSuccess && (
-                <div className="text-emerald-450 text-[11px] font-semibold flex items-center justify-center gap-1.5">
+                <div className="text-emerald-400 text-[11px] font-semibold flex items-center justify-center gap-1.5">
                   <CheckCircleIcon className="w-3.5 h-3.5" />
                   <span>Subscribed successfully! Welcome to LogoutDev updates.</span>
                 </div>
@@ -831,14 +831,14 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
               <Link
                 href="/signup"
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-6 py-3 text-xs font-bold text-black hover:bg-zinc-150 transition-all cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-6 py-3 text-xs font-bold text-primary-foreground hover:bg-zinc-150 transition-all cursor-pointer"
               >
                 <span>Create profile</span>
                 <ArrowRightIcon className="w-3.5 h-3.5 stroke-[2.5]" />
               </Link>
               <Link
                 href="/explore"
-                className="inline-flex items-center justify-center rounded-xl border border-zinc-800 bg-zinc-950 px-6 py-3 text-xs font-bold text-zinc-300 hover:bg-zinc-850 hover:text-white transition-all cursor-pointer"
+                className="inline-flex items-center justify-center rounded-xl border border-border-default bg-app px-6 py-3 text-xs font-bold text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-all cursor-pointer"
               >
                 Explore community
               </Link>
@@ -848,21 +848,21 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-zinc-900/40">
+      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border-subtle/40">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 text-zinc-500">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 text-text-disabled">
             <div className="flex items-center gap-2.5">
               <img src="/logo.jpeg" alt="LogoutDev" className="h-8 w-8 rounded-full object-cover" />
             </div>
             
             <nav className="flex items-center gap-6 text-xs font-bold uppercase tracking-wider">
-              <a href="#features" className="hover:text-white transition-colors">Features</a>
-              <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
-              <Link href="/explore" className="hover:text-white transition-colors">Explore</Link>
-              <Link href="/login" className="hover:text-white transition-colors">Sign in</Link>
+              <a href="#features" className="hover:text-text-primary transition-colors">Features</a>
+              <a href="#how-it-works" className="hover:text-text-primary transition-colors">How it works</a>
+              <Link href="/explore" className="hover:text-text-primary transition-colors">Explore</Link>
+              <Link href="/login" className="hover:text-text-primary transition-colors">Sign in</Link>
             </nav>
             
-            <p className="text-[11px] font-mono text-zinc-650">
+            <p className="text-[11px] font-mono text-text-disabled">
               © {new Date().getFullYear()} LogoutDev. Built for developers.
             </p>
           </div>

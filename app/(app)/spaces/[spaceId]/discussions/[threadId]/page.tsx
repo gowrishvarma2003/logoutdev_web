@@ -39,7 +39,7 @@ const STATUS_META: Record<
   open:          { label: "Open",        bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
   "in-progress": { label: "In Progress", bg: "bg-amber-500/10",   text: "text-amber-400",   dot: "bg-amber-400" },
   resolved:      { label: "Resolved",    bg: "bg-sky-500/10",     text: "text-sky-400",     dot: "bg-sky-400" },
-  closed:        { label: "Closed",      bg: "bg-zinc-700/30",    text: "text-zinc-500",    dot: "bg-zinc-600" },
+  closed:        { label: "Closed",      bg: "bg-surface-active/30",    text: "text-text-disabled",    dot: "bg-zinc-600" },
 };
 
 const REPLY_LIMIT = 1000;
@@ -132,7 +132,7 @@ export default function DiscussionThreadPage({
   if (error || !discussion) {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
-        <p className="text-sm text-zinc-400">{error || "Discussion not found."}</p>
+        <p className="text-sm text-text-muted">{error || "Discussion not found."}</p>
         <Link
           href={`/spaces/${spaceId}/discussions`}
           className="mt-3 text-xs text-sky-400 hover:text-sky-300 transition-colors"
@@ -150,28 +150,28 @@ export default function DiscussionThreadPage({
     <div className="flex flex-col min-h-full">
 
       {/* ── ① Breadcrumb nav ────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-10 flex items-center gap-2 px-5 py-3 bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-800">
+      <div className="sticky top-0 z-10 flex items-center gap-2 px-5 py-3 bg-app/90 backdrop-blur-sm border-b border-border-default">
         <Link
           href={`/spaces/${spaceId}/discussions`}
-          className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-200 transition-colors group"
+          className="flex items-center gap-1.5 text-xs text-text-disabled hover:text-text-secondary transition-colors group"
         >
           <ArrowLeftIcon className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
           Discussions
         </Link>
         <span className="text-zinc-700 text-xs">/</span>
-        <span className="text-xs text-zinc-400 truncate max-w-[200px]">
+        <span className="text-xs text-text-muted truncate max-w-[200px]">
           {discussion.title}
         </span>
       </div>
 
       {/* ── ② Original Post card ────────────────────────────────────────── */}
-      <article className={`border-b border-zinc-800 border-l-[4px] ${cat.border} bg-zinc-900/20`}>
+      <article className={`border-b border-border-default border-l-[4px] ${cat.border} bg-surface/20`}>
         <div className="px-5 pt-5 pb-5">
 
           {/* Labels row: OP badge + category + status + pin */}
           <div className="flex items-center gap-2 flex-wrap mb-3.5">
             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold
-              bg-zinc-800 text-zinc-400 border border-zinc-700 uppercase tracking-widest">
+              bg-surface-hover text-text-muted border border-border-strong uppercase tracking-widest">
               Original Post
             </span>
             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${cat.bg} ${cat.text}`}>
@@ -191,7 +191,7 @@ export default function DiscussionThreadPage({
           </div>
 
           {/* Title */}
-          <h1 className="text-xl font-bold text-white leading-snug mb-4">
+          <h1 className="text-xl font-bold text-text-primary leading-snug mb-4">
             {discussion.title}
           </h1>
 
@@ -199,10 +199,10 @@ export default function DiscussionThreadPage({
           <div className="flex items-center gap-3 mb-4">
             <Avatar user={discussion.author} size="md" />
             <div>
-              <p className="text-sm font-semibold text-white leading-none">
+              <p className="text-sm font-semibold text-text-primary leading-none">
                 {discussion.author?.name ?? "Unknown"}
               </p>
-              <p className="text-xs text-zinc-500 mt-1">
+              <p className="text-xs text-text-disabled mt-1">
                 {formatRelativeTime(discussion.created_at)}
               </p>
             </div>
@@ -211,7 +211,7 @@ export default function DiscussionThreadPage({
           {/* Body */}
           <RichText
             text={discussion.body}
-            className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line"
+            className="text-sm text-text-secondary leading-relaxed whitespace-pre-line"
           />
 
           {/* Decision summary callout */}
@@ -232,61 +232,61 @@ export default function DiscussionThreadPage({
       </article>
 
       {/* ── ③ Replies section header ────────────────────────────────── */}
-      <div className="flex items-center gap-3 px-5 py-3 bg-zinc-950 border-b border-zinc-800/60">
-        <ChatIcon className="w-3.5 h-3.5 text-zinc-600" />
-        <span className="text-xs font-semibold text-zinc-500">
+      <div className="flex items-center gap-3 px-5 py-3 bg-app border-b border-border-default/60">
+        <ChatIcon className="w-3.5 h-3.5 text-text-disabled" />
+        <span className="text-xs font-semibold text-text-disabled">
           {rootReplies.length === 0
             ? "No replies yet"
             : rootReplies.length === 1
             ? "1 Reply"
             : `${rootReplies.length} Replies`}
         </span>
-        <div className="flex-1 h-px bg-zinc-800/50" />
+        <div className="flex-1 h-px bg-surface-hover/50" />
       </div>
 
       {/* ── ④ Reply list — each reply links to its own page ───────────── */}
       {rootReplies.length === 0 ? (
         <div className="flex flex-col items-center py-10 text-center px-4">
-          <p className="text-sm text-zinc-600">
+          <p className="text-sm text-text-disabled">
             {canReply
               ? "Be the first to reply to this discussion."
               : "No replies yet."}
           </p>
         </div>
       ) : (
-        <div className="flex flex-col divide-y divide-zinc-800/40">
+        <div className="flex flex-col divide-y divide-border-default/40">
           {rootReplies.map((reply) => {
             const nestedCount = nestedCountByParent[reply.id] ?? 0;
             return (
               <Link
                 key={reply.id}
                 href={`/spaces/${spaceId}/discussions/${threadId}/replies/${reply.id}`}
-                className="group flex gap-3 px-5 py-4 hover:bg-zinc-900/40 transition-colors"
+                className="group flex gap-3 px-5 py-4 hover:bg-surface/40 transition-colors"
               >
                 <Avatar user={reply.author} size="sm" className="mt-0.5 shrink-0" />
                 <div className="flex-1 min-w-0">
                   {/* Author + time */}
                   <div className="flex items-center gap-2 mb-1 text-xs">
-                    <span className="font-semibold text-white">
+                    <span className="font-semibold text-text-primary">
                       {reply.author?.name ?? "Unknown"}
                     </span>
                     <span className="text-zinc-700">·</span>
-                    <span className="text-zinc-500">
+                    <span className="text-text-disabled">
                       {formatRelativeTime(reply.created_at)}
                     </span>
                   </div>
                   {/* Body */}
                   <RichText
                     text={reply.body}
-                    className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line"
+                    className="text-sm text-text-secondary leading-relaxed whitespace-pre-line"
                   />
                   {/* Footer: reply count + chevron */}
                   <div className="mt-2 flex items-center justify-between text-xs">
-                    <span className="inline-flex items-center gap-1.5 text-zinc-500">
+                    <span className="inline-flex items-center gap-1.5 text-text-disabled">
                       <ChatIcon className="w-3.5 h-3.5" />
                       {nestedCount} {nestedCount === 1 ? "reply" : "replies"}
                     </span>
-                    <ChevronRightIcon className="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-300 transition-colors" />
+                    <ChevronRightIcon className="w-3.5 h-3.5 text-text-disabled group-hover:text-text-secondary transition-colors" />
                   </div>
                 </div>
               </Link>
@@ -300,7 +300,7 @@ export default function DiscussionThreadPage({
 
       {/* ── ⑤ Sticky reply composer ───────────────────────────────────── */}
       {canReply ? (
-        <div className="fixed bottom-0 left-0 right-0 z-20 bg-zinc-950/95 backdrop-blur-md border-t border-zinc-800 shadow-xl">
+        <div className="fixed bottom-0 left-0 right-0 z-20 bg-app/95 backdrop-blur-md border-t border-border-default shadow-xl">
           <form onSubmit={handleReply} className="max-w-3xl mx-auto px-4 py-3">
             <div className="flex gap-3 items-end">
               <Avatar user={user} size="sm" className="shrink-0 mb-0.5" />
@@ -312,11 +312,11 @@ export default function DiscussionThreadPage({
                   onFocus={() => setComposerFocused(true)}
                   placeholder="Write a reply…"
                   rows={1}
-                  previewClassName={`w-full px-3.5 py-2.5 rounded-xl text-sm leading-relaxed text-white
-                    bg-zinc-900 border transition-all duration-200
+                  previewClassName={`w-full px-3.5 py-2.5 rounded-xl text-sm leading-relaxed text-text-primary
+                    bg-surface border transition-all duration-200
                     ${composerFocused
-                      ? "border-zinc-600 ring-1 ring-zinc-700 pb-7"
-                      : "border-zinc-800 hover:border-zinc-700"}
+                      ? "border-border-strong ring-1 ring-border-strong pb-7"
+                      : "border-border-default hover:border-border-strong"}
                     ${isOverLimit ? "border-rose-500/60 ring-rose-500/20" : ""}`}
                    className={`w-full px-3.5 py-2.5 text-sm leading-relaxed text-transparent caret-white
                     transition-all duration-200 resize-none focus:outline-none
@@ -329,7 +329,7 @@ export default function DiscussionThreadPage({
                         ? "text-rose-400"
                         : charCount > REPLY_LIMIT * 0.85
                         ? "text-amber-400"
-                        : "text-zinc-600"
+                        : "text-text-disabled"
                     }`}
                   >
                     {charCount}/{REPLY_LIMIT}
@@ -339,8 +339,8 @@ export default function DiscussionThreadPage({
               <button
                 type="submit"
                 disabled={replying || !replyBody.trim() || isOverLimit}
-                className="shrink-0 px-4 py-2 rounded-xl bg-white text-zinc-950 text-xs font-bold
-                  hover:bg-zinc-100 disabled:opacity-40 disabled:cursor-not-allowed
+                className="shrink-0 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold
+                  hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed
                   active:scale-95 transition-all"
               >
                 {replying ? "…" : "Reply"}
@@ -352,17 +352,17 @@ export default function DiscussionThreadPage({
           </form>
         </div>
       ) : authLoaded && user && !permissionsLoaded ? (
-        <div className="border-t border-zinc-800 bg-zinc-950/60 px-5 py-4">
+        <div className="border-t border-border-default bg-app/60 px-5 py-4">
           <div className="flex justify-center">
             <Spinner />
           </div>
         </div>
       ) : authLoaded && user ? (
-        <div className="border-t border-zinc-800 bg-zinc-950/60 px-5 py-4 text-sm text-zinc-400">
-          Replies in this thread are limited to contributors or to viewers allowed for the <span className="text-zinc-200">{discussion.category}</span> category.
+        <div className="border-t border-border-default bg-app/60 px-5 py-4 text-sm text-text-muted">
+          Replies in this thread are limited to contributors or to viewers allowed for the <span className="text-text-secondary">{discussion.category}</span> category.
         </div>
       ) : authLoaded ? (
-        <div className="border-t border-zinc-800 bg-zinc-950/60 px-5 py-4 text-sm text-zinc-400">
+        <div className="border-t border-border-default bg-app/60 px-5 py-4 text-sm text-text-muted">
           Sign in to reply where this discussion category is open to public participants.
         </div>
       ) : null}

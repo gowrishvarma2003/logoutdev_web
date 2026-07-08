@@ -60,7 +60,7 @@ export default function Avatar({
 
   return (
     <div
-      className={`${sizeClass} ${color} rounded-full flex items-center justify-center font-semibold text-white shrink-0 select-none ${className}`}
+      className={`${sizeClass} ${color} rounded-full flex items-center justify-center font-semibold text-text-primary shrink-0 select-none ${className}`}
       aria-label={label}
       title={label}
     >

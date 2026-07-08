@@ -8,7 +8,7 @@ import RichText from "@/components/ui/RichText";
 
 function TagPill({ label }: { label: string }) {
   return (
-    <span className="inline-flex rounded-full border border-zinc-700 px-2 py-0.5 text-[11px] font-medium text-zinc-300">
+    <span className="inline-flex rounded-full border border-border-strong px-2 py-0.5 text-[11px] font-medium text-text-secondary">
       #{label}
     </span>
   );
@@ -26,14 +26,14 @@ export default function QuestionCard({
   return (
     <Link
       href={`/questions/${question.id}`}
-      className="block border-b border-zinc-800 px-4 py-4 transition-colors hover:bg-zinc-900/40"
+      className="block border-b border-border-default px-4 py-4 transition-colors hover:bg-surface/40"
     >
       <div className="flex items-start gap-3">
         <Avatar user={question.author ?? null} size="sm" className="mt-0.5 shrink-0" />
 
         <div className="min-w-0 flex-1">
-          <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-            <span className="font-semibold text-zinc-200">
+          <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-text-disabled">
+            <span className="font-semibold text-text-secondary">
               {question.author?.name ?? "Unknown"}
             </span>
             <span>·</span>
@@ -50,7 +50,7 @@ export default function QuestionCard({
             <span
               className={`rounded-full px-2 py-0.5 font-semibold ${
                 question.status === "open"
-                  ? "bg-zinc-800 text-zinc-300"
+                  ? "bg-surface-hover text-text-secondary"
                   : "bg-rose-500/10 text-rose-300"
               }`}
             >
@@ -63,10 +63,10 @@ export default function QuestionCard({
             )}
           </div>
 
-          <h2 className="line-clamp-2 text-[17px] font-semibold text-white">
+          <h2 className="line-clamp-2 text-[17px] font-semibold text-text-primary">
             {question.title}
           </h2>
-          <RichText text={question.body} className="mt-2 line-clamp-3 text-sm leading-relaxed text-zinc-400" />
+          <RichText text={question.body} className="mt-2 line-clamp-3 text-sm leading-relaxed text-text-muted" />
 
           <div className="mt-3 flex flex-wrap gap-2">
             {question.tags.slice(0, 6).map((tag) => (
@@ -74,7 +74,7 @@ export default function QuestionCard({
             ))}
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-zinc-500">
+          <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-text-disabled">
             <span>{question.answer_count} answers</span>
             <span>{question.discussion_count} discussion posts</span>
             <span>{question.participant_count} participants</span>

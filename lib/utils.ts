@@ -80,3 +80,9 @@ export function formatCurrencyFromCents(
     maximumFractionDigits: 0,
   }).format((amountCents ?? 0) / 100);
 }
+
+export function cn(
+  ...classes: Array<string | false | null | undefined | 0 | 0n | "">
+): string {
+  return classes.filter(Boolean).join(" ");
+}

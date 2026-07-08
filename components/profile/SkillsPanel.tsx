@@ -32,7 +32,7 @@ export default function SkillsPanel({ skills, showEmpty = false }: SkillsPanelPr
 
   return (
     <section aria-label="Tech stack skills" id="skills">
-      <h2 className="text-sm font-semibold text-zinc-300 mb-3 flex items-center gap-1.5">
+      <h2 className="text-sm font-semibold text-text-secondary mb-3 flex items-center gap-1.5">
         <span className="w-1 h-3.5 rounded-full bg-violet-500 inline-block" />
         Tech Stack
       </h2>
@@ -54,11 +54,11 @@ export default function SkillsPanel({ skills, showEmpty = false }: SkillsPanelPr
                 key={s.id}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium ${
                   isTop
-                    ? "bg-white/10 text-white border-zinc-600"
+                    ? "bg-primary/10 text-text-primary border-border-strong"
                     : CHIP_COLORS[idx % CHIP_COLORS.length]
                 }`}
               >
-                {isTop ? <span className="w-1.5 h-1.5 rounded-full bg-white" /> : null}
+                {isTop ? <span className="w-1.5 h-1.5 rounded-full bg-primary" /> : null}
                 {s.skill}
               </span>
             );

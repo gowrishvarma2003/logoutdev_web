@@ -19,46 +19,46 @@ export default function ProposalInboxCard({
   const { signals } = useProfileSignals(profileSlug);
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
+    <div className="rounded-2xl border border-border-default bg-surface/60 p-4">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <Avatar user={proposal.freelancer} size="md" />
           <div className="min-w-0">
             <div className="mb-1 flex flex-wrap items-center gap-2">
-              <p className="truncate text-sm font-semibold text-white">
+              <p className="truncate text-sm font-semibold text-text-primary">
                 {proposal.freelancer?.name || "Freelancer"}
               </p>
               <ProposalStatusBadge status={proposal.status} />
             </div>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-text-disabled">
               {proposal.freelancer?.headline || "No headline yet"} • {formatRelativeTime(proposal.created_at)}
             </p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-text-primary">
             {formatCurrencyFromCents(proposal.bid_amount_cents, proposal.currency_code)}
             {proposal.pricing_model === "hourly" ? "/hr" : ""}
           </p>
           {signals && (
-            <p className="mt-1 text-[11px] text-zinc-500">
+            <p className="mt-1 text-[11px] text-text-disabled">
               {signals.badge || "Proof-of-work"} · {signals.score.toLocaleString()} XP
             </p>
           )}
         </div>
       </div>
 
-      <p className="mb-3 text-sm leading-relaxed text-zinc-300">{proposal.cover_note}</p>
+      <p className="mb-3 text-sm leading-relaxed text-text-secondary">{proposal.cover_note}</p>
 
-      <div className="mb-3 flex flex-wrap gap-2 text-xs text-zinc-500">
+      <div className="mb-3 flex flex-wrap gap-2 text-xs text-text-disabled">
         {proposal.estimated_duration_weeks ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-zinc-800 px-2.5 py-1">
+          <span className="inline-flex items-center gap-1 rounded-full bg-surface-hover px-2.5 py-1">
             <ClockIcon className="h-3.5 w-3.5" />
             {proposal.estimated_duration_weeks} weeks
           </span>
         ) : null}
         {proposal.availability_hours ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-zinc-800 px-2.5 py-1">
+          <span className="inline-flex items-center gap-1 rounded-full bg-surface-hover px-2.5 py-1">
             <AwardIcon className="h-3.5 w-3.5" />
             {proposal.availability_hours} hrs/week
           </span>
@@ -103,7 +103,7 @@ export default function ProposalInboxCard({
               href={link}
               target="_blank"
               rel="noreferrer"
-              className="text-xs text-zinc-400 underline decoration-zinc-700 underline-offset-2 hover:text-white"
+              className="text-xs text-text-muted underline decoration-border-strong underline-offset-2 hover:text-text-primary"
             >
               {link}
             </a>

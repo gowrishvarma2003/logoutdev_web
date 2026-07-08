@@ -86,22 +86,22 @@ export default function EmptyState({
   const sizeStyle = SIZE_STYLES[size];
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950/35 text-center ${sizeStyle.wrap} ${className}`}>
+    <div className={`relative overflow-hidden rounded-2xl border border-border-default/80 bg-app/35 text-center ${sizeStyle.wrap} ${className}`}>
       <div className={`pointer-events-none absolute inset-x-8 top-6 h-20 rounded-full bg-gradient-to-r ${toneStyle.glow} blur-3xl`} />
       <div className="relative mx-auto flex max-w-md flex-col items-center">
         <div className={`relative ${sizeStyle.visual} animate-empty-float`}>
           <div className={`absolute inset-0 rounded-2xl border ${toneStyle.ring} shadow-[0_0_28px_rgba(255,255,255,0.04)]`} />
-          <div className="absolute inset-2 rounded-xl border border-white/5 bg-zinc-950/80" />
+          <div className="absolute inset-2 rounded-xl border border-white/5 bg-app/80" />
           <div className={`relative z-10 flex h-full w-full items-center justify-center ${toneStyle.icon}`}>
             {icon ?? <span className="text-2xl font-black">+</span>}
           </div>
           <span className={`absolute -right-1 top-2 h-2.5 w-2.5 rounded-full ${toneStyle.dot} shadow-[0_0_14px_currentColor] animate-empty-pulse`} />
-          <span className="absolute -left-1 bottom-3 h-2 w-2 rounded-full bg-white/35 animate-empty-pulse-delayed" />
+          <span className="absolute -left-1 bottom-3 h-2 w-2 rounded-full bg-primary/35 animate-empty-pulse-delayed" />
         </div>
 
-        <h3 className={`mt-5 font-semibold text-zinc-100 ${sizeStyle.title}`}>{title}</h3>
+        <h3 className={`mt-5 font-semibold text-text-primary ${sizeStyle.title}`}>{title}</h3>
         {description ? (
-          <p className={`mt-2 max-w-sm leading-relaxed text-zinc-500 ${sizeStyle.desc}`}>{description}</p>
+          <p className={`mt-2 max-w-sm leading-relaxed text-text-disabled ${sizeStyle.desc}`}>{description}</p>
         ) : null}
         {action ? <div className="mt-5">{action}</div> : null}
       </div>

@@ -77,7 +77,7 @@ export default function PostActions({ post, onUpdate, onReplyClick }: PostAction
           e.stopPropagation();
           onReplyClick?.();
         }}
-        className="group flex items-center gap-1.5 text-zinc-500 hover:text-sky-400 transition-colors"
+        className="group flex items-center gap-1.5 text-text-disabled hover:text-sky-400 transition-colors"
         aria-label="Reply"
       >
         <span className="p-1.5 rounded-full group-hover:bg-sky-500/10 transition-colors">
@@ -93,7 +93,7 @@ export default function PostActions({ post, onUpdate, onReplyClick }: PostAction
         className={`group flex items-center gap-1.5 transition-colors ${
           post.is_liked_by_me
             ? "text-rose-400"
-            : "text-zinc-500 hover:text-rose-400"
+            : "text-text-disabled hover:text-rose-400"
         }`}
         aria-label={post.is_liked_by_me ? "Unlike" : "Like"}
       >
@@ -114,7 +114,7 @@ export default function PostActions({ post, onUpdate, onReplyClick }: PostAction
         className={`group flex items-center gap-1.5 transition-colors ${
           post.is_reposted_by_me
             ? "text-emerald-400"
-            : "text-zinc-500 hover:text-emerald-400"
+            : "text-text-disabled hover:text-emerald-400"
         }`}
         aria-label={post.is_reposted_by_me ? "Undo repost" : "Repost"}
       >

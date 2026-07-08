@@ -52,15 +52,15 @@ export default function PostDetailPage({ params }: PostPageProps) {
   return (
     <div>
       {/* ── Header ── */}
-      <header className="sticky top-0 z-10 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 px-4 py-3 flex items-center gap-3">
+      <header className="sticky top-0 z-10 bg-app/80 backdrop-blur-md border-b border-border-default px-4 py-3 flex items-center gap-3">
         <button
           onClick={() => router.back()}
-          className="p-1.5 -ml-1.5 rounded-full text-zinc-400 hover:bg-zinc-800 transition-colors"
+          className="p-1.5 -ml-1.5 rounded-full text-text-muted hover:bg-surface-hover transition-colors"
           aria-label="Go back"
         >
           <ArrowLeftIcon className="w-5 h-5" />
         </button>
-        <h1 className="text-[17px] font-bold text-white">Post</h1>
+        <h1 className="text-[17px] font-bold text-text-primary">Post</h1>
       </header>
 
       {/* ── Loading ── */}
@@ -73,7 +73,7 @@ export default function PostDetailPage({ params }: PostPageProps) {
       {/* ── Error ── */}
       {error && (
         <div className="py-16 text-center">
-          <p className="text-sm text-zinc-500">{error}</p>
+          <p className="text-sm text-text-disabled">{error}</p>
         </div>
       )}
 
@@ -90,7 +90,7 @@ export default function PostDetailPage({ params }: PostPageProps) {
           />
 
           {/* Reply compose */}
-          <div className="border-b border-zinc-800">
+          <div className="border-b border-border-default">
             <ComposeBox
               currentUser={user}
               placeholder="Write a reply…"
@@ -107,7 +107,7 @@ export default function PostDetailPage({ params }: PostPageProps) {
 
           {/* Replies */}
           {replies.length === 0 ? (
-            <p className="py-12 text-center text-sm text-zinc-500">
+            <p className="py-12 text-center text-sm text-text-disabled">
               No replies yet — start the conversation.
             </p>
           ) : (

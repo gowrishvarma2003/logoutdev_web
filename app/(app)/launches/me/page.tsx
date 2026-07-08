@@ -17,7 +17,7 @@ const STATUS_DOT: Record<string, string> = {
 const STATUS_LABEL: Record<string, { label: string; classes: string }> = {
   published: { label: "Published", classes: "text-emerald-300 bg-emerald-500/10" },
   draft: { label: "Draft", classes: "text-amber-300 bg-amber-500/10" },
-  archived: { label: "Archived", classes: "text-zinc-400 bg-zinc-800" },
+  archived: { label: "Archived", classes: "text-text-muted bg-surface-hover" },
 };
 
 function LaunchManageRow({
@@ -33,7 +33,7 @@ function LaunchManageRow({
 }) {
   const screenshot = launch.screenshots?.[0]?.image_url;
   const dot = STATUS_DOT[launch.status] ?? "bg-zinc-500";
-  const badge = STATUS_LABEL[launch.status] ?? { label: launch.status, classes: "text-zinc-400 bg-zinc-800" };
+  const badge = STATUS_LABEL[launch.status] ?? { label: launch.status, classes: "text-text-muted bg-surface-hover" };
   const [menuOpen, setMenuOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -50,9 +50,9 @@ function LaunchManageRow({
   }
 
   return (
-    <div className="group flex items-start gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 transition-colors hover:border-zinc-700">
+    <div className="group flex items-start gap-4 rounded-2xl border border-border-default bg-surface/60 p-4 transition-colors hover:border-border-strong">
       {/* Thumbnail */}
-      <div className="hidden h-16 w-24 shrink-0 overflow-hidden rounded-xl bg-zinc-950 sm:block">
+      <div className="hidden h-16 w-24 shrink-0 overflow-hidden rounded-xl bg-app sm:block">
         {screenshot ? (
           <img src={screenshot} alt={launch.name} className="h-full w-full object-cover" />
         ) : (
@@ -66,13 +66,13 @@ function LaunchManageRow({
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-2 mb-1">
           <span className={`inline-block h-1.5 w-1.5 rounded-full ${dot}`} />
-          <h3 className="text-sm font-semibold text-white truncate">{launch.name}</h3>
+          <h3 className="text-sm font-semibold text-text-primary truncate">{launch.name}</h3>
           <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${badge.classes}`}>
             {badge.label}
           </span>
         </div>
-        <p className="text-xs text-zinc-500 line-clamp-1">{launch.tagline}</p>
-        <div className="mt-1.5 text-[11px] text-zinc-600">
+        <p className="text-xs text-text-disabled line-clamp-1">{launch.tagline}</p>
+        <div className="mt-1.5 text-[11px] text-text-disabled">
           {launch.upvote_count} upvotes · {launch.review_count} reviews · {launch.feedback_count} feedback
         </div>
       </div>
@@ -81,7 +81,7 @@ function LaunchManageRow({
       <div className="flex shrink-0 flex-wrap items-center gap-2">
         <Link
           href={`/launches/${launch.id}`}
-          className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800 transition-colors"
+          className="rounded-lg border border-border-strong px-3 py-1.5 text-xs text-text-secondary hover:bg-surface-hover transition-colors"
         >
           View
         </Link>
@@ -90,7 +90,7 @@ function LaunchManageRow({
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 transition-colors hover:bg-zinc-800"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border-strong px-3 py-1.5 text-xs text-text-secondary transition-colors hover:bg-surface-hover"
             aria-haspopup="menu"
             aria-expanded={menuOpen}
             aria-label="Launch settings"
@@ -102,11 +102,11 @@ function LaunchManageRow({
           {menuOpen && (
             <>
               <div className="fixed inset-0 z-10 cursor-pointer" onClick={() => setMenuOpen(false)} />
-              <div className="absolute right-0 top-9 z-20 min-w-44 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl">
+              <div className="absolute right-0 top-9 z-20 min-w-44 overflow-hidden rounded-xl border border-border-strong bg-surface shadow-2xl">
                 <Link
                   href={`/launches/${launch.id}/edit`}
                   onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-2.5 text-sm text-zinc-200 transition-colors hover:bg-zinc-800"
+                  className="block px-4 py-2.5 text-sm text-text-secondary transition-colors hover:bg-surface-hover"
                 >
                   Edit launch
                 </Link>
@@ -116,7 +116,7 @@ function LaunchManageRow({
                     type="button"
                     disabled={actionLoading}
                     onClick={() => runAction(() => onPublish(launch.id))}
-                    className="block w-full px-4 py-2.5 text-left text-sm font-semibold text-zinc-100 transition-colors hover:bg-zinc-800 disabled:opacity-60"
+                    className="block w-full px-4 py-2.5 text-left text-sm font-semibold text-text-primary transition-colors hover:bg-surface-hover disabled:opacity-60"
                   >
                     Publish launch
                   </button>
@@ -127,7 +127,7 @@ function LaunchManageRow({
                     type="button"
                     disabled={actionLoading}
                     onClick={() => runAction(() => onArchive(launch.id))}
-                    className="block w-full px-4 py-2.5 text-left text-sm text-zinc-200 transition-colors hover:bg-zinc-800 disabled:opacity-60"
+                    className="block w-full px-4 py-2.5 text-left text-sm text-text-secondary transition-colors hover:bg-surface-hover disabled:opacity-60"
                   >
                     Archive launch
                   </button>
@@ -137,7 +137,7 @@ function LaunchManageRow({
                   type="button"
                   disabled={actionLoading}
                   onClick={() => runAction(() => onDelete(launch.id))}
-                  className="block w-full border-t border-zinc-800 px-4 py-2.5 text-left text-sm text-rose-400 transition-colors hover:bg-rose-500/10 disabled:opacity-60"
+                  className="block w-full border-t border-border-default px-4 py-2.5 text-left text-sm text-rose-400 transition-colors hover:bg-rose-500/10 disabled:opacity-60"
                 >
                   Delete launch
                 </button>
@@ -181,14 +181,14 @@ export default function MyLaunchesPage() {
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-white">My Launches</h1>
-          <p className="mt-1 text-xs text-zinc-500">
+          <h1 className="text-xl font-bold text-text-primary">My Launches</h1>
+          <p className="mt-1 text-xs text-text-disabled">
             Manage your products — publish drafts, track engagement, and archive old launches.
           </p>
         </div>
         <Link
           href="/launches/new"
-          className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-zinc-100 transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover transition-colors"
         >
           <PlusIcon className="h-3.5 w-3.5" />
           New launch
@@ -202,12 +202,12 @@ export default function MyLaunchesPage() {
       ) : error ? (
         <p className="rounded-xl bg-rose-500/10 px-4 py-3 text-sm text-rose-400">{error}</p>
       ) : launches.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-zinc-800 py-16 text-center">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border-default py-16 text-center">
           <SparklesIcon className="h-10 w-10 text-zinc-700" />
-          <p className="text-sm font-medium text-zinc-400">You have not created any launches yet.</p>
+          <p className="text-sm font-medium text-text-muted">You have not created any launches yet.</p>
           <Link
             href="/launches/new"
-            className="mt-1 inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-zinc-100"
+            className="mt-1 inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover"
           >
             <PlusIcon className="h-3.5 w-3.5" />
             Create your first launch
@@ -217,7 +217,7 @@ export default function MyLaunchesPage() {
         <div className="space-y-8">
           {drafts.length > 0 && (
             <div>
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-disabled">
                 Drafts · {drafts.length}
               </h2>
               <div className="space-y-3">
@@ -236,7 +236,7 @@ export default function MyLaunchesPage() {
 
           {published.length > 0 && (
             <div>
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-disabled">
                 Published · {published.length}
               </h2>
               <div className="space-y-3">
@@ -255,7 +255,7 @@ export default function MyLaunchesPage() {
 
           {archived.length > 0 && (
             <div>
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-disabled">
                 Archived · {archived.length}
               </h2>
               <div className="space-y-3">

@@ -124,35 +124,35 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen">
       {/* Left branding panel */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-slate-900 p-12">
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-surface border-r border-border-subtle p-12">
         <img src="/logo.jpeg" alt="LogoutDev" className="h-10 w-10 rounded-full object-cover" />
         <div>
-          <p className="text-3xl font-semibold text-white leading-snug">
+          <p className="text-3xl font-semibold text-text-primary leading-snug">
             Where developers build<br />in public and get hired<br />for real work.
           </p>
-          <p className="mt-4 text-sm text-zinc-400">
+          <p className="mt-4 text-sm text-text-muted">
             Projects. Collaboration. Discovery.
           </p>
         </div>
-        <p className="text-xs text-zinc-600">&copy; {new Date().getFullYear()} LogoutDev</p>
+        <p className="text-xs text-text-disabled">&copy; {new Date().getFullYear()} LogoutDev</p>
       </div>
 
       {/* Right form panel */}
-      <div className="flex w-full lg:w-1/2 flex-col items-center justify-center px-6 py-12 bg-zinc-950">
+      <div className="flex w-full lg:w-1/2 flex-col items-center justify-center px-6 py-12 bg-app">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <img src="/logo.jpeg" alt="LogoutDev" className="mb-8 h-8 w-8 rounded-full object-cover lg:hidden" />
 
           {isCompletingGoogleProfile ? (
             <>
-              <h1 className="text-2xl font-bold text-white">Complete your profile</h1>
-              <p className="mt-1 text-sm text-zinc-500">
+              <h1 className="text-2xl font-bold text-text-primary">Complete your profile</h1>
+              <p className="mt-1 text-sm text-text-muted">
                 {pendingGoogleEmail || "Your Google email"} is verified.
               </p>
 
               <form onSubmit={handleGoogleProfileComplete} className="mt-8 flex flex-col gap-5">
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="google-name" className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <label htmlFor="google-name" className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                     Full name
                   </label>
                   <input
@@ -162,12 +162,12 @@ export default function LoginPage() {
                     onChange={(event) => setGoogleName(event.target.value)}
                     required
                     placeholder="John Doe"
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
+                    className="ld-input ld-field px-4"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="google-username" className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <label htmlFor="google-username" className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                     Username
                   </label>
                   <input
@@ -179,21 +179,21 @@ export default function LoginPage() {
                     minLength={3}
                     maxLength={50}
                     placeholder="johndoe"
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
+                    className="ld-input ld-field px-4"
                   />
                 </div>
 
                 {errorMessage ? (
-                  <div className="flex items-start gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3">
-                    <span className="mt-0.5 text-rose-400">&#x26A0;</span>
-                    <p className="text-sm text-rose-400">{errorMessage}</p>
+                  <div className="flex items-start gap-2 rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3">
+                    <span className="mt-0.5 text-danger">&#x26A0;</span>
+                    <p className="text-sm text-danger">{errorMessage}</p>
                   </div>
                 ) : null}
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full rounded-xl bg-white px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full ld-btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? "Creating account..." : "Complete Google signup"}
                 </button>
@@ -201,12 +201,12 @@ export default function LoginPage() {
             </>
           ) : (
             <>
-              <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-              <p className="mt-1 text-sm text-zinc-500">Sign in to your account to continue.</p>
+              <h1 className="text-2xl font-bold text-text-primary">Welcome back</h1>
+              <p className="mt-1 text-sm text-text-muted">Sign in to your account to continue.</p>
 
               <form onSubmit={handleEmailLogin} className="mt-8 flex flex-col gap-5">
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                     Email address
                   </label>
                   <input
@@ -216,12 +216,12 @@ export default function LoginPage() {
                     onChange={(event) => setEmail(event.target.value)}
                     required
                     placeholder="you@example.com"
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500 focus:ring-2 focus:ring-white/10 transition"
+                    className="ld-input ld-field px-4 focus:ring-2 focus:ring-white/10 transition"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                     Password
                   </label>
                   <div className="relative">
@@ -232,12 +232,12 @@ export default function LoginPage() {
                       onChange={(event) => setPassword(event.target.value)}
                       required
                       placeholder="••••••••"
-                      className="w-full rounded-xl border border-zinc-700 bg-zinc-900 pl-4 pr-10 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500 focus:ring-2 focus:ring-white/10 transition"
+                      className="w-full rounded-xl border border-border-default bg-surface pl-4 pr-10 py-3 text-sm text-text-primary outline-none placeholder:text-text-disabled focus:border-border-strong focus:ring-2 focus:ring-focus/35 focus:ring-2 focus:ring-white/10 transition"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition cursor-pointer"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition cursor-pointer"
                     >
                       {showPassword ? (
                         <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
@@ -249,37 +249,37 @@ export default function LoginPage() {
                 </div>
 
                 {errorMessage ? (
-                  <div className="flex items-start gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3">
-                    <span className="mt-0.5 text-rose-400">&#x26A0;</span>
-                    <p className="text-sm text-rose-400">{errorMessage}</p>
+                  <div className="flex items-start gap-2 rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3">
+                    <span className="mt-0.5 text-danger">&#x26A0;</span>
+                    <p className="text-sm text-danger">{errorMessage}</p>
                   </div>
                 ) : null}
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full rounded-xl bg-white px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full ld-btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? "Signing in..." : "Sign in"}
                 </button>
 
                 <div className="text-right">
-                  <Link href="/reset-password" className="text-xs text-zinc-500 hover:text-white transition">
+                  <Link href="/reset-password" className="text-xs text-text-muted hover:text-text-primary transition">
                     Forgot password?
                   </Link>
                 </div>
               </form>
 
               <div className="mt-6 flex items-center gap-4">
-                <div className="flex-1 h-px bg-zinc-800" />
-                <span className="text-xs text-zinc-600">or</span>
-                <div className="flex-1 h-px bg-zinc-800" />
+                <div className="flex-1 h-px bg-surface-hover" />
+                <span className="text-xs text-text-disabled">or</span>
+                <div className="flex-1 h-px bg-surface-hover" />
               </div>
 
               <button
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
-                className="mt-6 w-full flex items-center justify-center gap-3 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-6 w-full flex items-center justify-center gap-3 rounded-xl border border-border-default bg-surface px-4 py-3 text-sm font-medium text-text-primary transition hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -290,9 +290,9 @@ export default function LoginPage() {
                 Continue with Google
               </button>
 
-              <p className="mt-6 text-center text-sm text-zinc-500">
+              <p className="mt-6 text-center text-sm text-text-muted">
                 Don&apos;t have an account?{" "}
-                <Link href="/signup" className="font-semibold text-white hover:underline">
+                <Link href="/signup" className="font-semibold text-text-primary hover:underline">
                   Create one
                 </Link>
               </p>

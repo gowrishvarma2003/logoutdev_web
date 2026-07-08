@@ -25,13 +25,13 @@ function StatItem({ value, label, onClick, title }: StatItemProps) {
     <Wrapper
       {...(onClick ? { onClick, type: "button" as const, title } : { title })}
       className={`flex flex-col items-center text-center min-w-0 px-1 ${
-        onClick ? "rounded-lg py-1 hover:bg-zinc-800/60 transition-colors cursor-pointer" : "py-1"
+        onClick ? "rounded-lg py-1 hover:bg-surface-hover/60 transition-colors cursor-pointer" : "py-1"
       }`}
     >
-      <span className="text-[17px] font-bold text-white tabular-nums">
+      <span className="text-[17px] font-bold text-text-primary tabular-nums">
         {value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value}
       </span>
-      <span className="text-[11px] text-zinc-500 mt-0.5 whitespace-nowrap font-medium">
+      <span className="text-[11px] text-text-disabled mt-0.5 whitespace-nowrap font-medium">
         {label}
       </span>
     </Wrapper>
@@ -50,7 +50,7 @@ export default function ProfileStats({ stats, username, profileId, isMe }: Profi
 
   return (
     <>
-      <div className="px-4 py-4 border-b border-zinc-800">
+      <div className="px-4 py-4 border-b border-border-default">
         <div className="grid grid-cols-4 gap-1 sm:grid-cols-4 lg:grid-cols-8">
           <StatItem
             value={stats.followers}

@@ -76,12 +76,12 @@ export default function FollowButton({
       disabled={loading}
       className={`shrink-0 rounded-xl border font-semibold transition-colors disabled:opacity-60 ${
         following
-          ? "border-zinc-700 bg-zinc-900 text-zinc-200 hover:bg-zinc-800"
+          ? "border-border-strong bg-surface text-text-secondary hover:bg-surface-hover"
           : "border-sky-500/40 bg-sky-500/10 text-sky-200 hover:bg-sky-500/20"
       } ${size === "sm" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm"}`}
     >
       {following ? "Following" : "Follow"}
-      {followerCount > 0 ? <span className="ml-1.5 text-zinc-400">{formatCount(followerCount)}</span> : null}
+      {followerCount > 0 ? <span className="ml-1.5 text-text-muted">{formatCount(followerCount)}</span> : null}
     </button>
   );
 }

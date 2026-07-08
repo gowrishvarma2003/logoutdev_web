@@ -78,12 +78,12 @@ export default function EditFilePage({
   if (blob.is_binary) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <DocumentIcon className="h-12 w-12 text-zinc-600 mb-4" />
-        <h2 className="text-xl font-semibold text-white">Cannot edit binary file</h2>
-        <p className="mt-2 text-sm text-zinc-400">Binary representations are not supported in the web editor.</p>
+        <DocumentIcon className="h-12 w-12 text-text-disabled mb-4" />
+        <h2 className="text-xl font-semibold text-text-primary">Cannot edit binary file</h2>
+        <p className="mt-2 text-sm text-text-muted">Binary representations are not supported in the web editor.</p>
         <Link
           href={`/repos/${repo.id}?ref=${encodeURIComponent(ref)}&path=${encodeURIComponent(filePath)}&view=blob`}
-          className="mt-6 rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+          className="mt-6 rounded-lg bg-surface-hover px-4 py-2 text-sm font-medium text-text-primary hover:bg-surface-active"
         >
           Return to file
         </Link>
@@ -122,16 +122,16 @@ export default function EditFilePage({
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex items-center gap-2 text-sm text-zinc-400">
+      <div className="flex items-center gap-2 text-sm text-text-muted">
         <Link href={`/repos/${repo.id}?ref=${encodeURIComponent(ref)}`} className="text-blue-500 hover:underline">
           {repo.name}
         </Link>
         <span>/</span>
-        <span className="font-semibold text-zinc-200">{filePath}</span>
+        <span className="font-semibold text-text-secondary">{filePath}</span>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
-        <div className="border-b border-zinc-800 bg-zinc-900/50 px-4 py-2 font-mono text-sm text-white">
+      <div className="overflow-hidden rounded-xl border border-border-default bg-app">
+        <div className="border-b border-border-default bg-surface/50 px-4 py-2 font-mono text-sm text-text-primary">
           <div className="flex gap-4">
             <span className="border-b-2 border-[#f78166] py-1 px-1">Edit file</span>
           </div>
@@ -140,14 +140,14 @@ export default function EditFilePage({
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[500px] w-full resize-y bg-transparent p-4 font-mono text-sm text-zinc-300 focus:outline-none"
+            className="min-h-[500px] w-full resize-y bg-transparent p-4 font-mono text-sm text-text-secondary focus:outline-none"
             spellCheck={false}
           />
         </div>
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-        <h3 className="mb-4 text-sm font-semibold text-white">Commit changes</h3>
+      <div className="rounded-xl border border-border-default bg-surface/40 p-5">
+        <h3 className="mb-4 text-sm font-semibold text-text-primary">Commit changes</h3>
         
         {error && (
           <div className="mb-4 rounded-md border border-rose-900/50 bg-rose-500/10 p-3 text-sm text-rose-400">
@@ -162,22 +162,22 @@ export default function EditFilePage({
               value={commitMessage}
               onChange={(e) => setCommitMessage(e.target.value)}
               placeholder={`Update ${filePath}`}
-              className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border border-border-strong bg-app px-3 py-2 text-sm text-text-primary focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           
-          <div className="flex items-center gap-3 border-t border-zinc-800/50 pt-4">
+          <div className="flex items-center gap-3 border-t border-border-default/50 pt-4">
             <button
               type="submit"
               disabled={isSubmitting || content === blob.content}
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-text-primary hover:bg-green-700 disabled:opacity-50 transition-colors"
             >
               {isSubmitting ? <Spinner size="sm" className="mr-2 inline" /> : null}
               Commit changes
             </button>
             <Link
               href={`/repos/${repo.id}?ref=${encodeURIComponent(ref)}&path=${encodeURIComponent(filePath)}&view=blob`}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
+              className="rounded-lg px-4 py-2 text-sm font-medium text-text-muted hover:bg-surface-hover hover:text-text-primary transition-colors"
             >
               Cancel
             </Link>

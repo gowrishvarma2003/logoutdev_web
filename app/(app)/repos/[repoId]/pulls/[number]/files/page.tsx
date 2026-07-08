@@ -44,18 +44,18 @@ function ThreadCard({
   const replies = thread.replies || [];
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-950/80 p-3">
+    <div className="rounded-xl border border-border-default bg-app/80 p-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-white">{thread.author?.username || thread.author_id}</p>
-          <p className="mt-1 text-sm text-zinc-300 whitespace-pre-wrap">{thread.body}</p>
+          <p className="text-sm font-medium text-text-primary">{thread.author?.username || thread.author_id}</p>
+          <p className="mt-1 text-sm text-text-secondary whitespace-pre-wrap">{thread.body}</p>
         </div>
         <div className="flex items-center gap-2">
           {!thread.is_resolved && canResolve ? (
             <button
               type="button"
               onClick={() => onResolve(thread.id)}
-              className="rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
+              className="rounded-md border border-border-strong px-2 py-1 text-xs text-text-secondary hover:bg-surface-hover"
             >
               Resolve
             </button>
@@ -63,7 +63,7 @@ function ThreadCard({
           <button
             type="button"
             onClick={() => setShowReply((current) => !current)}
-            className="rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
+            className="rounded-md border border-border-strong px-2 py-1 text-xs text-text-secondary hover:bg-surface-hover"
           >
             Reply
           </button>
@@ -71,11 +71,11 @@ function ThreadCard({
       </div>
 
       {replies.length > 0 ? (
-        <div className="mt-3 space-y-2 border-l border-zinc-800 pl-3">
+        <div className="mt-3 space-y-2 border-l border-border-default pl-3">
           {replies.map((reply) => (
-            <div key={reply.id} className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3">
-              <p className="text-sm font-medium text-white">{reply.author?.username || reply.author_id}</p>
-              <p className="mt-1 text-sm text-zinc-300 whitespace-pre-wrap">{reply.body}</p>
+            <div key={reply.id} className="rounded-lg border border-border-default bg-surface/60 p-3">
+              <p className="text-sm font-medium text-text-primary">{reply.author?.username || reply.author_id}</p>
+              <p className="mt-1 text-sm text-text-secondary whitespace-pre-wrap">{reply.body}</p>
             </div>
           ))}
         </div>
@@ -88,7 +88,7 @@ function ThreadCard({
             value={replyBody}
             onChange={(event) => setReplyBody(event.target.value)}
             placeholder="Reply to this thread"
-            className="w-full resize-y rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+            className="w-full resize-y rounded-lg border border-border-default bg-surface px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
           />
           <button
             type="button"
@@ -98,7 +98,7 @@ function ThreadCard({
               setReplyBody("");
               setShowReply(false);
             }}
-            className="rounded-lg bg-zinc-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+            className="rounded-lg bg-surface-hover px-3 py-1.5 text-sm font-medium text-text-primary hover:bg-surface-active disabled:opacity-50"
           >
             Reply
           </button>
@@ -175,9 +175,9 @@ export default function PRFilesPage({
 
   return (
     <div className="mb-8">
-      <div className="mb-6 flex flex-wrap items-center gap-4 text-sm text-zinc-400">
+      <div className="mb-6 flex flex-wrap items-center gap-4 text-sm text-text-muted">
         <p>
-          Showing <span className="font-semibold text-white">{diff.stats.files_changed} changed files</span>{" "}
+          Showing <span className="font-semibold text-text-primary">{diff.stats.files_changed} changed files</span>{" "}
           with <span className="font-semibold text-green-500">{diff.stats.additions} additions</span> and{" "}
           <span className="font-semibold text-red-500">{diff.stats.deletions} deletions</span>.
         </p>
@@ -195,12 +195,12 @@ export default function PRFilesPage({
           }
 
           return (
-            <div key={file.path} className="overflow-hidden rounded-md border border-zinc-800 bg-zinc-950">
-              <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900/80 px-4 py-2 text-sm">
+            <div key={file.path} className="overflow-hidden rounded-md border border-border-default bg-app">
+              <div className="flex items-center justify-between border-b border-border-default bg-surface/80 px-4 py-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <DocumentIcon className="h-4 w-4 text-zinc-500" />
-                  <span className="font-mono text-zinc-300">{file.path}</span>
-                  <span className="ml-2 text-xs text-zinc-500">
+                  <DocumentIcon className="h-4 w-4 text-text-disabled" />
+                  <span className="font-mono text-text-secondary">{file.path}</span>
+                  <span className="ml-2 text-xs text-text-disabled">
                     {file.status === "added" && "New File"}
                     {file.status === "deleted" && "Deleted"}
                     {file.status === "renamed" && "Renamed"}
@@ -212,14 +212,14 @@ export default function PRFilesPage({
                 </div>
               </div>
 
-              <div className="overflow-x-auto bg-zinc-950 p-4 font-mono text-xs">
+              <div className="overflow-x-auto bg-app p-4 font-mono text-xs">
                 {file.patch ? (
                   <pre className="whitespace-pre">
                     {file.patch.split("\n").map((line: string, idx: number) => {
                       const lineNumber = idx + 1;
                       const threadKey = `${file.path}:${lineNumber}`;
                       const lineThreads = buildCommentTree(threadsByPosition.get(String(lineNumber)) || []);
-                      let colorClass = "text-zinc-300";
+                      let colorClass = "text-text-secondary";
                       let bgClass = "bg-transparent";
 
                       if (line.startsWith("+")) {
@@ -240,26 +240,26 @@ export default function PRFilesPage({
                             <button
                               type="button"
                               onClick={() => setActiveLine((current) => ({ ...current, [file.path]: current[file.path] === lineNumber ? null : lineNumber }))}
-                              className="opacity-0 transition-opacity group-hover:opacity-100 text-[10px] text-zinc-500 hover:text-zinc-200"
+                              className="opacity-0 transition-opacity group-hover:opacity-100 text-[10px] text-text-disabled hover:text-text-secondary"
                             >
                               Comment
                             </button>
                           </div>
 
                           {activeLine[file.path] === lineNumber ? (
-                            <div className="mt-2 rounded-lg border border-zinc-800 bg-zinc-900/80 p-3">
+                            <div className="mt-2 rounded-lg border border-border-default bg-surface/80 p-3">
                               <textarea
                                 rows={3}
                                 value={drafts[threadKey] || ""}
                                 onChange={(event) => setDrafts((current) => ({ ...current, [threadKey]: event.target.value }))}
                                 placeholder={`Comment on ${file.path}:${lineNumber}`}
-                                className="w-full resize-y rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-white focus:border-zinc-600 focus:outline-none"
+                                className="w-full resize-y rounded-lg border border-border-default bg-app px-3 py-2 text-sm text-text-primary focus:border-border-strong focus:outline-none"
                               />
                               <button
                                 type="button"
                                 disabled={!drafts[threadKey]?.trim() || submittingKey === threadKey}
                                 onClick={() => submitInlineComment(file.path, lineNumber, drafts[threadKey].trim())}
-                                className="mt-3 rounded-lg bg-zinc-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+                                className="mt-3 rounded-lg bg-surface-hover px-3 py-1.5 text-sm font-medium text-text-primary hover:bg-surface-active disabled:opacity-50"
                               >
                                 Add inline comment
                               </button>
@@ -284,12 +284,12 @@ export default function PRFilesPage({
                     })}
                   </pre>
                 ) : (
-                  <div className="text-zinc-500 italic text-center p-4">Binary file not shown.</div>
+                  <div className="text-text-disabled italic text-center p-4">Binary file not shown.</div>
                 )}
 
                 {threadsByPosition.get("file")?.length ? (
-                  <div className="mt-4 space-y-2 border-t border-zinc-800 pt-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">File threads</p>
+                  <div className="mt-4 space-y-2 border-t border-border-default pt-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-text-disabled">File threads</p>
                     {buildCommentTree(threadsByPosition.get("file") || []).map((thread) => (
                       <ThreadCard
                         key={thread.id}

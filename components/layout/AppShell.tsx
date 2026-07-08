@@ -63,7 +63,7 @@ export default function AppShell({ children }: AppShellProps) {
   // Show centered spinner while resolving auth from localStorage
   if (!isLoaded) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950">
+      <div className="flex min-h-screen items-center justify-center bg-app">
         <Spinner size="lg" />
       </div>
     );
@@ -71,8 +71,8 @@ export default function AppShell({ children }: AppShellProps) {
 
   if (!user && allowsGuest) {
     return (
-      <div className="min-h-screen bg-zinc-950">
-        <header className="sticky top-0 z-40 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-md">
+      <div className="min-h-screen bg-app">
+        <header className="sticky top-0 z-sticky border-b border-border-subtle bg-app/90 shadow-sticky backdrop-blur-md">
           <div className="mx-auto flex max-w-[1520px] items-center justify-between px-4 py-4">
             <Link href="/" className="flex items-center gap-2.5">
               <img
@@ -85,13 +85,13 @@ export default function AppShell({ children }: AppShellProps) {
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="rounded-xl border border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
+                className="rounded-xl border border-border-default px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
               >
                 Sign in
               </Link>
               <Link
                 href="/signup"
-                className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100"
+                className="rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
               >
                 Create account
               </Link>
@@ -99,7 +99,7 @@ export default function AppShell({ children }: AppShellProps) {
           </div>
         </header>
 
-        <main className="mx-auto min-h-screen w-full max-w-[1020px] border-x border-zinc-800 bg-zinc-950">
+        <main className="mx-auto min-h-screen w-full max-w-[1020px] border-x border-border-subtle bg-app">
           {children}
         </main>
       </div>
@@ -108,18 +108,18 @@ export default function AppShell({ children }: AppShellProps) {
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950">
+      <div className="flex min-h-screen items-center justify-center bg-app">
         <Spinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-app text-text-primary">
       {/* ── Centered 3-column wrapper with wider content area and reduced outer gutters ── */}
       <div className="flex min-h-screen w-full">
         {/* ── Left sidebar (sticky, desktop only) ── */}
-        <aside className="hidden lg:flex flex-col w-[240px] shrink-0 border-r border-zinc-800 bg-zinc-950 sticky top-0 h-screen overflow-y-auto">
+        <aside className="hidden lg:flex flex-col w-[240px] shrink-0 border-r border-border-subtle bg-app/95 sticky top-0 h-screen overflow-y-auto shadow-sticky">
           <Sidebar
             user={user}
             onLogout={logout}
@@ -130,13 +130,13 @@ export default function AppShell({ children }: AppShellProps) {
 
         {/* ── Center feed column ── */}
         <main className="flex-1 min-w-0">
-          <div className="w-full border-x border-zinc-800 min-h-screen bg-zinc-950 pb-20 lg:pb-0">
+          <div className="w-full border-x border-border-subtle min-h-screen bg-app pb-20 lg:pb-0">
             {children}
           </div>
         </main>
 
         {!hideRightPanel ? (
-          <aside className="hidden xl:flex flex-col w-[280px] shrink-0 border-l border-zinc-800 bg-zinc-950 sticky top-0 h-screen overflow-y-auto">
+          <aside className="hidden xl:flex flex-col w-[280px] shrink-0 border-l border-border-subtle bg-app/95 sticky top-0 h-screen overflow-y-auto">
             <RightPanel currentUser={user} />
           </aside>
         ) : null}

@@ -200,20 +200,20 @@ export default function GroupInfoPanel({ conversation, currentUserId, onClose, o
   }
 
   return (
-    <aside className="flex h-full w-full flex-col bg-zinc-950 text-white fixed inset-0 z-50 lg:static lg:z-0 lg:w-[360px] lg:border-l lg:border-zinc-900">
-      <header className="flex items-center justify-between border-b border-zinc-900 px-4 py-4">
+    <aside className="flex h-full w-full flex-col bg-app text-text-primary fixed inset-0 z-50 lg:static lg:z-0 lg:w-[360px] lg:border-l lg:border-border-subtle">
+      <header className="flex items-center justify-between border-b border-border-subtle px-4 py-4">
         <div className="flex items-center gap-2">
           <CogIcon className="h-5 w-5" />
           <h2 className="text-lg font-semibold">Group info</h2>
         </div>
-        <button onClick={onClose} className="rounded-full p-1 text-zinc-400 hover:text-white">
+        <button onClick={onClose} className="rounded-full p-1 text-text-muted hover:text-text-primary">
           <XIcon className="h-4 w-4" />
         </button>
       </header>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="flex flex-col items-center border-b border-zinc-900 px-4 py-6 text-center">
-          <div className="grid h-20 w-20 place-items-center rounded-full bg-zinc-800 text-2xl font-semibold text-white">
+        <div className="flex flex-col items-center border-b border-border-subtle px-4 py-6 text-center">
+          <div className="grid h-20 w-20 place-items-center rounded-full bg-surface-hover text-2xl font-semibold text-text-primary">
             {group?.title?.[0]?.toUpperCase() || "G"}
           </div>
           {editing ? (
@@ -222,27 +222,27 @@ export default function GroupInfoPanel({ conversation, currentUserId, onClose, o
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 maxLength={80}
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-center text-sm"
+                className="w-full rounded-lg border border-border-default bg-surface px-3 py-2 text-center text-sm"
               />
               <textarea
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 rows={2}
                 maxLength={500}
-                className="w-full resize-none rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm"
+                className="w-full resize-none rounded-lg border border-border-default bg-surface px-3 py-2 text-sm"
               />
               <div className="flex justify-center gap-2">
-                <button onClick={() => setEditing(false)} className="rounded-lg border border-zinc-800 px-3 py-1.5 text-xs">Cancel</button>
-                <button onClick={saveInfo} disabled={busy} className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950">Save</button>
+                <button onClick={() => setEditing(false)} className="rounded-lg border border-border-default px-3 py-1.5 text-xs">Cancel</button>
+                <button onClick={saveInfo} disabled={busy} className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">Save</button>
               </div>
             </div>
           ) : (
             <>
               <h3 className="mt-3 text-lg font-semibold">{group?.title}</h3>
-              {group?.description ? <p className="mt-1 text-sm text-zinc-400">{group.description}</p> : null}
-              <p className="mt-1 text-xs text-zinc-600">{members.length} members · epoch {group?.current_epoch_number}</p>
+              {group?.description ? <p className="mt-1 text-sm text-text-muted">{group.description}</p> : null}
+              <p className="mt-1 text-xs text-text-disabled">{members.length} members · epoch {group?.current_epoch_number}</p>
               {canEditInfo ? (
-                <button onClick={() => setEditing(true)} className="mt-3 rounded-lg border border-zinc-800 px-3 py-1.5 text-xs">
+                <button onClick={() => setEditing(true)} className="mt-3 rounded-lg border border-border-default px-3 py-1.5 text-xs">
                   Edit group
                 </button>
               ) : null}
@@ -250,9 +250,9 @@ export default function GroupInfoPanel({ conversation, currentUserId, onClose, o
           )}
         </div>
 
-        <div className="border-b border-zinc-900 px-4 py-4">
+        <div className="border-b border-border-subtle px-4 py-4">
           <div className="mb-2 flex items-center justify-between">
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Members ({members.length})</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-text-disabled">Members ({members.length})</h4>
             {canManage ? (
               <button onClick={() => setAdding((value) => !value)} className="flex items-center gap-1 text-xs text-emerald-400">
                 <PlusIcon className="h-3.5 w-3.5" /> Add
@@ -262,8 +262,8 @@ export default function GroupInfoPanel({ conversation, currentUserId, onClose, o
 
           {adding ? (
             <div className="mb-3">
-              <div className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2">
-                <SearchIcon className="h-4 w-4 text-zinc-500" />
+              <div className="flex items-center gap-2 rounded-lg border border-border-default bg-surface px-3 py-2">
+                <SearchIcon className="h-4 w-4 text-text-disabled" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
@@ -275,16 +275,16 @@ export default function GroupInfoPanel({ conversation, currentUserId, onClose, o
                 {results.map((user) => {
                   const already = members.some((member) => member.user_id === user.id);
                   return (
-                    <div key={user.id} className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-zinc-900">
+                    <div key={user.id} className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-surface">
                       <Avatar user={{ id: user.id, name: user.name || user.username || "User", avatar_url: user.avatar_url }} size="sm" />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-medium">@{user.username}</span>
-                        <span className="block truncate text-xs text-zinc-500">{user.headline || user.name}</span>
+                        <span className="block truncate text-xs text-text-disabled">{user.headline || user.name}</span>
                       </span>
                       <button
                         onClick={() => (already ? invite(user) : addMember(user))}
                         disabled={busy}
-                        className="rounded-lg border border-zinc-800 px-2 py-1 text-xs"
+                        className="rounded-lg border border-border-default px-2 py-1 text-xs"
                       >
                         {already ? "Invite" : "Add"}
                       </button>
@@ -299,19 +299,19 @@ export default function GroupInfoPanel({ conversation, currentUserId, onClose, o
             {members.map((member) => {
               const isMe = member.user_id === currentUserId;
               return (
-                <div key={member.user_id} className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-zinc-900">
+                <div key={member.user_id} className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-surface">
                   <Avatar user={{ id: member.user_id, name: member.user?.name || member.user?.username || "User", avatar_url: member.user?.avatar_url }} size="sm" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium">
                       @{member.user?.username || member.user?.name}
-                      {isMe ? <span className="ml-2 text-xs text-zinc-500">(you)</span> : null}
+                      {isMe ? <span className="ml-2 text-xs text-text-disabled">(you)</span> : null}
                     </span>
-                    <span className="text-xs capitalize text-zinc-500">{member.role}</span>
+                    <span className="text-xs capitalize text-text-disabled">{member.role}</span>
                   </span>
                   {canManage && !isMe && member.role !== "owner" ? (
                     <div className="flex gap-1">
                       {isOwner ? (
-                        <button onClick={() => changeRole(member, member.role === "admin" ? "member" : "admin")} className="rounded px-2 py-1 text-xs text-zinc-400 hover:text-white">
+                        <button onClick={() => changeRole(member, member.role === "admin" ? "member" : "admin")} className="rounded px-2 py-1 text-xs text-text-muted hover:text-text-primary">
                           {member.role === "admin" ? "Demote" : "Promote"}
                         </button>
                       ) : null}
@@ -336,7 +336,7 @@ export default function GroupInfoPanel({ conversation, currentUserId, onClose, o
             <button
               onClick={leave}
               disabled={busy}
-              className="flex w-full items-center gap-2 rounded-lg border border-zinc-800 px-3 py-2 text-sm text-rose-300 hover:bg-rose-950/40"
+              className="flex w-full items-center gap-2 rounded-lg border border-border-default px-3 py-2 text-sm text-rose-300 hover:bg-rose-950/40"
             >
               <LogOutIcon className="h-4 w-4" /> Leave group
             </button>

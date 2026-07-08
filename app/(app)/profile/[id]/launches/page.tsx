@@ -33,7 +33,7 @@ export default function ProfileLaunchesPage({
           description="Turn a repo, prototype, or product idea into a launch page when it is ready for eyes."
           tone="feed"
           action={
-            <Link href="/launches/new" className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-100">
+            <Link href="/launches/new" className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover">
               Create launch
             </Link>
           }
