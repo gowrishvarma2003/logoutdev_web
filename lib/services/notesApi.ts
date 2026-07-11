@@ -51,6 +51,7 @@ export interface NoteUpsertPayload {
   is_favorite?: boolean;
   is_pinned?: boolean;
   is_archived?: boolean;
+  expected_version?: number;
 }
 
 function buildQuery(filters: NoteListFilters = {}) {

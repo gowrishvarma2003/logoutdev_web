@@ -129,7 +129,7 @@ export default function NoteMoreMenu({ note, context = "list", align = "right", 
       const response = await notesApi.duplicateNote(note.id);
       showToast("Note duplicated", {
         tone: "success",
-        action: { label: "Open copy", onClick: () => router.push(`/notes/${response.note.id}`) },
+        action: { label: "Open copy", onClick: () => router.push(`/productivity/notes/${response.note.id}`) },
       });
     }, "Couldn't duplicate note");
   }

@@ -203,27 +203,92 @@ export async function removeLaunchUpvote(launchId: string): Promise<{ upvoted: b
 
 export async function listLaunchReviews(
   launchId: string,
-  page = 1,
-  limit = 20
+  filters?: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    status?: string;
+    sort?: string;
+    mine?: boolean;
+    bookmarked?: boolean;
+  }
 ): Promise<{ reviews: LaunchReview[]; total: number; page: number; limit: number }> {
-  const res = await fetch(`${API}/api/launches/${launchId}/reviews${qs({ page, limit })}`, {
-    headers: { ...authHeaders() },
-  });
+  const res = await fetch(
+    `${API}/api/launches/${launchId}/reviews${qs({
+      page: filters?.page ?? 1,
+      limit: filters?.limit ?? 20,
+      category: filters?.category,
+      status: filters?.status,
+      sort: filters?.sort,
+      mine: filters?.mine ? "true" : undefined,
+      bookmarked: filters?.bookmarked ? "true" : undefined,
+    })}`,
+    { headers: { ...authHeaders() } }
+  );
   return handleRes(res);
 }
 
-export async function upsertMyLaunchReview(
+export async function createLaunchReview(
   launchId: string,
-  body: { headline: string; body: string; recommendation: string }
+  body: {
+    headline: string;
+    body: string;
+    recommendation?: string;
+    category?: string;
+  }
 ): Promise<{ review: LaunchReview }> {
-  const res = await fetch(`${API}/api/launches/${launchId}/my-review`, {
-    method: "PUT",
+  const res = await fetch(`${API}/api/launches/${launchId}/reviews`, {
+    method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(body),
   });
   return handleRes(res);
 }
 
+/** @deprecated Prefer createLaunchReview — always creates a new entry. */
+export async function upsertMyLaunchReview(
+  launchId: string,
+  body: {
+    headline: string;
+    body: string;
+    recommendation?: string;
+    category?: string;
+  }
+): Promise<{ review: LaunchReview }> {
+  return createLaunchReview(launchId, body);
+}
+
+export async function updateLaunchReview(
+  launchId: string,
+  reviewId: string,
+  body: Partial<{
+    headline: string;
+    body: string;
+    recommendation: string;
+    category: string;
+    status: string;
+  }>
+): Promise<{ review: LaunchReview }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/reviews/${reviewId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function deleteLaunchReview(
+  launchId: string,
+  reviewId: string
+): Promise<{ deleted: boolean }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/reviews/${reviewId}`, {
+    method: "DELETE",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+/** @deprecated Prefer deleteLaunchReview with a specific id. */
 export async function deleteMyLaunchReview(launchId: string): Promise<{ deleted: boolean }> {
   const res = await fetch(`${API}/api/launches/${launchId}/my-review`, {
     method: "DELETE",
@@ -232,14 +297,60 @@ export async function deleteMyLaunchReview(launchId: string): Promise<{ deleted:
   return handleRes(res);
 }
 
+export async function createLaunchReviewComment(
+  launchId: string,
+  reviewId: string,
+  body: { body: string }
+): Promise<{ comment: NonNullable<LaunchReview["comments"]>[number] }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/reviews/${reviewId}/comments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function bookmarkLaunchReview(
+  launchId: string,
+  reviewId: string
+): Promise<{ bookmarked: boolean }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/reviews/${reviewId}/bookmark`, {
+    method: "POST",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function unbookmarkLaunchReview(
+  launchId: string,
+  reviewId: string
+): Promise<{ bookmarked: boolean }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/reviews/${reviewId}/bookmark`, {
+    method: "DELETE",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
 export async function listLaunchFeedback(
   launchId: string,
-  filters?: { type?: string; status?: string; page?: number; limit?: number }
+  filters?: {
+    type?: string;
+    status?: string;
+    sort?: string;
+    mine?: boolean;
+    bookmarked?: boolean;
+    page?: number;
+    limit?: number;
+  }
 ): Promise<{ feedback: LaunchFeedbackItem[]; total: number; page: number; limit: number }> {
   const res = await fetch(
     `${API}/api/launches/${launchId}/feedback${qs({
       type: filters?.type,
       status: filters?.status,
+      sort: filters?.sort,
+      mine: filters?.mine ? "true" : undefined,
+      bookmarked: filters?.bookmarked ? "true" : undefined,
       page: filters?.page,
       limit: filters?.limit,
     })}`,
@@ -346,6 +457,28 @@ export async function createLaunchFeedbackComment(
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function bookmarkLaunchFeedback(
+  launchId: string,
+  feedbackId: string
+): Promise<{ bookmarked: boolean }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/feedback/${feedbackId}/bookmark`, {
+    method: "POST",
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function unbookmarkLaunchFeedback(
+  launchId: string,
+  feedbackId: string
+): Promise<{ bookmarked: boolean }> {
+  const res = await fetch(`${API}/api/launches/${launchId}/feedback/${feedbackId}/bookmark`, {
+    method: "DELETE",
+    headers: { ...authHeaders() },
   });
   return handleRes(res);
 }

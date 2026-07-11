@@ -928,6 +928,10 @@ export type LaunchCollaborationMode = "off" | "looking";
 export type LaunchStatus = "draft" | "published" | "archived";
 export type LaunchReviewRecommendation =
   "recommend" | "mixed" | "not_recommend";
+export type LaunchReviewCategory =
+  "experience" | "issue" | "praise" | "suggestion";
+export type LaunchReviewStatus =
+  "open" | "acknowledged" | "planned" | "resolved" | "closed";
 export type LaunchFeedbackType = "suggestion" | "bug" | "idea";
 export type LaunchFeedbackStatus =
   "open" | "acknowledged" | "planned" | "resolved" | "closed";
@@ -1898,6 +1902,7 @@ export interface LaunchViewerState {
   is_owner: boolean;
   is_upvoted_by_me: boolean;
   my_review_id?: string | null;
+  my_review_count?: number;
   can_request_collaboration: boolean;
   can_edit: boolean;
   can_publish: boolean;
@@ -1942,16 +1947,31 @@ export interface LaunchBetaRegistration {
   reviewer?: User | null;
 }
 
+export interface LaunchReviewComment {
+  id: string;
+  review_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
+  author?: User;
+}
+
 export interface LaunchReview {
   id: string;
   launch_id: string;
   author_id: string;
+  category: LaunchReviewCategory;
   headline: string;
   body: string;
   recommendation: LaunchReviewRecommendation;
+  status: LaunchReviewStatus;
   created_at: string;
   updated_at: string;
   author?: User;
+  comments?: LaunchReviewComment[];
+  comment_count?: number;
+  is_bookmarked_by_me?: boolean;
 }
 
 export interface LaunchFeedbackComment {
@@ -1977,6 +1997,8 @@ export interface LaunchFeedbackItem {
   updated_at: string;
   author?: User;
   comments?: LaunchFeedbackComment[];
+  comment_count?: number;
+  is_bookmarked_by_me?: boolean;
 }
 
 export interface Launch {
@@ -2193,6 +2215,7 @@ export interface NoteListItem {
   deleted_at: string | null;
   created_at: string;
   updated_at: string;
+  version: number;
   folder: NoteFolderRef | null;
   tags: NoteTag[];
 }
@@ -2208,4 +2231,4 @@ export interface NoteListResponse {
   next_cursor: string | null;
 }
 
-export type NoteSaveStatus = "idle" | "saving" | "saved" | "unsaved" | "error";
+export type NoteSaveStatus = "idle" | "saving" | "saved" | "unsaved" | "error" | "conflict";

@@ -74,9 +74,9 @@ export default function MobileNav({
   /* Secondary items shown in overflow "More" menu */
   const moreItems = [
     {
-      href: "/notes",
+      href: "/productivity",
       icon: <DocumentTextIcon className="w-5 h-5" />,
-      label: "Notes",
+      label: "Productivity Hub",
     },
     {
       href: "/launches",

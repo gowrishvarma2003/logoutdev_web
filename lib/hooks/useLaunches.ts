@@ -87,8 +87,28 @@ export function useLaunch(launchId: string) {
   };
 }
 
-export function useLaunchReviews(launchId: string, page = 1) {
-  const result = useAsync(() => api.listLaunchReviews(launchId, page), [launchId, page]);
+export function useLaunchReviews(
+  launchId: string,
+  filters?: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    status?: string;
+    sort?: string;
+    mine?: boolean;
+    bookmarked?: boolean;
+  }
+) {
+  const result = useAsync(() => api.listLaunchReviews(launchId, filters), [
+    launchId,
+    filters?.page,
+    filters?.limit,
+    filters?.category,
+    filters?.status,
+    filters?.sort,
+    filters?.mine,
+    filters?.bookmarked,
+  ]);
   return {
     reviews: result.data?.reviews ?? ([] as LaunchReview[]),
     total: result.data?.total ?? 0,
@@ -100,12 +120,23 @@ export function useLaunchReviews(launchId: string, page = 1) {
 
 export function useLaunchFeedback(
   launchId: string,
-  filters?: { type?: string; status?: string; page?: number; limit?: number }
+  filters?: {
+    type?: string;
+    status?: string;
+    sort?: string;
+    mine?: boolean;
+    bookmarked?: boolean;
+    page?: number;
+    limit?: number;
+  }
 ) {
   const result = useAsync(() => api.listLaunchFeedback(launchId, filters), [
     launchId,
     filters?.type,
     filters?.status,
+    filters?.sort,
+    filters?.mine,
+    filters?.bookmarked,
     filters?.page,
     filters?.limit,
   ]);

@@ -140,7 +140,7 @@ export default function TagList() {
           await tags.removeTag(deleteTarget.id);
           showToast("Tag deleted", { tone: "success" });
           if (activeTagId === deleteTarget.id) {
-            router.push("/notes");
+            router.push("/productivity/notes");
           }
         }}
       />

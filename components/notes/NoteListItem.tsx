@@ -15,7 +15,7 @@ export default function NoteListItem({ note, onChanged }: NoteListItemProps) {
   return (
     <li className="group relative">
       <Link
-        href={`/notes/${note.id}`}
+        href={`/productivity/notes/${note.id}`}
         className="flex items-start gap-3 rounded-xl border border-transparent px-3 py-3 pr-11 transition-colors hover:border-border-default hover:bg-surface/60"
       >
         <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-hover/80 text-base">

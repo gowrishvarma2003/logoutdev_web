@@ -24,7 +24,7 @@ export default function AppShell({ children }: AppShellProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { summary } = useNotificationSummary();
-  const hideRightPanel = pathname.startsWith("/notes");
+  const hideRightPanel = pathname.startsWith("/notes") || pathname.startsWith("/productivity");
   const isPublicSpaceRoute =
     pathname === "/spaces" ||
     (pathname.startsWith("/spaces/") &&

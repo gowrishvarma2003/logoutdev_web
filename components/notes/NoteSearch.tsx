@@ -23,7 +23,7 @@ function NoteSearchInput({ initialValue }: { initialValue: string }) {
     if (next.trim()) params.set("q", next.trim());
     else params.delete("q");
     const qs = params.toString();
-    router.push(qs ? `/notes?${qs}` : "/notes");
+    router.push(qs ? `/productivity/notes?${qs}` : "/productivity/notes");
   }
 
   function handleChange(next: string) {

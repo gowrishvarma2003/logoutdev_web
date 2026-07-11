@@ -30,6 +30,7 @@ export default function WorkItemCard({
   onResolve,
   onMarkTriaged,
   onAssignToMe,
+  onAddToProductivity,
 }: {
   issue: SpaceWorkItem;
   spaceId: string;
@@ -44,6 +45,7 @@ export default function WorkItemCard({
   onResolve?: () => void;
   onMarkTriaged?: () => void;
   onAssignToMe?: () => void;
+  onAddToProductivity?: () => void;
 }) {
   const router = useRouter();
   const href = queryString
@@ -143,8 +145,17 @@ export default function WorkItemCard({
             {issue.close_reason ? <span>Close reason: {issue.close_reason}</span> : null}
           </div>
 
-          {(issue.viewer_state?.can_claim || issue.viewer_state?.can_start || issue.viewer_state?.can_resolve || issue.viewer_state?.can_manage) ? (
+          {(onAddToProductivity || issue.viewer_state?.can_claim || issue.viewer_state?.can_start || issue.viewer_state?.can_resolve || issue.viewer_state?.can_manage) ? (
             <div className="mt-3 flex flex-wrap items-center gap-2">
+              {onAddToProductivity ? (
+                <button
+                  onClick={onAddToProductivity}
+                  disabled={isBusy}
+                  className="rounded-lg border border-border-strong bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-hover disabled:opacity-50"
+                >
+                  Add to Productivity
+                </button>
+              ) : null}
               {issue.viewer_state?.can_claim ? (
                 <button
                   onClick={onClaim}

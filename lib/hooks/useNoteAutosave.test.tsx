@@ -39,6 +39,7 @@ function noteResponse(overrides: Partial<Note> = {}): { note: Note } {
       deleted_at: null,
       created_at: "2026-07-06T00:00:00.000Z",
       updated_at: "2026-07-06T00:00:01.000Z",
+      version: 2,
       folder: null,
       tags: [],
       content_json: content,
@@ -67,7 +68,7 @@ describe("useNoteAutosave", () => {
     );
 
     act(() => {
-      result.current.hydrate({ title: "Initial", content });
+      result.current.hydrate({ title: "Initial", content, version: 1 });
       result.current.notifyChange({ title: "Saved" });
     });
 
@@ -82,6 +83,7 @@ describe("useNoteAutosave", () => {
     expect(updateNote).toHaveBeenCalledWith("note-1", {
       title: "Saved",
       content,
+      expected_version: 1,
     });
     expect(readNoteDraft("note-1")).toBeNull();
     expect(onSaved).toHaveBeenCalledWith(expect.objectContaining({ id: "note-1" }));
@@ -97,7 +99,7 @@ describe("useNoteAutosave", () => {
     );
 
     act(() => {
-      result.current.hydrate({ title: "Initial", content });
+      result.current.hydrate({ title: "Initial", content, version: 1 });
       result.current.notifyChange({ title: "Retry" });
     });
 
@@ -125,5 +127,25 @@ describe("useNoteAutosave", () => {
     discardNoteDraft("note-1");
 
     expect(readNoteDraft("note-1")).toBeNull();
+  });
+
+  it("retains a conflict draft instead of retrying over a newer note", async () => {
+    const conflict = Object.assign(new Error("Conflict"), { status: 409 });
+    vi.mocked(updateNote).mockRejectedValueOnce(conflict);
+    const { result } = renderHook(() =>
+      useNoteAutosave({ noteId: "note-1", debounceMs: 50 }),
+    );
+
+    act(() => {
+      result.current.hydrate({ title: "Initial", content, version: 1 });
+      result.current.notifyChange({ title: "Local edit" });
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(50);
+    });
+
+    expect(result.current.status).toBe("conflict");
+    expect(readNoteDraft("note-1")?.title).toBe("Local edit");
+    expect(updateNote).toHaveBeenCalledWith("note-1", expect.objectContaining({ expected_version: 1 }));
   });
 });

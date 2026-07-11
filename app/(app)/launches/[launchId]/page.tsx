@@ -61,9 +61,28 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
   const router = useRouter();
   const { user } = useAuth();
   const { launch, loading, error, refetch } = useLaunch(launchId);
-  const { reviews, refetch: refetchReviews } = useLaunchReviews(launchId);
+  const [reviewCategory, setReviewCategory] = useState("experience");
+  const [reviewStatusFilter, setReviewStatusFilter] = useState("");
+  const [reviewScopeFilter, setReviewScopeFilter] = useState<"all" | "mine" | "bookmarked">("all");
+  const [reviewSort, setReviewSort] = useState("newest");
+  const { reviews, refetch: refetchReviews } = useLaunchReviews(launchId, {
+    category: reviewCategory,
+    status: reviewStatusFilter || undefined,
+    sort: reviewSort,
+    mine: reviewScopeFilter === "mine",
+    bookmarked: reviewScopeFilter === "bookmarked",
+  });
   const [feedbackType, setFeedbackType] = useState("suggestion");
-  const { feedback, refetch: refetchFeedback } = useLaunchFeedback(launchId, { type: feedbackType });
+  const [feedbackStatusFilter, setFeedbackStatusFilter] = useState("");
+  const [feedbackScopeFilter, setFeedbackScopeFilter] = useState<"all" | "mine" | "bookmarked">("all");
+  const [feedbackSort, setFeedbackSort] = useState("newest");
+  const { feedback, refetch: refetchFeedback } = useLaunchFeedback(launchId, {
+    type: feedbackType,
+    status: feedbackStatusFilter || undefined,
+    sort: feedbackSort,
+    mine: feedbackScopeFilter === "mine",
+    bookmarked: feedbackScopeFilter === "bookmarked",
+  });
   const { registrations, refetch: refetchRegistrations } = useLaunchBetaRegistrations(
     launchId,
     Boolean(launch?.viewer_state?.can_moderate_beta)
@@ -80,7 +99,6 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
   const [goLiveUrl, setGoLiveUrl] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
-  const myReviewId = launch?.viewer_state?.my_review_id ?? null;
   const canToggleUpvote = Boolean(user && launch && !launch.viewer_state?.is_owner);
   const isUpvoted = Boolean(launch?.viewer_state?.is_upvoted_by_me);
 
@@ -193,6 +211,12 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                   feedback={feedback}
                   activeType={feedbackType}
                   onActiveTypeChange={setFeedbackType}
+                  statusFilter={feedbackStatusFilter}
+                  onStatusFilterChange={setFeedbackStatusFilter}
+                  scopeFilter={feedbackScopeFilter}
+                  onScopeFilterChange={setFeedbackScopeFilter}
+                  sort={feedbackSort}
+                  onSortChange={setFeedbackSort}
                   canPostFeedback={Boolean(user && launch.viewer_state?.can_submit_feedback)}
                   disabledMessage={isBetaLaunch ? "Only approved beta users can post feedback." : null}
                   error={feedbackError}
@@ -205,8 +229,8 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                       setFeedbackError(err instanceof Error ? err.message : "Failed to create feedback");
                     }
                   }}
-                  onUpdateFeedbackStatus={async (feedbackId, status) => {
-                    await launchesApi.updateLaunchFeedback(launch.id, feedbackId, { status });
+                  onUpdateFeedback={async (feedbackId, payload) => {
+                    await launchesApi.updateLaunchFeedback(launch.id, feedbackId, payload);
                     await refetchFeedback();
                   }}
                   onDeleteFeedback={async (feedbackId) => {
@@ -217,6 +241,14 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
                     await launchesApi.createLaunchFeedbackComment(launch.id, feedbackId, { body });
                     await refetchFeedback();
                   }}
+                  onToggleBookmark={async (feedbackId, bookmarked) => {
+                    if (bookmarked) {
+                      await launchesApi.unbookmarkLaunchFeedback(launch.id, feedbackId);
+                    } else {
+                      await launchesApi.bookmarkLaunchFeedback(launch.id, feedbackId);
+                    }
+                    await refetchFeedback();
+                  }}
                 />
               </section>
             )
@@ -224,41 +256,69 @@ export default function LaunchDetailPage({ params }: { params: Promise<{ launchI
             <section id="reviews" className="scroll-mt-20 space-y-4">
               <div className="border-b border-border-default/80 pb-4 flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold tracking-tight text-text-primary">Product Reviews</h2>
+                  <h2 className="text-xl font-bold tracking-tight text-text-primary">Product Feedback</h2>
                   <p className="mt-1 text-xs text-text-disabled font-light">
-                    What other developers think of {launch.name}.
+                    Ongoing experiences, issues, praise, and suggestions for {launch.name}.
                   </p>
                 </div>
                 {launch.review_count > 0 && (
                   <span className="rounded-full bg-surface-hover px-3 py-1 text-xs font-semibold tabular-nums text-text-muted border border-border-default">
-                    {launch.review_count} review{launch.review_count > 1 ? "s" : ""}
+                    {launch.review_count} entr{launch.review_count === 1 ? "y" : "ies"}
                   </span>
                 )}
               </div>
               <LaunchReviewPanel
-                key={`${myReviewId ?? "new"}`}
+                launch={launch}
                 reviews={reviews}
-                currentUser={launch.viewer_state?.is_owner ? null : user}
-                myReviewId={myReviewId}
+                currentUser={user}
                 canReview={Boolean(user && launch.viewer_state?.can_submit_review)}
                 error={reviewError}
-                onSubmitReview={async (payload) => {
+                activeCategory={reviewCategory}
+                onActiveCategoryChange={setReviewCategory}
+                statusFilter={reviewStatusFilter}
+                onStatusFilterChange={setReviewStatusFilter}
+                scopeFilter={reviewScopeFilter}
+                onScopeFilterChange={setReviewScopeFilter}
+                sort={reviewSort}
+                onSortChange={setReviewSort}
+                onCreateReview={async (payload) => {
                   setReviewError(null);
                   try {
-                    await launchesApi.upsertMyLaunchReview(launch.id, payload);
+                    await launchesApi.createLaunchReview(launch.id, payload);
                     await Promise.all([refetchReviews(), refetch()]);
                   } catch (err: unknown) {
-                    setReviewError(err instanceof Error ? err.message : "Failed to save review");
+                    setReviewError(err instanceof Error ? err.message : "Failed to save feedback");
                   }
                 }}
-                onDeleteReview={async () => {
+                onUpdateReview={async (reviewId, payload) => {
                   setReviewError(null);
                   try {
-                    await launchesApi.deleteMyLaunchReview(launch.id);
+                    await launchesApi.updateLaunchReview(launch.id, reviewId, payload);
+                    await refetchReviews();
+                  } catch (err: unknown) {
+                    setReviewError(err instanceof Error ? err.message : "Failed to update feedback");
+                  }
+                }}
+                onDeleteReview={async (reviewId) => {
+                  setReviewError(null);
+                  try {
+                    await launchesApi.deleteLaunchReview(launch.id, reviewId);
                     await Promise.all([refetchReviews(), refetch()]);
                   } catch (err: unknown) {
-                    setReviewError(err instanceof Error ? err.message : "Failed to delete review");
+                    setReviewError(err instanceof Error ? err.message : "Failed to delete feedback");
                   }
+                }}
+                onAddComment={async (reviewId, body) => {
+                  await launchesApi.createLaunchReviewComment(launch.id, reviewId, { body });
+                  await refetchReviews();
+                }}
+                onToggleBookmark={async (reviewId, bookmarked) => {
+                  if (bookmarked) {
+                    await launchesApi.unbookmarkLaunchReview(launch.id, reviewId);
+                  } else {
+                    await launchesApi.bookmarkLaunchReview(launch.id, reviewId);
+                  }
+                  await refetchReviews();
                 }}
               />
             </section>

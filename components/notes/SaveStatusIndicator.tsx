@@ -32,6 +32,14 @@ export default function SaveStatusIndicator({ status, lastSavedAt, onRetry }: Sa
     );
   }
 
+  if (status === "conflict") {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-amber-300" role="status">
+        Changes need review
+      </span>
+    );
+  }
+
   if (status === "unsaved") {
     return (
       <span className="inline-flex items-center gap-1.5 text-xs text-amber-400">

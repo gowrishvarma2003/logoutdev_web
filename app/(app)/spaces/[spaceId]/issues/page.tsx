@@ -11,6 +11,7 @@ import { useIssues, useWorkSummary, useContributors, useMilestones } from "@/lib
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useRepos } from "@/lib/hooks/useRepos";
 import WorkItemCard from "@/components/spaces/WorkItemCard";
+import RichProductivityDialog from "@/components/productivity/RichProductivityDialog";
 import { EmptyState, SectionHeader } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import {
@@ -35,6 +36,7 @@ import type {
   WorkReadiness,
   WorkSort,
   WorkView,
+  SpaceWorkItem,
 } from "@/lib/types";
 import { buildWorkHref, parseWorkSearchParams, serializeWorkQuery, type WorkSearchState } from "@/lib/workFilters";
 import RichComposer from "@/components/ui/RichComposer";
@@ -261,6 +263,7 @@ export default function WorkPage({
   const [busyIssueId, setBusyIssueId] = useState<string | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState(filters.q || "");
+  const [productivityIssue, setProductivityIssue] = useState<SpaceWorkItem | null>(null);
 
   // Collapsible UI state
   const [showMetrics, setShowMetrics] = useState(false);
@@ -1499,6 +1502,7 @@ export default function WorkPage({
                   onResolve={() => runQuickAction(issue.id, "resolve", { status: "resolved" })}
                   onMarkTriaged={() => runQuickAction(issue.id, "triage", { status: "triaged" })}
                   onAssignToMe={() => runQuickAction(issue.id, "assign", { assignee_user_id: user?.id || "" })}
+                  onAddToProductivity={() => setProductivityIssue(issue)}
                 />
               ))}
             </div>
@@ -1611,6 +1615,17 @@ export default function WorkPage({
           </button>
         </div>
       ) : null}
+      <RichProductivityDialog
+        open={Boolean(productivityIssue)}
+        onClose={() => setProductivityIssue(null)}
+        initialKind="task"
+        defaultTitle={productivityIssue?.title ?? ""}
+        defaultDescription={productivityIssue?.body ?? ""}
+        defaultDate={productivityIssue?.target_date ? `${productivityIssue.target_date}T12:00` : ""}
+        defaultTags={productivityIssue ? ["space-work", productivityIssue.type, productivityIssue.repo?.name].filter(Boolean).join(", ") : ""}
+        defaultRelation={productivityIssue ? { target_type: "space_work" as const, target_id: productivityIssue.id } : undefined}
+        onCreated={() => setPostError("Added this work item to your Productivity Hub.")}
+      />
     </div>
   );
 }

@@ -42,7 +42,7 @@ export default function NotesSidebar() {
     try {
       const folderId = searchParams.get("folder");
       const note = await createNote(folderId ? { folder_id: folderId } : {});
-      router.push(`/notes/${note.id}`);
+      router.push(`/productivity/notes/${note.id}`);
     } catch {
       showToast("Couldn't create note", { tone: "error", description: "Check your connection and try again." });
     }

@@ -11,6 +11,8 @@ import NoteMetaBar from "@/components/notes/NoteMetaBar";
 import NoteTagPicker from "@/components/notes/NoteTagPicker";
 import SaveStatusIndicator from "@/components/notes/SaveStatusIndicator";
 import NoteMoreMenu from "@/components/notes/NoteMoreMenu";
+import RichProductivityDialog from "@/components/productivity/RichProductivityDialog";
+import Button from "@/components/ui/Button";
 import { useNotesWorkspace } from "@/components/notes/NotesWorkspaceContext";
 import EmptyState from "@/components/ui/EmptyState";
 import Spinner from "@/components/ui/Spinner";
@@ -36,6 +38,7 @@ export default function NoteEditorPage() {
   const [initialContent, setInitialContent] = useState<NoteContentDoc | null>(
     null,
   );
+  const [productivityOpen, setProductivityOpen] = useState(false);
   const hydratedForRef = useRef<string | null>(null);
 
   const autosave = useNoteAutosave({
@@ -53,7 +56,7 @@ export default function NoteEditorPage() {
     if (draft) {
       setTitle(draft.title);
       setInitialContent(draft.content);
-      autosave.restoreDraft({ title: draft.title, content: draft.content });
+      autosave.restoreDraft({ title: draft.title, content: draft.content, version: draft.baseVersion ?? note.version });
       showToast("Restored unsaved changes", {
         description:
           "We picked up where you left off before your last save completed.",
@@ -61,7 +64,7 @@ export default function NoteEditorPage() {
     } else {
       setTitle(note.title);
       setInitialContent(note.content_json);
-      autosave.hydrate({ title: note.title, content: note.content_json });
+      autosave.hydrate({ title: note.title, content: note.content_json, version: note.version });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [note?.id]);
@@ -124,7 +127,7 @@ export default function NoteEditorPage() {
           description="This note doesn't exist, was permanently deleted, or you don't have access to it."
           action={
             <button
-              onClick={() => router.push("/notes")}
+              onClick={() => router.push("/productivity/notes")}
               className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
             >
               Back to Notes
@@ -182,6 +185,9 @@ export default function NoteEditorPage() {
           placeholder="Untitled"
         />
         <div className="flex shrink-0 items-center gap-2 pt-2">
+          <Button size="sm" variant="outline" onClick={() => setProductivityOpen(true)} disabled={Boolean(note.deleted_at)}>
+            Add to Productivity
+          </Button>
           <NoteMoreMenu
             note={note}
             context="editor"
@@ -190,7 +196,7 @@ export default function NoteEditorPage() {
                 setNote((current) =>
                   current ? { ...current, ...updated } : updated,
                 );
-              if (navigateHome) router.push("/notes");
+              if (navigateHome) router.push("/productivity/notes");
             }}
           />
         </div>
@@ -209,6 +215,12 @@ export default function NoteEditorPage() {
         <span>Updated {formatRelativeTime(note.updated_at)}</span>
       </div>
 
+      {autosave.isConflict ? (
+        <div className="mb-5 rounded-xl border border-amber-800/50 bg-amber-950/30 px-3.5 py-3 text-sm text-amber-100" role="alert">
+          {autosave.error} Reloading will keep the server version; copy your local text first if you want to merge it.
+        </div>
+      ) : null}
+
       <div className="mb-6">
         <NoteTagPicker selectedTags={note.tags} onChange={handleTagsChange} />
       </div>
@@ -219,6 +231,17 @@ export default function NoteEditorPage() {
         editable={!note.deleted_at}
         onChange={(content) => handleContentChange(content)}
         placeholder="Start writing, or press '/' for commands…"
+      />
+      <RichProductivityDialog
+        open={productivityOpen}
+        onClose={() => setProductivityOpen(false)}
+        initialKind="task"
+        defaultTitle={title || note.title || "Untitled note follow-up"}
+        defaultDescription={note.excerpt || ""}
+        defaultRelation={{ target_type: "note", target_id: note.id }}
+        onCreated={() => {
+          showToast("Added to Productivity", { description: "The new item is linked back to this note." });
+        }}
       />
     </div>
   );

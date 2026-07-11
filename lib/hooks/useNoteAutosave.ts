@@ -8,6 +8,7 @@ interface NoteDraft {
   title: string;
   content: NoteContentDoc;
   savedAt: string;
+  baseVersion?: number;
 }
 
 function draftKey(noteId: string) {
@@ -56,6 +57,7 @@ interface UseNoteAutosaveOptions {
 interface LatestContent {
   title: string;
   content: NoteContentDoc;
+  version?: number;
 }
 
 /**
@@ -77,6 +79,8 @@ export function useNoteAutosave({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savingRef = useRef(false);
   const pendingAfterSaveRef = useRef(false);
+  const changeSequenceRef = useRef(0);
+  const versionRef = useRef<number | null>(null);
   const statusRef = useRef<NoteSaveStatus>("idle");
 
   useEffect(() => {
@@ -101,21 +105,30 @@ export function useNoteAutosave({
     setStatus("saving");
     setError(null);
     const payload = latestRef.current;
+    const saveSequence = changeSequenceRef.current;
+    const expectedVersion = versionRef.current;
 
     try {
       const response = await apiUpdateNote(noteId, {
         title: payload.title,
         content: payload.content,
+        ...(expectedVersion !== null ? { expected_version: expectedVersion } : {}),
       });
       const note = response.note;
+      versionRef.current = note.version;
       setStatus("saved");
       setLastSavedAt(note.updated_at);
-      discardNoteDraft(noteId);
+      // Do not erase recovery data written while this request was in flight.
+      if (changeSequenceRef.current === saveSequence) discardNoteDraft(noteId);
       onSaved?.(note);
     } catch (err) {
-      setStatus("error");
-      setError(err instanceof Error ? err.message : "Failed to save note.");
-      writeDraft(noteId, { ...payload, savedAt: new Date().toISOString() });
+      const status = (err as { status?: number } | undefined)?.status;
+      const isConflict = status === 409;
+      setStatus(isConflict ? "conflict" : "error");
+      setError(isConflict
+        ? "This note changed in another session. Your local draft is safe; reload the note before deciding what to keep."
+        : err instanceof Error ? err.message : "Failed to save note.");
+      writeDraft(noteId, { ...latestRef.current, savedAt: new Date().toISOString(), baseVersion: versionRef.current ?? undefined });
     } finally {
       savingRef.current = false;
       if (pendingAfterSaveRef.current) {
@@ -138,12 +151,14 @@ export function useNoteAutosave({
   /** Seeds the "last known" content without marking anything dirty. */
   const hydrate = useCallback((initial: LatestContent) => {
     latestRef.current = initial;
+    versionRef.current = initial.version ?? null;
   }, []);
 
   /** Seeds content from a restored draft and saves it right away. */
   const restoreDraft = useCallback(
     (initial: LatestContent) => {
       latestRef.current = initial;
+      versionRef.current = initial.version ?? null;
       setStatus("unsaved");
       scheduleSave();
     },
@@ -162,8 +177,9 @@ export function useNoteAutosave({
           update.content !== undefined ? update.content : current.content,
       };
       latestRef.current = next;
+      changeSequenceRef.current += 1;
       setStatus("unsaved");
-      writeDraft(noteId, { ...next, savedAt: new Date().toISOString() });
+      writeDraft(noteId, { ...next, savedAt: new Date().toISOString(), baseVersion: versionRef.current ?? undefined });
       scheduleSave();
     },
     [noteId, scheduleSave],
@@ -212,6 +228,7 @@ export function useNoteAutosave({
     lastSavedAt,
     setLastSavedAt,
     error,
+    isConflict: status === "conflict",
     notifyChange,
     hydrate,
     restoreDraft,

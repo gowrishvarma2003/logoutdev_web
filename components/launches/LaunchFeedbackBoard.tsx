@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Launch, LaunchFeedbackItem, User } from "@/lib/types";
 import RichComposer from "@/components/ui/RichComposer";
 import RichText from "@/components/ui/RichText";
 import Avatar from "@/components/ui/Avatar";
-import { ChatBubbleIcon, TrashIcon, SparklesIcon, CheckIcon } from "@/components/ui/Icons";
+import { PinIcon, SparklesIcon, TrashIcon } from "@/components/ui/Icons";
 
 interface LaunchFeedbackBoardProps {
   launch: Launch;
@@ -13,14 +13,24 @@ interface LaunchFeedbackBoardProps {
   feedback: LaunchFeedbackItem[];
   activeType: string;
   onActiveTypeChange: (value: string) => void;
+  statusFilter: string;
+  onStatusFilterChange: (value: string) => void;
+  scopeFilter: "all" | "mine" | "bookmarked";
+  onScopeFilterChange: (value: "all" | "mine" | "bookmarked") => void;
+  sort: string;
+  onSortChange: (value: string) => void;
   canPostFeedback?: boolean;
   disabledMessage?: string | null;
   loading?: boolean;
   error?: string | null;
   onCreateFeedback: (payload: { type: string; title: string; body: string }) => Promise<void> | void;
-  onUpdateFeedbackStatus: (feedbackId: string, status: string) => Promise<void> | void;
+  onUpdateFeedback: (
+    feedbackId: string,
+    payload: Partial<{ type: string; title: string; body: string; status: string }>
+  ) => Promise<void> | void;
   onDeleteFeedback: (feedbackId: string) => Promise<void> | void;
   onAddComment: (feedbackId: string, body: string) => Promise<void> | void;
+  onToggleBookmark: (feedbackId: string, bookmarked: boolean) => Promise<void> | void;
 }
 
 const TABS = [
@@ -47,10 +57,13 @@ const STATUS_BADGE: Record<string, string> = {
   closed: "bg-surface-hover text-text-muted border-border-strong",
 };
 
-const COMPOSER_DETAILS: Record<string, { title: string; desc: string; titlePlaceholder: string; bodyPlaceholder: string }> = {
+const COMPOSER_DETAILS: Record<
+  string,
+  { title: string; desc: string; titlePlaceholder: string; bodyPlaceholder: string }
+> = {
   bug: {
     title: "Report a Bug",
-    desc: "Help us make LogoutDev stable by reporting issues with steps to reproduce.",
+    desc: "Each bug is its own thread — report as many as you find during testing.",
     titlePlaceholder: "Brief summary of the issue (e.g. Cannot upload screenshot on profile edit)",
     bodyPlaceholder: `### What happened?
 [Describe the bug here]
@@ -65,7 +78,7 @@ const COMPOSER_DETAILS: Record<string, { title: string; desc: string; titlePlace
   },
   idea: {
     title: "Suggest an Idea",
-    desc: "Share your vision for new features and capability additions.",
+    desc: "Share feature ideas as separate items so builders can triage them independently.",
     titlePlaceholder: "What is your idea? (e.g. Add dark mode toggle in navbar)",
     bodyPlaceholder: `### Desired outcome
 [What feature would you like to see?]
@@ -99,54 +112,116 @@ export default function LaunchFeedbackBoard({
   feedback,
   activeType,
   onActiveTypeChange,
+  statusFilter,
+  onStatusFilterChange,
+  scopeFilter,
+  onScopeFilterChange,
+  sort,
+  onSortChange,
   canPostFeedback = true,
   disabledMessage = null,
   loading = false,
   error = null,
   onCreateFeedback,
-  onUpdateFeedbackStatus,
+  onUpdateFeedback,
   onDeleteFeedback,
   onAddComment,
+  onToggleBookmark,
 }: LaunchFeedbackBoardProps) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editBody, setEditBody] = useState("");
 
   const details = COMPOSER_DETAILS[activeType] || COMPOSER_DETAILS.suggestion;
+  const isOwner = Boolean(launch.viewer_state?.is_owner);
+  const openCount = useMemo(
+    () => feedback.filter((item) => item.status === "open").length,
+    [feedback]
+  );
 
   return (
     <div className="space-y-6">
-      {/* Header and navigation tabs */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-border-default/80 pb-4">
-        <div className="flex gap-1.5 rounded-xl border border-border-default bg-app/60 p-1">
-          {TABS.map(({ value, label }) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => {
-                onActiveTypeChange(value);
-                // Reset form with type-specific defaults when switching tabs
-                setTitle("");
-                setBody("");
-              }}
-              className={`rounded-lg px-4 py-2 text-xs font-semibold tracking-wide transition-all ${
-                activeType === value
-                  ? "bg-surface-hover text-text-primary shadow-sm ring-1 ring-border-strong"
-                  : "text-text-muted hover:text-text-secondary"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+      <div className="flex flex-col gap-4 border-b border-border-default/80 pb-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex gap-1.5 rounded-xl border border-border-default bg-app/60 p-1">
+            {TABS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  onActiveTypeChange(value);
+                  setTitle("");
+                  setBody("");
+                }}
+                className={`rounded-lg px-4 py-2 text-xs font-semibold tracking-wide transition-all ${
+                  activeType === value
+                    ? "bg-surface-hover text-text-primary shadow-sm ring-1 ring-border-strong"
+                    : "text-text-muted hover:text-text-secondary"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {(
+              [
+                { value: "all", label: "All" },
+                { value: "mine", label: "Mine" },
+                { value: "bookmarked", label: "Bookmarked" },
+              ] as const
+            ).map((scope) => (
+              <button
+                key={scope.value}
+                type="button"
+                onClick={() => onScopeFilterChange(scope.value)}
+                className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition-all ${
+                  scopeFilter === scope.value
+                    ? "border-sky-500/30 bg-sky-500/10 text-sky-300"
+                    : "border-border-default text-text-muted hover:text-text-secondary"
+                }`}
+              >
+                {scope.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <p className="text-xs text-text-disabled font-light max-w-xs md:text-right">
-          Track what the community wants next and keep each thread easy to scan.
-        </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={statusFilter}
+              onChange={(e) => onStatusFilterChange(e.target.value)}
+              className="rounded-lg border border-border-default bg-app px-2.5 py-1.5 text-xs text-text-primary focus:border-border-strong focus:outline-none"
+            >
+              <option value="">All statuses</option>
+              {STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {status.replace(/_/g, " ")}
+                </option>
+              ))}
+            </select>
+            <select
+              value={sort}
+              onChange={(e) => onSortChange(e.target.value)}
+              className="rounded-lg border border-border-default bg-app px-2.5 py-1.5 text-xs text-text-primary focus:border-border-strong focus:outline-none"
+            >
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="open_first">Open first</option>
+            </select>
+          </div>
+          <p className="text-xs text-text-disabled font-light max-w-sm md:text-right">
+            Manage threads with status, replies, and bookmarks · {openCount} open here
+          </p>
+        </div>
       </div>
 
-      {/* Composer form */}
-      {currentUser && !launch.viewer_state?.is_owner && canPostFeedback && (
+      {currentUser && !isOwner && canPostFeedback && (
         <form
           onSubmit={async (e) => {
             e.preventDefault();
@@ -181,13 +256,12 @@ export default function LaunchFeedbackBoard({
               rows={4}
               placeholder={details.bodyPlaceholder}
               previewClassName="w-full rounded-xl border border-border-default bg-app px-4 py-3 text-sm leading-relaxed text-text-primary prose prose-invert max-w-none"
-               className="w-full resize-y px-4 py-3 text-sm leading-relaxed text-transparent caret-white placeholder:text-text-disabled focus:outline-none selection:bg-[#1d9bf0]/30"
+              className="w-full resize-y px-4 py-3 text-sm leading-relaxed text-transparent caret-white placeholder:text-text-disabled focus:outline-none selection:bg-[#1d9bf0]/30"
             />
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-border-subtle pt-3">
             {error ? <p className="text-xs text-rose-400">{error}</p> : <div />}
-
             <button
               type="submit"
               disabled={loading || !title.trim() || !body.trim()}
@@ -199,35 +273,34 @@ export default function LaunchFeedbackBoard({
         </form>
       )}
 
-      {currentUser && !launch.viewer_state?.is_owner && !canPostFeedback ? (
+      {currentUser && !isOwner && !canPostFeedback ? (
         <div className="rounded-2xl border border-border-default/80 bg-app/20 px-5 py-4 text-sm text-text-disabled font-light leading-relaxed">
           {disabledMessage || "Feedback submission is not open right now."}
         </div>
       ) : null}
 
-      {/* Feedback list */}
       {feedback.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border-default bg-app/20 px-4 py-12 text-center">
-          <p className="text-sm text-text-muted font-medium mb-1">
-            No {activeType} items yet.
-          </p>
+          <p className="text-sm text-text-muted font-medium mb-1">No {activeType} items yet.</p>
           <p className="text-xs text-text-disabled font-light">
-            Be the first to suggest what LogoutDev should build or fix next.
+            Be the first to suggest what should be built or fixed next.
           </p>
         </div>
       ) : (
         <div className="space-y-4">
           {feedback.map((item) => {
             const accentClass = STATUS_ACCENT[item.status] ?? "border-l-zinc-600";
-            const badgeClass = STATUS_BADGE[item.status] ?? "bg-surface-hover text-text-muted border-border-strong";
+            const badgeClass =
+              STATUS_BADGE[item.status] ?? "bg-surface-hover text-text-muted border-border-strong";
             const builderReplied = item.comments?.some((c) => c.author_id === launch.builder_id);
+            const isAuthor = currentUser?.id === item.author_id;
+            const isEditing = editingId === item.id;
 
             return (
               <article
                 key={item.id}
                 className={`rounded-2xl border border-border-default border-l-4 bg-surface/10 p-5 shadow-sm space-y-4 transition-all hover:bg-surface/20 ${accentClass}`}
               >
-                {/* User details and status row */}
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <Avatar user={item.author} size="sm" />
@@ -236,13 +309,15 @@ export default function LaunchFeedbackBoard({
                         {item.author?.name ?? "Community member"}
                       </p>
                       <p className="text-[10px] text-text-disabled font-light mt-0.5">
-                        Posted on {formatDate(item.created_at)}
+                        Posted on {formatDate(item.created_at)} · {item.type}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className={`rounded-lg border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider capitalize ${badgeClass}`}>
+                    <span
+                      className={`rounded-lg border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider capitalize ${badgeClass}`}
+                    >
                       {item.status.replace(/_/g, " ")}
                     </span>
                     {builderReplied && (
@@ -253,20 +328,62 @@ export default function LaunchFeedbackBoard({
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="space-y-2">
-                  <h4 className="text-base font-bold text-text-primary tracking-tight">
-                    {item.title}
-                  </h4>
-                  <div className="pl-0.5">
-                    <RichText text={item.body} className="text-sm leading-relaxed text-text-secondary prose prose-invert prose-sm max-w-none font-light" />
+                {isEditing ? (
+                  <div className="space-y-3">
+                    <input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="w-full rounded-xl border border-border-default bg-app px-4 py-2.5 text-sm text-text-primary focus:border-border-strong focus:outline-none"
+                    />
+                    <RichComposer
+                      value={editBody}
+                      onChange={setEditBody}
+                      rows={3}
+                      previewClassName="w-full rounded-xl border border-border-default bg-app px-4 py-3 text-sm leading-relaxed text-text-primary"
+                      className="w-full resize-y px-4 py-3 text-sm leading-relaxed text-transparent caret-white focus:outline-none"
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setEditingId(null)}
+                        className="rounded-lg border border-border-default px-3 py-1.5 text-xs text-text-muted"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await onUpdateFeedback(item.id, {
+                            title: editTitle.trim(),
+                            body: editBody.trim(),
+                          });
+                          setEditingId(null);
+                        }}
+                        className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
+                      >
+                        Save
+                      </button>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="space-y-2">
+                    <h4 className="text-base font-bold text-text-primary tracking-tight">
+                      {item.title}
+                    </h4>
+                    <div className="pl-0.5">
+                      <RichText
+                        text={item.body}
+                        className="text-sm leading-relaxed text-text-secondary prose prose-invert prose-sm max-w-none font-light"
+                      />
+                    </div>
+                  </div>
+                )}
 
-                {/* Comments / Nested threads list */}
                 {(item.comments ?? []).length > 0 && (
                   <div className="mt-4 space-y-3 rounded-xl border border-border-default/80 bg-app/40 p-4">
-                    <p className="text-[10px] font-medium uppercase tracking-wider text-text-disabled border-b border-border-subtle pb-2 mb-2">Replies</p>
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-text-disabled border-b border-border-subtle pb-2 mb-2">
+                      Replies ({item.comments?.length ?? 0})
+                    </p>
                     {item.comments?.map((comment) => {
                       const isBuilderComment = comment.author_id === launch.builder_id;
                       return (
@@ -274,13 +391,17 @@ export default function LaunchFeedbackBoard({
                           <Avatar user={comment.author} size="xs" className="mt-0.5" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-semibold text-text-secondary text-xs">{comment.author?.name ?? "Member"}</span>
+                              <span className="font-semibold text-text-secondary text-xs">
+                                {comment.author?.name ?? "Member"}
+                              </span>
                               {isBuilderComment && (
                                 <span className="rounded bg-sky-500/10 text-sky-400 px-1.5 py-px text-[8px] font-bold uppercase tracking-wider border border-sky-500/20">
                                   Builder
                                 </span>
                               )}
-                              <span className="text-[9px] text-text-disabled font-light">{formatDate(comment.created_at)}</span>
+                              <span className="text-[9px] text-text-disabled font-light">
+                                {formatDate(comment.created_at)}
+                              </span>
                             </div>
                             <div className="mt-1 text-xs text-text-muted font-light pl-0.5">
                               <RichText text={comment.body} as="span" className="inline" />
@@ -292,7 +413,6 @@ export default function LaunchFeedbackBoard({
                   </div>
                 )}
 
-                {/* Actions row: admin controls and reply form */}
                 <div className="flex flex-col gap-3 pt-3 border-t border-border-subtle/60 sm:flex-row sm:items-center sm:justify-between">
                   {currentUser && (
                     <div className="flex-1 flex gap-2">
@@ -301,16 +421,15 @@ export default function LaunchFeedbackBoard({
                         onChange={(e) =>
                           setCommentDrafts((prev) => ({ ...prev, [item.id]: e.target.value }))
                         }
-                        placeholder={launch.viewer_state?.is_owner ? "Reply as builder…" : "Reply to thread…"}
+                        placeholder={isOwner ? "Reply as builder…" : "Reply to thread…"}
                         className="flex-1 rounded-xl border border-border-default bg-app/80 px-4 py-2.5 text-xs text-text-primary placeholder:text-text-disabled focus:border-border-strong focus:outline-none"
                       />
-
                       <button
                         type="button"
                         onClick={async () => {
                           const val = commentDrafts[item.id] ?? "";
                           if (!val.trim()) return;
-                          await onAddComment(item.id, val);
+                          await onAddComment(item.id, val.trim());
                           setCommentDrafts((prev) => ({ ...prev, [item.id]: "" }));
                         }}
                         className="rounded-xl bg-surface-hover hover:bg-surface-hover px-4 py-2 text-xs font-semibold text-text-secondary border border-border-default/80 transition-all cursor-pointer"
@@ -320,13 +439,31 @@ export default function LaunchFeedbackBoard({
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2.5 sm:ml-auto">
-                    {launch.viewer_state?.is_owner && (
+                  <div className="flex items-center gap-2.5 sm:ml-auto flex-wrap">
+                    {currentUser && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onToggleBookmark(item.id, Boolean(item.is_bookmarked_by_me))
+                        }
+                        className={`rounded-xl border px-3 py-1.5 text-[10px] font-semibold transition-all flex items-center gap-1 cursor-pointer ${
+                          item.is_bookmarked_by_me
+                            ? "border-amber-500/30 bg-amber-500/10 text-amber-300"
+                            : "border-border-default text-text-muted hover:text-text-secondary"
+                        }`}
+                        title={item.is_bookmarked_by_me ? "Remove bookmark" : "Bookmark"}
+                      >
+                        <PinIcon className="h-3 w-3" />
+                        {item.is_bookmarked_by_me ? "Saved" : "Save"}
+                      </button>
+                    )}
+
+                    {isOwner && (
                       <div className="flex items-center gap-1.5">
                         <span className="text-[10px] font-medium text-text-disabled">Status:</span>
                         <select
                           value={item.status}
-                          onChange={(e) => onUpdateFeedbackStatus(item.id, e.target.value)}
+                          onChange={(e) => onUpdateFeedback(item.id, { status: e.target.value })}
                           className="rounded-xl border border-border-default bg-app px-2.5 py-1.5 text-xs text-text-primary focus:border-border-strong focus:outline-none"
                         >
                           {STATUSES.map((status) => (
@@ -338,16 +475,29 @@ export default function LaunchFeedbackBoard({
                       </div>
                     )}
 
-                    {currentUser?.id === item.author_id && (
-                      <button
-                        type="button"
-                        onClick={() => onDeleteFeedback(item.id)}
-                        className="rounded-xl border border-rose-500/10 bg-rose-500/5 hover:bg-rose-500/10 px-3 py-1.5 text-[10px] font-semibold text-rose-400 transition-all flex items-center gap-1 cursor-pointer"
-                        title="Delete feedback"
-                      >
-                        <TrashIcon className="h-3 w-3" />
-                        Delete
-                      </button>
+                    {isAuthor && !isEditing && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingId(item.id);
+                            setEditTitle(item.title);
+                            setEditBody(item.body);
+                          }}
+                          className="rounded-xl border border-border-default px-3 py-1.5 text-[10px] font-semibold text-text-muted hover:text-text-secondary"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDeleteFeedback(item.id)}
+                          className="rounded-xl border border-rose-500/10 bg-rose-500/5 hover:bg-rose-500/10 px-3 py-1.5 text-[10px] font-semibold text-rose-400 transition-all flex items-center gap-1 cursor-pointer"
+                          title="Delete feedback"
+                        >
+                          <TrashIcon className="h-3 w-3" />
+                          Delete
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>

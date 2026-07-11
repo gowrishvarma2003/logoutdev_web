@@ -64,7 +64,7 @@ export default function NotesList() {
     const note = await createNote(
       parsed.folderId ? { folder_id: parsed.folderId } : {},
     );
-    router.push(`/notes/${note.id}`);
+    router.push(`/productivity/notes/${note.id}`);
   }
 
   function emptyVariant() {

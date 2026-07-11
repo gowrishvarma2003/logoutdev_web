@@ -136,7 +136,7 @@ export default function FolderList() {
           await folders.removeFolder(deleteTarget.id);
           showToast("Folder deleted", { tone: "success" });
           if (activeFolderId === deleteTarget.id) {
-            router.push("/notes");
+            router.push("/productivity/notes");
           }
         }}
       />

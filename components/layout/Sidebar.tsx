@@ -218,10 +218,10 @@ export default function Sidebar({
             active={pathname.startsWith("/chat")}
           />
           <NavItem
-            href="/notes"
+            href="/productivity"
             icon={<DocumentTextIcon />}
-            label="Notes"
-            active={pathname.startsWith("/notes")}
+            label="Productivity Hub"
+            active={pathname.startsWith("/productivity")}
           />
         </div>
 
