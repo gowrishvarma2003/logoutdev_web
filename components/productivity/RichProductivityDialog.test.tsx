@@ -14,7 +14,23 @@ vi.mock("@/lib/services/productivityApi", async () => {
 });
 
 describe("RichProductivityDialog", () => {
+  it("creates a sparse Inbox task from only a title", async () => {
+    vi.mocked(productivityApi.compose).mockClear();
+    render(<RichProductivityDialog open onClose={() => {}} defaultTitle="Capture quickly" />);
+
+    expect(screen.queryByLabelText(/Description/i)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Create/i }));
+
+    await waitFor(() => expect(productivityApi.compose).toHaveBeenCalledWith({
+      kind: "task",
+      item: expect.objectContaining({ title: "Capture quickly" }),
+    }));
+    expect(vi.mocked(productivityApi.compose).mock.calls[0][0].item).not.toHaveProperty("priority");
+    expect(vi.mocked(productivityApi.compose).mock.calls[0][0].item).not.toHaveProperty("list_id");
+  });
+
   it("builds a rich task compose payload", async () => {
+    vi.mocked(productivityApi.compose).mockClear();
     const onCreated = vi.fn();
     render(
       <RichProductivityDialog
@@ -28,6 +44,10 @@ describe("RichProductivityDialog", () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole("button", { name: /^More$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^List$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Priority$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Date$/i }));
     fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: "Robust creation flow" } });
     fireEvent.change(screen.getByLabelText(/^List$/i), { target: { value: "list-1" } });
     fireEvent.change(screen.getByLabelText(/^Priority$/i), { target: { value: "high" } });

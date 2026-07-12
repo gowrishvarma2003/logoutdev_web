@@ -5,6 +5,7 @@ import type { FreelanceProject } from "@/lib/types";
 import { formatCurrencyFromCents, formatRelativeTime } from "@/lib/utils";
 import { ChevronRightIcon, BoltIcon, CalendarIcon, MapPinIcon } from "@/components/ui/Icons";
 import ProposalStatusBadge from "./ProposalStatusBadge";
+import ProductivityContextAction from "@/components/productivity/ProductivityContextAction";
 
 export default function FreelanceProjectCard({
   project,
@@ -16,10 +17,8 @@ export default function FreelanceProjectCard({
   const targetHref = href || `/freelance/${project.id}`;
 
   return (
-    <Link
-      href={targetHref}
-      className="group block rounded-2xl border border-border-default bg-surface/60 p-5 transition-colors hover:border-border-strong hover:bg-surface"
-    >
+    <article className="group rounded-2xl border border-border-default bg-surface/60 p-5 transition-colors hover:border-border-strong hover:bg-surface">
+      <Link href={targetHref} className="block">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -67,6 +66,10 @@ export default function FreelanceProjectCard({
           {project.location_mode}
         </span>
       </div>
-    </Link>
+      </Link>
+      <div className="mt-3 flex justify-end border-t border-border-subtle pt-2">
+        <ProductivityContextAction title={project.title} description={project.summary} relation={{ target_type: "freelance_project", target_id: project.id }} />
+      </div>
+    </article>
   );
 }

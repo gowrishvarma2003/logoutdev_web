@@ -11,7 +11,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { useProfile } from "@/lib/hooks/useProfile";
 import ProfileEditForm from "@/components/profile/ProfileEditForm";
 import Spinner from "@/components/ui/Spinner";
-import { ArrowLeftIcon, UserIcon, KeyIcon } from "@/components/ui/Icons";
+import { ArrowLeftIcon, UserIcon, KeyIcon, BriefcaseIcon } from "@/components/ui/Icons";
 import type { User } from "@/lib/types";
 
 export default function SettingsProfilePage() {
@@ -67,7 +67,8 @@ export default function SettingsProfilePage() {
 
       {/* ── Content ── */}
       <div className="px-5 py-6">
-        <div className="mb-5 rounded-2xl border border-border-default bg-surface/50 p-4">
+        <div className="mb-5 grid gap-3 md:grid-cols-2">
+        <div className="rounded-2xl border border-border-default bg-surface/50 p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-text-primary">Git Access Tokens</h2>
@@ -83,6 +84,24 @@ export default function SettingsProfilePage() {
               Manage
             </Link>
           </div>
+        </div>
+        <div className="rounded-2xl border border-border-default bg-surface/50 p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-text-primary">Opportunity Settings</h2>
+              <p className="mt-1 text-sm text-text-disabled">
+                Control hiring visibility, experience, resume, and company privacy.
+              </p>
+            </div>
+            <Link
+              href="/settings/opportunities"
+              className="inline-flex items-center gap-1 rounded-lg bg-surface-hover px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-active transition-colors"
+            >
+              <BriefcaseIcon className="w-3.5 h-3.5" />
+              Manage
+            </Link>
+          </div>
+        </div>
         </div>
 
         {loading ? (

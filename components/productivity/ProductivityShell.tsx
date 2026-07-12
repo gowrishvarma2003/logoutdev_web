@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { productivityNavigation } from "./productivityNavigation";
+import { productivityMoreNavigation, productivityNavigation } from "./productivityNavigation";
 
 export default function ProductivityShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -33,6 +33,12 @@ export default function ProductivityShell({ children }: { children: React.ReactN
                 </Link>
               );
             })}
+            <details className="relative shrink-0">
+              <summary className="cursor-pointer list-none rounded-lg px-3 py-2 text-sm font-medium text-text-muted hover:bg-surface-hover hover:text-text-primary">More</summary>
+              <div className="absolute right-0 z-dropdown mt-1 min-w-40 rounded-lg border border-border-default bg-surface-elevated p-1 shadow-dropdown">
+                {productivityMoreNavigation.map((item) => <Link key={item.href} href={item.href} className="block rounded-md px-3 py-2 text-sm text-text-secondary hover:bg-surface-hover hover:text-text-primary">{item.label}</Link>)}
+              </div>
+            </details>
           </nav>
         </div>
       </header>
@@ -57,6 +63,13 @@ export default function ProductivityShell({ children }: { children: React.ReactN
                 </Link>
               );
             })}
+            <div className="my-2 border-t border-border-subtle" />
+            <p className="px-3 pb-1 text-[11px] font-semibold uppercase text-text-disabled">More</p>
+            {productivityMoreNavigation.map((item) => (
+              <Link key={item.href} href={item.href} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-text-muted hover:bg-surface-hover hover:text-text-primary">
+                <span aria-hidden="true">{item.icon}</span>{item.label}
+              </Link>
+            ))}
           </nav>
         </aside>
         <main className="min-w-0 flex-1">{children}</main>

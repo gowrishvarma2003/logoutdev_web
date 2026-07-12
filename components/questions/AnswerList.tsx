@@ -6,6 +6,7 @@ import type { QuestionAnswer, User } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils";
 import RichText from "@/components/ui/RichText";
 import EmptyState from "@/components/ui/EmptyState";
+import ProductivityContextAction from "@/components/productivity/ProductivityContextAction";
 
 export default function AnswerList({
   answers,
@@ -110,6 +111,7 @@ export default function AnswerList({
                       Accept Solution
                     </button>
                   )}
+                  <ProductivityContextAction title={`Follow up on ${answer.author?.name ?? "this answer"}`} description={answer.body} relation={{ target_type: "question_answer", target_id: answer.id }} />
                 </div>
               </div>
             </div>

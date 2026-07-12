@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { LaunchListItem } from "@/lib/types";
 import { SparklesIcon, HeartIcon, ChatBubbleIcon } from "@/components/ui/Icons";
 import ExternalImage from "@/components/ui/ExternalImage";
+import ProductivityContextAction from "@/components/productivity/ProductivityContextAction";
 
 const PHASE_BADGE: Record<string, string> = {
   beta: "bg-sky-500 text-text-primary",
@@ -20,10 +21,8 @@ export default function LaunchCard({ launch }: { launch: LaunchListItem }) {
   const reviewCount = launch.review_count;
 
   return (
-    <Link
-      href={`/launches/${launch.id}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-border-default/60 bg-surface/50 transition-all duration-200 hover:border-border-strong hover:bg-surface"
-    >
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-border-default/60 bg-surface/50 transition-all duration-200 hover:border-border-strong hover:bg-surface">
+      <Link href={`/launches/${launch.id}`} className="flex flex-1 flex-col">
       {/* Thumbnail with phase badge overlay */}
       <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-app">
         {screenshot ? (
@@ -86,6 +85,10 @@ export default function LaunchCard({ launch }: { launch: LaunchListItem }) {
           </span>
         </div>
       </div>
-    </Link>
+      </Link>
+      <div className="flex justify-end border-t border-border-subtle px-3 py-2">
+        <ProductivityContextAction title={launch.name} description={launch.tagline} relation={{ target_type: "launch", target_id: launch.id }} />
+      </div>
+    </article>
   );
 }

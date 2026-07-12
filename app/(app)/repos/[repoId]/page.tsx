@@ -11,6 +11,7 @@ import Spinner from "@/components/ui/Spinner";
 import { API_BASE_URL } from "@/lib/apiBaseUrl";
 import { formatFileSize, formatRelativeTime } from "@/lib/utils";
 import { CheckIcon, ChevronDownIcon, FolderIcon, DocumentIcon, ClockIcon, CodeBracketIcon, KeyIcon, BookOpenIcon, Cog6ToothIcon, StarIcon, EyeIcon, ArrowPathIcon, CubeIcon, ArrowsRightLeftIcon, TagIcon } from "@heroicons/react/24/outline";
+import ProductivityContextAction from "@/components/productivity/ProductivityContextAction";
 
 const LANGUAGE_COLORS: Record<string, string> = {
   "C#": "#178600",
@@ -230,6 +231,9 @@ export default function RepoCodePage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <ProductivityContextAction title={repo.name} description={repo.description || ""} relation={{ target_type: "repository", target_id: repo.id }} variant="outline" />
+      </div>
       {!repo.attached_space && isRepoOwner ? (
         <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300">Space Recommended</p>

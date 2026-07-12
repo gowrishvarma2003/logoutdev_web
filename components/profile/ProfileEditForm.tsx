@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import type { User, UserProfileSkill, UserFeaturedProject, ProjectSpace } from "@/lib/types";
 import { useUpdateProfile, useUpdateSkills, useUpdateFeaturedProjects, useUploadAvatar, useUploadBanner } from "@/lib/hooks/useProfile";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -74,7 +75,6 @@ export default function ProfileEditForm({
   const [githubUrl, setGithubUrl] = useState(profile.github_url ?? "");
   const [linkedinUrl, setLinkedinUrl] = useState(profile.linkedin_url ?? "");
   const [pronouns, setPronouns] = useState(profile.pronouns ?? "");
-  const [openToWork, setOpenToWork] = useState(Boolean(profile.open_to_work));
 
   const [skills, setSkills] = useState<string[]>(
     initialSkills.map((s) => s.skill)
@@ -129,7 +129,7 @@ export default function ProfileEditForm({
     e.preventDefault();
 
     const [updatedProfile] = await Promise.all([
-      update({ name, username, headline, bio, location, website_url: websiteUrl, github_url: githubUrl, linkedin_url: linkedinUrl, pronouns, open_to_work: openToWork }),
+      update({ name, username, headline, bio, location, website_url: websiteUrl, github_url: githubUrl, linkedin_url: linkedinUrl, pronouns }),
       updateSkills(skills),
       updateFeatured(featuredIds),
     ]);
@@ -284,26 +284,13 @@ export default function ProfileEditForm({
                 <BriefcaseIcon className="w-4 h-4 text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-text-primary">Open to work</p>
-                <p className="text-xs text-text-disabled mt-0.5">Let others know you&apos;re available for opportunities.</p>
+                <p className="text-sm font-medium text-text-primary">Opportunity preferences</p>
+                <p className="text-xs text-text-disabled mt-0.5">Manage company visibility, resume, experience, and hiring privacy.</p>
               </div>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={openToWork}
-              onClick={() => setOpenToWork((v) => !v)}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border transition-colors ${
-                openToWork ? "bg-emerald-500/30 border-emerald-500/50" : "bg-surface-hover border-border-strong"
-              }`}
-              aria-label="Toggle open to work"
-            >
-              <span
-                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-primary shadow transition-transform mt-0.5 ${
-                  openToWork ? "translate-x-5" : "translate-x-0.5"
-                }`}
-              />
-            </button>
+            <Link href="/settings/opportunities" className="rounded-lg border border-border-default bg-surface-hover px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary">
+              Open
+            </Link>
           </div>
         </div>
       </div>

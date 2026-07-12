@@ -5,6 +5,7 @@ import Avatar from "@/components/ui/Avatar";
 import type { Question, User } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils";
 import RichText from "@/components/ui/RichText";
+import ProductivityContextAction from "@/components/productivity/ProductivityContextAction";
 
 function TagPill({ label }: { label: string }) {
   return (
@@ -24,10 +25,8 @@ export default function QuestionCard({
   const isAnswered = Boolean(question.viewer_state?.has_answered);
 
   return (
-    <Link
-      href={`/questions/${question.id}`}
-      className="block border-b border-border-default px-4 py-4 transition-colors hover:bg-surface/40"
-    >
+    <article className="border-b border-border-default px-4 py-4 transition-colors hover:bg-surface/40">
+      <Link href={`/questions/${question.id}`} className="block">
       <div className="flex items-start gap-3">
         <Avatar user={question.author ?? null} size="sm" className="mt-0.5 shrink-0" />
 
@@ -82,6 +81,10 @@ export default function QuestionCard({
           </div>
         </div>
       </div>
-    </Link>
+      </Link>
+      <div className="mt-2 flex justify-end">
+        <ProductivityContextAction title={question.title} description={question.body} relation={{ target_type: "question", target_id: question.id }} />
+      </div>
+    </article>
   );
 }

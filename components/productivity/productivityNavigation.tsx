@@ -1,10 +1,8 @@
 import type { ReactNode } from "react";
 import {
   ArchiveBoxIcon,
-  BellIcon,
   CalendarIcon,
   CheckCircleIcon,
-  ClockIcon,
   CogIcon,
   DocumentTextIcon,
   HomeIcon,
@@ -13,6 +11,7 @@ import {
 
 export type ProductivitySection =
   | "overview"
+  | "inbox"
   | "tasks"
   | "calendar"
   | "notes"
@@ -30,16 +29,20 @@ export type ProductivityNavItem = {
 };
 
 export const productivityNavigation: ProductivityNavItem[] = [
-  { href: "/productivity", label: "Overview", icon: <HomeIcon />, section: "overview" },
+  { href: "/productivity", label: "Today", icon: <HomeIcon />, section: "overview" },
+  { href: "/productivity/inbox", label: "Inbox", icon: <ArchiveBoxIcon className="h-5 w-5" />, section: "inbox" },
   { href: "/productivity/tasks", label: "Tasks", icon: <CheckCircleIcon />, section: "tasks" },
   { href: "/productivity/calendar", label: "Calendar", icon: <CalendarIcon className="h-5 w-5" />, section: "calendar" },
   // Notes remains its established standalone workspace so old deep links and editor behavior stay intact.
   { href: "/notes", label: "Notes", icon: <DocumentTextIcon />, section: "notes" },
-  { href: "/productivity/reminders", label: "Reminders", icon: <BellIcon />, section: "reminders" },
   { href: "/productivity/goals", label: "Goals", icon: <SparklesIcon className="h-5 w-5" />, section: "goals" },
+  { href: "/productivity/settings", label: "Settings", icon: <CogIcon />, section: "settings" },
+];
+
+export const productivityMoreNavigation: ProductivityNavItem[] = [
+  { href: "/productivity/reminders", label: "Reminders", icon: <CalendarIcon className="h-5 w-5" />, section: "reminders" },
   { href: "/productivity/templates", label: "Templates", icon: <DocumentTextIcon />, section: "templates" },
   { href: "/productivity/archive", label: "Archive", icon: <ArchiveBoxIcon className="h-5 w-5" />, section: "archive" },
-  { href: "/productivity/settings", label: "Settings", icon: <CogIcon />, section: "settings" },
 ];
 
 export const productivitySectionMeta: Record<Exclude<ProductivitySection, "notes">, {
@@ -49,10 +52,16 @@ export const productivitySectionMeta: Record<Exclude<ProductivitySection, "notes
   emptyDescription: string;
 }> = {
   overview: {
-    title: "Overview",
-    description: "A clear, personal view of the work that needs your attention.",
+    title: "Today",
+    description: "The work that needs your attention now.",
     emptyTitle: "Your workspace is ready",
     emptyDescription: "Tasks, reminders, events, and goals will appear here as you add them.",
+  },
+  inbox: {
+    title: "Inbox",
+    description: "Unscheduled work you can organize when you are ready.",
+    emptyTitle: "Inbox clear",
+    emptyDescription: "Quick captures without a date or list will appear here.",
   },
   tasks: {
     title: "Tasks",

@@ -50,6 +50,7 @@ import { CallErrorBoundary, CallProvider, ConversationCallControls, OngoingGroup
 import EmptyState from "@/components/ui/EmptyState";
 import { API_BASE_URL } from "@/lib/apiBaseUrl";
 import { PhoneIcon, VideoCameraIcon, PhoneArrowDownLeftIcon } from "@heroicons/react/24/outline";
+import ProductivityContextAction from "@/components/productivity/ProductivityContextAction";
 
 type ViewMode = "inbox" | "requests" | "group-invites" | "settings";
 
@@ -458,6 +459,9 @@ function MessageBubble({
             <span>Sending...</span>
           ) : null}
           <span>{formatTime(message.created_at)}</span>
+          {message.id && message.decrypted_body && !message.pending && !message.failed && !message.deleted_for_everyone_at ? (
+            <ProductivityContextAction title={message.decrypted_body.slice(0, 300)} relation={{ target_type: "chat_message", target_id: message.id }} label="Add" />
+          ) : null}
         </span>
       </div>
     </div>

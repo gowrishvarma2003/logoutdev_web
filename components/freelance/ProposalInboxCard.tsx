@@ -7,6 +7,7 @@ import { formatCurrencyFromCents, formatRelativeTime } from "@/lib/utils";
 import type { FreelanceProposal } from "@/lib/types";
 import { useProfileSignals } from "@/lib/hooks/useProfile";
 import { AwardIcon, ClockIcon, ExternalLinkIcon } from "@/components/ui/Icons";
+import ProductivityContextAction from "@/components/productivity/ProductivityContextAction";
 
 export default function ProposalInboxCard({
   proposal,
@@ -111,7 +112,10 @@ export default function ProposalInboxCard({
         </div>
       )}
 
-      {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+      <div className="flex flex-wrap items-center gap-2">
+        {actions}
+        <ProductivityContextAction title={`Review proposal from ${proposal.freelancer?.name || "freelancer"}`} description={proposal.cover_note} relation={{ target_type: "freelance_proposal", target_id: proposal.id }} />
+      </div>
     </div>
   );
 }

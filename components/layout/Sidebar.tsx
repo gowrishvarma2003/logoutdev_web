@@ -22,6 +22,7 @@ import {
   ChatBubbleIcon,
   KeyIcon,
   DocumentTextIcon,
+  BriefcaseIcon,
 } from "@/components/ui/Icons";
 
 interface SidebarProps {
@@ -218,10 +219,22 @@ export default function Sidebar({
             active={pathname.startsWith("/chat")}
           />
           <NavItem
+            href="/opportunities"
+            icon={<BriefcaseIcon />}
+            label="Opportunities"
+            active={pathname.startsWith("/opportunities")}
+          />
+          <NavItem
             href="/productivity"
             icon={<DocumentTextIcon />}
             label="Productivity Hub"
             active={pathname.startsWith("/productivity")}
+          />
+          <NavItem
+            href="/productivity?quick=1"
+            icon={<DocumentTextIcon />}
+            label="Quick add"
+            active={false}
           />
         </div>
 

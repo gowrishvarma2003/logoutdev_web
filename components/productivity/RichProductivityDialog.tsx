@@ -125,6 +125,10 @@ export default function RichProductivityDialog({
   const [color, setColor] = useState("");
   const [timeZone, setTimeZone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
   const [tags, setTags] = useState(defaultTags);
+  const [dateOpen, setDateOpen] = useState(Boolean(defaultDate));
+  const [priorityOpen, setPriorityOpen] = useState(false);
+  const [listOpen, setListOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -142,6 +146,10 @@ export default function RichProductivityDialog({
     setEventEnd(initialKind === "event" ? addHours(localDate, 1) : "");
     setReminderTitle(defaultTitle ? `Reminder: ${defaultTitle}` : "");
     setPinMyDay(defaultMyDay);
+    setDateOpen(Boolean(defaultDate) || initialKind === "reminder" || initialKind === "event");
+    setPriorityOpen(false);
+    setListOpen(false);
+    setMoreOpen(false);
     setStatus(initialKind === "goal" ? "not_started" : initialKind === "task" ? "inbox" : "scheduled");
     setError("");
   }, [defaultDate, defaultDescription, defaultMyDay, defaultTags, defaultTitle, initialKind, open]);
@@ -157,42 +165,42 @@ export default function RichProductivityDialog({
     const item: Record<string, unknown> & { title: string } = { title: title.trim() };
     if (description.trim()) item.description = description.trim();
     if (recurrence.trim()) item.recurrence_rule = recurrence.trim();
-    if (kind !== "goal") item.time_zone = timeZone.trim() || "UTC";
+    if (kind !== "goal" && timeZone.trim()) item.time_zone = timeZone.trim();
     if (kind === "task") {
-      item.list_id = listId || null;
-      item.status = status;
-      item.priority = priority;
-      item.start_at = toIso(startAt);
-      item.due_at = toIso(dueAt);
-      item.estimated_minutes = numberOrUndefined(estimate);
-      item.is_pinned = pinMyDay;
+      if (listId) item.list_id = listId;
+      if (status !== "inbox") item.status = status;
+      if (priority !== "none") item.priority = priority;
+      if (startAt) item.start_at = toIso(startAt);
+      if (dueAt) item.due_at = toIso(dueAt);
+      if (estimate) item.estimated_minutes = numberOrUndefined(estimate);
+      if (pinMyDay) item.is_pinned = true;
     }
     if (kind === "reminder") {
-      item.task_id = linkedTaskId || null;
-      item.event_id = linkedEventId || null;
+      if (linkedTaskId) item.task_id = linkedTaskId;
+      if (linkedEventId) item.event_id = linkedEventId;
       item.remind_at = toIso(reminderAt);
-      item.channels = reminderChannels;
-      item.status = status;
+      if (reminderChannels.length !== 1 || reminderChannels[0] !== "in_app") item.channels = reminderChannels;
+      if (status !== "scheduled") item.status = status;
     }
     if (kind === "goal") {
-      item.status = status;
-      item.priority = priority;
-      item.start_at = toIso(startAt);
-      item.target_at = toIso(targetAt);
-      item.progress_type = progressType;
-      item.progress_percent = Math.max(0, Math.min(100, Math.round(Number(progressPercent) || 0)));
-      item.numeric_target = numberOrUndefined(numericTarget);
-      item.numeric_current = numberOrUndefined(numericCurrent);
+      if (status !== "not_started") item.status = status;
+      if (priority !== "none") item.priority = priority;
+      if (startAt) item.start_at = toIso(startAt);
+      if (targetAt) item.target_at = toIso(targetAt);
+      if (progressType !== "manual") item.progress_type = progressType;
+      if (Number(progressPercent)) item.progress_percent = Math.max(0, Math.min(100, Math.round(Number(progressPercent))));
+      if (numericTarget) item.numeric_target = numberOrUndefined(numericTarget);
+      if (numericCurrent) item.numeric_current = numberOrUndefined(numericCurrent);
     }
     if (kind === "event") {
-      item.task_id = linkedTaskId || null;
+      if (linkedTaskId) item.task_id = linkedTaskId;
       item.starts_at = toIso(eventStart);
       item.ends_at = toIso(eventEnd);
-      item.all_day = allDay;
-      item.location = location.trim() || null;
-      item.meeting_url = meetingUrl.trim() || null;
-      item.color = color.trim() || null;
-      item.status = status;
+      if (allDay) item.all_day = true;
+      if (location.trim()) item.location = location.trim();
+      if (meetingUrl.trim()) item.meeting_url = meetingUrl.trim();
+      if (color.trim()) item.color = color.trim();
+      if (status !== "scheduled") item.status = status;
     }
     return item;
   }
@@ -238,12 +246,12 @@ export default function RichProductivityDialog({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} title="Add to Productivity" description="Capture the details now so the plan is useful later." maxWidthClassName="max-w-3xl">
-      <form onSubmit={submit} className="max-h-[75vh] space-y-4 overflow-y-auto pr-1">
+    <Dialog open={open} onClose={onClose} title="Quick add" description="A title is enough. Add details only when they help." maxWidthClassName="max-w-xl">
+      <form onSubmit={submit} className="space-y-4">
         {lockKind ? null : (
-          <div className="grid grid-cols-4 gap-1 rounded-xl border border-border-default bg-surface-muted p-1">
+          <div className="grid grid-cols-4 gap-1 rounded-lg border border-border-default bg-surface-muted p-1" aria-label="Productivity item type">
             {kinds.map((itemKind) => (
-              <button key={itemKind} type="button" onClick={() => setKind(itemKind)} className={`rounded-lg px-3 py-2 text-xs font-semibold capitalize ${kind === itemKind ? "bg-surface-active text-text-primary" : "text-text-muted hover:text-text-secondary"}`}>
+              <button key={itemKind} type="button" onClick={() => { setKind(itemKind); if (itemKind === "reminder" || itemKind === "event") setDateOpen(true); }} className={`rounded-md px-2 py-2 text-xs font-semibold capitalize ${kind === itemKind ? "bg-surface-active text-text-primary" : "text-text-muted hover:text-text-secondary"}`}>
                 {itemKind}
               </button>
             ))}
@@ -252,22 +260,33 @@ export default function RichProductivityDialog({
 
         {error ? <div role="alert" className="rounded-xl border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">{error}</div> : null}
 
-        <div className="grid gap-3 md:grid-cols-2">
-          <label className="md:col-span-2 text-xs font-semibold uppercase text-text-muted">
-            Title
-            <input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={300} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-focus/70" />
-          </label>
-          <label className="md:col-span-2 text-xs font-semibold uppercase text-text-muted">
-            Description
-            <textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={3} maxLength={5000} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-focus/70" />
-          </label>
+        <label className="sr-only" htmlFor="productivity-title">Title</label>
+        <input id="productivity-title" autoFocus value={title} onChange={(event) => setTitle(event.target.value)} maxLength={300} placeholder={`What ${kind === "event" ? "is happening" : kind === "goal" ? "do you want to achieve" : "needs your attention"}?`} className="w-full rounded-lg border border-border-default bg-surface px-3 py-3 text-base text-text-primary outline-none placeholder:text-text-muted focus:ring-2 focus:ring-focus/70" />
+
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => setDateOpen((value) => !value)} aria-expanded={dateOpen} className="rounded-md border border-border-default px-2.5 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-hover">Date</button>
+          {(kind === "task" || kind === "goal") ? <button type="button" onClick={() => setPriorityOpen((value) => !value)} aria-expanded={priorityOpen} className="rounded-md border border-border-default px-2.5 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-hover">Priority{priority !== "none" ? `: ${priority}` : ""}</button> : null}
+          {kind === "task" ? <button type="button" onClick={() => setListOpen((value) => !value)} aria-expanded={listOpen} className="rounded-md border border-border-default px-2.5 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-hover">List</button> : null}
+          <button type="button" onClick={() => setMoreOpen((value) => !value)} aria-expanded={moreOpen} className="rounded-md px-2.5 py-1.5 text-xs font-medium text-text-muted hover:bg-surface-hover hover:text-text-primary">More</button>
+        </div>
+
+        <div className="max-h-[48vh] space-y-3 overflow-y-auto pr-1">
+          {dateOpen ? <div className="grid gap-3 sm:grid-cols-2">
+            {kind === "task" ? <label className="text-xs font-semibold text-text-muted">Due<input type="datetime-local" value={dueAt} onChange={(event) => setDueAt(event.target.value)} className="mt-1 w-full rounded-lg border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label> : null}
+            {kind === "reminder" ? <label className="sm:col-span-2 text-xs font-semibold text-text-muted">Remind me<input required type="datetime-local" value={reminderAt} onChange={(event) => setReminderAt(event.target.value)} className="mt-1 w-full rounded-lg border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label> : null}
+            {kind === "goal" ? <label className="sm:col-span-2 text-xs font-semibold text-text-muted">Target date<input type="datetime-local" value={targetAt} onChange={(event) => setTargetAt(event.target.value)} className="mt-1 w-full rounded-lg border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label> : null}
+            {kind === "event" ? <><label className="text-xs font-semibold text-text-muted">Starts<input required type="datetime-local" value={eventStart} onChange={(event) => { setEventStart(event.target.value); if (!eventEnd) setEventEnd(addHours(event.target.value, 1)); }} className="mt-1 w-full rounded-lg border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label><label className="text-xs font-semibold text-text-muted">Ends<input required type="datetime-local" value={eventEnd} onChange={(event) => setEventEnd(event.target.value)} className="mt-1 w-full rounded-lg border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label></> : null}
+          </div> : null}
+
+          {priorityOpen && (kind === "task" || kind === "goal") ? <label className="block text-xs font-semibold text-text-muted">Priority<select value={priority} onChange={(event) => setPriority(event.target.value as TaskPriority)} className="mt-1 w-full rounded-lg border border-border-default bg-surface px-3 py-2 text-sm text-text-secondary">{priorities.map((item) => <option key={item} value={item}>{item}</option>)}</select></label> : null}
+          {listOpen && kind === "task" ? <label className="block text-xs font-semibold text-text-muted">List<select value={listId} onChange={(event) => setListId(event.target.value)} className="mt-1 w-full rounded-lg border border-border-default bg-surface px-3 py-2 text-sm text-text-secondary"><option value="">Inbox</option>{lists.map((list) => <option key={list.id} value={list.id}>{list.name}</option>)}</select></label> : null}
+
+          {moreOpen ? <div className="grid gap-3 border-t border-border-subtle pt-3 sm:grid-cols-2">
+          <label className="sm:col-span-2 text-xs font-semibold text-text-muted">Description<textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={3} maxLength={5000} className="mt-1 w-full rounded-lg border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label>
 
           {kind === "task" ? (
             <>
-              <label className="text-xs font-semibold uppercase text-text-muted">List<select value={listId} onChange={(event) => setListId(event.target.value)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-secondary"><option value="">Inbox</option>{lists.map((list) => <option key={list.id} value={list.id}>{list.name}</option>)}</select></label>
-              <label className="text-xs font-semibold uppercase text-text-muted">Priority<select value={priority} onChange={(event) => setPriority(event.target.value as TaskPriority)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-secondary">{priorities.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
               <label className="text-xs font-semibold uppercase text-text-muted">Start<input type="datetime-local" value={startAt} onChange={(event) => setStartAt(event.target.value)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label>
-              <label className="text-xs font-semibold uppercase text-text-muted">Due<input type="datetime-local" value={dueAt} onChange={(event) => setDueAt(event.target.value)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label>
               <label className="text-xs font-semibold uppercase text-text-muted">Estimate minutes<input type="number" min={1} max={10080} value={estimate} onChange={(event) => setEstimate(event.target.value)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label>
               <label className="flex items-center gap-2 pt-6 text-sm text-text-secondary"><input type="checkbox" checked={pinMyDay} onChange={(event) => setPinMyDay(event.target.checked)} />Pin to Today&apos;s Focus</label>
               <label className="md:col-span-2 text-xs font-semibold uppercase text-text-muted">Checklist<textarea value={checklist} onChange={(event) => setChecklist(event.target.value)} rows={3} placeholder="One checklist item per line" className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label>
@@ -276,7 +295,6 @@ export default function RichProductivityDialog({
 
           {kind === "reminder" ? (
             <>
-              <label className="text-xs font-semibold uppercase text-text-muted">Remind at<input required type="datetime-local" value={reminderAt} onChange={(event) => setReminderAt(event.target.value)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label>
               <label className="text-xs font-semibold uppercase text-text-muted">Link task<select value={linkedTaskId} onChange={(event) => setLinkedTaskId(event.target.value)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-secondary"><option value="">No task</option>{tasks.map((task) => <option key={task.id} value={task.id}>{task.title}</option>)}</select></label>
               <label className="text-xs font-semibold uppercase text-text-muted">Link event<select value={linkedEventId} onChange={(event) => setLinkedEventId(event.target.value)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-secondary"><option value="">No event</option>{events.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label>
             </>
@@ -284,8 +302,6 @@ export default function RichProductivityDialog({
 
           {kind === "goal" ? (
             <>
-              <label className="text-xs font-semibold uppercase text-text-muted">Priority<select value={priority} onChange={(event) => setPriority(event.target.value as TaskPriority)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-secondary">{priorities.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
-              <label className="text-xs font-semibold uppercase text-text-muted">Target<input type="datetime-local" value={targetAt} onChange={(event) => setTargetAt(event.target.value)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label>
               <label className="text-xs font-semibold uppercase text-text-muted">Progress type<select value={progressType} onChange={(event) => setProgressType(event.target.value)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-secondary"><option value="manual">Manual</option><option value="numeric">Numeric</option></select></label>
               <label className="text-xs font-semibold uppercase text-text-muted">Progress %<input type="number" min={0} max={100} value={progressPercent} onChange={(event) => setProgressPercent(event.target.value)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label>
               {progressType === "numeric" ? <><label className="text-xs font-semibold uppercase text-text-muted">Current<input type="number" value={numericCurrent} onChange={(event) => setNumericCurrent(event.target.value)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label><label className="text-xs font-semibold uppercase text-text-muted">Target value<input type="number" value={numericTarget} onChange={(event) => setNumericTarget(event.target.value)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label></> : null}
@@ -295,8 +311,6 @@ export default function RichProductivityDialog({
 
           {kind === "event" ? (
             <>
-              <label className="text-xs font-semibold uppercase text-text-muted">Starts<input required type="datetime-local" value={eventStart} onChange={(event) => { setEventStart(event.target.value); if (!eventEnd) setEventEnd(addHours(event.target.value, 1)); }} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label>
-              <label className="text-xs font-semibold uppercase text-text-muted">Ends<input required type="datetime-local" value={eventEnd} onChange={(event) => setEventEnd(event.target.value)} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label>
               <label className="text-xs font-semibold uppercase text-text-muted">Location<input value={location} onChange={(event) => setLocation(event.target.value)} maxLength={300} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label>
               <label className="text-xs font-semibold uppercase text-text-muted">Meeting URL<input value={meetingUrl} onChange={(event) => setMeetingUrl(event.target.value)} maxLength={2048} className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label>
               <label className="text-xs font-semibold uppercase text-text-muted">Color<input value={color} onChange={(event) => setColor(event.target.value)} maxLength={20} placeholder="#38bdf8" className="mt-1 w-full rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary" /></label>
@@ -325,11 +339,12 @@ export default function RichProductivityDialog({
               </label>
             ))}
           </div>
+          </div> : null}
         </div>
 
         <DialogActions>
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>Cancel</Button>
-          <Button type="submit" size="sm" loading={submitting}>Create</Button>
+          <Button type="submit" size="sm" loading={submitting} disabled={!title.trim() || submitting}>Create</Button>
         </DialogActions>
       </form>
     </Dialog>

@@ -35,7 +35,7 @@ export type ProductivityComposePayload = {
   milestones?: Array<string | { title: string; due_at?: string | null; is_completed?: boolean; sort_order?: number }>;
   tags?: Array<string | { name: string }>;
   reminders?: Array<Record<string, unknown> & { title: string; remind_at: string }>;
-  relations?: Array<{ target_type: "note" | "space_work"; target_id: string; relation_type?: string }>;
+  relations?: Array<{ target_type: "note" | "space_work" | "repository" | "pull_request" | "launch" | "question" | "question_answer" | "chat_message" | "freelance_project" | "freelance_proposal"; target_id: string; relation_type?: string }>;
   my_day?: { day: string };
 };
 export type ProductivityComposeResponse = {

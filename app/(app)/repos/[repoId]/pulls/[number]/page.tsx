@@ -19,6 +19,7 @@ import * as cache from "@/lib/services/requestCache";
 import type { PullRequestComment, PullRequestReview } from "@/lib/types";
 import Spinner from "@/components/ui/Spinner";
 import { formatRelativeTime } from "@/lib/utils";
+import ProductivityContextAction from "@/components/productivity/ProductivityContextAction";
 
 type TimelineItem =
   | (PullRequestComment & { kind: "comment"; date: string })
@@ -150,6 +151,9 @@ export default function PRConversationPage({
 
   return (
     <div className="mx-auto max-w-5xl pt-4">
+      <div className="mb-4 flex justify-end">
+        <ProductivityContextAction title={pullRequest.title} description={pullRequest.body || ""} relation={{ target_type: "pull_request", target_id: pullRequest.id }} variant="outline" />
+      </div>
       {error ? (
         <div className="mb-4 rounded border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-500">
           {error}

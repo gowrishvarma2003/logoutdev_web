@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import EmptyState from "@/components/ui/EmptyState";
 import { Card, CardContent } from "@/components/ui/Card";
@@ -114,6 +115,7 @@ function TaskRow({ task, lists, onUpdate, onMyDay, myDay }: { task: Productivity
 }
 
 export default function ProductivityPage({ section }: { section: SupportedSection }) {
+  const searchParams = useSearchParams();
   const meta = productivitySectionMeta[section];
   const [tasks, setTasks] = useState<ProductivityTask[]>([]);
   const [lists, setLists] = useState<ProductivityList[]>([]);
@@ -128,6 +130,8 @@ export default function ProductivityPage({ section }: { section: SupportedSectio
   const [overview, setOverview] = useState<Awaited<ReturnType<typeof productivityApi.overview>> | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeKind, setComposeKind] = useState<ProductivityKind>("task");
+  const [quickTitle, setQuickTitle] = useState("");
+  const [quickSubmitting, setQuickSubmitting] = useState(false);
   const [taskView, setTaskView] = useState<TaskView>("list");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -157,7 +161,7 @@ export default function ProductivityPage({ section }: { section: SupportedSectio
         setTasks(taskResult.tasks);
         setLists(listResult.lists);
       }
-      if (section === "tasks") {
+      if (section === "tasks" || section === "inbox") {
         const [taskResult, listResult, myDayResult] = await Promise.all([
           productivityApi.listTasks(),
           productivityApi.listLists(),
@@ -204,6 +208,12 @@ export default function ProductivityPage({ section }: { section: SupportedSectio
   }, [day, range.end, range.start, section]);
 
   useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    if (searchParams.get("quick") === "1") {
+      setComposeKind("task");
+      setComposeOpen(true);
+    }
+  }, [searchParams]);
 
   function openCompose(kind: ProductivityKind) {
     setComposeKind(kind);
@@ -213,13 +223,20 @@ export default function ProductivityPage({ section }: { section: SupportedSectio
   async function toggleMyDay(task: ProductivityTask, exists: boolean) { try { if (exists) await productivityApi.removeMyDay(task.id, day); else await productivityApi.addMyDay(task.id, day); await load(); } catch (requestError) { setError(message(requestError, "Could not update My Day.")); } }
   async function updateGoal(goal: ProductivityGoal, progress: number) { try { await productivityApi.updateGoal(goal.id, { progress_percent: progress, status: progress === 100 ? "completed" : goal.status }); await load(); } catch (requestError) { setError(message(requestError, "Could not update goal.")); } }
   async function saveSettings(event: FormEvent) { event.preventDefault(); if (!settings) return; try { setSettings((await productivityApi.updateSettings(settings)).settings); } catch (requestError) { setError(message(requestError, "Could not save settings.")); } }
-  async function addTaskToFocus(titleText: string) {
+  async function quickCapture(event: FormEvent) {
+    event.preventDefault();
+    const title = quickTitle.trim();
+    if (!title || quickSubmitting) return;
+    setQuickSubmitting(true);
+    setError(null);
     try {
-      const created = await productivityApi.createTask({ title: titleText });
-      await productivityApi.addMyDay(created.task.id, day);
+      await productivityApi.compose({ kind: "task", item: { title } });
+      setQuickTitle("");
       await load();
     } catch (requestError) {
-      setError(message(requestError, "Could not create focus task."));
+      setError(message(requestError, "Could not capture this task."));
+    } finally {
+      setQuickSubmitting(false);
     }
   }
 
@@ -229,14 +246,22 @@ export default function ProductivityPage({ section }: { section: SupportedSectio
       <PageHeader title={meta.title} description={meta.description} />
       <PageContainer className="max-w-6xl space-y-5">
         <Notice error={error} retry={() => void load()} />
+        {(section === "overview" || section === "inbox") ? (
+          <form onSubmit={quickCapture} className="flex items-center gap-2 border-b border-border-subtle pb-5">
+            <label htmlFor="quick-capture" className="sr-only">Quick capture</label>
+            <input id="quick-capture" value={quickTitle} onChange={(event) => setQuickTitle(event.target.value)} maxLength={300} placeholder="Add a task to Inbox" className="min-w-0 flex-1 rounded-lg border border-border-default bg-surface px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:ring-2 focus:ring-focus/70" />
+            <Button type="submit" size="sm" loading={quickSubmitting} disabled={!quickTitle.trim() || quickSubmitting}>Add</Button>
+            <Button type="button" size="sm" variant="ghost" onClick={() => openCompose("task")}>More</Button>
+          </form>
+        ) : null}
         {section === "overview" && overview ? (
           <Overview
             overview={overview}
+            day={day}
             myDay={myDay}
             tasks={tasks}
             onUpdateTask={updateTask}
             onToggleMyDay={toggleMyDay}
-            onAddTaskToFocus={addTaskToFocus}
           />
         ) : null}
         {section === "tasks" ? (
@@ -251,8 +276,20 @@ export default function ProductivityPage({ section }: { section: SupportedSectio
             myDay={myDay}
           />
         ) : null}
+        {section === "inbox" ? (
+          <TasksView
+            tasks={tasks.filter((task) => !task.list_id && !task.due_at && task.status === "inbox")}
+            lists={lists}
+            taskView="list"
+            setTaskView={() => undefined}
+            onUpdate={updateTask}
+            onCreateList={async (name) => { try { await productivityApi.createList(name); await load(); } catch (err) { setError(message(err, "Could not create list.")); } }}
+            onToggleMyDay={toggleMyDay}
+            myDay={myDay}
+          />
+        ) : null}
         
-        {showCreator && section !== "calendar" ? (
+        {showCreator && section !== "calendar" && section !== "overview" && section !== "inbox" ? (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border-subtle bg-surface-muted p-3">
             <div>
               <p className="text-sm font-semibold text-text-primary">Create a detailed {section === "templates" ? "task template starter" : section.slice(0, -1)}</p>
@@ -305,192 +342,54 @@ export default function ProductivityPage({ section }: { section: SupportedSectio
   );
 }
 
+function TodayWorkRows({ items, focus, myDayTaskIds, onUpdateTask, onToggleMyDay }: {
+  items: ProductivityTask[];
+  focus?: boolean;
+  myDayTaskIds: Set<string>;
+  onUpdateTask: (task: ProductivityTask, data: Partial<ProductivityTask>) => Promise<void>;
+  onToggleMyDay: (task: ProductivityTask, exists: boolean) => Promise<void>;
+}) {
+  if (!items.length) return <p className="py-3 text-sm text-text-muted">Nothing here.</p>;
+  return <ul className="divide-y divide-border-subtle">{items.map((task) => <li key={task.id} className="flex flex-wrap items-center gap-2 py-2.5">
+    <button type="button" aria-label={`Complete ${task.title}`} onClick={() => onUpdateTask(task, { status: "completed" })} className="h-5 w-5 shrink-0 rounded-full border border-border-strong hover:border-success" />
+    <span className="min-w-40 flex-1 truncate text-sm font-medium text-text-primary">{task.title}</span>
+    {task.due_at ? <span className="text-xs text-text-muted">{dateLabel(task.due_at)}</span> : null}
+    <select aria-label={`Priority for ${task.title}`} value={task.priority} onChange={(event) => onUpdateTask(task, { priority: event.target.value as TaskPriority })} className="rounded-md border border-border-default bg-surface px-2 py-1 text-xs text-text-secondary">{priorities.map((priority) => <option key={priority} value={priority}>{priority}</option>)}</select>
+    <input aria-label={`Reschedule ${task.title}`} type="datetime-local" onChange={(event) => event.target.value && onUpdateTask(task, { due_at: new Date(event.target.value).toISOString() })} className="w-9 rounded-md border border-border-default bg-surface px-1 py-1 text-xs text-text-secondary focus:w-auto" />
+    {focus && myDayTaskIds.has(task.id) ? <Button size="sm" variant="ghost" onClick={() => onToggleMyDay(task, true)}>Remove</Button> : null}
+  </li>)}</ul>;
+}
+
 function Overview({
   overview,
+  day,
   myDay,
   tasks,
   onUpdateTask,
   onToggleMyDay,
-  onAddTaskToFocus,
 }: {
   overview: Awaited<ReturnType<typeof productivityApi.overview>>;
+  day: string;
   myDay: MyDayItem[];
   tasks: ProductivityTask[];
   onUpdateTask: (task: ProductivityTask, data: Partial<ProductivityTask>) => Promise<void>;
   onToggleMyDay: (task: ProductivityTask, exists: boolean) => Promise<void>;
-  onAddTaskToFocus: (title: string) => Promise<void>;
 }) {
-  const [newFocusTitle, setNewFocusTitle] = useState("");
-  const [showAddExisting, setShowAddExisting] = useState(false);
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!newFocusTitle.trim()) return;
-    await onAddTaskToFocus(newFocusTitle.trim());
-    setNewFocusTitle("");
-  };
-
   const myDayTaskIds = new Set(myDay.map((item) => item.task_id));
-  const availableTasks = tasks.filter(
-    (t) => !myDayTaskIds.has(t.id) && t.status !== "completed" && !t.is_archived
-  );
+  const start = new Date(`${day}T00:00:00`);
+  const end = new Date(start); end.setDate(end.getDate() + 1);
+  const active = (task: ProductivityTask) => !["completed", "cancelled"].includes(task.status) && !task.is_archived;
+  const overdue = tasks.filter((task) => active(task) && task.due_at && new Date(task.due_at) < start);
+  const todayTasks = tasks.filter((task) => active(task) && (myDayTaskIds.has(task.id) || (task.due_at && new Date(task.due_at) >= start && new Date(task.due_at) < end)) && !overdue.some((item) => item.id === task.id));
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          ["Due today", overview.today_tasks],
-          ["Overdue", overview.overdue_tasks],
-          ["Upcoming events", overview.upcoming_events.length],
-          ["Active goals", overview.active_goals.length],
-        ].map(([label, value]) => (
-          <Card key={String(label)} className="border border-border-subtle bg-surface">
-            <CardContent className="p-4">
-              <p className="text-xs text-text-muted">{label}</p>
-              <p className="mt-1 text-2xl font-semibold text-text-primary">{value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="space-y-4 md:col-span-2">
-          <Card className="border border-border-subtle bg-surface shadow-sm">
-            <CardContent className="p-4 space-y-4">
-              <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-                <div>
-                  <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
-                    <CheckCircleIcon className="h-5 w-5 text-primary" />
-                    Today&apos;s Focus
-                  </h2>
-                  <p className="text-xs text-text-muted mt-0.5">
-                    Plan and check off what you want to achieve today
-                  </p>
-                </div>
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/20 text-primary-active border border-primary/30">
-                  {myDay.filter(item => item.task.status !== "completed").length} active
-                </span>
-              </div>
-
-              <form onSubmit={handleSubmit} className="flex gap-2">
-                <input
-                  type="text"
-                  value={newFocusTitle}
-                  onChange={(e) => setNewFocusTitle(e.target.value)}
-                  placeholder="Add a task to today's focus..."
-                  maxLength={300}
-                  className="min-w-0 flex-1 rounded-xl border border-border-default bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-focus/70"
-                />
-                <Button type="submit" size="sm">
-                  Add to Focus
-                </Button>
-              </form>
-
-              {myDay.length ? (
-                <ul className="divide-y divide-border-subtle border border-border-subtle rounded-xl overflow-hidden bg-surface-muted/10">
-                  {myDay.map((item) => (
-                    <li key={item.id} className="flex items-center gap-3 px-4 py-3 hover:bg-surface-muted/30 transition-colors">
-                      <button
-                        type="button"
-                        onClick={() => onUpdateTask(item.task, { status: item.task.status === "completed" ? "inbox" : "completed" })}
-                        className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border transition-colors cursor-pointer ${
-                          item.task.status === "completed" 
-                            ? "border-success bg-success text-app" 
-                            : "border-border-strong text-transparent hover:border-success"
-                        }`}
-                      >
-                        <CheckCircleIcon className="h-3.5 w-3.5" />
-                      </button>
-                      <div className="min-w-0 flex-1">
-                        <span className={`text-sm font-medium block truncate ${item.task.status === "completed" ? "text-text-muted line-through" : "text-text-primary"}`}>
-                          {item.task.title}
-                        </span>
-                        {item.task.due_at && (
-                          <span className="text-[10px] text-text-muted">
-                            Due: {dateLabel(item.task.due_at)}
-                          </span>
-                        )}
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-text-muted hover:text-text-primary shrink-0"
-                        onClick={() => onToggleMyDay(item.task, true)}
-                      >
-                        Remove Focus
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="text-center py-6 border border-dashed border-border-default rounded-xl bg-surface-muted/5">
-                  <p className="text-sm text-text-muted">No focus tasks selected for today.</p>
-                  <p className="text-xs text-text-muted mt-1">Add a new task above or select an existing task below.</p>
-                </div>
-              )}
-
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddExisting(!showAddExisting)}
-                  className="text-xs font-semibold text-primary hover:text-primary-active transition-colors flex items-center gap-1 cursor-pointer border-0 bg-transparent p-0 outline-none"
-                >
-                  {showAddExisting ? "Hide available tasks" : "Pin existing tasks to today's focus →"}
-                </button>
-
-                {showAddExisting && (
-                  <div className="mt-3 bg-surface-muted/20 border border-border-subtle rounded-xl p-3 max-h-[220px] overflow-y-auto space-y-2">
-                    {availableTasks.length ? (
-                      availableTasks.map((task) => (
-                        <div key={task.id} className="flex items-center justify-between gap-3 text-xs border-b border-border-subtle/50 pb-2 last:border-0 last:pb-0">
-                          <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-text-primary truncate">{task.title}</p>
-                            {task.due_at && <p className="text-[10px] text-text-muted">Due: {dateLabel(task.due_at)}</p>}
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-[10px] px-2 py-0.5 rounded"
-                            onClick={() => onToggleMyDay(task, false)}
-                          >
-                            + Pin Focus
-                          </Button>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-xs text-text-muted italic py-1">No other active tasks available to pin.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-4">
-          <Card className="border border-border-subtle bg-surface shadow-sm">
-            <CardContent className="p-0">
-              <h2 className="px-4 py-3.5 text-sm font-semibold text-text-primary border-b border-border-subtle flex items-center gap-2">
-                <SparklesIcon className="h-4 w-4 text-purple-500" />
-                Recently Updated
-              </h2>
-              {overview.recent_tasks.length ? (
-                <ul className="divide-y divide-border-subtle">
-                  {overview.recent_tasks.map((task) => (
-                    <li key={task.id} className="px-4 py-3 text-xs flex flex-col gap-0.5">
-                      <span className="font-semibold text-text-secondary truncate">{task.title}</span>
-                      <span className="text-[10px] text-text-muted">
-                        Status: <span className="capitalize">{task.status.replace("_", " ")}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="px-4 py-4 text-xs text-text-muted italic">No tasks created yet.</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+      {overdue.length ? <section className="border-t border-danger/30 pt-3"><h2 className="text-sm font-semibold text-danger">Overdue <span className="text-text-muted">{overdue.length}</span></h2><TodayWorkRows items={overdue} myDayTaskIds={myDayTaskIds} onUpdateTask={onUpdateTask} onToggleMyDay={onToggleMyDay} /></section> : null}
+      <section className="border-t border-border-subtle pt-3"><h2 className="text-sm font-semibold text-text-primary">Today <span className="text-text-muted">{todayTasks.length}</span></h2><TodayWorkRows items={todayTasks} focus myDayTaskIds={myDayTaskIds} onUpdateTask={onUpdateTask} onToggleMyDay={onToggleMyDay} /></section>
+      <div className="grid gap-6 border-t border-border-subtle pt-4 md:grid-cols-3">
+        <section><h2 className="text-sm font-semibold text-text-primary">Reminders</h2>{overview.upcoming_reminders.length ? <ul className="mt-2 space-y-2">{overview.upcoming_reminders.map((item) => <li key={item.id} className="text-sm text-text-secondary"><span className="block truncate">{item.title}</span><span className="text-xs text-text-muted">{dateLabel(item.remind_at)}</span></li>)}</ul> : <p className="mt-2 text-sm text-text-muted">None upcoming.</p>}</section>
+        <section><h2 className="text-sm font-semibold text-text-primary">Upcoming</h2>{overview.upcoming_events.length ? <ul className="mt-2 space-y-2">{overview.upcoming_events.map((item) => <li key={item.id} className="text-sm text-text-secondary"><span className="block truncate">{item.title}</span><span className="text-xs text-text-muted">{dateLabel(item.starts_at)}</span></li>)}</ul> : <p className="mt-2 text-sm text-text-muted">No events.</p>}</section>
+        <section><h2 className="text-sm font-semibold text-text-primary">Goals</h2>{overview.active_goals.length ? <ul className="mt-2 space-y-3">{overview.active_goals.map((goal) => <li key={goal.id}><div className="flex justify-between gap-2 text-sm"><span className="truncate text-text-secondary">{goal.title}</span><span className="text-text-muted">{goal.progress_percent}%</span></div><div className="mt-1 h-1 overflow-hidden rounded bg-surface-hover"><div className="h-full bg-success" style={{ width: `${goal.progress_percent}%` }} /></div></li>)}</ul> : <p className="mt-2 text-sm text-text-muted">No active goals.</p>}</section>
       </div>
     </div>
   );

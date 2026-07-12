@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/spaces/SpaceBadges";
 import Spinner from "@/components/ui/Spinner";
 import { formatRelativeTime } from "@/lib/utils";
 import { DocumentIcon, CodeBracketIcon } from "@heroicons/react/24/outline";
+import ProductivityContextAction from "@/components/productivity/ProductivityContextAction";
 
 export default function RepoCommitDetailPage({
   params,
@@ -48,7 +49,8 @@ export default function RepoCommitDetailPage({
               </pre>
             )}
           </div>
-          <div className="shrink-0">
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <ProductivityContextAction title={commit.message} description={`Commit ${commit.oid}${commit.body ? `\n\n${commit.body}` : ""}`} relation={{ target_type: "repository", target_id: repo.id }} variant="outline" />
             <Link
               href={`/repos/${repo.id}?ref=${commit.oid}`}
               className="rounded-lg border border-border-strong bg-surface-hover px-3 py-1.5 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-active hover:text-text-primary"
