@@ -20,6 +20,8 @@ import type {
   Launch,
   FreelanceProject,
   FreelanceProposal,
+  GithubProfileSnapshot,
+  LeetcodeProfileSnapshot,
 } from "../types";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -143,13 +145,30 @@ export async function getProfileFreelance(
 /** PATCH /api/profiles/me — update profile metadata */
 export async function patchMyProfile(
   updates: Partial<
-    Pick<User, "name" | "headline" | "bio" | "location" | "website_url" | "github_url" | "linkedin_url" | "username" | "pronouns" | "open_to_work">
+    Pick<User, "name" | "headline" | "bio" | "location" | "website_url" | "github_url" | "leetcode_username" | "linkedin_url" | "username" | "pronouns" | "open_to_work">
   >
 ): Promise<{ profile: User }> {
   const res = await fetch(`${API_BASE_URL}/api/profiles/me`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     body: JSON.stringify(updates),
+  });
+  return handleResponse(res);
+}
+
+/** POST /api/profiles/me/github/sync — import a public GitHub profile snapshot. */
+export async function syncMyGithubProfile(): Promise<{ github_profile: GithubProfileSnapshot }> {
+  const res = await fetch(`${API_BASE_URL}/api/profiles/me/github/sync`, {
+    method: "POST",
+    headers: { ...getAuthHeaders() },
+  });
+  return handleResponse(res);
+}
+
+export async function syncMyLeetcodeProfile(): Promise<{ leetcode_profile: LeetcodeProfileSnapshot }> {
+  const res = await fetch(`${API_BASE_URL}/api/profiles/me/leetcode/sync`, {
+    method: "POST",
+    headers: { ...getAuthHeaders() },
   });
   return handleResponse(res);
 }

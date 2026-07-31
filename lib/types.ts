@@ -8,6 +8,7 @@ export interface User {
   location?: string;
   website_url?: string;
   github_url?: string;
+  leetcode_username?: string | null;
   linkedin_url?: string;
   avatar_url?: string | null;
   banner_url?: string | null;
@@ -17,6 +18,32 @@ export interface User {
   chat_encryption_enabled?: boolean;
   chat_crypto_version?: number;
   chat_recovery_enabled?: boolean;
+}
+
+export interface GithubDailyContribution {
+  date: string;
+  count: number;
+}
+
+export interface GithubProfileSnapshot {
+  github_username: string;
+  public_repos_count: number;
+  daily_contributions: GithubDailyContribution[];
+  fetched_at: string;
+}
+
+export interface LeetcodeProfileSnapshot {
+  leetcode_username: string;
+  total_solved: number;
+  easy_solved: number;
+  medium_solved: number;
+  hard_solved: number;
+  profile_ranking: number | null;
+  contest_rating: number | null;
+  contest_global_ranking: number | null;
+  attended_contests_count: number;
+  contest_top_percentage: number | null;
+  fetched_at: string;
 }
 
 export interface ChatUser {
@@ -569,6 +596,8 @@ export interface ProfileResponse {
   career_summary: CareerSummary;
   fit_clusters: string[];
   open_to_collaborate: boolean;
+  github_profile: GithubProfileSnapshot | null;
+  leetcode_profile: LeetcodeProfileSnapshot | null;
   related_entities: RelatedEntityRef[];
 }
 

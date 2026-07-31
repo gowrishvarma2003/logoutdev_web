@@ -6,6 +6,7 @@ import type { User, UserProfileSkill, UserFeaturedProject, ProjectSpace } from "
 import { useUpdateProfile, useUpdateSkills, useUpdateFeaturedProjects, useUploadAvatar, useUploadBanner } from "@/lib/hooks/useProfile";
 import { useAuth } from "@/lib/hooks/useAuth";
 import * as spacesApi from "@/lib/services/spacesApi";
+import { syncMyGithubProfile, syncMyLeetcodeProfile } from "@/lib/services/profilesApi";
 import {
   CheckIcon,
   XIcon,
@@ -29,6 +30,12 @@ import Spinner from "@/components/ui/Spinner";
 import Avatar from "@/components/ui/Avatar";
 import { getInitials } from "@/lib/utils";
 import AvatarCropModal from "./AvatarCropModal";
+import {
+  githubUrlFromUsername,
+  githubUsernameFromInput,
+  isValidGithubUsername,
+} from "@/lib/githubProfile";
+import { isValidLeetcodeUsername, normalizeLeetcodeUsername } from "@/lib/leetcodeProfile";
 
 interface ProfileEditFormProps {
   profile: User;
@@ -72,9 +79,18 @@ export default function ProfileEditForm({
   const [bio, setBio] = useState(profile.bio ?? "");
   const [location, setLocation] = useState(profile.location ?? "");
   const [websiteUrl, setWebsiteUrl] = useState(profile.website_url ?? "");
-  const [githubUrl, setGithubUrl] = useState(profile.github_url ?? "");
+  const [githubUsername, setGithubUsername] = useState(
+    () => githubUsernameFromInput(profile.github_url)
+  );
+  const [leetcodeUsername, setLeetcodeUsername] = useState(profile.leetcode_username ?? "");
   const [linkedinUrl, setLinkedinUrl] = useState(profile.linkedin_url ?? "");
   const [pronouns, setPronouns] = useState(profile.pronouns ?? "");
+  const [githubFieldError, setGithubFieldError] = useState<string | null>(null);
+  const [githubSyncError, setGithubSyncError] = useState<string | null>(null);
+  const [githubSyncing, setGithubSyncing] = useState(false);
+  const [leetcodeFieldError, setLeetcodeFieldError] = useState<string | null>(null);
+  const [leetcodeSyncError, setLeetcodeSyncError] = useState<string | null>(null);
+  const [leetcodeSyncing, setLeetcodeSyncing] = useState(false);
 
   const [skills, setSkills] = useState<string[]>(
     initialSkills.map((s) => s.skill)
@@ -93,8 +109,8 @@ export default function ProfileEditForm({
   const { upload: uploadAvatar, remove: removeAvatar, loading: avatarLoading, error: avatarError } = useUploadAvatar();
   const { upload: uploadBanner, remove: removeBanner, loading: bannerLoading, error: bannerError } = useUploadBanner();
 
-  const loading = profileLoading || skillsLoading || featuredLoading;
-  const anyError = profileError || skillsError || featuredError || avatarError || bannerError;
+  const loading = profileLoading || skillsLoading || featuredLoading || githubSyncing || leetcodeSyncing;
+  const anyError = profileError || skillsError || featuredError || avatarError || bannerError || githubSyncError || leetcodeSyncError;
 
   useEffect(() => {
     spacesApi
@@ -128,11 +144,51 @@ export default function ProfileEditForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const normalizedGithubUser = githubUsernameFromInput(githubUsername);
+    if (normalizedGithubUser && !isValidGithubUsername(normalizedGithubUser)) {
+      setGithubFieldError("Enter a valid GitHub username (letters, numbers, hyphens).");
+      return;
+    }
+    setGithubFieldError(null);
+
+    const normalizedLeetcodeUser = normalizeLeetcodeUsername(leetcodeUsername);
+    if (!isValidLeetcodeUsername(normalizedLeetcodeUser)) {
+      setLeetcodeFieldError("Enter a valid LeetCode username (letters, numbers, underscores, hyphens).");
+      return;
+    }
+    setLeetcodeFieldError(null);
+
+    const github_url = githubUrlFromUsername(normalizedGithubUser);
+
     const [updatedProfile] = await Promise.all([
-      update({ name, username, headline, bio, location, website_url: websiteUrl, github_url: githubUrl, linkedin_url: linkedinUrl, pronouns }),
+      update({ name, username, headline, bio, location, website_url: websiteUrl, github_url, leetcode_username: normalizedLeetcodeUser, linkedin_url: linkedinUrl, pronouns }),
       updateSkills(skills),
       updateFeatured(featuredIds),
     ]);
+
+    if (updatedProfile && normalizedGithubUser) {
+      setGithubSyncing(true);
+      setGithubSyncError(null);
+      try {
+        await syncMyGithubProfile();
+      } catch (error: unknown) {
+        setGithubSyncError(error instanceof Error ? error.message : "Profile saved, but GitHub data could not be refreshed.");
+      } finally {
+        setGithubSyncing(false);
+      }
+    }
+
+    if (updatedProfile && normalizedLeetcodeUser) {
+      setLeetcodeSyncing(true);
+      setLeetcodeSyncError(null);
+      try {
+        await syncMyLeetcodeProfile();
+      } catch (error: unknown) {
+        setLeetcodeSyncError(error instanceof Error ? error.message : "Profile saved, but LeetCode data could not be refreshed.");
+      } finally {
+        setLeetcodeSyncing(false);
+      }
+    }
 
     if (updatedProfile && onSaved) {
       onSaved(updatedProfile);
@@ -324,17 +380,68 @@ export default function ProfileEditForm({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-text-muted mb-1.5">GitHub</label>
-            <div className="relative">
-              <GitHubIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-text-disabled w-4 h-4 pointer-events-none" />
+            <label className="block text-xs font-medium text-text-muted mb-1.5">GitHub username</label>
+            <div className="flex items-center rounded-xl bg-surface-hover/60 border border-border-strong/80 focus-within:border-border-strong focus-within:bg-surface-hover transition-all">
+              <span className="flex items-center gap-2 pl-3 text-text-disabled text-sm select-none shrink-0">
+                <GitHubIcon className="w-4 h-4" />
+                github.com/
+              </span>
               <input
-                className={INPUT_ICON_CLASS}
-                type="url"
-                value={githubUrl}
-                onChange={(e) => setGithubUrl(e.target.value)}
-                placeholder="https://github.com/yourusername"
+                className="min-w-0 flex-1 bg-transparent py-2.5 pr-3 text-text-primary text-sm placeholder:text-text-disabled focus:outline-none"
+                type="text"
+                inputMode="text"
+                autoComplete="username"
+                spellCheck={false}
+                value={githubUsername}
+                onChange={(e) => {
+                  setGithubUsername(e.target.value.replace(/\s/g, ""));
+                  if (githubFieldError) setGithubFieldError(null);
+                }}
+                placeholder="yourusername"
+                maxLength={39}
+                aria-invalid={Boolean(githubFieldError)}
+                aria-describedby="github-username-hint"
               />
             </div>
+            <p id="github-username-hint" className="text-[11px] text-text-disabled mt-1.5">
+              Your public GitHub handle — repository count and contribution calendar refresh when you save.
+            </p>
+            {githubFieldError ? (
+              <p className="text-[11px] text-rose-400 mt-1" role="alert">{githubFieldError}</p>
+            ) : null}
+            {githubSyncError ? (
+              <p className="text-[11px] text-amber-300 mt-1" role="alert">{githubSyncError}</p>
+            ) : null}
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-text-muted mb-1.5">LeetCode username</label>
+            <div className="flex items-center rounded-xl bg-surface-hover/60 border border-border-strong/80 focus-within:border-border-strong focus-within:bg-surface-hover transition-all">
+              <span className="flex items-center gap-2 pl-3 text-text-disabled text-sm select-none shrink-0">
+                <CodeBracketIcon className="w-4 h-4 text-amber-400" />
+                leetcode.com/u/
+              </span>
+              <input
+                className="min-w-0 flex-1 bg-transparent py-2.5 pr-3 text-text-primary text-sm placeholder:text-text-disabled focus:outline-none"
+                type="text"
+                autoComplete="username"
+                spellCheck={false}
+                value={leetcodeUsername}
+                onChange={(e) => {
+                  setLeetcodeUsername(e.target.value.replace(/\s/g, ""));
+                  if (leetcodeFieldError) setLeetcodeFieldError(null);
+                }}
+                placeholder="yourusername"
+                maxLength={50}
+                aria-invalid={Boolean(leetcodeFieldError)}
+                aria-describedby="leetcode-username-hint"
+              />
+            </div>
+            <p id="leetcode-username-hint" className="text-[11px] text-text-disabled mt-1.5">
+              Your public LeetCode handle — solved problems and contest profile refresh when you save.
+            </p>
+            {leetcodeFieldError ? <p className="text-[11px] text-rose-400 mt-1" role="alert">{leetcodeFieldError}</p> : null}
+            {leetcodeSyncError ? <p className="text-[11px] text-amber-300 mt-1" role="alert">{leetcodeSyncError}</p> : null}
           </div>
 
           <div>

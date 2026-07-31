@@ -17,6 +17,7 @@ import {
   CalendarIcon,
   BriefcaseIcon,
 } from "@/components/ui/Icons";
+import { githubUsernameFromInput } from "@/lib/githubProfile";
 
 interface ProfileHeaderProps {
   profile: User;
@@ -81,9 +82,8 @@ export default function ProfileHeader({
   const websiteLabel = profile.website_url
     ? safeHostname(profile.website_url)
     : null;
-  const githubLabel = profile.github_url
-    ? profile.github_url.replace(/https?:\/\/(www\.)?github\.com\//, "@")
-    : null;
+  const githubHandle = githubUsernameFromInput(profile.github_url);
+  const githubLabel = githubHandle ? `@${githubHandle}` : null;
   const linkedinLabel = profile.linkedin_url ? "LinkedIn" : null;
 
   const openToWork = Boolean(profile.open_to_work);

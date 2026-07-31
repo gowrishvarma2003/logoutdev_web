@@ -12,6 +12,8 @@ import Link from "next/link";
 import { useProfile, useProfileSignals, useProfileHeatmap } from "@/lib/hooks/useProfile";
 import ProofOfWorkScoreBadge from "@/components/profile/ProofOfWorkScoreBadge";
 import ActivityHeatmap from "@/components/profile/ActivityHeatmap";
+import GithubContributionCard from "@/components/profile/GithubContributionCard";
+import LeetcodeProfileCard from "@/components/profile/LeetcodeProfileCard";
 import FeaturedProjectsPanel from "@/components/profile/FeaturedProjectsPanel";
 import SkillsPanel from "@/components/profile/SkillsPanel";
 import RelatedEntitiesPanel from "@/components/connected/RelatedEntitiesPanel";
@@ -108,7 +110,7 @@ const TIMELINE_TYPE_CONFIG = {
 export default function ProfileOverviewPage({ params }: ProfilePageProps) {
   const { id: username } = use(params);
 
-  const { skills, featured_projects, is_me, career_summary, related_entities, loading: profileLoading } = useProfile(username);
+  const { skills, featured_projects, is_me, career_summary, related_entities, github_profile, leetcode_profile, loading: profileLoading } = useProfile(username);
   const { signals, loading: signalsLoading } = useProfileSignals(username);
   const { heatmap, loading: heatmapLoading } = useProfileHeatmap(username);
 
@@ -151,6 +153,9 @@ export default function ProfileOverviewPage({ params }: ProfilePageProps) {
 
       {/* ── Activity heatmap ── */}
       <ActivityHeatmap heatmap={heatmap} loading={heatmapLoading} />
+
+      {github_profile ? <GithubContributionCard snapshot={github_profile} /> : null}
+      {leetcode_profile ? <LeetcodeProfileCard snapshot={leetcode_profile} /> : null}
 
       {/* ── Career graph ── */}
       {career_summary && career_summary.timeline.length > 0 ? (

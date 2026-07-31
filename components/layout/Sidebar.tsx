@@ -225,6 +225,12 @@ export default function Sidebar({
             active={pathname.startsWith("/opportunities")}
           />
           <NavItem
+            href="/company/profile"
+            icon={<BriefcaseIcon className="w-5 h-5 text-sky-400" />}
+            label="Company Portal"
+            active={pathname.startsWith("/company")}
+          />
+          <NavItem
             href="/productivity"
             icon={<DocumentTextIcon />}
             label="Productivity Hub"

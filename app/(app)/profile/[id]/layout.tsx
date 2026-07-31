@@ -116,22 +116,53 @@ export default function ProfileLayout({ params, children }: ProfileLayoutProps) 
   }
 
   if (error || !profile) {
+    const isNotFound =
+      !error ||
+      /not found|profile not found/i.test(error);
+
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6 text-center">
         <div className="w-16 h-16 rounded-2xl bg-surface border border-border-default flex items-center justify-center text-2xl">
           👤
         </div>
-        <h1 className="text-xl font-bold text-text-primary">Profile not found</h1>
+        <h1 className="text-xl font-bold text-text-primary">
+          {isNotFound ? "Profile not found" : "Couldn’t load profile"}
+        </h1>
         <p className="text-text-disabled text-sm max-w-xs">
-          The user <span className="text-text-secondary">@{username}</span> doesn&apos;t exist or their profile isn&apos;t available.
+          {isNotFound ? (
+            <>
+              The user <span className="text-text-secondary">@{username}</span> doesn&apos;t exist or their profile isn&apos;t available.
+            </>
+          ) : (
+            <>
+              Something went wrong loading <span className="text-text-secondary">@{username}</span>.
+              {error ? (
+                <>
+                  {" "}
+                  <span className="text-text-muted">{error}</span>
+                </>
+              ) : null}
+            </>
+          )}
         </p>
-        <Link
-          href="/feed"
-          className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors"
-        >
-          <ArrowLeftIcon className="w-4 h-4" />
-          Back to feed
-        </Link>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {!isNotFound ? (
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="px-3.5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover transition-colors"
+            >
+              Try again
+            </button>
+          ) : null}
+          <Link
+            href="/feed"
+            className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors"
+          >
+            <ArrowLeftIcon className="w-4 h-4" />
+            Back to feed
+          </Link>
+        </div>
       </div>
     );
   }

@@ -84,6 +84,8 @@ export function useProfile(username: string) {
     career_summary: result.data?.career_summary ?? null,
     fit_clusters: result.data?.fit_clusters ?? [],
     open_to_collaborate: result.data?.open_to_collaborate ?? false,
+    github_profile: result.data?.github_profile ?? null,
+    leetcode_profile: result.data?.leetcode_profile ?? null,
     related_entities: result.data?.related_entities ?? [],
     loading: result.loading,
     error: result.error,
