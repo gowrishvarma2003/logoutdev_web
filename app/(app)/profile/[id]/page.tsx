@@ -26,7 +26,7 @@ export default function ProfileOverviewPage({ params }: ProfilePageProps) {
 
   if (profileLoading || signalsLoading) {
     return (
-      <div className="flex justify-center py-16">
+      <div className="flex justify-center py-8 sm:py-16">
         <Spinner size="lg" />
       </div>
     );
@@ -37,8 +37,8 @@ export default function ProfileOverviewPage({ params }: ProfilePageProps) {
 
   if (!hasContent) {
     return (
-      <div className="px-5 py-16 text-center">
-        <p className="text-zinc-600 text-sm">
+      <div className="px-4 sm:px-6 py-12 sm:py-16 text-center">
+        <p className="text-zinc-600 text-sm sm:text-base break-words">
           {is_me
             ? "Your profile is empty. Head to Settings → Profile to get started."
             : "This developer hasn't filled out their profile yet."}
@@ -48,27 +48,27 @@ export default function ProfileOverviewPage({ params }: ProfilePageProps) {
   }
 
   return (
-    <div className="px-5 py-6 space-y-7">
+    <div className="px-4 sm:px-6 py-6 space-y-6 sm:space-y-7">
       {/* ── Proof-of-Work Score ── */}
       {signals && <ProofOfWorkScoreBadge signals={signals} />}
 
       {career_summary ? (
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4">
+        <section className="rounded-xl sm:rounded-2xl border border-zinc-800 bg-zinc-900/60 p-3 sm:p-4">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-base font-semibold text-white">Career graph</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-white break-words">Career graph</h2>
             {career_summary.open_to_collaborate ? (
-              <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-300">
+              <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-300 flex-shrink-0">
                 Open to collaborate
               </span>
             ) : null}
           </div>
 
           {career_summary.strongest_stacks.length > 0 ? (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-3 sm:mt-4 flex flex-wrap gap-2">
               {career_summary.strongest_stacks.map((stack) => (
                 <span
                   key={stack}
-                  className="rounded-full border border-sky-500/20 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300"
+                  className="rounded-full border border-sky-500/20 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300 flex-shrink-0 whitespace-nowrap"
                 >
                   {stack}
                 </span>
@@ -77,13 +77,13 @@ export default function ProfileOverviewPage({ params }: ProfilePageProps) {
           ) : null}
 
           {career_summary.timeline.length > 0 ? (
-            <div className="mt-5 space-y-3">
+            <div className="mt-4 sm:mt-5 space-y-2 sm:space-y-3">
               {career_summary.timeline.map((item) => (
                 <div
                   key={`${item.type}:${item.title}:${item.created_at}`}
-                  className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-3"
+                  className="rounded-xl sm:rounded-2xl border border-zinc-800 bg-zinc-950/70 p-2.5 sm:p-3"
                 >
-                  <p className="text-sm font-semibold text-white">{item.title}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-white break-words">{item.title}</p>
                   <p className="mt-1 text-xs text-zinc-500">
                     {new Date(item.created_at).toLocaleDateString("en", {
                       month: "short",

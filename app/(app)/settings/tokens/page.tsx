@@ -59,13 +59,22 @@ export default function SettingsTokensPage() {
       <header className="sticky top-0 z-20 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-md">
         <div className="flex items-center gap-3 px-4 py-3">
           <Link
-            href="/settings/profile"
+            href="/settings/integrations"
             className="rounded-full p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
             aria-label="Go back"
           >
             <ArrowLeftIcon className="w-5 h-5" />
           </Link>
           <div className="flex items-center gap-2">
+            <span className="text-sm text-zinc-500">Settings</span>
+            <span className="text-zinc-600">/</span>
+            <Link
+              href="/settings/integrations"
+              className="text-sm text-zinc-400 hover:text-zinc-300 transition-colors"
+            >
+              Integrations
+            </Link>
+            <span className="text-zinc-600">/</span>
             <KeyIcon className="w-4 h-4 text-zinc-400" />
             <h1 className="text-[15px] font-bold text-white">Access Tokens</h1>
           </div>

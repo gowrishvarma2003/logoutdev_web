@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { User } from "@/lib/types";
@@ -34,7 +35,10 @@ interface NavItemProps {
   badge?: number;
 }
 
-function NavItem({ href, icon, label, active, badge }: NavItemProps) {
+/**
+ * NavItem component - memoized to prevent unnecessary re-renders when props haven't changed
+ */
+const NavItem = memo(function NavItem({ href, icon, label, active, badge }: NavItemProps) {
   return (
     <Link
       href={href}
@@ -56,9 +60,9 @@ function NavItem({ href, icon, label, active, badge }: NavItemProps) {
       <span className="flex-1">{label}</span>
     </Link>
   );
-}
+});
 
-export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProps) {
+export default memo(function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -203,4 +207,4 @@ export default function Sidebar({ user, onLogout, unreadCount = 0 }: SidebarProp
       </div>
     </nav>
   );
-}
+});

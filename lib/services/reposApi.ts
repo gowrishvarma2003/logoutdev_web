@@ -14,6 +14,11 @@ import type {
   RepoDiscussionState,
   RepoAiDocStatus,
   RepoAiDocRun,
+  RepoAiPolicy,
+  RepoAiIssue,
+  RepoAiDetectionSummary,
+  RepoAiProductResponse,
+  RepoAiProductHistoryResponse,
 } from "../types";
 import { API_BASE_URL } from "../apiBaseUrl";
 
@@ -174,6 +179,92 @@ export async function getRepositoryAiDocStatus(repoId: string): Promise<RepoAiDo
 
 export async function getRepositoryAiDocRuns(repoId: string): Promise<{ repo_id: string; runs: RepoAiDocRun[] }> {
   const res = await fetch(`${API}/api/repos/${repoId}/ai-doc/runs`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function getRepositoryAiProduct(repoId: string): Promise<RepoAiProductResponse> {
+  const res = await fetch(`${API}/api/repos/${repoId}/ai-team/product`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function getRepositoryAiProductHistory(
+  repoId: string,
+  params?: { limit?: number }
+): Promise<RepoAiProductHistoryResponse> {
+  const res = await fetch(`${API}/api/repos/${repoId}/ai-team/product/history${qs({ limit: params?.limit })}`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function getRepositoryAiSettings(repoId: string): Promise<{ policy: RepoAiPolicy }> {
+  const res = await fetch(`${API}/api/repos/${repoId}/ai-team/settings`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function updateRepositoryAiSettings(
+  repoId: string,
+  body: Partial<RepoAiPolicy>
+): Promise<{ policy: RepoAiPolicy }> {
+  const res = await fetch(`${API}/api/repos/${repoId}/ai-team/settings`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  return handleRes(res);
+}
+
+export async function getRepositoryAiDetectionSummary(repoId: string): Promise<RepoAiDetectionSummary> {
+  const res = await fetch(`${API}/api/repos/${repoId}/ai-team/detection`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function getRepositoryAiReviewSummary(
+  repoId: string
+): Promise<import("../types").RepoAiReviewSummaryResponse> {
+  const res = await fetch(`${API}/api/repos/${repoId}/ai-team/review`, {
+    headers: { ...authHeaders() },
+  });
+  return handleRes(res);
+}
+
+export async function listRepositoryAiIssues(
+  repoId: string,
+  params?: {
+    status?: string;
+    severity?: string;
+    classification?: string;
+    confidence_band?: string;
+    related_feature_id?: string;
+    origin_agent?: string;
+    detection_source?: string;
+    auto_fixable?: boolean;
+    safe_autofix_candidate?: boolean;
+    q?: string;
+    limit?: number;
+  }
+): Promise<{ repo_id: string; issues: RepoAiIssue[] }> {
+  const res = await fetch(`${API}/api/repos/${repoId}/issues${qs({
+    status: params?.status,
+    severity: params?.severity,
+    classification: params?.classification,
+    confidence_band: params?.confidence_band,
+    related_feature_id: params?.related_feature_id,
+    origin_agent: params?.origin_agent,
+    detection_source: params?.detection_source,
+    auto_fixable: params?.auto_fixable,
+    safe_autofix_candidate: params?.safe_autofix_candidate,
+    q: params?.q,
+    limit: params?.limit,
+  })}`, {
     headers: { ...authHeaders() },
   });
   return handleRes(res);

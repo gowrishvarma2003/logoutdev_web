@@ -572,6 +572,451 @@ export interface RepoAiDocRun {
   completed_at?: string | null;
 }
 
+export interface RepoAiPolicy {
+  id: string;
+  repo_id: string;
+  enabled: boolean;
+  watched_branches: string[];
+  scan_schedule: string;
+  safe_autofix_scopes: string[];
+  verification_profile: {
+    commands: Array<{ name: string; command: string; cwd?: string | null }>;
+  };
+  concurrency_budget: number;
+  max_runtime_seconds: number;
+  max_cost_cents: number;
+  suppression_rules: Array<Record<string, unknown>>;
+  detection_policy: {
+    scan_mode: string;
+    analyzer_profile: string;
+    issue_sensitivity: string;
+    security_scan_enabled: boolean;
+    max_new_issues_scoped: number;
+    max_new_issues_full: number;
+    llm_candidate_budget_scoped: number;
+    llm_candidate_budget_full: number;
+  };
+  fix_policy?: {
+    mode: string;
+    min_confidence_auto: number;
+    min_confidence_manual: number;
+    allowed_issue_classes: string[];
+    max_files_touched: number;
+    max_net_lines: number;
+    single_commit: boolean;
+    test_generation: string;
+    retry_limit: number;
+  };
+  review_policy?: {
+    publish_pr_review: boolean;
+    publish_inline_comments: boolean;
+    reject_on_uncertain: boolean;
+    max_inline_comments: number;
+    require_clean_verification: boolean;
+    auto_retry_on_rejection: boolean;
+    rerun_on_pr_open: boolean;
+  };
+  scan_mode: string;
+  analyzer_profile: string;
+  issue_sensitivity: string;
+  security_scan_enabled: boolean;
+  max_new_issues_scoped: number;
+  max_new_issues_full: number;
+  llm_candidate_budget_scoped: number;
+  llm_candidate_budget_full: number;
+  fix_mode?: string;
+  min_fix_confidence_auto?: number;
+  min_fix_confidence_manual?: number;
+  allowed_fix_issue_classes?: string[];
+  max_fix_files_touched?: number;
+  max_fix_net_lines?: number;
+  fix_single_commit?: boolean;
+  fix_test_generation?: string;
+  fix_retry_limit?: number;
+  publish_pr_review?: boolean;
+  publish_inline_comments?: boolean;
+  reject_on_uncertain?: boolean;
+  max_review_inline_comments?: number;
+  require_clean_verification?: boolean;
+  auto_retry_on_rejection?: boolean;
+  rerun_on_pr_open?: boolean;
+  require_ai_review: boolean;
+  last_event_at?: string | null;
+  updated_at?: string | null;
+  updated_by?: { id: string; name: string; username: string } | null;
+}
+
+export interface RepoAiIssueEvidence {
+  path: string;
+  line_start?: number | null;
+  line_end?: number | null;
+  source_kind?: string | null;
+  summary?: string | null;
+  snippet?: string | null;
+  source_branch?: string | null;
+  source_commit?: string | null;
+}
+
+export interface RepoAiIssueSummaryRef {
+  id: string;
+  number: number;
+  status: string;
+  branch_name?: string | null;
+  result_commit?: string | null;
+}
+
+export interface RepoAiIssue {
+  id: string;
+  repo_id: string;
+  number: number;
+  issue_key: string;
+  type: string;
+  status: string;
+  severity: "low" | "medium" | "high" | "critical" | string;
+  confidence: "low" | "medium" | "high" | string;
+  confidence_score: number;
+  confidence_band: "low" | "medium" | "high" | string;
+  detection_kind: string;
+  origin_agent: string;
+  classification?: string | null;
+  title: string;
+  body: string;
+  impact?: string | null;
+  suggested_fix?: string | null;
+  fingerprint: string;
+  evidence: RepoAiIssueEvidence[];
+  labels: string[];
+  detection_sources: string[];
+  source_branch?: string | null;
+  source_commit?: string | null;
+  related_feature_id?: string | null;
+  related_feature_title?: string | null;
+  related_module_id?: string | null;
+  related_flow_id?: string | null;
+  fix_recommended: boolean;
+  safe_autofix_candidate: boolean;
+  triage_required: boolean;
+  auto_fixable: boolean;
+  suppression_reason?: string | null;
+  first_seen_at?: string | null;
+  last_seen_at?: string | null;
+  resolved_at?: string | null;
+  closed_at?: string | null;
+  last_change_set?: RepoAiIssueSummaryRef | null;
+  detected_by?: { id: string; name: string; username: string } | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface RepoAiReviewFinding {
+  type: string;
+  severity: string;
+  message: string;
+  suggestion?: string | null;
+  path?: string | null;
+  line?: number | null;
+  symbol?: string | null;
+  blocking?: boolean;
+  source?: string | null;
+}
+
+export interface RepoAiReviewInlineComment {
+  path: string;
+  body: string;
+  position?: number | null;
+}
+
+export interface RepoAiReviewSummary {
+  approved?: boolean;
+  outcome?: string | null;
+  confidence?: number;
+  risk_level?: string | null;
+  summary?: string | null;
+  findings: RepoAiReviewFinding[];
+  inline_comments: RepoAiReviewInlineComment[];
+  status_contexts: string[];
+  reviewed_commit?: string | null;
+  feedback_for_fix: Array<Record<string, unknown>>;
+  auto_retry_scheduled?: boolean;
+  attempt_count?: number;
+  notes?: string[];
+  history?: Array<Record<string, unknown>>;
+  pr_review_published?: boolean;
+}
+
+export interface RepoAiChangeSet {
+  id: string;
+  repo_id: string;
+  number: number;
+  status: string;
+  issue_id?: string | null;
+  source_branch: string;
+  source_commit: string;
+  base_branch: string;
+  branch_name: string;
+  result_commit?: string | null;
+  patch_summary?: string | null;
+  plan_summary: Record<string, unknown>;
+  files_touched: string[];
+  diff_stats: Record<string, unknown>;
+  confidence_score: number;
+  safe_to_merge: boolean;
+  risk_level?: string | null;
+  verification_summary: Record<string, unknown>;
+  validation_summary: Record<string, unknown>;
+  review_summary: RepoAiReviewSummary;
+  review_history: Array<Record<string, unknown>>;
+  latest_review_decision?: string | null;
+  blocking_findings_count: number;
+  last_reviewed_commit?: string | null;
+  auto_retry_status?: {
+    scheduled: boolean;
+    attempt_count: number;
+  };
+  patch_artifact_url?: string | null;
+  logs_url?: string | null;
+  attempt_count: number;
+  suggested_pr_title?: string | null;
+  suggested_pr_body?: string | null;
+  pull_request?: {
+    id: string;
+    number: number;
+    title: string;
+    status: string;
+  } | null;
+  issue?: {
+    id: string;
+    number: number;
+    issue_key: string;
+    title: string;
+    severity: string;
+    status: string;
+  } | null;
+  created_by?: { id: string; name: string; username: string } | null;
+  agent?: { id: string; name: string; username: string } | null;
+  started_at?: string | null;
+  completed_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface RepoAiReviewSummaryResponse {
+  repo_id: string;
+  available: boolean;
+  latest_review: RepoAiChangeSet | null;
+  blocked_change_sets: RepoAiChangeSet[];
+  pending_retry_count: number;
+}
+
+export interface RepoAiDetectionSummary {
+  repo_id: string;
+  available: boolean;
+  latest_run?: {
+    id: string;
+    status: string;
+    source_branch?: string | null;
+    source_commit?: string | null;
+    created_at?: string | null;
+    completed_at?: string | null;
+  } | null;
+  summary?: {
+    mode: string;
+    resolution_mode: string;
+    scope_reason: string;
+    source_branch: string;
+    source_commit: string;
+    previous_commit?: string | null;
+    changed_paths_count: number;
+    changed_module_count: number;
+    scanned_paths_count: number;
+    analysis_paths_count: number;
+    high_risk_paths: string[];
+    analyzers: {
+      completed: Array<{ name: string; status: string; reason?: string | null; finding_count: number; command?: string | null }>;
+      skipped: Array<{ name: string; status: string; reason?: string | null; finding_count: number; command?: string | null }>;
+      failed: Array<{ name: string; status: string; reason?: string | null; finding_count: number; command?: string | null }>;
+    };
+    candidate_counts: {
+      reasoning_candidates: number;
+      reasoning_completed: number;
+    };
+    finding_counts: {
+      visible: number;
+      suppressed: number;
+      run_only: number;
+      capped_out: number;
+    };
+    severity_counts: Record<string, number>;
+    classification_counts: Record<string, number>;
+    sync: Record<string, number>;
+    feedback: Record<string, number>;
+    top_findings: Array<{
+      title: string;
+      severity: string;
+      classification: string;
+      confidence_score: number;
+      path?: string | null;
+    }>;
+    run_only_findings: Array<{
+      title: string;
+      severity: string;
+      classification: string;
+      confidence_score: number;
+      path?: string | null;
+    }>;
+  } | null;
+  high_risk_issues: RepoAiIssue[];
+}
+
+export interface ProductIdentity {
+  name: string;
+  description: string;
+  confidence: "low" | "medium" | "high" | string;
+  evidence_paths: string[];
+}
+
+export interface ProductModule {
+  id: string;
+  name: string;
+  summary: string;
+  files: string[];
+  dependencies: string[];
+  linked_feature_ids: string[];
+  evidence_paths: string[];
+  confidence: "low" | "medium" | "high" | string;
+}
+
+export interface ProductFeature {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  linked_module_ids: string[];
+  files: string[];
+  evidence_paths: string[];
+  user_flow_ids: string[];
+  confidence: "low" | "medium" | "high" | string;
+}
+
+export interface ProductFlowStep {
+  title: string;
+  description: string;
+  path?: string | null;
+}
+
+export interface ProductUserFlow {
+  id: string;
+  name: string;
+  summary: string;
+  steps: ProductFlowStep[];
+  linked_feature_ids: string[];
+  linked_module_ids: string[];
+  evidence_paths: string[];
+  confidence: "low" | "medium" | "high" | string;
+}
+
+export interface ProductGap {
+  id: string;
+  title: string;
+  description: string;
+  gap_type: string;
+  confidence: "low" | "medium" | "high" | string;
+  evidence_paths: string[];
+  linked_feature_ids: string[];
+  linked_module_ids: string[];
+}
+
+export interface ProductSuggestion {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  priority: "low" | "medium" | "high" | string;
+  confidence: "low" | "medium" | "high" | string;
+  evidence_paths: string[];
+  linked_feature_ids: string[];
+  linked_module_ids: string[];
+  fingerprint?: string | null;
+}
+
+export interface ProductChangeRecord {
+  id: string;
+  run_type: string;
+  change_type: string;
+  impact: string;
+  scope: string[];
+  summary: string;
+  changed_paths: string[];
+  changed_feature_ids: string[];
+  changed_module_ids: string[];
+  source_branch: string;
+  source_commit: string;
+  generated_at: string;
+  snapshot_path?: string | null;
+}
+
+export interface ProductHistorySummary {
+  schema_version: number;
+  source_branch: string;
+  source_commit: string;
+  generated_at: string;
+  latest_change_id?: string | null;
+  latest_snapshot_path?: string | null;
+  change_count: number;
+  snapshot_count: number;
+  recent_changes: Array<{
+    id: string;
+    summary: string;
+    run_type: string;
+    change_type: string;
+    impact: string;
+    source_commit: string;
+    generated_at: string;
+  }>;
+}
+
+export interface ProductModelMetadata {
+  schema_version: number;
+  source_branch: string;
+  source_commit: string;
+  generated_at: string;
+  run_type: string;
+  change_type: string;
+  impact: string;
+}
+
+export interface ProductModel {
+  product_identity: ProductIdentity;
+  tech_stack: string[];
+  modules: ProductModule[];
+  features: ProductFeature[];
+  user_flows: ProductUserFlow[];
+  file_feature_map: Record<string, string[]>;
+  file_module_map: Record<string, string>;
+  known_gaps: ProductGap[];
+  suggestions: ProductSuggestion[];
+  change_history_summary?: ProductHistorySummary | null;
+  unknowns: string[];
+  metadata: ProductModelMetadata;
+}
+
+export interface RepoAiProductResponse {
+  repo_id: string;
+  available: boolean;
+  manifest: Record<string, unknown> | null;
+  product_model: ProductModel | null;
+  feature_file_map: Record<string, string[]>;
+  suggestions: ProductSuggestion[];
+  history_summary: ProductHistorySummary | null;
+}
+
+export interface RepoAiProductHistoryResponse {
+  repo_id: string;
+  summary: ProductHistorySummary | null;
+  changes: ProductChangeRecord[];
+  snapshots: ProductModel[];
+}
+
 export interface RepoPermissions {
   can_read: boolean;
   can_push: boolean;

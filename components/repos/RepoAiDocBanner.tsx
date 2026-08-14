@@ -20,7 +20,7 @@ export default function RepoAiDocBanner({ repo }: { repo: Repository }) {
       setError(null);
       return nextStatus;
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to fetch AI doc status.");
+      setError(err instanceof Error ? err.message : "Failed to fetch AI product doc status.");
       return null;
     }
   }, [repo.id]);
@@ -65,7 +65,7 @@ export default function RepoAiDocBanner({ repo }: { repo: Repository }) {
       })
       .then(() => loadStatus())
       .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : "Failed to start AI documentation.");
+        setError(err instanceof Error ? err.message : "Failed to start AI product documentation.");
       });
   }, [repo.default_branch, repo.id, isLoaded, loadStatus, status, user]);
 
@@ -84,11 +84,11 @@ export default function RepoAiDocBanner({ repo }: { repo: Repository }) {
       await reposApi.regenerateRepositoryAiDoc(repo.id, { source_branch: repo.default_branch });
       await loadStatus();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to regenerate AI documentation.";
+      const message = err instanceof Error ? err.message : "Failed to regenerate AI product documentation.";
       if (message.includes("no commits")) {
-        setError("This repository has no commits yet. Push at least one commit before generating documentation.");
+        setError("This repository has no commits yet. Push at least one commit before generating product documentation.");
       } else if (message.includes("unavailable")) {
-        setError("The AI documentation agent is temporarily unavailable. Please try again in a moment.");
+        setError("The PM agent is temporarily unavailable. Please try again in a moment.");
       } else {
         setError(message);
       }
@@ -111,20 +111,20 @@ export default function RepoAiDocBanner({ repo }: { repo: Repository }) {
 
   return (
     <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300">AI Repo Doc</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300">AI Product Doc</p>
       <h2 className="mt-2 text-lg font-semibold text-white">
         {status?.status === "completed" && isStale
-          ? "Generated project documentation is out of date"
+          ? "Generated product documentation is out of date"
           : status?.status === "completed"
-          ? "Generated project documentation is available on the AI branch"
+          ? "Generated product documentation is available on the AI branch"
           : status?.status === "failed"
-            ? "Project documentation generation failed"
+            ? "Product documentation generation failed"
             : status?.status === "idle"
-              ? "Preparing AI-generated project documentation"
-          : "Generating project documentation on the AI branch"}
+              ? "Preparing AI-generated product documentation"
+          : "Generating product documentation on the AI branch"}
       </h2>
       <p className="mt-1 text-sm text-emerald-100/90">
-        The repo doc agent reads this repository through signed MCP-backed tools and writes only to
+        The PM agent inside the AI Team reads this repository through signed MCP-backed tools and writes only to
         {" "}
         <span className="font-mono text-white">{aiBranch}</span>.
       </p>
@@ -150,7 +150,7 @@ export default function RepoAiDocBanner({ repo }: { repo: Repository }) {
             href={docHref}
             className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-emerald-950 transition-colors hover:bg-emerald-50"
           >
-            Open Generated Doc
+            Open Product Doc
           </Link>
         ) : null}
         {user ? (

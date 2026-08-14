@@ -11,7 +11,10 @@ import Spinner from "@/components/ui/Spinner";
 import { FolderIcon } from "@/components/ui/Icons";
 import RepoCollaborationBanner from "@/components/repos/RepoCollaborationBanner";
 import RepoAiDocBanner from "@/components/repos/RepoAiDocBanner";
-import { CodeBracketIcon, ClockIcon, Cog6ToothIcon, StarIcon, ArrowsRightLeftIcon, TagIcon, QueueListIcon, ChartBarIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
+import RepoDetectionPanel from "@/components/repos/RepoDetectionPanel";
+import RepoProductPanel from "@/components/repos/RepoProductPanel";
+import RepoReviewPanel from "@/components/repos/RepoReviewPanel";
+import { CodeBracketIcon, ClockIcon, Cog6ToothIcon, StarIcon, ArrowsRightLeftIcon, TagIcon, QueueListIcon, ChartBarIcon, ShieldCheckIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 interface RepoContextType {
   repo: Repository;
@@ -94,6 +97,7 @@ export default function RepoLayout({
     { name: "Commits", href: `/repos/${repo.id}/commits`, icon: ClockIcon },
     { name: "Branches", href: `/repos/${repo.id}/branches`, icon: ArrowsRightLeftIcon },
     { name: "Pull Requests", href: `/repos/${repo.id}/pulls`, icon: QueueListIcon },
+    { name: "Issues", href: `/repos/${repo.id}/issues`, icon: ExclamationTriangleIcon },
     { name: "Releases", href: `/repos/${repo.id}/releases`, icon: TagIcon },
     { name: "Forks", href: `/repos/${repo.id}/forks`, icon: ArrowsRightLeftIcon },
     { name: "Insights", href: `/repos/${repo.id}/insights`, icon: ChartBarIcon },
@@ -204,6 +208,15 @@ export default function RepoLayout({
           </div>
           <div className="mb-6">
             <RepoAiDocBanner repo={repo} />
+          </div>
+          <div className="mb-6">
+            <RepoProductPanel repo={repo} />
+          </div>
+          <div className="mb-6">
+            <RepoDetectionPanel repo={repo} />
+          </div>
+          <div className="mb-6">
+            <RepoReviewPanel repo={repo} />
           </div>
           {children}
         </main>

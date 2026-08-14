@@ -3,7 +3,7 @@
 import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRepo, useRepoAccess } from "@/lib/hooks/useRepos";
+import { useRepo, useRepoAccess, useRepoAiSettings } from "@/lib/hooks/useRepos";
 import { useSpaceList } from "@/lib/hooks/useSpaces";
 import * as reposApi from "@/lib/services/reposApi";
 import type { RepoCollaboratorCandidate, RepoRole } from "@/lib/types";
@@ -26,6 +26,7 @@ export default function RepoSettingsPage({
   const router = useRouter();
   const { repo, loading: repoLoading, error, refetch } = useRepo(repoId);
   const { collaborators, loading: accessLoading, refetch: refetchAccess } = useRepoAccess(repoId);
+  const { policy, loading: aiLoading, refetch: refetchAi } = useRepoAiSettings(repoId);
   const { data: spacesData, loading: spacesLoading, error: spacesError } = useSpaceList({ mine: true, page: 1, limit: 100 });
 
   const [name, setName] = useState("");
@@ -43,6 +44,21 @@ export default function RepoSettingsPage({
   const [selectedUser, setSelectedUser] = useState<RepoCollaboratorCandidate | null>(null);
   const [candidateRole, setCandidateRole] = useState<RepoRole>("read");
   const [memberSaving, setMemberSaving] = useState(false);
+  const [aiEnabled, setAiEnabled] = useState(false);
+  const [scanSchedule, setScanSchedule] = useState("0 * * * *");
+  const [scanMode, setScanMode] = useState("scoped_scheduled");
+  const [analyzerProfile, setAnalyzerProfile] = useState("standard");
+  const [issueSensitivity, setIssueSensitivity] = useState("high_precision");
+  const [securityScanEnabled, setSecurityScanEnabled] = useState(true);
+  const [publishPrReview, setPublishPrReview] = useState(true);
+  const [publishInlineComments, setPublishInlineComments] = useState(true);
+  const [rejectOnUncertain, setRejectOnUncertain] = useState(true);
+  const [requireCleanVerification, setRequireCleanVerification] = useState(true);
+  const [autoRetryOnRejection, setAutoRetryOnRejection] = useState(true);
+  const [rerunOnPrOpen, setRerunOnPrOpen] = useState(true);
+  const [maxReviewInlineComments, setMaxReviewInlineComments] = useState(20);
+  const [requireAiReview, setRequireAiReview] = useState(false);
+  const [aiSaving, setAiSaving] = useState(false);
 
   useEffect(() => {
     if (!repo) return;
@@ -53,6 +69,24 @@ export default function RepoSettingsPage({
     setVisibility(repo.visibility);
     setSelectedSpaceId(repo.attached_space?.id ?? "");
   }, [repo]);
+
+  useEffect(() => {
+    if (!policy) return;
+    setAiEnabled(policy.enabled);
+    setScanSchedule(policy.scan_schedule);
+    setScanMode(policy.scan_mode);
+    setAnalyzerProfile(policy.analyzer_profile);
+    setIssueSensitivity(policy.issue_sensitivity);
+    setSecurityScanEnabled(policy.security_scan_enabled);
+    setPublishPrReview(policy.publish_pr_review ?? true);
+    setPublishInlineComments(policy.publish_inline_comments ?? true);
+    setRejectOnUncertain(policy.reject_on_uncertain ?? true);
+    setRequireCleanVerification(policy.require_clean_verification ?? true);
+    setAutoRetryOnRejection(policy.auto_retry_on_rejection ?? true);
+    setRerunOnPrOpen(policy.rerun_on_pr_open ?? true);
+    setMaxReviewInlineComments(policy.max_review_inline_comments ?? 20);
+    setRequireAiReview(policy.require_ai_review ?? false);
+  }, [policy]);
 
   useEffect(() => {
     if (!repo) return;
@@ -162,7 +196,36 @@ export default function RepoSettingsPage({
     refetch();
   }
 
-  if (repoLoading || accessLoading) {
+  async function handleAiSave(event: React.FormEvent) {
+    event.preventDefault();
+    if (!repo) return;
+    setAiSaving(true);
+    try {
+      await reposApi.updateRepositoryAiSettings(repo.id, {
+        enabled: aiEnabled,
+        scan_schedule: scanSchedule,
+        scan_mode: scanMode,
+        analyzer_profile: analyzerProfile,
+        issue_sensitivity: issueSensitivity,
+        security_scan_enabled: securityScanEnabled,
+        review_policy: {
+          publish_pr_review: publishPrReview,
+          publish_inline_comments: publishInlineComments,
+          reject_on_uncertain: rejectOnUncertain,
+          max_inline_comments: maxReviewInlineComments,
+          require_clean_verification: requireCleanVerification,
+          auto_retry_on_rejection: autoRetryOnRejection,
+          rerun_on_pr_open: rerunOnPrOpen,
+        },
+        require_ai_review: requireAiReview,
+      });
+      refetchAi();
+    } finally {
+      setAiSaving(false);
+    }
+  }
+
+  if (repoLoading || accessLoading || aiLoading) {
     return (
       <div className="flex justify-center py-16">
         <Spinner />
@@ -274,6 +337,135 @@ export default function RepoSettingsPage({
               className="rounded-lg bg-white px-4 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50">
+        <SectionHeader title="AI Team" />
+        <form onSubmit={handleAiSave} className="space-y-4 px-4 py-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+              <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Enabled</span>
+              <select value={aiEnabled ? "true" : "false"} onChange={(event) => setAiEnabled(event.target.value === "true")} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white">
+                <option value="false">Disabled</option>
+                <option value="true">Enabled</option>
+              </select>
+            </label>
+            <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+              <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Scan cadence</span>
+              <input value={scanSchedule} onChange={(event) => setScanSchedule(event.target.value)} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white" />
+            </label>
+            <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+              <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Scan mode</span>
+              <select value={scanMode} onChange={(event) => setScanMode(event.target.value)} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white">
+                <option value="scoped_scheduled">Scoped + scheduled</option>
+                <option value="full">Full scan</option>
+                <option value="scoped_only">Scoped only</option>
+              </select>
+            </label>
+            <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+              <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Analyzer profile</span>
+              <select value={analyzerProfile} onChange={(event) => setAnalyzerProfile(event.target.value)} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white">
+                <option value="standard">Standard</option>
+                <option value="security_first">Security first</option>
+              </select>
+            </label>
+            <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+              <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Issue sensitivity</span>
+              <select value={issueSensitivity} onChange={(event) => setIssueSensitivity(event.target.value)} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white">
+                <option value="high_precision">High precision</option>
+                <option value="balanced">Balanced</option>
+              </select>
+            </label>
+            <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+              <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Security scan</span>
+              <select value={securityScanEnabled ? "true" : "false"} onChange={(event) => setSecurityScanEnabled(event.target.value === "true")} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white">
+                <option value="true">Enabled</option>
+                <option value="false">Disabled</option>
+              </select>
+            </label>
+            <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+              <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Require AI review to merge</span>
+              <select value={requireAiReview ? "true" : "false"} onChange={(event) => setRequireAiReview(event.target.value === "true")} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white">
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/40 p-4">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-white">Review gate policy</h3>
+              <p className="mt-1 text-xs text-zinc-500">
+                These controls decide how strict the Review agent should be before an AI patch is shown as ready for humans.
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+                <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Publish PR review</span>
+                <select value={publishPrReview ? "true" : "false"} onChange={(event) => setPublishPrReview(event.target.value === "true")} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white">
+                  <option value="true">Enabled</option>
+                  <option value="false">Disabled</option>
+                </select>
+              </label>
+              <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+                <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Publish inline comments</span>
+                <select value={publishInlineComments ? "true" : "false"} onChange={(event) => setPublishInlineComments(event.target.value === "true")} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white">
+                  <option value="true">Enabled</option>
+                  <option value="false">Disabled</option>
+                </select>
+              </label>
+              <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+                <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Reject when uncertain</span>
+                <select value={rejectOnUncertain ? "true" : "false"} onChange={(event) => setRejectOnUncertain(event.target.value === "true")} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white">
+                  <option value="true">Enabled</option>
+                  <option value="false">Disabled</option>
+                </select>
+              </label>
+              <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+                <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Require clean verification</span>
+                <select value={requireCleanVerification ? "true" : "false"} onChange={(event) => setRequireCleanVerification(event.target.value === "true")} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white">
+                  <option value="true">Enabled</option>
+                  <option value="false">Disabled</option>
+                </select>
+              </label>
+              <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+                <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Auto retry after rejection</span>
+                <select value={autoRetryOnRejection ? "true" : "false"} onChange={(event) => setAutoRetryOnRejection(event.target.value === "true")} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white">
+                  <option value="true">Enabled</option>
+                  <option value="false">Disabled</option>
+                </select>
+              </label>
+              <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300">
+                <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Rerun when PR opens</span>
+                <select value={rerunOnPrOpen ? "true" : "false"} onChange={(event) => setRerunOnPrOpen(event.target.value === "true")} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white">
+                  <option value="true">Enabled</option>
+                  <option value="false">Disabled</option>
+                </select>
+              </label>
+              <label className="rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-sm text-zinc-300 md:col-span-2">
+                <span className="block text-xs uppercase tracking-[0.12em] text-zinc-500">Max inline comments</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={maxReviewInlineComments}
+                  onChange={(event) => setMaxReviewInlineComments(Math.max(0, Math.min(100, Number(event.target.value) || 0)))}
+                  className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white"
+                />
+              </label>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={aiSaving || !repo.can_manage_general}
+              className="rounded-lg bg-white px-4 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-100 disabled:opacity-50"
+            >
+              {aiSaving ? "Saving..." : "Save AI settings"}
             </button>
           </div>
         </form>

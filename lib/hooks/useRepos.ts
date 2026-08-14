@@ -3,6 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import type {
   RepoAiDocStatus,
+  RepoAiDetectionSummary,
+  RepoAiReviewSummaryResponse,
+  RepoAiIssue,
+  RepoAiPolicy,
+  RepoAiProductResponse,
   RepoBlobResponse,
   RepoCommit,
   RepoMember,
@@ -170,6 +175,87 @@ export function useRepoAiDocStatus(repoId: string) {
   const result = useAsync(() => reposApi.getRepositoryAiDocStatus(repoId), [repoId]);
   return {
     status: (result.data as RepoAiDocStatus | null) ?? null,
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+export function useRepoAiProduct(repoId: string) {
+  const result = useAsync(() => reposApi.getRepositoryAiProduct(repoId), [repoId]);
+  return {
+    product: (result.data as RepoAiProductResponse | null) ?? null,
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+export function useRepoAiSettings(repoId: string) {
+  const result = useAsync(() => reposApi.getRepositoryAiSettings(repoId), [repoId]);
+  return {
+    policy: (result.data as { policy: RepoAiPolicy } | null)?.policy ?? null,
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+export function useRepoAiDetectionSummary(repoId: string) {
+  const result = useAsync(() => reposApi.getRepositoryAiDetectionSummary(repoId), [repoId]);
+  return {
+    summary: (result.data as RepoAiDetectionSummary | null) ?? null,
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+export function useRepoAiReviewSummary(repoId: string) {
+  const result = useAsync(() => reposApi.getRepositoryAiReviewSummary(repoId), [repoId]);
+  return {
+    summary: (result.data as RepoAiReviewSummaryResponse | null) ?? null,
+    loading: result.loading,
+    error: result.error,
+    refetch: result.refetch,
+  };
+}
+
+export function useRepoAiIssues(
+  repoId: string,
+  filters?: {
+    status?: string;
+    severity?: string;
+    classification?: string;
+    confidence_band?: string;
+    related_feature_id?: string;
+    origin_agent?: string;
+    detection_source?: string;
+    auto_fixable?: boolean;
+    safe_autofix_candidate?: boolean;
+    q?: string;
+    limit?: number;
+  }
+) {
+  const result = useAsync(
+    () => reposApi.listRepositoryAiIssues(repoId, filters),
+    [
+      repoId,
+      filters?.status,
+      filters?.severity,
+      filters?.classification,
+      filters?.confidence_band,
+      filters?.related_feature_id,
+      filters?.origin_agent,
+      filters?.detection_source,
+      filters?.auto_fixable,
+      filters?.safe_autofix_candidate,
+      filters?.q,
+      filters?.limit,
+    ]
+  );
+  return {
+    issues: (result.data as { issues: RepoAiIssue[] } | null)?.issues ?? [],
     loading: result.loading,
     error: result.error,
     refetch: result.refetch,
